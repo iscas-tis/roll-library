@@ -22,6 +22,11 @@ package roll.automata;
 
 public class DFA extends FA {
 
+    public DFA(int numOfLetters) {
+        super(numOfLetters);
+        // TODO Auto-generated constructor stub
+    }
+
     @Override
     public AccType getAccType() {
         return AccType.DFA;
@@ -29,6 +34,18 @@ public class DFA extends FA {
 
     @Override
     public Acc getAcc() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public State createState() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    State makeState(int index) {
         // TODO Auto-generated method stub
         return null;
     }

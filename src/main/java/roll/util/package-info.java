@@ -14,21 +14,4 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.automata;
-
-/**
- * @author Yong Li (liyong@ios.ac.cn)
- * */
-public class Buchi extends NFA {
-
-    public Buchi(int numOfLetters) {
-        super(numOfLetters);
-        // TODO Auto-generated constructor stub
-    }
-
-    @Override
-    public AccType getAccType() {
-        return AccType.BUECHI;
-    }
-
-}
+package roll.util;
