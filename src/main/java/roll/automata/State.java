@@ -2,9 +2,8 @@ package roll.automata;
 
 public interface State {
     // getters 
-    Automaton getAutomaton();
-    int getIndex();
-    
+    FA getFA();
+    int getId();
     // setters
     void addTransition(int letter, int state);
 

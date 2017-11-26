@@ -9,5 +9,7 @@ package roll.automata;
  * In this package, every letter in the alphabet will
  * be denoted by an integer
  * 
+ * Every automaton is complete
+ * 
  * **/
 

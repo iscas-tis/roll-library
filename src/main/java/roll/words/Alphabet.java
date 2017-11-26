@@ -23,7 +23,7 @@ public final class Alphabet {
 	
 	private final Word epsilon;
 	private final LetterList letterList;
-	private final Class<?> clazz;
+	private final Class<?> clazz; // the class type of input letters
 	
 	public Alphabet(Class<?> clazz) {
 		assert clazz != null;
@@ -54,6 +54,7 @@ public final class Alphabet {
 	
 	public void addLetter(Object obj) {
 		assert clazz.isInstance(obj);
+		assert !letterList.contains(obj);
 		letterList.add(obj);
 	}
 	
