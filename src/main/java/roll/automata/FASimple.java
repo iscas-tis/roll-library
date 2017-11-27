@@ -1,7 +1,6 @@
 package roll.automata;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 
 import roll.util.ISet;
 import roll.util.UtilISet;
@@ -16,13 +15,12 @@ public abstract class FASimple implements FA {
     protected final int alphabetSize;
     protected int initialState;
     protected final ISet finalStates;
-    protected final Acc acceptance;
+    protected Acc acceptance;
     
     public FASimple(final int alphabetSize) {
         this.alphabetSize = alphabetSize;
         this.states = new ArrayList<>();
         this.finalStates = UtilISet.newISet();
-        this.acceptance = new AccFA();
     }
     
     public int getStateSize() {
@@ -61,6 +59,10 @@ public abstract class FASimple implements FA {
         finalStates.set(state);
     }
     
+    public ISet getFinalStates() {
+        return finalStates.clone();
+    }
+    
     public boolean isFinal(int state) {
         assert checkValidState(state);
         return finalStates.get(state);
@@ -79,17 +81,6 @@ public abstract class FASimple implements FA {
     @Override
     public Acc getAcc() {
         return acceptance;
-    }
-    
-    // only check the existence of final states
-    protected class AccFA implements Acc {
-        public AccFA() {
-        }
-        
-        @Override
-        public boolean isAccepting(ISet states) {
-            return states.overlap(finalStates);
-        }
     }
 
 }

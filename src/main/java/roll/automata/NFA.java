@@ -16,6 +16,10 @@
 
 package roll.automata;
 
+import roll.util.ISet;
+import roll.util.UtilISet;
+import roll.words.Word;
+
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
@@ -23,6 +27,7 @@ public class NFA extends FASimple {
 
     public NFA(int alphabetSize) {
         super(alphabetSize);
+        this.acceptance = new AccNFA(this);
     }
 
     @Override
@@ -33,6 +38,53 @@ public class NFA extends FASimple {
     @Override
     public State makeState(int index) {
         return new NFAState(this, index);
+    }
+    
+    @Override
+    public NFAState getState(int state) {
+        return (NFAState) super.getState(state);
+    }
+    
+    public ISet getSuccessors(ISet states, Word word) {
+        ISet currentStates = states;
+        int index = 0;
+        while(index < word.length()) {
+            ISet nextStates = UtilISet.newISet();
+            for(final int state : currentStates) {
+                nextStates.or(getSuccessors(state, word.getLetter(index)));
+            }
+            currentStates = nextStates;
+            ++ index;
+        }
+        return currentStates;
+    }
+    
+    public ISet getSuccessors(int state, Word word) {
+        ISet states = UtilISet.newISet();
+        states.set(state);
+        return getSuccessors(states, word);
+    }
+    
+    public ISet getSuccessors(Word word) {
+        return getSuccessors(getInitialState(), word);
+    }
+
+    public ISet getSuccessors(int state, int letter) {
+        return getState(state).getSuccessors(letter);
+    }
+    
+    private class AccNFA extends AccFA {
+
+        public AccNFA(FASimple fa) {
+            super(fa);
+        }
+
+        @Override
+        public boolean isAccepting(Word prefix, Word suffix) {
+            Word word = prefix.concat(suffix);
+            return isAccepting(getSuccessors(word));
+        }
+        
     }
 
 }

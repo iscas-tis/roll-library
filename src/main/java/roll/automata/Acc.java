@@ -17,6 +17,7 @@
 package roll.automata;
 
 import roll.util.ISet;
+import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -24,4 +25,5 @@ import roll.util.ISet;
 
 public interface Acc {
     boolean isAccepting(ISet states);
+    boolean isAccepting(Word prefix, Word suffix);
 }

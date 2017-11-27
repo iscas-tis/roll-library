@@ -16,35 +16,21 @@
 
 package roll.automata;
 
+import roll.util.ISet;
+
 /**
- * Acceptor for regular (omega) language 
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public interface Acceptor {
-	
-	AccType getAccType();
-	
-	Acc getAcc(); // acceptance condition
-	
-	default FDFA asFDFA() {
-	    assert this instanceof FDFA;
-		return (FDFA)this;
-	}
-	
-	default DFA asDFA() {
-	    assert this instanceof DFA;
-		return (DFA)this;
-	}
-	
-	default NFA asNFA() {
-	    assert this instanceof NFA;
-		return (NFA)this;
-	}
-	
-	default NBA asNBA() {
-	    assert this instanceof NBA;
-        return (NBA)this;
-    }
-	// and so on
 
+abstract class AccFA implements Acc {
+    protected final FASimple fa;
+    
+    public AccFA(FASimple fa) {
+        this.fa = fa;
+    }
+    
+    @Override
+    public boolean isAccepting(ISet states) {
+        return states.overlap(fa.finalStates);
+    }
 }

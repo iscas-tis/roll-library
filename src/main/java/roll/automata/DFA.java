@@ -16,6 +16,8 @@
 
 package roll.automata;
 
+import roll.words.Word;
+
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
@@ -24,6 +26,7 @@ public class DFA extends FASimple {
     
     public DFA(int alphabetSize) {
         super(alphabetSize);
+        this.acceptance = new AccDFA(this);
     }
 
     @Override
@@ -34,6 +37,44 @@ public class DFA extends FASimple {
     @Override
     public State makeState(int index) {
         return new DFAState(this, index);
+    }
+    
+    @Override
+    public DFAState getState(int state) {
+        return (DFAState) super.getState(state);
+    }
+    
+    public int getSuccessor(int state, int letter) {
+        return getState(state).getSuccessor(letter);
+    }
+    
+    public int getSuccessor(Word word) {
+        return getSuccessor(getInitialState(), word);
+    }
+    
+    public int getSuccessor(int state, Word word) {
+        int index = 0;
+        int currState = state;
+        while(index < word.length()) {          
+            currState = getSuccessor(currState, word.getLetter(index));
+            ++ index;
+        }
+        return currState;
+    }
+    
+    
+    private class AccDFA extends AccFA {
+
+        public AccDFA(FASimple fa) {
+            super(fa);
+        }
+
+        @Override
+        public boolean isAccepting(Word prefix, Word suffix) {
+            Word word = prefix.concat(suffix);
+            return isFinal(getSuccessor(word));
+        }
+        
     }
 
 }
