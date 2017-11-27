@@ -23,6 +23,8 @@ import roll.util.UtilISet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ * NFA is allowed to be incomplete
  * */
 
 public class NFAState implements State {
@@ -50,6 +52,12 @@ public class NFAState implements State {
     @Override
     public void addTransition(int letter, int state) {
         assert nfa.checkValidLetter(letter);
+        ISet succs = successors.get(letter);
+        if(succs == null) {
+            succs = UtilISet.newISet();
+        }
+        succs.set(state);
+        successors.put(letter, succs);
     }
     
     public ISet getSuccessors(int letter) {
