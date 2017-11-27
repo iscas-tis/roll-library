@@ -18,6 +18,9 @@ package roll.automata;
 
 import java.util.List;
 
+import roll.util.sets.ISet;
+import roll.words.Word;
+
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
@@ -25,10 +28,12 @@ public class FDFA implements Acceptor {
     
     private final DFA leadingDFA;
     private final List<DFA> progressDFAs;
+    private final Acc acceptance;
     
     public FDFA(DFA m, List<DFA> ps) {
         leadingDFA = m;
         progressDFAs = ps;
+        acceptance = new AccFDFA();
     }
     
     public DFA getLeadingDFA() {
@@ -54,8 +59,31 @@ public class FDFA implements Acceptor {
 
     @Override
     public Acc getAcc() {
-        // TODO Auto-generated method stub
-        return null;
+        return acceptance;
+    }
+    
+    private class AccFDFA implements Acc {
+
+        @Override
+        public boolean isAccepting(ISet states) {
+            throw new UnsupportedOperationException("FDFA doesnot support isAccepting(ISet states)");
+        }
+
+        @Override
+        public boolean isAccepting(Word prefix, Word suffix) {
+            assert isNormalized(prefix, suffix);
+            int state = leadingDFA.getSuccessor(prefix);
+            DFA proDFA = getProgressDFA(state);
+            int proState = proDFA.getSuccessor(suffix);
+            return proDFA.isFinal(proState);
+        }
+        
+    }
+    
+    public boolean isNormalized(Word stem, Word loop) {
+        int state = leadingDFA.getSuccessor(stem);
+        int nextState = leadingDFA.getSuccessor(state, loop);
+        return state == nextState;
     }
 
 }
