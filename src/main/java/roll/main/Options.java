@@ -21,6 +21,8 @@ package roll.main;
  * */
 public final class Options {
     
+    public boolean verbose = false;
+    
     public Options() {
         
     }
