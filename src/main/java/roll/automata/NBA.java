@@ -21,9 +21,8 @@ package roll.automata;
  * */
 public class NBA extends NFA {
 
-    public NBA(int numOfLetters) {
-        super(numOfLetters);
-        // TODO Auto-generated constructor stub
+    public NBA(int alphabetSize) {
+        super(alphabetSize);
     }
 
     @Override

@@ -21,18 +21,13 @@ package roll.automata;
  * */
 public class NFA extends FASimple {
 
-    public NFA(int numOfLetters) {
-        super(numOfLetters);
+    public NFA(int alphabetSize) {
+        super(alphabetSize);
     }
 
     @Override
     public AccType getAccType() {
         return AccType.NFA;
-    }
-
-    @Override
-    public Acc getAcc() {
-        return null;
     }
 
     @Override

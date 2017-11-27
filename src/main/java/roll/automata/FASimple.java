@@ -16,11 +16,13 @@ public abstract class FASimple implements FA {
     protected final int alphabetSize;
     protected int initialState;
     protected final ISet finalStates;
+    protected final Acc acceptance;
     
     public FASimple(final int alphabetSize) {
         this.alphabetSize = alphabetSize;
         this.states = new ArrayList<>();
         this.finalStates = UtilISet.newISet();
+        this.acceptance = new AccFA();
     }
     
     public int getStateSize() {
@@ -72,6 +74,22 @@ public abstract class FASimple implements FA {
     
     protected boolean checkValidLetter(int letter) {
         return letter >= 0 && letter < alphabetSize;
+    }
+    
+    @Override
+    public Acc getAcc() {
+        return acceptance;
+    }
+    
+    // only check the existence of final states
+    protected class AccFA implements Acc {
+        public AccFA() {
+        }
+        
+        @Override
+        public boolean isAccepting(ISet states) {
+            return states.overlap(finalStates);
+        }
     }
 
 }

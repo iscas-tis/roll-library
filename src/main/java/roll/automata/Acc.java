@@ -16,10 +16,12 @@
 
 package roll.automata;
 
+import roll.util.ISet;
+
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
 public interface Acc {
-    boolean isAccepting();
+    boolean isAccepting(ISet states);
 }

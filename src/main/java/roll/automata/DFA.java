@@ -22,18 +22,13 @@ package roll.automata;
 
 public class DFA extends FASimple {
     
-    public DFA(int numOfLetters) {
-        super(numOfLetters);
+    public DFA(int alphabetSize) {
+        super(alphabetSize);
     }
 
     @Override
     public AccType getAccType() {
         return AccType.DFA;
-    }
-
-    @Override
-    public Acc getAcc() {
-        return null;
     }
 
     @Override
