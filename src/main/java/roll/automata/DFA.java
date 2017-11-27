@@ -36,12 +36,12 @@ public class DFA extends FASimple {
 
     @Override
     public State makeState(int index) {
-        return new DFAState(this, index);
+        return new StateDFA(this, index);
     }
     
     @Override
-    public DFAState getState(int state) {
-        return (DFAState) super.getState(state);
+    public StateDFA getState(int state) {
+        return (StateDFA) super.getState(state);
     }
     
     public int getSuccessor(int state, int letter) {

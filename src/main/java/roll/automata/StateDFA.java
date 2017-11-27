@@ -16,32 +16,27 @@
 
 package roll.automata;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import roll.util.sets.ISet;
-import roll.util.sets.UtilISet;
-
 /**
  * @author Yong Li (liyong@ios.ac.cn)
- * 
- * NFA is allowed to be incomplete
  * */
 
-public class NFAState implements State {
-    private final NFA nfa;
-    private final TIntObjectMap<ISet> successors; // Alphabet -> 2^Q
+// all DFA state will be complete in the sense that
+// it has successors for every letter
+public class StateDFA implements State {
+    private final DFA dfa;
+    private final int[] successors; // // Alphabet -> Q
     private final int id;
     
-    public NFAState(final NFA nfa, final int id) {
-        assert nfa != null;
-        this.nfa = nfa;
+    public StateDFA(final DFA dfa, final int id) {
+        assert dfa != null;
+        this.dfa = dfa;
         this.id = id;
-        this.successors = new TIntObjectHashMap<>();
+        this.successors = new int[dfa.getAlphabetSize()];
     }
 
     @Override
-    public NFA getFA() {
-        return nfa;
+    public DFA getFA() {
+        return dfa;
     }
 
     @Override
@@ -51,22 +46,13 @@ public class NFAState implements State {
 
     @Override
     public void addTransition(int letter, int state) {
-        assert nfa.checkValidLetter(letter);
-        ISet succs = successors.get(letter);
-        if(succs == null) {
-            succs = UtilISet.newISet();
-        }
-        succs.set(state);
-        successors.put(letter, succs);
+        assert dfa.checkValidLetter(letter);
+        successors[letter] = state;
     }
     
-    public ISet getSuccessors(int letter) {
-        assert nfa.checkValidLetter(letter);
-        ISet succs = successors.get(letter);
-        if(succs == null) {
-            return UtilISet.newISet();
-        }
-        return succs;
+    public int getSuccessor(int letter) {
+        assert dfa.checkValidLetter(letter);
+        return successors[letter];
     }
     
 }

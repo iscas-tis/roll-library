@@ -37,12 +37,12 @@ public class NFA extends FASimple {
 
     @Override
     public State makeState(int index) {
-        return new NFAState(this, index);
+        return new StateNFA(this, index);
     }
     
     @Override
-    public NFAState getState(int state) {
-        return (NFAState) super.getState(state);
+    public StateNFA getState(int state) {
+        return (StateNFA) super.getState(state);
     }
     
     public ISet getSuccessors(ISet states, Word word) {
