@@ -28,6 +28,9 @@ import roll.table.HashableValueBoolean;
 import roll.words.Alphabet;
 import roll.words.Word;
 
+/**
+ * @author Yong Li (liyong@ios.ac.cn)
+ * */
 public abstract class LearnerDFA extends LearnerBase<DFA> {
 	
 	protected final Alphabet alphabet;

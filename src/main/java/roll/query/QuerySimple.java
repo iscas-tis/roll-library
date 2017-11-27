@@ -21,6 +21,8 @@ import roll.words.Word;
 
 /**
  * Simple query implementation
+ * 
+ * @author Yong Li (liyong@ios.ac.cn)
  * */
 public class QuerySimple<O> implements Query<O> {
 
