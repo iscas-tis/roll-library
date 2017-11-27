@@ -16,35 +16,49 @@
 
 package roll.automata;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import roll.util.ISet;
+import roll.util.UtilISet;
+
 /**
- * Acceptor for regular (omega) language 
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public interface Acceptor {
-	
-	AccType getAccType();
-	
-	Acc getAcc(); // acceptance condition
-	
-	default FDFA asFDFA() {
-	    assert this instanceof FDFA;
-		return (FDFA)this;
-	}
-	
-	default DFA asDFA() {
-	    assert this instanceof DFA;
-		return (DFA)this;
-	}
-	
-	default NFA asNFA() {
-	    assert this instanceof NFA;
-		return (NFA)this;
-	}
-	
-	default NBA asBuchi() {
-	    assert this instanceof NBA;
-        return (NBA)this;
-    }
-	// and so on
 
+public class NFAState implements State {
+    private final NFA nfa;
+    private final TIntObjectMap<ISet> successors; // Alphabet -> 2^Q
+    private final int id;
+    
+    public NFAState(final NFA nfa, final int id) {
+        assert nfa != null;
+        this.nfa = nfa;
+        this.id = id;
+        this.successors = new TIntObjectHashMap<>();
+    }
+
+    @Override
+    public NFA getFA() {
+        return nfa;
+    }
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public void addTransition(int letter, int state) {
+        assert nfa.checkValidLetter(letter);
+    }
+    
+    public ISet getSuccessors(int letter) {
+        assert nfa.checkValidLetter(letter);
+        ISet succs = successors.get(letter);
+        if(succs == null) {
+            return UtilISet.newISet();
+        }
+        return succs;
+    }
+    
 }

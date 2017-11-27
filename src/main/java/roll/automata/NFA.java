@@ -19,11 +19,10 @@ package roll.automata;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public class NFA extends FA {
+public class NFA extends FASimple {
 
     public NFA(int numOfLetters) {
         super(numOfLetters);
-        // TODO Auto-generated constructor stub
     }
 
     @Override
@@ -33,20 +32,18 @@ public class NFA extends FA {
 
     @Override
     public Acc getAcc() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    State makeState(int index) {
-        // TODO Auto-generated method stub
-        return null;
+    public State makeState(int index) {
+        return new NFAState(this, index);
     }
 
     @Override
     public State createState() {
-        // TODO Auto-generated method stub
-        return null;
+        State state = makeState(states.size());
+        return state;
     }
 
 }

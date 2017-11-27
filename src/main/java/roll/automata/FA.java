@@ -16,57 +16,23 @@
 
 package roll.automata;
 
-import java.util.ArrayList;
-
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public abstract class FA implements Acceptor {
+public interface FA extends Acceptor {
     
-    protected final ArrayList<State> states;
-    protected final int alphabetSize;
-    protected int initialState;
+    int getStateSize();
     
-    public FA(final int alphabetSize) {
-        this.alphabetSize = alphabetSize;
-        this.states = new ArrayList<>();
-    }
+    int getAlphabetSize();
     
-    public int getStateSize() {
-        return states.size();
-    }
+    State createState();
     
-    public int getAlphabetSize() {
-        return alphabetSize;
-    }
+    void setInitial(int state);
     
-    public abstract State createState();
+    void setInitial(State state);
     
-    public void setInitial(int state) {
-        initialState = state;
-    }
+    State getState(int state);
     
-    public void setInitial(State state) {
-        setInitial(state.getId());
-    }
+    int getInitialState();
     
-    public State getState(int state) {
-        assert checkValidState(state);
-        return states.get(state);
-    }
-    
-    public int getInitialState() {
-        return initialState;
-    }
-    
-    abstract State makeState(int index);
-    
-    protected boolean checkValidState(int state) {
-        return state >= 0 && state < states.size();
-    }
-    
-    protected boolean checkValidLetter(int letter) {
-        return letter >= 0 && letter < alphabetSize;
-    }
-
 }

@@ -19,9 +19,9 @@ package roll.automata;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public class Buchi extends NFA {
+public class NBA extends NFA {
 
-    public Buchi(int numOfLetters) {
+    public NBA(int numOfLetters) {
         super(numOfLetters);
         // TODO Auto-generated constructor stub
     }
