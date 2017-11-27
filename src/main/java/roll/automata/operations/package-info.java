@@ -14,37 +14,4 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.automata;
-
-import roll.automata.operations.NBAAccept;
-import roll.words.Word;
-
-/**
- * @author Yong Li (liyong@ios.ac.cn)
- * */
-public class NBA extends NFA {
-
-    public NBA(int alphabetSize) {
-        super(alphabetSize);
-        this.acceptance = new AccNBA(this);
-    }
-
-    @Override
-    public AccType getAccType() {
-        return AccType.BUECHI;
-    }
-    
-    private class AccNBA extends AccFA {
-
-        public AccNBA(FASimple fa) {
-            super(fa);
-        }
-
-        @Override
-        public boolean isAccepting(Word prefix, Word suffix) {
-            NBAAccept accept = new NBAAccept((NBA) fa, prefix, suffix);
-            return accept.isAccepting();
-        }
-    }
-
-}
+package roll.automata.operations;
