@@ -16,7 +16,7 @@
 
 package roll.automata;
 
-import roll.util.ISet;
+import roll.util.sets.ISet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)

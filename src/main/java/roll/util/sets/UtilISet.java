@@ -17,7 +17,7 @@
  * 
  */
 
-package roll.util;
+package roll.util.sets;
 
 public class UtilISet {
     private UtilISet() {

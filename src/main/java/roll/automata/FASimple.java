@@ -2,8 +2,8 @@ package roll.automata;
 
 import java.util.ArrayList;
 
-import roll.util.ISet;
-import roll.util.UtilISet;
+import roll.util.sets.ISet;
+import roll.util.sets.UtilISet;
 
 /**
  * simple fa like DFA, NFA and NBA

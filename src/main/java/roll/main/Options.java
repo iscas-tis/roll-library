@@ -14,16 +14,15 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.automata;
-
-import roll.util.sets.ISet;
-import roll.words.Word;
+package roll.main;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
+public final class Options {
+    
+    public Options() {
+        
+    }
 
-public interface Acc {
-    boolean isAccepting(ISet states);
-    boolean isAccepting(Word prefix, Word suffix);
 }

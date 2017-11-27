@@ -17,7 +17,7 @@
  * 
  */
 
-package roll.util;
+package roll.util.sets;
 
 //In order to keep the original code as much as possible, we
 //use the interface of BitSet

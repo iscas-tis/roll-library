@@ -18,8 +18,8 @@ package roll.automata;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import roll.util.ISet;
-import roll.util.UtilISet;
+import roll.util.sets.ISet;
+import roll.util.sets.UtilISet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)

@@ -16,8 +16,8 @@
 
 package roll.automata;
 
-import roll.util.ISet;
-import roll.util.UtilISet;
+import roll.util.sets.ISet;
+import roll.util.sets.UtilISet;
 import roll.words.Word;
 
 /**
