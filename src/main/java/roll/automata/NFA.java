@@ -40,10 +40,4 @@ public class NFA extends FASimple {
         return new NFAState(this, index);
     }
 
-    @Override
-    public State createState() {
-        State state = makeState(states.size());
-        return state;
-    }
-
 }

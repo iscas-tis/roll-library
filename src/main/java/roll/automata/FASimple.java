@@ -31,7 +31,11 @@ public abstract class FASimple implements FA {
         return alphabetSize;
     }
     
-    public abstract State createState();
+    public State createState() {
+        State state = makeState(states.size());
+        states.add(state);
+        return state;
+    }
     
     public void setInitial(int state) {
         initialState = state;

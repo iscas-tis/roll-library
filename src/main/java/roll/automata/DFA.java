@@ -37,12 +37,6 @@ public class DFA extends FASimple {
     }
 
     @Override
-    public State createState() {
-        State state = makeState(states.size()); 
-        return state;
-    }
-
-    @Override
     public State makeState(int index) {
         return new DFAState(this, index);
     }
