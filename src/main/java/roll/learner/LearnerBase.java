@@ -14,65 +14,13 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.table;
+package roll.learner;
+
+import roll.table.HashableValue;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-
-public class HashableValueBoolean implements HashableValue {
-	
-	private boolean value ;
-	
-	public HashableValueBoolean(boolean val) {
-		value = val;
-	}
-
-	@Override
-	public boolean valueEqual(HashableValue rvalue) {
-		return value == (Boolean)rvalue.get();
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public Boolean get() {
-		return value;
-	}
-	
-	public boolean equals(Object obj) {
-		if(obj instanceof HashableValueBoolean) {
-			HashableValueBoolean row = (HashableValueBoolean)obj;
-			return valueEqual(row);
-		}
-		return false;
-	}
-	
-	public String toString() {
-		return value? "+" : "-";
-	}
-	
-	public int hashCode() {
-		return value? 0 : 1;
-	}
-
-	@Override
-	public boolean isPair() {
-		return false;
-	}
-
-	@Override
-	public <T> T getLeft() {
-		return null;
-	}
-
-	@Override
-	public <T> T getRight() {
-		return null;
-	}
-
-	@Override
-	public boolean isAccepting() {
-		return value;
-	}
+public abstract class LearnerBase<M> implements Learner<M, HashableValue> {
 
 }

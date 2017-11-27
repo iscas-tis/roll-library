@@ -14,65 +14,75 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.table;
-
-import roll.util.Pair;
-import roll.words.Word;
+package roll.table;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class ExprValueWordPair implements ExprValue {
+public class HashableValueInt implements HashableValue {
+
+	private final int value;
 	
-	private final Word wordLeft;
-	private final Word wordRight;
-	
-	public ExprValueWordPair(Word left, Word right) {
-		this.wordLeft = left;
-		this.wordRight = right;
+	public HashableValueInt(int value) {
+		this.value = value;
 	}
+	
 	@Override
-	public boolean valueEqual(ExprValue rvalue) {
-		ExprValueWordPair pvalue = (ExprValueWordPair)rvalue;
-		return wordLeft.equals(pvalue.wordLeft)
-			&& wordRight.equals(pvalue.wordRight);
+	public boolean valueEqual(HashableValue rvalue) {
+		// TODO Auto-generated method stub
+		Integer rValue = rvalue.get(); 
+		return value == rValue.intValue();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof HashableValueInt) {
+			HashableValueInt val = (HashableValueInt)obj;
+			return val.value == value;
+		}
+		return false;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Pair<Word, Word> get() {
-		return new Pair<Word, Word>(wordLeft, wordRight);
+	public Integer get() {
+		// TODO Auto-generated method stub
+		return value;
 	}
-	
-	public boolean equals(Object obj) {
-		if(obj instanceof ExprValueWordPair) {
-			ExprValueWordPair pair = (ExprValueWordPair)obj;
-			return valueEqual(pair);
-		}
+
+	@Override
+	public boolean isPair() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public <T> T getLeft() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public <T> T getRight() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean isAccepting() {
+		// TODO Auto-generated method stub
 		return false;
 	}
 	
+	@Override
 	public String toString() {
-		return "(" + wordLeft.toStringWithAlphabet() 
-		+ ", " + wordRight.toStringWithAlphabet() + ")";
-	}
-	@SuppressWarnings("unchecked")
-	@Override
-	public boolean isPair() {
-		return true;
+		return "" + value;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public Word getLeft() {
-		return wordLeft;
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public Word getRight() {
-		return wordRight;
+	public int hashCode() {
+		return value;
 	}
 
 }

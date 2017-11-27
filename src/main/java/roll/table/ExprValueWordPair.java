@@ -14,56 +14,65 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.table;
+package roll.table;
 
+import roll.util.Pair;
 import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class ExprValueWord implements ExprValue {
-	private Word word;
-	public ExprValueWord(Word col) {
-		word = col;
+public class ExprValueWordPair implements ExprValue {
+	
+	private final Word wordLeft;
+	private final Word wordRight;
+	
+	public ExprValueWordPair(Word left, Word right) {
+		this.wordLeft = left;
+		this.wordRight = right;
 	}
 	@Override
 	public boolean valueEqual(ExprValue rvalue) {
-		return word.equals(rvalue.get());
+		ExprValueWordPair pvalue = (ExprValueWordPair)rvalue;
+		return wordLeft.equals(pvalue.wordLeft)
+			&& wordRight.equals(pvalue.wordRight);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Word get() {
-		return word;
+	public Pair<Word, Word> get() {
+		return new Pair<Word, Word>(wordLeft, wordRight);
 	}
 	
 	public boolean equals(Object obj) {
-		if(obj instanceof ExprValueWord) {
-			ExprValueWord col = (ExprValueWord)obj;
-			return valueEqual(col);
+		if(obj instanceof ExprValueWordPair) {
+			ExprValueWordPair pair = (ExprValueWordPair)obj;
+			return valueEqual(pair);
 		}
 		return false;
 	}
 	
 	public String toString() {
-		return word.toStringWithAlphabet();
+		return "(" + wordLeft.toStringWithAlphabet() 
+		+ ", " + wordRight.toStringWithAlphabet() + ")";
 	}
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean isPair() {
-		return false;
-	}
-	@Override
-	public <T> T getLeft() {
-		return null;
-	}
-	@Override
-	public <T> T getRight() {
-		return null;
+		return true;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public int hashCode() {
-		return word.hashCode();
+	public Word getLeft() {
+		return wordLeft;
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Word getRight() {
+		return wordRight;
+	}
+
 }

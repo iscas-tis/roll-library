@@ -14,74 +14,64 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.table;
+package roll.table;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class HashableValueInt implements HashableValue {
-
-	private final int value;
+public class HashableValueBoolean implements HashableValue {
 	
-	public HashableValueInt(int value) {
-		this.value = value;
+	private boolean value ;
+	
+	public HashableValueBoolean(boolean val) {
+		value = val;
 	}
-	
+
 	@Override
 	public boolean valueEqual(HashableValue rvalue) {
-		// TODO Auto-generated method stub
-		Integer rValue = rvalue.get(); 
-		return value == rValue.intValue();
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof HashableValueInt) {
-			HashableValueInt val = (HashableValueInt)obj;
-			return val.value == value;
-		}
-		return false;
+		return value == (Boolean)rvalue.get();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Integer get() {
-		// TODO Auto-generated method stub
+	public Boolean get() {
 		return value;
+	}
+	
+	public boolean equals(Object obj) {
+		if(obj instanceof HashableValueBoolean) {
+			HashableValueBoolean row = (HashableValueBoolean)obj;
+			return valueEqual(row);
+		}
+		return false;
+	}
+	
+	public String toString() {
+		return value? "+" : "-";
+	}
+	
+	public int hashCode() {
+		return value? 0 : 1;
 	}
 
 	@Override
 	public boolean isPair() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public <T> T getLeft() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public <T> T getRight() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public boolean isAccepting() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	
-	@Override
-	public String toString() {
-		return "" + value;
-	}
-	
-	@Override
-	public int hashCode() {
 		return value;
 	}
 

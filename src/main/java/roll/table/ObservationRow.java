@@ -14,37 +14,46 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.query;
+package roll.table;
 
-import roll.table.ObservationRow;
+import java.util.List;
+
 import roll.words.Word;
 
+
 /**
- * This is for interaction with membership query
- * and equivalence query, mainly for equivalence query
- * @O oracle return type 
- * */
-/**
+ * A row consists of its strings, namely its labels 
+ * and corresponding row values
+ * 
  * @author Yong Li (liyong@ios.ac.cn)
- * */
-public interface Query<O> {
+*/
+// maybe later replace O with Value type
+public interface ObservationRow {
+
+	Word getWord();
 	
+	// can not modified copy of values
+	List<HashableValue> getValues();
 	
-	Word getPrefix();
+	// do not know whether it is necessary
+	boolean equals(Object obj);
+		
+	void add(HashableValue value);
 	
-	Word getSuffix();
-	
-	default Word getQueriedWord() {
-		return getPrefix().concat(getSuffix());
+	default boolean valuesEqual(ObservationRow other) {
+		List<HashableValue> thisValues = getValues();
+		List<HashableValue> otherValues = other.getValues();
+		assert thisValues.size() == otherValues.size();
+		for(int valNr = 0; valNr < thisValues.size(); valNr ++) {
+			if(! thisValues.get(valNr).valueEqual(otherValues.get(valNr))) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
-	void answerQuery(O answer);
+	void set(int index, HashableValue value);
 	
-	O getQueryAnswer();
+	void clear();
 	
-	// only for tables
-	ObservationRow getPrefixRow();
-	
-	int getSuffixColumn();
-
 }

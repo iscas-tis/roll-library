@@ -14,7 +14,7 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.table;
+package roll.table;
 /**
  * Row value for observation table
  * Needs to be hashable

@@ -14,27 +14,12 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.table;
+package roll.learner;
+
 /**
- * Column value for observation table
- * Experiment value for distinguishing different row word
- * 
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public interface ExprValue {
-	
-	boolean equals(Object obj);
-	
-	boolean valueEqual(ExprValue cvalue);
-	
-	<T> T get();
-	
-	String toString();
-	
-	boolean isPair();
-	
-    <T> T getLeft();
-    
-    <T> T getRight();
-	
+
+public interface CeAnalyzer {
+
 }

@@ -14,37 +14,27 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.query;
-
-import roll.table.ObservationRow;
-import roll.words.Word;
-
+package roll.table;
 /**
- * This is for interaction with membership query
- * and equivalence query, mainly for equivalence query
- * @O oracle return type 
- * */
-/**
+ * Column value for observation table
+ * Experiment value for distinguishing different row word
+ * 
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public interface Query<O> {
+public interface ExprValue {
 	
+	boolean equals(Object obj);
 	
-	Word getPrefix();
+	boolean valueEqual(ExprValue cvalue);
 	
-	Word getSuffix();
+	<T> T get();
 	
-	default Word getQueriedWord() {
-		return getPrefix().concat(getSuffix());
-	}
+	String toString();
 	
-	void answerQuery(O answer);
+	boolean isPair();
 	
-	O getQueryAnswer();
+    <T> T getLeft();
+    
+    <T> T getRight();
 	
-	// only for tables
-	ObservationRow getPrefixRow();
-	
-	int getSuffixColumn();
-
 }

@@ -14,37 +14,56 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.query;
+package roll.table;
 
-import roll.table.ObservationRow;
 import roll.words.Word;
 
 /**
- * This is for interaction with membership query
- * and equivalence query, mainly for equivalence query
- * @O oracle return type 
- * */
-/**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public interface Query<O> {
-	
-	
-	Word getPrefix();
-	
-	Word getSuffix();
-	
-	default Word getQueriedWord() {
-		return getPrefix().concat(getSuffix());
+
+public class ExprValueWord implements ExprValue {
+	private Word word;
+	public ExprValueWord(Word col) {
+		word = col;
+	}
+	@Override
+	public boolean valueEqual(ExprValue rvalue) {
+		return word.equals(rvalue.get());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Word get() {
+		return word;
 	}
 	
-	void answerQuery(O answer);
+	public boolean equals(Object obj) {
+		if(obj instanceof ExprValueWord) {
+			ExprValueWord col = (ExprValueWord)obj;
+			return valueEqual(col);
+		}
+		return false;
+	}
 	
-	O getQueryAnswer();
+	public String toString() {
+		return word.toStringWithAlphabet();
+	}
+	@Override
+	public boolean isPair() {
+		return false;
+	}
+	@Override
+	public <T> T getLeft() {
+		return null;
+	}
+	@Override
+	public <T> T getRight() {
+		return null;
+	}
 	
-	// only for tables
-	ObservationRow getPrefixRow();
-	
-	int getSuffixColumn();
-
+	@Override
+	public int hashCode() {
+		return word.hashCode();
+	}
 }
