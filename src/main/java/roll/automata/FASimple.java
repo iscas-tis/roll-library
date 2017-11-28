@@ -20,6 +20,7 @@ import java.util.ArrayList;
 
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
+import roll.words.Alphabet;
 
 /**
  * simple fa like DFA, NFA and NBA
@@ -28,15 +29,19 @@ import roll.util.sets.UtilISet;
 public abstract class FASimple implements FA {
 
     protected final ArrayList<State> states;
-    protected final int alphabetSize;
+    protected final Alphabet alphabet;
     protected int initialState;
     protected final ISet finalStates;
     protected Acc acceptance;
     
-    public FASimple(final int alphabetSize) {
-        this.alphabetSize = alphabetSize;
+    public FASimple(final Alphabet alphabet) {
+        this.alphabet = alphabet;
         this.states = new ArrayList<>();
         this.finalStates = UtilISet.newISet();
+    }
+    
+    public Alphabet getAlphabet() {
+        return alphabet;
     }
     
     public int getStateSize() {
@@ -44,7 +49,7 @@ public abstract class FASimple implements FA {
     }
     
     public int getAlphabetSize() {
-        return alphabetSize;
+        return alphabet.getLetterSize();
     }
     
     public State createState() {
@@ -55,6 +60,10 @@ public abstract class FASimple implements FA {
     
     public void setInitial(int state) {
         initialState = state;
+    }
+    
+    public boolean isInitial(int state) {
+        return state == initialState;
     }
     
     public void setInitial(State state) {
@@ -91,7 +100,7 @@ public abstract class FASimple implements FA {
     }
     
     protected boolean checkValidLetter(int letter) {
-        return letter >= 0 && letter < alphabetSize;
+        return letter >= 0 && letter < getAlphabetSize();
     }
     
     @Override

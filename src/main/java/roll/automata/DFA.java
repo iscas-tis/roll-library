@@ -16,6 +16,7 @@
 
 package roll.automata;
 
+import roll.words.Alphabet;
 import roll.words.Word;
 
 /**
@@ -24,8 +25,8 @@ import roll.words.Word;
 
 public class DFA extends FASimple {
     
-    public DFA(int alphabetSize) {
-        super(alphabetSize);
+    public DFA(final Alphabet alphabet) {
+        super(alphabet);
         this.acceptance = new AccDFA(this);
     }
 

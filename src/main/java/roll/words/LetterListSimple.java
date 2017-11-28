@@ -28,8 +28,8 @@ import java.util.Map;
  * */
 class LetterListSimple implements LetterList {
 
-	private List<Object> letters = new ArrayList<>();
-	private Map<Object, Integer> letterToId = new HashMap<>();
+	private List<Character> letters = new ArrayList<>();
+	private Map<Character, Integer> letterToId = new HashMap<>();
 	private boolean isImmutable;
 	
 	LetterListSimple() {
@@ -47,7 +47,7 @@ class LetterListSimple implements LetterList {
 	}
 
 	@Override
-	public Iterator<Object> iterator() {
+	public Iterator<Character> iterator() {
 		return letters.iterator();
 	}
 
@@ -62,7 +62,7 @@ class LetterListSimple implements LetterList {
 	}
 
 	@Override
-	public boolean add(Object e) {
+	public boolean add(Character e) {
 		assert !isImmutable();
 		if(letterToId.containsKey(e)) {
 			return false;
@@ -105,7 +105,7 @@ class LetterListSimple implements LetterList {
 	}
 
 	@Override
-	public int compare(Object o1, Object o2) {
+	public int compare(Character o1, Character o2) {
 		assert indexOf(o1) >=0 && indexOf(o2) >= 0;
 		return indexOf(o1) - indexOf(o2);
 	}
@@ -116,13 +116,13 @@ class LetterListSimple implements LetterList {
 	}
 
 	@Override
-	public Object get(int index) {
+	public Character get(int index) {
 		assert index < size() : index + ", " + size();
 		return letters.get(index);
 	}
 
 	@Override
-	public int indexOf(Object letter) {
+	public int indexOf(Character letter) {
 		Integer id = letterToId.get(letter);
 		if(id == null) return -1;
 		return id;
@@ -139,10 +139,10 @@ class LetterListSimple implements LetterList {
 	}
 	
 	@Override
-	public boolean addAll(Collection<? extends Object> c) {
+	public boolean addAll(Collection<? extends Character> c) {
 		assert !isImmutable();
 		boolean result = false;
-		for(Object letter : c) {
+		for(Character letter : c) {
 			result = result || add(letter);
 		}
 		return false;

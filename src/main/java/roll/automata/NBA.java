@@ -17,6 +17,7 @@
 package roll.automata;
 
 import roll.automata.operations.NBAAccept;
+import roll.words.Alphabet;
 import roll.words.Word;
 
 /**
@@ -24,14 +25,14 @@ import roll.words.Word;
  * */
 public class NBA extends NFA {
 
-    public NBA(int alphabetSize) {
-        super(alphabetSize);
+    public NBA(final Alphabet alphabet) {
+        super(alphabet);
         this.acceptance = new AccNBA(this);
     }
 
     @Override
     public AccType getAccType() {
-        return AccType.BUECHI;
+        return AccType.NBA;
     }
     
     private class AccNBA extends AccFA {

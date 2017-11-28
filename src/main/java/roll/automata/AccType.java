@@ -24,7 +24,7 @@ public enum AccType {
 	DFA,
 	NFA,
 	FDFA,
-	BUECHI,
+	NBA,
 	RABIN,
 	STREET,
 	PARITY;
@@ -41,8 +41,8 @@ public enum AccType {
 		return this == FDFA;
 	}
 	
-	public boolean isBuechi() {
-		return this == BUECHI;
+	public boolean isNBA() {
+		return this == NBA;
 	}
 	
 	public boolean isRabin() {
@@ -65,8 +65,8 @@ public enum AccType {
 			return "NFA";
 		}else if(this == FDFA) {
 			return "FDFA";
-		}if(this == BUECHI) {
-			return "BUECHI";
+		}if(this == NBA) {
+			return "NBA";
 		}else if(this == RABIN) {
 			return "RABIN";
 		}else if(this == STREET) {

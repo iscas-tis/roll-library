@@ -16,6 +16,8 @@
 
 package roll.automata;
 
+import java.util.Arrays;
+
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
@@ -32,6 +34,7 @@ public class StateDFA implements State {
         this.dfa = dfa;
         this.id = id;
         this.successors = new int[dfa.getAlphabetSize()];
+        Arrays.fill(successors, -1); // with initial value -1
     }
 
     @Override

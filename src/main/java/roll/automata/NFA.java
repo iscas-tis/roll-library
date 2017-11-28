@@ -18,6 +18,7 @@ package roll.automata;
 
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
+import roll.words.Alphabet;
 import roll.words.Word;
 
 /**
@@ -25,8 +26,8 @@ import roll.words.Word;
  * */
 public class NFA extends FASimple {
 
-    public NFA(int alphabetSize) {
-        super(alphabetSize);
+    public NFA(final Alphabet alphabet) {
+        super(alphabet);
         this.acceptance = new AccNFA(this);
     }
 

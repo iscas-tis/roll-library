@@ -18,22 +18,26 @@ package roll.words;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ * Usually we just use Class Character
  * */
 public final class Alphabet {
 	
 	private final Word epsilon;
 	private final LetterList letterList;
-	private final Class<?> clazz; // the class type of input letters
+	public static final Character DOLLAR = '$';
 	
-	public Alphabet(Class<?> clazz) {
-		assert clazz != null;
-		this.clazz = clazz;
+	public Alphabet() {
 		this.epsilon = new WordEmpty(this);
 		this.letterList = new LetterListSimple();
 	}
 	
 	public LetterList getLetters() {
 		return letterList;
+	}
+	
+	public Character getLetter(int index) {
+	    return letterList.get(index);
 	}
 	
 	public int getLetterSize() {
@@ -52,22 +56,20 @@ public final class Alphabet {
 		return new WordArray(this, word);
 	}
 	
-	public void addLetter(Object obj) {
-		assert clazz.isInstance(obj);
+	public void addLetter(Character obj) {
 		assert !letterList.contains(obj);
+		assert !obj.equals(DOLLAR);
 		letterList.add(obj);
 	}
 	
-	public Word getWordFromString(String string, String splitter) {
-		assert string != null ;
-		String[] wordStr = string.split(splitter);
-		int[] word = new int[wordStr.length];
-		for(int index = 0; index < wordStr.length; index ++) {
-			int letter = letterList.indexOf(wordStr[index]);
+	public Word getWordFromString(String wordStr) {
+		assert wordStr != null ;
+		int[] word = new int[wordStr.length()];
+		for(int index = 0; index < wordStr.length(); index ++) {
+			int letter = letterList.indexOf(wordStr.charAt(index));
 			if(letter == -1) return null;
 			word[index] = letter;
 		}
-		
 		return getArrayWord(word);
 	}
 

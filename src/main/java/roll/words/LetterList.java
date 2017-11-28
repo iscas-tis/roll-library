@@ -25,16 +25,16 @@ import java.util.Comparator;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public interface LetterList extends Collection<Object>, Comparator<Object>{
+public interface LetterList extends Collection<Character>, Comparator<Character>{
 	
 	int size();
 	
-	Object get(int index);
+	Character get(int index);
 	
-	int indexOf(Object letter);
+	int indexOf(Character letter);
     
     @Override
-	default public int compare(Object o1, Object o2) {
+	default public int compare(Character o1, Character o2) {
 		return indexOf(o1) - indexOf(o2);
 	}
     
