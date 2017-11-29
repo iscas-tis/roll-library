@@ -14,19 +14,4 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.main;
-
-/**
- * @author Yong Li (liyong@ios.ac.cn)
- * */
-public final class Options {
-    
-    public boolean verbose = false;
-    
-    public boolean dot = false;
-    
-    public Options() {
-        
-    }
-
-}
+package roll.parser.ba;

@@ -1,0 +1,182 @@
+package roll.parser.ba;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import dk.brics.automaton.Automaton;
+import dk.brics.automaton.State;
+import dk.brics.automaton.Transition;
+import gnu.trove.map.TObjectCharMap;
+import gnu.trove.map.hash.TObjectCharHashMap;
+import roll.automata.NBA;
+import roll.automata.operations.NBAOperations;
+import roll.main.Options;
+import roll.parser.Parser;
+import roll.words.Alphabet;
+ 
+public class BAParser implements Parser {
+	
+	private Map<Character, String> charStrMap ; // char -> str
+	private TObjectCharMap<String> strCharMap ; // str -> char
+	private Map<String, State> strStateMap = new HashMap<>();
+	private final Alphabet alphabet;
+	// this class only allow the characters
+	private Automaton automaton;
+	private final Options options;
+	private NBA nba;
+	
+	public BAParser(Options options, String file) {
+	    this.options = options;
+		this.strCharMap = new TObjectCharHashMap<>();
+		this.charStrMap = new HashMap<>();
+		this.automaton = new Automaton();
+		this.alphabet = new Alphabet();
+		try {
+			FileInputStream inputStream = new FileInputStream(new File(file));
+			JBAParser parser = new JBAParser(inputStream);
+			parser.parse(this);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	// share alphabet with other parser
+	public BAParser(Options options, String file, BAParser otherParser) {
+	    this.options = options;
+		this.charStrMap = otherParser.charStrMap;
+		this.strCharMap = otherParser.strCharMap;
+		this.automaton = new Automaton();
+		this.alphabet = new Alphabet();
+		try {
+			FileInputStream inputStream = new FileInputStream(new File(file));
+			JBAParser parser = new JBAParser(inputStream);
+			parser.parse(this);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public NBA parse() {
+		return nba; //NBAOperations.fromDkNBA(automaton, alphabet);
+	}
+
+	@Override
+	public void print(NBA nba, OutputStream out) {
+		PrintStream printer = new PrintStream(out);
+		if(options.dot) {
+			printer.print("//Buechi \n");
+			printer.print("digraph {\n");
+	        
+	        for(int stateNr = 0; stateNr < nba.getStateSize(); stateNr ++) {
+	        	printer.print("  " + stateNr + " [label=\"" +  stateNr + "\"");
+	            if(nba.isFinal(stateNr)) printer.print(", shape = doublecircle");
+	            else printer.print(", shape = circle");
+	            printer.print("];\n");
+	            for(int letter = 0; letter < nba.getAlphabetSize(); letter ++) {
+	                for(int succNr : nba.getSuccessors(stateNr, letter)) {
+	                    printer.print("  " + stateNr + " -> " + succNr 
+	                            + " [label=\"" + charStrMap.get(nba.getAlphabet().getLetter(letter))
+	                            + "\"];\n");
+	                }
+	            }
+	        }	
+	        printer.print("  " + nba.getStateSize() + " [label=\"\", shape = plaintext];\n");
+	        printer.print("  " + nba.getStateSize() + " -> " + nba.getInitialState() + " [label=\"\"];\n");
+	        printer.print("}\n\n");
+		}else {
+			// first output initial state
+			printer.print("[" + nba.getInitialState() + "]\n");
+			// transitions
+			for(int stateNr = 0; stateNr < nba.getStateSize(); stateNr ++) {
+			    for(int letter = 0; letter < nba.getAlphabetSize(); letter ++) {
+                    for(int succNr : nba.getSuccessors(stateNr, letter)) {
+                        printer.print(charStrMap.get(nba.getAlphabet().getLetter(letter))
+                                + "," + "[" + stateNr + "]->[" + succNr + "]\n");
+                    }
+			    }
+			}
+			
+			for(final int finalNr : nba.getFinalStates()) {
+				printer.print("[" + finalNr + "]\n");
+			}
+		}
+	}
+
+	@Override
+	public void close() {		
+	}
+	
+	protected void setInitial(String state) {
+		State init = getState(state);
+		automaton.setInitialState(init);
+	}
+	
+	protected void addTransition(String source, String target, String ap) {
+		State st = getState(source);
+		State tg = getState(target);
+		char ch = getCharFromString(ap);
+		st.addTransition(new Transition(ch, tg));
+	}
+	
+	protected void setAccepting(String state) {
+		State fin = getState(state);
+		fin.setAccept(true);
+	}
+	
+	protected void parseBegin() {
+		
+	}
+	
+	protected void parseEnd() {
+		nba = NBAOperations.fromDkNBA(automaton, alphabet);
+		automaton = null; // empty this automaton
+	}
+	
+	// we reserve '$' sign for L dollar automaton
+	private char getCharFromString(String label) {
+		char ch = 0;
+		if(strCharMap.containsKey(label)) {
+			return strCharMap.get(label);
+		}
+
+		ch = (char) strCharMap.size();
+		if(ch >= '$' )   ch ++; // reserve '$' sign
+		strCharMap.put(label, ch);
+		charStrMap.put(ch, label);
+		alphabet.addLetter(ch); // add characters
+		return ch;
+	}
+	
+	private State getState(String str) {
+	    State state = strStateMap.get(str);
+		if(state == null) {
+			state = new State();
+			strStateMap.put(str, state);
+		}
+		return state;
+	}
+	
+	public String translate(List<String> strs) {
+		StringBuilder builder = new StringBuilder();
+		for(String str : strs) {
+			builder.append(charStrMap.get(str));
+		}
+		return builder.toString();
+	}
+	
+	public String translate(String strs) {
+		StringBuilder builder = new StringBuilder();
+		for(int i = 0; i < strs.length(); i ++) {
+			builder.append(charStrMap.get("" + strs.charAt(i)));
+		}
+		return builder.toString();
+	}
+
+}

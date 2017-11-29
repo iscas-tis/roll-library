@@ -1,0 +1,121 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ */
+options
+{
+  JDK_VERSION = "1.8";
+
+  LOOKAHEAD= 2;
+// FORCE_LA_CHECK = true;
+  STATIC = false;
+}
+
+PARSER_BEGIN(JBAParser)
+package roll.parser.ba;
+
+public class JBAParser
+{
+  private BAParser parser ;
+  
+  public void parse(BAParser parser)
+  {
+    this.parser = parser;
+    try
+    {
+      this.parser.parseBegin();
+      parseAutomaton();
+      this.parser.parseEnd();
+    }
+    catch (ParseException e)
+    {
+      e.printStackTrace();
+    }
+  }
+}
+
+PARSER_END(JBAParser)
+
+SKIP :
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+  // skip comments
+| < "%" (~[ "\r", "\n" ])* >
+| < "//" (~[ "\r", "\n" ])* >
+}
+
+TOKEN : /* OPERATORS */
+{
+  < COMMA : "," >
+| < ARROW : "->" >
+| < STRING : (~[ ",", ">", "-", "\n", "\r" ])+ > // allow space and tab character in String
+  //| < NEWLINE : >
+}
+
+private void parseAutomaton() :
+{
+  Token stateOrLetterStr, labelStr, sourceStr, targetStr;
+}
+{
+  stateOrLetterStr = < STRING > // state or label string
+  (
+    < COMMA > // no initial state so start with transitions
+    sourceStr = < STRING >
+    {
+      labelStr = stateOrLetterStr;
+      parser.setInitial(sourceStr.toString());
+    }
+    < ARROW > 
+    targetStr = < STRING >
+  |
+    // there is an initial state
+    {
+      parser.setInitial(stateOrLetterStr.toString());
+    }
+    labelStr = < STRING > 
+    < COMMA > 
+    sourceStr = < STRING >
+    < ARROW > 
+    targetStr = < STRING >
+  )
+  {
+    parser.addTransition(sourceStr.toString(), targetStr.toString(), labelStr.toString());
+  }
+  parseTransitions() 
+  parseFinalStates()
+}
+
+private void parseTransitions() :
+{
+  Token labelStr, sourceStr, targetStr;
+}
+{
+  
+  (
+    LOOKAHEAD(< STRING> < COMMA>)
+    labelStr = < STRING > 
+    < COMMA > 
+    sourceStr = < STRING >
+    < ARROW > 
+    targetStr = < STRING >
+  {
+    parser.addTransition(sourceStr.toString(), targetStr.toString(), labelStr.toString());
+  }
+  )*
+}
+
+// optional 
+private void parseFinalStates() :
+{
+  Token stateIdStr;
+}
+{
+  (
+    stateIdStr = < STRING >
+    {
+      parser.setAccepting(stateIdStr.toString());
+    }
+  )*
+}

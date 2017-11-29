@@ -14,19 +14,22 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.main;
+package roll.automata.operations;
+
+import dk.brics.automaton.Automaton;
+import roll.automata.NBA;
+import roll.words.Alphabet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public final class Options {
+
+public class NBAOperations {
     
-    public boolean verbose = false;
-    
-    public boolean dot = false;
-    
-    public Options() {
+    public static NBA fromDkNBA(Automaton dkAut, Alphabet alphabet) {
+        NBA nba = new NBA(alphabet);
         
+        return null;
     }
 
 }
