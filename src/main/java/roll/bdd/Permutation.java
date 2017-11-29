@@ -26,37 +26,37 @@ import net.sf.javabdd.BDDPairing;
  * Adapted from EPMC tool code
  * 
  * @author Yong Li (liyong@ios.ac.cn)
- * */
+ */
 
 public class Permutation {
-	
-	private final List<BDD> presVars;
-	private final List<BDD> nextVars;
-	private final BDDManager bdd;
-	private final BDDPairing bddPair;
-	
-	public Permutation(BDDManager bdd, List<BDD> pres, List<BDD> nexts) {
-		assert pres.size() == nexts.size();
-		presVars = pres;
-		nextVars = nexts;
-		this.bdd = bdd;
-		this.bddPair = bdd.makeBDDPair(pres, nexts);
-	}
-	
-	public BDDPairing getBDDPairing() {
-		return bddPair;
-	}
-	
-	public List<BDD> getPresVars() {
-		return Collections.unmodifiableList(presVars);
-	}
-	
-	public List<BDD> getNextVars() {
-		return Collections.unmodifiableList(nextVars);
-	}
-	
-	public BDDManager getBDDManager() {
-		return bdd;
-	}
+
+    private final List<BDD> presVars;
+    private final List<BDD> nextVars;
+    private final BDDManager bdd;
+    private final BDDPairing bddPair;
+
+    public Permutation(BDDManager bdd, List<BDD> pres, List<BDD> nexts) {
+        assert pres.size() == nexts.size();
+        presVars = pres;
+        nextVars = nexts;
+        this.bdd = bdd;
+        this.bddPair = bdd.makeBDDPair(pres, nexts);
+    }
+
+    public BDDPairing getBDDPairing() {
+        return bddPair;
+    }
+
+    public List<BDD> getPresVars() {
+        return Collections.unmodifiableList(presVars);
+    }
+
+    public List<BDD> getNextVars() {
+        return Collections.unmodifiableList(nextVars);
+    }
+
+    public BDDManager getBDDManager() {
+        return bdd;
+    }
 
 }

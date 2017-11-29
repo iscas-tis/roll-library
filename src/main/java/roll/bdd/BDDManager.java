@@ -31,56 +31,57 @@ import net.sf.javabdd.BDDFactory;
 import net.sf.javabdd.BDDPairing;
 import roll.parser.hoa.Valuation;
 import roll.parser.hoa.ValuationIterator;
-/** 
+
+/**
  * TODO reimplement the BDD package and supports for clone BDD operation
  * 
  * @author Yong Li (liyong@ios.ac.cn)
- * */
+ */
 public final class BDDManager {
-		
-	private BDDFactory bdd;
-	
-	private final static int NUM_NODES = 125000;
-	private final static int NUM_CACHE = 100000;
-	private final static int NUM_INC = 10000;
-	
-	private TIntObjectMap<String> varsMap = new TIntObjectHashMap<>();
-	
-	public BDDManager(int numNodes, int numCache) {
-		bdd = BDDFactory.init(numNodes, numCache);
-		bdd.setMaxIncrease(NUM_INC);
-	}
-	
-	public BDDManager() {
-		this(NUM_NODES, NUM_CACHE);
-	}
-	
-	public void setNumVar(int numVar) {
-		assert bdd != null;
-		bdd.setVarNum(numVar);
-	}
-	
+
+    private BDDFactory bdd;
+
+    private final static int NUM_NODES = 125000;
+    private final static int NUM_CACHE = 100000;
+    private final static int NUM_INC = 10000;
+
+    private TIntObjectMap<String> varsMap = new TIntObjectHashMap<>();
+
+    public BDDManager(int numNodes, int numCache) {
+        bdd = BDDFactory.init(numNodes, numCache);
+        bdd.setMaxIncrease(NUM_INC);
+    }
+
+    public BDDManager() {
+        this(NUM_NODES, NUM_CACHE);
+    }
+
+    public void setNumVar(int numVar) {
+        assert bdd != null;
+        bdd.setVarNum(numVar);
+    }
+
     public int getNumVars() {
-    	return bdd.varNum();
+        return bdd.varNum();
     }
-    
+
     public void addExtraVarNum(int num) {
-    	bdd.extVarNum(num);
+        bdd.extVarNum(num);
     }
-    
+
     public BDD getOne() {
-    	return bdd.one();
+        return bdd.one();
     }
-    
+
     public BDD getZero() {
-    	return bdd.zero();
+        return bdd.zero();
     }
-    
+
     public BDD ithVar(int index) {
-    	return bdd.ithVar(index);
+        return bdd.ithVar(index);
     }
-	
-	// print one letter
+
+    // print one letter
     public String toString(BDD bdd) {
         if (bdd.isOne()) {
             return "t";
@@ -93,25 +94,21 @@ public final class BDDManager {
                 result += "" + bdd.var() + "";
                 first = true;
             } else if (!bdd.high().isZero()) {
-                result += "(" + bdd.var() + " & "
-                    + toString(bdd.high()) + ")";
+                result += "(" + bdd.var() + " & " + toString(bdd.high()) + ")";
                 first = true;
             }
 
             if (bdd.low().isOne()) {
-                result += (first ? "|" : "") + "!"
-                    + bdd.var() + "";
+                result += (first ? "|" : "") + "!" + bdd.var() + "";
             } else if (!bdd.low().isZero()) {
-                result += (first ? "|" : "") + "(!"
-                    + bdd.var() + "&"
-                    + toString(bdd.low()) + ")";
+                result += (first ? "|" : "") + "(!" + bdd.var() + "&" + toString(bdd.low()) + ")";
             }
             result = "(" + result + ")";
             return result;
         }
     }
-    
-	// change one letter to expression
+
+    // change one letter to expression
     public BooleanExpression<Atom> toBoolExpr(BDD bdd) {
         if (bdd.isOne()) {
             return new BooleanExpression<>(true);
@@ -119,131 +116,125 @@ public final class BDDManager {
             return new BooleanExpression<>(false);
         } else {
             boolean first = false;
-            BooleanExpression<Atom> atom = new BooleanExpression<>(
-            		AtomLabel.createAPIndex(bdd.var()));
+            BooleanExpression<Atom> atom = new BooleanExpression<>(AtomLabel.createAPIndex(bdd.var()));
             BooleanExpression<Atom> result = null;
             if (bdd.high().isOne()) {
-            	result = atom;
+                result = atom;
                 first = true;
             } else if (!bdd.high().isZero()) {
-            	result = new BooleanExpression<>(Type.EXP_AND
-                		, atom
-                		, toBoolExpr(bdd.high()));
+                result = new BooleanExpression<>(Type.EXP_AND, atom, toBoolExpr(bdd.high()));
                 first = true;
             }
 
             if (bdd.low().isOne()) {
-            	result =  first ? 
-            			new BooleanExpression<>(Type.EXP_OR
-                		, result
-                		, atom.not()) // high | !low
-            			: atom.not();
+                result = first ? new BooleanExpression<>(Type.EXP_OR, result, atom.not()) // high
+                                                                                          // |
+                                                                                          // !low
+                        : atom.not();
             } else if (!bdd.low().isZero()) {
-            	BooleanExpression<Atom> lower = new BooleanExpression<>(Type.EXP_AND
-    										, atom.not()
-    										, toBoolExpr(bdd.low()));
-            	result = first ? 
-            			new BooleanExpression<>(Type.EXP_OR
-                		, result
-                		, lower) // high | low
-            			: lower; // low
+                BooleanExpression<Atom> lower = new BooleanExpression<>(Type.EXP_AND, atom.not(),
+                        toBoolExpr(bdd.low()));
+                result = first ? new BooleanExpression<>(Type.EXP_OR, result, lower) // high
+                                                                                     // |
+                                                                                     // low
+                        : lower; // low
             }
             return result;
         }
     }
-    
-    public BDD fromBoolExpr(BooleanExpression<AtomLabel> boolExpr) {
-    	assert boolExpr != null;
-    	
-    	if(boolExpr.isTRUE()) {
-    		return bdd.one();
-    	}else if(boolExpr.isFALSE()) {
-    		return bdd.zero();
-    	}else if(boolExpr.isAtom()) {
-    		return bdd.ithVar(boolExpr.getAtom().getAPIndex()).andWith(bdd.one());
-    	}else if(boolExpr.isNOT()) {
-    		return fromBoolExpr(boolExpr.getLeft()).not();
-    	}else {
-    		BDD left = fromBoolExpr(boolExpr.getLeft());
-    		BDD right = fromBoolExpr(boolExpr.getRight());
-    		if(boolExpr.isAND()) {
-    			return left.andWith(right);
-    		}else {
-    			return left.orWith(right);
-    		}
-    	}    	
-    }
-    
-    public BDD fromValuation(Valuation val) {
-    	BDD result = bdd.one();
-    	for(int i = 0; i < val.size(); i ++) {
-    		if(val.get(i)) {
-    			result = result.andWith(bdd.ithVar(i).id());
-    		}else {
-    			result = result.andWith(bdd.ithVar(i).not());
-    		}
-    	}
-		return result;
-    }
-    
-    public Set<Valuation> toValuationSet(BDD ddSet, int size) {
-    	Set<Valuation> valSet = new HashSet<>();
-    	ValuationIterator valIter = new ValuationIterator(size);
-    	while(valIter.hasNext()) {
-    		Valuation val = valIter.next();
-    		BDD dd = fromValuation(val);
-    		dd = dd.and(ddSet);
-    		if(! dd.isZero()) {
-    			valSet.add(val);
-    		}
-    		dd.free();
-    	}
-		return valSet;
-    }
-    
-    public Valuation toOneFullValuation(BDD dd) {
-    	Valuation val = new Valuation(bdd.varNum());
-    	for(int i = 0; i < bdd.varNum(); i ++) {
-    		BDD var = bdd.ithVar(i).id();
-    		var = var.andWith(dd.id());
-    		val.set(i, !var.isZero());
-    		var.free();
-    	}
-		return val;
-    }
-    
-    public Set<Valuation> toValuationSet(BDD ddSet) {
-    	Set<Valuation> valSet = new HashSet<>();
 
-    	BDD dd = ddSet.id();
-    	while(! dd.isZero()) {
-    		BDD oneSat = dd.fullSatOne();
-    		valSet.add(toOneFullValuation(oneSat));
-    		dd = dd.andWith(oneSat.not());
-    		oneSat.free();
-    	}
-    	
-    	dd.free();
-		return valSet;
+    public BDD fromBoolExpr(BooleanExpression<AtomLabel> boolExpr) {
+        assert boolExpr != null;
+
+        if (boolExpr.isTRUE()) {
+            return bdd.one();
+        } else if (boolExpr.isFALSE()) {
+            return bdd.zero();
+        } else if (boolExpr.isAtom()) {
+            return bdd.ithVar(boolExpr.getAtom().getAPIndex()).andWith(bdd.one());
+        } else if (boolExpr.isNOT()) {
+            return fromBoolExpr(boolExpr.getLeft()).not();
+        } else {
+            BDD left = fromBoolExpr(boolExpr.getLeft());
+            BDD right = fromBoolExpr(boolExpr.getRight());
+            if (boolExpr.isAND()) {
+                return left.andWith(right);
+            } else {
+                return left.orWith(right);
+            }
+        }
     }
-    
+
+    public BDD fromValuation(Valuation val) {
+        BDD result = bdd.one();
+        for (int i = 0; i < val.size(); i++) {
+            if (val.get(i)) {
+                result = result.andWith(bdd.ithVar(i).id());
+            } else {
+                result = result.andWith(bdd.ithVar(i).not());
+            }
+        }
+        return result;
+    }
+
+    public Set<Valuation> toValuationSet(BDD ddSet, int size) {
+        Set<Valuation> valSet = new HashSet<>();
+        ValuationIterator valIter = new ValuationIterator(size);
+        while (valIter.hasNext()) {
+            Valuation val = valIter.next();
+            BDD dd = fromValuation(val);
+            dd = dd.and(ddSet);
+            if (!dd.isZero()) {
+                valSet.add(val);
+            }
+            dd.free();
+        }
+        return valSet;
+    }
+
+    public Valuation toOneFullValuation(BDD dd) {
+        Valuation val = new Valuation(bdd.varNum());
+        for (int i = 0; i < bdd.varNum(); i++) {
+            BDD var = bdd.ithVar(i).id();
+            var = var.andWith(dd.id());
+            val.set(i, !var.isZero());
+            var.free();
+        }
+        return val;
+    }
+
+    public Set<Valuation> toValuationSet(BDD ddSet) {
+        Set<Valuation> valSet = new HashSet<>();
+
+        BDD dd = ddSet.id();
+        while (!dd.isZero()) {
+            BDD oneSat = dd.fullSatOne();
+            valSet.add(toOneFullValuation(oneSat));
+            dd = dd.andWith(oneSat.not());
+            oneSat.free();
+        }
+
+        dd.free();
+        return valSet;
+    }
+
     public Set<BDD> toValuationSetBDD(BDD ddSet, int size) {
-    	Set<BDD> valSet = new HashSet<>();
-    	ValuationIterator valIter = new ValuationIterator(size);
-    	while(valIter.hasNext()) {
-    		BDD dd = fromValuation(valIter.next());
-    		dd = dd.andWith(ddSet.not());
-    		if(! dd.isZero()) {
-    			valSet.add(dd);
-    		}
-    	}
-		return valSet;
+        Set<BDD> valSet = new HashSet<>();
+        ValuationIterator valIter = new ValuationIterator(size);
+        while (valIter.hasNext()) {
+            BDD dd = fromValuation(valIter.next());
+            dd = dd.andWith(ddSet.not());
+            if (!dd.isZero()) {
+                valSet.add(dd);
+            }
+        }
+        return valSet;
     }
-    
+
     public void setVariableName(int var, String name) {
-    	varsMap.put(var, name);
+        varsMap.put(var, name);
     }
-    
+
     // TODO
     public String toDot(BDD bdd) {
         StringBuilder builder = new StringBuilder();
@@ -252,27 +243,26 @@ public final class BDDManager {
         return builder.toString();
     }
 
-    
     private String getName(int var) {
-    	String name = varsMap.get(var);
-    	if(name != null) return name;
-    	return var + "";
+        String name = varsMap.get(var);
+        if (name != null)
+            return name;
+        return var + "";
     }
-    
+
     public BDDPairing makeBDDPair(List<BDD> presVars, List<BDD> nextVars) {
-		BDDPairing bddPair = bdd.makePair();
-		for(int index = 0; index < presVars.size(); index ++) {
-			bddPair.set(presVars.get(index).var(), nextVars.get(index).var());
-		}
-		for(int index = 0; index < presVars.size(); index ++) {
-			bddPair.set(nextVars.get(index).var(), presVars.get(index).var());
-		}
-		return bddPair;
+        BDDPairing bddPair = bdd.makePair();
+        for (int index = 0; index < presVars.size(); index++) {
+            bddPair.set(presVars.get(index).var(), nextVars.get(index).var());
+        }
+        for (int index = 0; index < presVars.size(); index++) {
+            bddPair.set(nextVars.get(index).var(), presVars.get(index).var());
+        }
+        return bddPair;
     }
-    
-    
+
     public void close() {
-    	bdd.done();
+        bdd.done();
     }
-    
+
 }
