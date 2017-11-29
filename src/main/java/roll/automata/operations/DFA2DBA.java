@@ -40,9 +40,9 @@ class DFA2DBA {
         this.dfa = dfa;
     }
 
-    // build buechi for a given DFA, which has only one accepting state
+    // build DBA from a given DFA, which has only one accepting state
     // and L(aut) = N without N+ = N, this is for over approximation method
-    // there four kinds of states, namely q, [q], (q, q') and <q>
+    // there are four kinds of states, namely q, [q], (q, q') and <q>
     public Automaton buildDBA() {
         // remove all unreachable states and transitions
         dfa.removeDeadTransitions();
@@ -59,7 +59,6 @@ class DFA2DBA {
         }
         // state q is -2 * n + q, [q] is -1 * n + q 
         // (p, q) is p * n + q, while <q> is (n+1)* n + q
-        
         State qf = accs.iterator().next(); // qf
         State init = dfa.getInitialState();
         LinkedList<PairState> worklist = new LinkedList<PairState>();
@@ -301,6 +300,7 @@ class DFA2DBA {
             return this.middle;
         }
         
+        @Override
         public boolean equals(Object obj) {
             if(obj instanceof PairState) {
                 PairState pair = (PairState)obj;
@@ -312,6 +312,7 @@ class DFA2DBA {
             return false;
         }
         
+        @Override
         public String toString() {
 
             if(getMiddle() != null) {
@@ -329,10 +330,10 @@ class DFA2DBA {
             return "";
         }
         
+        @Override
         public int hashCode() {
             
             int num = map.size();
-            
             // state q is -2 * n + q, [q] is -1 * n + q 
             // , (p, q) is p * n + q, while <q> is (n+1)* n + q
 
