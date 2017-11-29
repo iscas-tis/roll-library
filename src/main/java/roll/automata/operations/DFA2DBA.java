@@ -32,7 +32,7 @@ import roll.util.Pair;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class DFA2DBA {
+class DFA2DBA {
     
     private Automaton dfa;
     
