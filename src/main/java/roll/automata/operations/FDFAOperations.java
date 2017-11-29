@@ -181,5 +181,76 @@ public class FDFAOperations {
         //dkAutL.minimize(); only for DFA
         return dkAutL;
     }
+    
+    public static Automaton buildUnderNBA(FDFA fdfa) {
+        return buildNBA(fdfa, true, false);
+    }
+    
+    public static Automaton buildOverNBA(FDFA fdfa) {
+        return buildNBA(fdfa, false, false);
+    }
+    
+    private static Automaton buildNBA(FDFA fdfa, boolean under, boolean dba) {
+        // L means Leading and P means Progress
+        TIntObjectMap<State> map = new TIntObjectHashMap<>();
+        Automaton dkAutL = DFAOperations.toDkDFA(map, fdfa.getLeadingDFA());
+        for (int stateNr = 0; stateNr < fdfa.getLeadingDFA().getStateSize(); stateNr++) {
+            DFA autP = fdfa.getProgressDFA(stateNr);
+            ISet finalStates = autP.getFinalStates();
+            List<Automaton> finalAuts = new ArrayList<>();
+            int initP = autP.getInitialState();
+            for (final int finalStateNr : finalStates) {
+                // A^a_f
+                Automaton dkAutP = DFAOperations.toDkDFA(autP, initP, finalStateNr);
+                dkAutP.minimize();
+                // M^a_a
+                Automaton dkAutLOther = DFAOperations.toDkDFA(fdfa.getLeadingDFA(), stateNr, stateNr);
+                dkAutLOther.minimize();
+                // M^a_a * A^a_f                
+                dk.brics.automaton.Automaton product = dkAutP.intersection(dkAutLOther);
+                product.minimize();
+                
+                if (under) {
+                    //A^f_f
+                    Automaton dkAutNq = DFAOperations.toDkDFA(autP, finalStateNr, finalStateNr);
+                    dkAutNq.minimize();
+                    // M^a_a * A^a_f * A^f_f
+                    product = product.intersection(dkAutNq);
+                    product.minimize();
+                }
+
+                if (! product.getAcceptStates().isEmpty()) {
+                    assert product.getAcceptStates().size() == 1 : "More than one accepting state...";
+                    if(dba) {
+                        product = DFAOperations.toDBA(product);
+                    }else {
+                        product =  DFAOperations.addEpsilon(product);
+                    }
+                    finalAuts.add(product);
+                }
+            }
+
+            State u = map.get(stateNr); // make epsilon transitions
+            for (Automaton dkAut : finalAuts) {
+                State init = dkAut.getInitialState();
+                for (Transition t : init.getTransitions())
+                    u.addTransition(new Transition(t.getMin(), t.getMax(), t.getDest()));
+            }
+        }
+
+        return dkAutL;
+    }
+    
+    public static Automaton buildUnderLDBA(FDFA fdfa) {
+        Automaton result = buildNBA(fdfa, true, true);
+        result.removeDeadTransitions();
+        return result;
+    }
+    
+    public static Automaton buildOverLDBA(FDFA fdfa) {
+        Automaton result = buildNBA(fdfa, false, true);
+        result.removeDeadTransitions();
+        return result;
+    }
 
 }

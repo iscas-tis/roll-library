@@ -16,8 +16,10 @@
 
 package roll.automata.operations;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Set;
 
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.State;
@@ -67,7 +69,8 @@ public class DFAOperations {
             for (int letter = 0; letter < dfa.getAlphabetSize(); letter ++) {
                 int succNr = dfa.getSuccessor(stateNr, letter);
                 State stateSucc = getState(map, succNr);
-                state.addTransition(new Transition(dfa.getAlphabet().getLetter(letter),
+                state.addTransition(
+                        new Transition(dfa.getAlphabet().getLetter(letter),
                         stateSucc));
             }
         }
@@ -98,7 +101,8 @@ public class DFAOperations {
             for (int letter = 0; letter < dfa.getAlphabetSize(); letter ++) {
                 int succNr =  dfa.getSuccessor(stateNr, letter);
                 State stateSucc = getState(map, succNr);
-                state.addTransition(new Transition(dfa.getAlphabet().getLetter(letter),
+                state.addTransition(
+                        new Transition(dfa.getAlphabet().getLetter(letter),
                         stateSucc));
                 if(! visited.get(succNr)) {
                     queue.add(succNr);
@@ -117,6 +121,45 @@ public class DFAOperations {
         State init = dkAut.getInitialState();
         TObjectIntMap<State> map = new TObjectIntHashMap<>();
         return null;
+    }
+    
+    //Adds specific(not general) epsilon transition in an NFA.
+    //A only has one accepting state, TODO flawed
+    public static Automaton addEpsilon(Automaton A) {
+        State epsilon = new State();
+        epsilon.setAccept(true);
+        Set<State> acc = A.getAcceptStates();
+        //only allow one accepted state.
+        if(acc.size() > 1)  {
+            throw new UnsupportedOperationException(
+                    "multiple final states while add epsilon transitions"
+                    );
+        }
+        State accept = acc.iterator().next();
+        accept.setAccept(false);
+        //record transitions to be added to epsilon state.
+        Set<Transition> transToAcc = new HashSet<Transition>();
+        
+        for (State s: A.getStates()) {
+            for (Transition t: s.getTransitions()){
+                if (t.getDest() == accept)
+                    transToAcc.add(new Transition(t.getMin(), t.getMax(), s));
+            }
+        }
+        // first add transitions from epsilon state
+        State ini = A.getInitialState();
+        for (Transition t : ini.getTransitions())
+            epsilon.addTransition(new Transition(t.getMin(), t.getMax(), t.getDest()));
+        // add transition to epsilon
+        for(Transition t: transToAcc)
+            t.getDest().addTransition(new Transition(t.getMin(), t.getMax(), epsilon));
+        
+        return A;
+    }
+    
+    public static Automaton toDBA(Automaton dfa) {
+        DFA2DBA dfa2dba = new DFA2DBA(dfa);
+        return dfa2dba.buildDBA();
     }
 
 }
