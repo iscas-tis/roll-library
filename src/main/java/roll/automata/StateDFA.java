@@ -24,15 +24,14 @@ import java.util.Arrays;
 
 // all DFA state will be complete in the sense that
 // it has successors for every letter
-public class StateDFA implements State {
+public class StateDFA extends StateFA {
     private final DFA dfa;
     private final int[] successors; // // Alphabet -> Q
-    private final int id;
     
     public StateDFA(final DFA dfa, final int id) {
+        super(id);
         assert dfa != null;
         this.dfa = dfa;
-        this.id = id;
         this.successors = new int[dfa.getAlphabetSize()];
         Arrays.fill(successors, -1); // with initial value -1
     }
@@ -40,11 +39,6 @@ public class StateDFA implements State {
     @Override
     public DFA getFA() {
         return dfa;
-    }
-
-    @Override
-    public int getId() {
-        return id;
     }
 
     @Override

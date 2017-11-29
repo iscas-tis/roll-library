@@ -16,51 +16,30 @@
 
 package roll.automata;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import roll.util.sets.ISet;
-import roll.util.sets.UtilISet;
-
 /**
  * @author Yong Li (liyong@ios.ac.cn)
- * 
- * NFA is allowed to be incomplete
  * */
 
-public class StateNFA extends StateFA {
-    private final NFA nfa;
-    private final TIntObjectMap<ISet> successors; // Alphabet -> 2^Q
+abstract class StateFA implements State {
     
-    public StateNFA(final NFA nfa, final int id) {
-        super(id);
-        assert nfa != null;
-        this.nfa = nfa;
-        this.successors = new TIntObjectHashMap<>();
+    private final int id;
+    StateFA(int id) {
+        this.id = id;
+    }
+    
+    @Override
+    public int getId() {
+        return id;
+    }
+    
+    @Override
+    public int hashCode() {
+        return id;
+    }
+    
+    @Override
+    public String toString() {
+        return "" + id;
     }
 
-    @Override
-    public NFA getFA() {
-        return nfa;
-    }
-
-    @Override
-    public void addTransition(int letter, int state) {
-        assert nfa.checkValidLetter(letter);
-        ISet succs = successors.get(letter);
-        if(succs == null) {
-            succs = UtilISet.newISet();
-        }
-        succs.set(state);
-        successors.put(letter, succs);
-    }
-    
-    public ISet getSuccessors(int letter) {
-        assert nfa.checkValidLetter(letter);
-        ISet succs = successors.get(letter);
-        if(succs == null) {
-            return UtilISet.newISet();
-        }
-        return succs;
-    }
-    
 }

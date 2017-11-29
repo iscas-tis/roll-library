@@ -23,12 +23,12 @@ import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
 
 /**
- * simple fa like DFA, NFA and NBA
+ * simple FA like DFA, NFA and NBA
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public abstract class FASimple implements FA {
+abstract class FASimple implements FA {
 
-    protected final ArrayList<State> states;
+    protected final ArrayList<StateFA> states;
     protected final Alphabet alphabet;
     protected int initialState;
     protected final ISet finalStates;
@@ -53,7 +53,7 @@ public abstract class FASimple implements FA {
     }
     
     public State createState() {
-        State state = makeState(states.size());
+        StateFA state = makeState(states.size());
         states.add(state);
         return state;
     }
@@ -70,7 +70,7 @@ public abstract class FASimple implements FA {
         setInitial(state.getId());
     }
     
-    public State getState(int state) {
+    public StateFA getState(int state) {
         assert checkValidState(state);
         return states.get(state);
     }
@@ -93,7 +93,7 @@ public abstract class FASimple implements FA {
         return finalStates.get(state);
     }
     
-    protected abstract State makeState(int index);
+    protected abstract StateFA makeState(int index);
     
     protected boolean checkValidState(int state) {
         return state >= 0 && state < states.size();

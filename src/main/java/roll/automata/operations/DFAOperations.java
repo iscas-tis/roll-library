@@ -23,7 +23,9 @@ import dk.brics.automaton.Automaton;
 import dk.brics.automaton.State;
 import dk.brics.automaton.Transition;
 import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import roll.automata.DFA;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
@@ -109,6 +111,12 @@ public class DFAOperations {
         dkAut.restoreInvariant();
         dkAut.minimize();
         return dkAut;
+    }
+    
+    public static DFA fromDkDFA(Automaton dkAut) {
+        State init = dkAut.getInitialState();
+        TObjectIntMap<State> map = new TObjectIntHashMap<>();
+        return null;
     }
 
 }

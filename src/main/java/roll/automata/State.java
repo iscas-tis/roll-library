@@ -25,5 +25,4 @@ public interface State {
     int getId();
     // setters
     void addTransition(int letter, int state);
-
 }

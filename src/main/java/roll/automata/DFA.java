@@ -36,7 +36,7 @@ public class DFA extends FASimple {
     }
 
     @Override
-    public State makeState(int index) {
+    public StateDFA makeState(int index) {
         return new StateDFA(this, index);
     }
     

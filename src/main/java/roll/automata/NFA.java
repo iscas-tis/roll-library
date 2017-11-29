@@ -37,7 +37,7 @@ public class NFA extends FASimple {
     }
 
     @Override
-    public State makeState(int index) {
+    public StateNFA makeState(int index) {
         return new StateNFA(this, index);
     }
     

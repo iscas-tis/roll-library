@@ -16,6 +16,8 @@
 
 package roll.automata.operations;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import dk.brics.automaton.Automaton;
@@ -24,8 +26,9 @@ import dk.brics.automaton.State;
 import dk.brics.automaton.Transition;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import roll.automata.DFA;
 import roll.automata.FDFA;
-import roll.main.Options;
+import roll.util.sets.ISet;
 import roll.words.Alphabet;
 import roll.words.Word;
 
@@ -36,14 +39,11 @@ import roll.words.Word;
  * */
 
 public class FDFAOperations {
-    
-    private final Options options;
-    
-    public FDFAOperations(Options options) {
-        this.options = options;
+        
+    private FDFAOperations() {
     }
     
-    public Word getSmallestPeriod(Word period) {
+    public static Word getSmallestPeriod(Word period) {
         // from the possible smallest length
         for(int i = 1; i <= period.length() / 2; i ++) {
             // can be divided
@@ -73,7 +73,7 @@ public class FDFAOperations {
     
     // Given word prefix and suffix, we do the shifting operation
     // as well as return the corresponding dk.brics.automaton.
-    public Automaton buildDDollar(Word prefix, Word suffix) {
+    public static Automaton buildDDollar(Word prefix, Word suffix) {
         // Finds the smallest period of suffix.
         suffix = getSmallestPeriod(suffix);
         
@@ -114,15 +114,15 @@ public class FDFAOperations {
     }
     
     
-    public Automaton buildDOne(FDFA fdfa) {
+    public static  Automaton buildDOne(FDFA fdfa) {
         return buildDFAFromFDFA(fdfa, false);
     }
     
-    public Automaton buildDTwo(FDFA fdfa) {
+    public static  Automaton buildDTwo(FDFA fdfa) {
         return buildDFAFromFDFA(fdfa, true);
     }
     
-    private Automaton buildDFAFromFDFA(FDFA fdfa, boolean complement) {
+    private static Automaton buildDFAFromFDFA(FDFA fdfa, boolean complement) {
         TIntObjectMap<State> map = new TIntObjectHashMap<>(); 
         Automaton dkAutL = DFAOperations.toDkDFA(map, fdfa.getLeadingDFA());
         for(int stateNr = 0; stateNr < fdfa.getLeadingDFA().getStateSize(); stateNr ++) {
@@ -145,40 +145,41 @@ public class FDFAOperations {
         return dkAutL;
     }
     
-//    // build NBA from FDFA
-//    public static Automaton buildDollarNFA(LearnerFDFA learnerFDFA) {
-//        if(Options.verbose) learnerFDFA.getHypothesis();
-//        // L means Leading and P means Progress
-//        Automaton autL = learnerFDFA.getLeadingAutomaton();
-//        TIntObjectMap<State> map = new TIntObjectHashMap<>(); 
-//        dk.brics.automaton.Automaton dkAutL = UtilAutomaton.convertToDkAutomaton(map, autL);
-//        for(int stateNr = 0; stateNr < autL.getNumStates(); stateNr ++) {
-//            Automaton autP = learnerFDFA.getProgressAutomaton(stateNr);
-//            BitSet accs = autP.getAcceptingStates();
-//            List<dk.brics.automaton.Automaton> autAccs = new ArrayList<>();
-//            int stateInitP = autP.getInitialStates().nextSetBit(0);
-//            for(int accNr = accs.nextSetBit(0); accNr >= 0; accNr = accs.nextSetBit(accNr + 1)) {
-//                dk.brics.automaton.Automaton dkAutP = UtilAutomaton.convertToDkAutomaton(autP, stateInitP, accNr);
-//                dkAutP.minimize();
-//                dk.brics.automaton.Automaton dkAutLOther = UtilAutomaton.convertToDkAutomaton(autL, stateNr, stateNr);
-//                dkAutLOther.minimize();
-//                dk.brics.automaton.Automaton product = dkAutP.intersection(dkAutLOther);
-//                product.minimize();
-//                
-//                if(! product.getAcceptStates().isEmpty()) {
-//                    assert product.getAcceptStates().size() == 1;
-//                    autAccs.add(product);
-//                }
-//            }
-//            State u = map.get(stateNr);
-//            
-//            for(dk.brics.automaton.Automaton aut : autAccs) {
-//                u.addTransition(new Transition(WordManager.getStringDollar().charAt(0), aut.getInitialState()));
-//            }
-//        }
-//        dkAutL.setDeterministic(false);
-//        //dkAutL.minimize(); only for DFA
-//        return dkAutL;
-//    }
+    // build NBA from FDFA
+    public static Automaton buildDollarNFA(FDFA fdfa) {
+        // L means Leading and P means Progress
+        TIntObjectMap<State> map = new TIntObjectHashMap<>(); 
+        Automaton dkAutL = DFAOperations.toDkDFA(map, fdfa.getLeadingDFA());
+        for(int stateNr = 0; stateNr < fdfa.getLeadingDFA().getStateSize(); stateNr ++) {
+            DFA autP = fdfa.getProgressDFA(stateNr);
+            ISet finalStates = autP.getFinalStates();
+            List<Automaton> autAccs = new ArrayList<>();
+            int stateInitP = autP.getInitialState();
+            for(final int finalStateNr : finalStates) {
+                // A^a_f
+                Automaton dkAutP = DFAOperations.toDkDFA(autP, stateInitP, finalStateNr);
+                dkAutP.minimize();
+                // M^a_a
+                Automaton dkAutLOther = DFAOperations.toDkDFA(fdfa.getLeadingDFA(), stateNr, stateNr);
+                dkAutLOther.minimize();
+                // A^a_a * M^a_a
+                Automaton product = dkAutP.intersection(dkAutLOther);
+                product.minimize();
+                
+                if(! product.getAcceptStates().isEmpty()) {
+                    assert product.getAcceptStates().size() == 1;
+                    autAccs.add(product);
+                }
+            }
+            State u = map.get(stateNr);
+            
+            for(dk.brics.automaton.Automaton aut : autAccs) {
+                u.addTransition(new Transition(Alphabet.DOLLAR, aut.getInitialState()));
+            }
+        }
+        dkAutL.setDeterministic(false);
+        //dkAutL.minimize(); only for DFA
+        return dkAutL;
+    }
 
 }
