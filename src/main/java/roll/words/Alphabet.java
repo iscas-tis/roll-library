@@ -21,7 +21,8 @@ import roll.util.Pair;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * 
- * Usually we just use Class Character
+ * Usually we just use Class Character to be consistent
+ * with dk.brics.automaton
  * */
 public final class Alphabet {
 	
@@ -71,11 +72,11 @@ public final class Alphabet {
 	public Word getWordFromString(String wordStr) {
 		assert wordStr != null ;
 		if(wordStr.isEmpty()) {
-		    return epsilon;
+		    return getEmptyWord();
 		}
 		if(wordStr.length() == 1) {
 		    int letter = indexOf(wordStr.charAt(0));
-		    return new WordLetter(this, letter);
+		    return getLetterWord(letter);
 		}
 		int[] word = new int[wordStr.length()];
 		for(int index = 0; index < wordStr.length(); index ++) {

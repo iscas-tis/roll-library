@@ -18,6 +18,8 @@ package roll.automata;
 
 import java.util.List;
 
+import roll.automata.operations.FDFAOperations;
+import roll.util.Pair;
 import roll.util.sets.ISet;
 import roll.words.Alphabet;
 import roll.words.Word;
@@ -37,7 +39,7 @@ public class FDFA implements Acceptor {
         alphabet = m.getAlphabet();
         leadingDFA = m;
         progressDFAs = ps;
-        acceptance = new AccFDFA();
+        acceptance = new AccFDFA(this);
     }
     
     public DFA getLeadingDFA() {
@@ -72,6 +74,11 @@ public class FDFA implements Acceptor {
     }
     
     private class AccFDFA implements Acc {
+        final FDFA fdfa;
+        
+        AccFDFA(FDFA fdfa) {
+            this.fdfa = fdfa;
+        }
 
         @Override
         public boolean isAccepting(ISet states) {
@@ -80,7 +87,12 @@ public class FDFA implements Acceptor {
 
         @Override
         public boolean isAccepting(Word prefix, Word suffix) {
-            assert isNormalized(prefix, suffix);
+            if(! isNormalized(prefix, suffix) ) {
+                Pair<Word, Word> pair = FDFAOperations.normalize(fdfa, prefix, suffix);
+                if(pair == null) return false;
+                prefix = pair.getLeft();
+                suffix = pair.getRight();
+            }
             int state = leadingDFA.getSuccessor(prefix);
             DFA proDFA = getProgressDFA(state);
             int proState = proDFA.getSuccessor(suffix);
