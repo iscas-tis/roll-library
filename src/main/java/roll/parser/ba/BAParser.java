@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.State;
@@ -93,7 +94,8 @@ public class BAParser implements Parser {
 	public void print(NBA nba, OutputStream out) {
 		PrintStream printer = new PrintStream(out);
 		if(options.dot) {
-		    UtilParser.print(nba, out, charStrMap);
+		    Function<Integer, String> fun = index -> charStrMap.get(nba.getAlphabet().getLetter(index));
+		    UtilParser.print(nba, out, fun);
 		}else {
 			// first output initial state
 			printer.print("[" + nba.getInitialState() + "]\n");

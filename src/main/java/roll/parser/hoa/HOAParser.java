@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.State;
@@ -120,13 +121,14 @@ public class HOAParser implements Parser, HOAConsumer{
 		PrintStream out = new PrintStream(stream);
 		
 		if(options.dot) {
-		    TCharObjectMap<String> map = new TCharObjectHashMap<>();
+		    TIntObjectMap<String> map = new TIntObjectHashMap<>();
 		    for(int letter = 0; letter < nba.getAlphabetSize(); letter ++) {
 		        BDD labelDD = getBDDFromLabel(nba.getAlphabet().getLetter(letter));
-		        map.put(nba.getAlphabet().getLetter(letter), bdd.toString(labelDD));
+		        map.put(letter, bdd.toString(labelDD));
 		        labelDD.free();
 		    }
-	        UtilParser.print(nba, stream, map);
+		    Function<Integer, String> fun = index -> map.get(index);
+	        UtilParser.print(nba, stream, fun);
 		}else {
 	        out.println("HOA: v1");
 	        out.println("tool: \"ROLL\"");

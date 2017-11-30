@@ -18,8 +18,8 @@ package roll.parser;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.function.Function;
 
-import gnu.trove.map.TCharObjectMap;
 import roll.automata.NBA;
 
 /**
@@ -29,7 +29,7 @@ import roll.automata.NBA;
 public class UtilParser {
     
     
-    public static void print(NBA nba, OutputStream out, TCharObjectMap<String> charStrMap) {
+    public static void print(NBA nba, OutputStream out, Function<Integer, String> fun) {
         PrintStream printer = new PrintStream(out);
         printer.print("//nba \n");
         printer.print("digraph {\n");
@@ -42,7 +42,7 @@ public class UtilParser {
             for(int letter = 0; letter < nba.getAlphabetSize(); letter ++) {
                 for(int succNr : nba.getSuccessors(stateNr, letter)) {
                     printer.print("  " + stateNr + " -> " + succNr 
-                            + " [label=\"" + charStrMap.get(nba.getAlphabet().getLetter(letter))
+                            + " [label=\"" + fun.apply(letter)
                             + "\"];\n");
                 }
             }
