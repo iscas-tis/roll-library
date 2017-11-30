@@ -21,6 +21,9 @@ import java.io.OutputStream;
 import roll.automata.NBA;
 
 /**
+ * This package is to parse the input automata
+ * HOA format and BA format
+ * 
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
