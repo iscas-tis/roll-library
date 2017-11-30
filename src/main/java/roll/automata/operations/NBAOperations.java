@@ -25,7 +25,6 @@ import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import roll.automata.NBA;
 import roll.automata.StateFA;
-import roll.automata.StateNFA;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
@@ -56,25 +55,22 @@ public class NBAOperations {
         LinkedList<State> queue = new LinkedList<>();
         queue.add(init);
         ISet visited = UtilISet.newISet();
+        visited.set(initNr);
         while(! queue.isEmpty()) {
             State currState = queue.remove();
-            int stateNr = getState(nba, init, map);
-            if(visited.get(stateNr)) {
-                continue;
-            }
-            visited.set(stateNr);
-            // visiting successors
+            int stateNr = getState(nba, currState, map);
             for(Transition trans : currState.getTransitions()) {
                 for(char label = trans.getMin(); label <= trans.getMax(); label ++) {
                     int succNr = getState(nba, trans.getDest(), map);
+                    nba.getState(stateNr).addTransition(alphabet.indexOf(label), succNr);
                     if(! visited.get(succNr)) {
-                        StateNFA state = nba.getState(stateNr);
-                        state.addTransition(alphabet.indexOf(label), succNr);
                         queue.add(trans.getDest());
+                        visited.set(succNr);
                     }
                 }
             }
         }
+        
         return nba;
     }
 

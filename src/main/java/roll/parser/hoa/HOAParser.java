@@ -277,6 +277,7 @@ public class HOAParser implements Parser, HOAConsumer{
     @Override
     public void notifyEnd() throws HOAConsumerException {
         nba = NBAOperations.fromDkNBA(automaton, alphabet);
+        System.out.println(automaton.toDot());
         automaton = null;
     }
 	
