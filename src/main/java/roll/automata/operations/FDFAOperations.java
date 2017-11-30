@@ -252,5 +252,12 @@ public class FDFAOperations {
         result.removeDeadTransitions();
         return result;
     }
+    
+    
+    public static boolean isEmpty(FDFA fdfa) {
+        Automaton d1 = buildDOne(fdfa);
+        String ce = d1.getShortestExample(true);
+        return ce == null;
+    }
 
 }
