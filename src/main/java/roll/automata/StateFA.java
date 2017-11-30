@@ -20,7 +20,7 @@ package roll.automata;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-abstract class StateFA implements State {
+public abstract class StateFA implements State {
     
     private final int id;
     StateFA(int id) {

@@ -40,6 +40,10 @@ public final class Alphabet {
 	    return letterList.get(index);
 	}
 	
+	public int indexOf(Character letter) {
+	    return letterList.indexOf(letter);
+	}
+	
 	public int getLetterSize() {
 		return letterList.size();
 	}

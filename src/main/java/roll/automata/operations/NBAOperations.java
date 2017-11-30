@@ -16,8 +16,18 @@
 
 package roll.automata.operations;
 
+import java.util.LinkedList;
+
 import dk.brics.automaton.Automaton;
+import dk.brics.automaton.State;
+import dk.brics.automaton.Transition;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import roll.automata.NBA;
+import roll.automata.StateFA;
+import roll.automata.StateNFA;
+import roll.util.sets.ISet;
+import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
 
 /**
@@ -26,10 +36,46 @@ import roll.words.Alphabet;
 
 public class NBAOperations {
     
+    private static int getState(NBA nba, State state, TObjectIntMap<State> map) {
+        if(map.containsKey(state)) {
+            return map.get(state);
+        }
+        StateFA nbaState = nba.createState();
+        map.put(state, nbaState.getId());
+        if(state.isAccept()) {
+            nba.setFinal(nbaState.getId());
+        }
+        return nbaState.getId();
+    }
     public static NBA fromDkNBA(Automaton dkAut, Alphabet alphabet) {
         NBA nba = new NBA(alphabet);
-        
-        return null;
+        TObjectIntMap<State> map = new TObjectIntHashMap<>();
+        State init = dkAut.getInitialState();
+        int initNr = getState(nba, init, map);
+        nba.setInitial(initNr);
+        LinkedList<State> queue = new LinkedList<>();
+        queue.add(init);
+        ISet visited = UtilISet.newISet();
+        while(! queue.isEmpty()) {
+            State currState = queue.remove();
+            int stateNr = getState(nba, init, map);
+            if(visited.get(stateNr)) {
+                continue;
+            }
+            visited.set(stateNr);
+            // visiting successors
+            for(Transition trans : currState.getTransitions()) {
+                for(char label = trans.getMin(); label <= trans.getMax(); label ++) {
+                    int succNr = getState(nba, trans.getDest(), map);
+                    if(! visited.get(succNr)) {
+                        StateNFA state = nba.getState(stateNr);
+                        state.addTransition(alphabet.indexOf(label), succNr);
+                        queue.add(trans.getDest());
+                    }
+                }
+            }
+        }
+        return nba;
     }
 
 }

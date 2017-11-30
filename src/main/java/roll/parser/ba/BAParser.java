@@ -22,18 +22,20 @@ import java.io.FileNotFoundException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.State;
 import dk.brics.automaton.Transition;
+import gnu.trove.map.TCharObjectMap;
 import gnu.trove.map.TObjectCharMap;
+import gnu.trove.map.hash.TCharObjectHashMap;
 import gnu.trove.map.hash.TObjectCharHashMap;
 import roll.automata.NBA;
 import roll.automata.operations.NBAOperations;
 import roll.main.Options;
 import roll.parser.Parser;
+import roll.parser.UtilParser;
 import roll.words.Alphabet;
 
 /**
@@ -42,7 +44,7 @@ import roll.words.Alphabet;
  
 public class BAParser implements Parser {
 	
-	private Map<Character, String> charStrMap ; // char -> str
+	private TCharObjectMap<String> charStrMap ; // char -> str
 	private TObjectCharMap<String> strCharMap ; // str -> char
 	private Map<String, State> strStateMap = new HashMap<>();
 	private final Alphabet alphabet;
@@ -54,7 +56,7 @@ public class BAParser implements Parser {
 	public BAParser(Options options, String file) {
 	    this.options = options;
 		this.strCharMap = new TObjectCharHashMap<>();
-		this.charStrMap = new HashMap<>();
+		this.charStrMap = new TCharObjectHashMap<>();
 		this.automaton = new Automaton();
 		this.alphabet = new Alphabet();
 		try {
@@ -91,25 +93,7 @@ public class BAParser implements Parser {
 	public void print(NBA nba, OutputStream out) {
 		PrintStream printer = new PrintStream(out);
 		if(options.dot) {
-			printer.print("//Buechi \n");
-			printer.print("digraph {\n");
-	        
-	        for(int stateNr = 0; stateNr < nba.getStateSize(); stateNr ++) {
-	        	printer.print("  " + stateNr + " [label=\"" +  stateNr + "\"");
-	            if(nba.isFinal(stateNr)) printer.print(", shape = doublecircle");
-	            else printer.print(", shape = circle");
-	            printer.print("];\n");
-	            for(int letter = 0; letter < nba.getAlphabetSize(); letter ++) {
-	                for(int succNr : nba.getSuccessors(stateNr, letter)) {
-	                    printer.print("  " + stateNr + " -> " + succNr 
-	                            + " [label=\"" + charStrMap.get(nba.getAlphabet().getLetter(letter))
-	                            + "\"];\n");
-	                }
-	            }
-	        }	
-	        printer.print("  " + nba.getStateSize() + " [label=\"\", shape = plaintext];\n");
-	        printer.print("  " + nba.getStateSize() + " -> " + nba.getInitialState() + " [label=\"\"];\n");
-	        printer.print("}\n\n");
+		    UtilParser.print(nba, out, charStrMap);
 		}else {
 			// first output initial state
 			printer.print("[" + nba.getInitialState() + "]\n");
@@ -183,20 +167,20 @@ public class BAParser implements Parser {
 		return state;
 	}
 	
-	public String translate(List<String> strs) {
-		StringBuilder builder = new StringBuilder();
-		for(String str : strs) {
-			builder.append(charStrMap.get(str));
-		}
-		return builder.toString();
-	}
-	
-	public String translate(String strs) {
-		StringBuilder builder = new StringBuilder();
-		for(int i = 0; i < strs.length(); i ++) {
-			builder.append(charStrMap.get("" + strs.charAt(i)));
-		}
-		return builder.toString();
-	}
+//	public String translate(List<String> strs) {
+//		StringBuilder builder = new StringBuilder();
+//		for(String str : strs) {
+//			builder.append(charStrMap.get(str));
+//		}
+//		return builder.toString();
+//	}
+//	
+//	public String translate(String strs) {
+//		StringBuilder builder = new StringBuilder();
+//		for(int i = 0; i < strs.length(); i ++) {
+//			builder.append(charStrMap.get("" + strs.charAt(i)));
+//		}
+//		return builder.toString();
+//	}
 
 }

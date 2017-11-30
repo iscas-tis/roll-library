@@ -16,17 +16,22 @@
 
 package roll.main;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
+
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 public final class Options {
     
-    public boolean verbose = false;
+    public boolean verbose = true;
     
     public boolean dot = false;
     
-    public Options() {
-        
+    public Log log;
+    
+    public Options(OutputStream out) {
+        this.log = new Log(this, new PrintStream(out));
     }
 
 }

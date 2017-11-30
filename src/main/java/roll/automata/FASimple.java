@@ -52,7 +52,7 @@ abstract class FASimple implements FA {
         return alphabet.getLetterSize();
     }
     
-    public State createState() {
+    public StateFA createState() {
         StateFA state = makeState(states.size());
         states.add(state);
         return state;
