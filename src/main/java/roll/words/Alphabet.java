@@ -16,6 +16,8 @@
 
 package roll.words;
 
+import roll.util.Pair;
+
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * 
@@ -68,13 +70,31 @@ public final class Alphabet {
 	
 	public Word getWordFromString(String wordStr) {
 		assert wordStr != null ;
+		if(wordStr.isEmpty()) {
+		    return epsilon;
+		}
+		if(wordStr.length() == 1) {
+		    int letter = indexOf(wordStr.charAt(0));
+		    return new WordLetter(this, letter);
+		}
 		int[] word = new int[wordStr.length()];
 		for(int index = 0; index < wordStr.length(); index ++) {
-			int letter = letterList.indexOf(wordStr.charAt(index));
+			int letter = indexOf(wordStr.charAt(index));
 			if(letter == -1) return null;
 			word[index] = letter;
 		}
 		return getArrayWord(word);
+	}
+	
+	public Pair<Word, Word> getWordPairFromString(String wordStr) {
+        int index = wordStr.indexOf(DOLLAR);
+        assert index != -1;
+        String prefixStr = wordStr.substring(0, index);
+        String suffixStr = wordStr.substring(index + 1);
+        Word prefix = getWordFromString(prefixStr);
+        Word suffix = getWordFromString(suffixStr);
+        assert prefix != null  && suffix != null;
+        return new Pair<>(prefix, suffix);
 	}
 
 

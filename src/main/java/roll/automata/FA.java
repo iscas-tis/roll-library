@@ -16,14 +16,10 @@
 
 package roll.automata;
 
-import roll.words.Alphabet;
-
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 public interface FA extends Acceptor {
-
-    Alphabet getAlphabet();
     
     int getStateSize();
     

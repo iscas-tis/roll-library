@@ -16,11 +16,15 @@
 
 package roll.automata;
 
+import roll.words.Alphabet;
+
 /**
  * Acceptor for regular (omega) language 
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 public interface Acceptor {
+    
+    Alphabet getAlphabet();
 	
 	AccType getAccType();
 	

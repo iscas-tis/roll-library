@@ -19,6 +19,7 @@ package roll.automata;
 import java.util.List;
 
 import roll.util.sets.ISet;
+import roll.words.Alphabet;
 import roll.words.Word;
 
 /**
@@ -29,8 +30,11 @@ public class FDFA implements Acceptor {
     private final DFA leadingDFA;
     private final List<DFA> progressDFAs;
     private final Acc acceptance;
+    private final Alphabet alphabet;
     
     public FDFA(DFA m, List<DFA> ps) {
+        assert m != null && ps != null;
+        alphabet = m.getAlphabet();
         leadingDFA = m;
         progressDFAs = ps;
         acceptance = new AccFDFA();
@@ -43,6 +47,11 @@ public class FDFA implements Acceptor {
     public DFA getProgressDFA(int state) {
         assert state >= 0 && state < progressDFAs.size(); 
         return progressDFAs.get(state);
+    }
+
+    @Override
+    public Alphabet getAlphabet() {
+        return alphabet;
     }
 
     @Override
@@ -85,5 +94,6 @@ public class FDFA implements Acceptor {
         int nextState = leadingDFA.getSuccessor(state, loop);
         return state == nextState;
     }
+
 
 }

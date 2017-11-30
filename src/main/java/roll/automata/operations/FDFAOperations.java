@@ -28,6 +28,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import roll.automata.DFA;
 import roll.automata.FDFA;
+import roll.util.Pair;
 import roll.util.sets.ISet;
 import roll.words.Alphabet;
 import roll.words.Word;
@@ -254,10 +255,22 @@ public class FDFAOperations {
     }
     
     
-    public static boolean isEmpty(FDFA fdfa) {
+    public static Pair<Word, Word> isEmpty(FDFA fdfa) {
         Automaton d1 = buildDOne(fdfa);
         String ce = d1.getShortestExample(true);
-        return ce == null;
+        if(ce == null) {
+            return null;
+        }
+        return fdfa.getAlphabet().getWordPairFromString(ce);
+    }
+    
+    public static Pair<Word, Word> normalize(FDFA fdfa, Word prefix, Word suffix) {
+        Automaton dDollar = buildDDollar(prefix, suffix);
+        Automaton dOne =  buildDOne(fdfa);
+        dOne = dOne.intersection(dDollar);
+        String wordStr = dOne.getShortestExample(true);
+        if(wordStr == null) return null;
+        return fdfa.getAlphabet().getWordPairFromString(wordStr);
     }
 
 }
