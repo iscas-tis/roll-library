@@ -48,6 +48,7 @@ import roll.automata.operations.NBAOperations;
 import roll.bdd.BDDManager;
 import roll.main.Options;
 import roll.parser.Parser;
+import roll.parser.UtilParser;
 import roll.words.Alphabet;
 
 /**
@@ -119,7 +120,13 @@ public class HOAParser implements Parser, HOAConsumer{
 		PrintStream out = new PrintStream(stream);
 		
 		if(options.dot) {
-//	        UtilParser.print(nba, stream, charStrMap);
+		    TCharObjectMap<String> map = new TCharObjectHashMap<>();
+		    for(int letter = 0; letter < nba.getAlphabetSize(); letter ++) {
+		        BDD labelDD = getBDDFromLabel(nba.getAlphabet().getLetter(letter));
+		        map.put(nba.getAlphabet().getLetter(letter), bdd.toString(labelDD));
+		        labelDD.free();
+		    }
+	        UtilParser.print(nba, stream, map);
 		}else {
 	        out.println("HOA: v1");
 	        out.println("tool: \"ROLL\"");
