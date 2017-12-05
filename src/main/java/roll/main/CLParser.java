@@ -182,7 +182,8 @@ public class CLParser {
     
     private void printUsage() {
         options.log.println(
-                "ROLL v1 (Regular Omega Language Learning) library");
+                "ROLL (Regular Omega Language Learning) library\n");
+        
         options.log.println(
                 "Usage: java -jar ROLL.jar [aut.ba, aut.hoa] [options]");
 
@@ -191,52 +192,30 @@ public class CLParser {
         options.log.println("             or: java -jar ROLL.jar aut.hoa -aut -table -periodic -under");
         options.log.println("             or: java -jar ROLL.jar -test 3 3 -table -periodic -under");
         options.log.println("\noptions:");
-        options.log.println("   -h: Show this page.");
-        options.log.println("   -v: Verbose mode.");
-        options.log.println("   -out filename: Output learned automaton in filename.");
-        options.log.println("   -dot: Output automaton in DOT format.");
-        options.log.println(
-                "   -test k n: Test ROLL with k randomly generated Buechi automata of n states.");
-        options.log.println(
-                "   -int: Play ROLL in an interactive way, you play the role as a teacher.");
-        options.log.println(
-                "   -aut: Use RABIT or DK package tool as the teacher. ");
-        options.log.println(
-                "   -sameq e d: Sampling as the teacher to check equivalence of two BA automata.\n"
-                + "               e - the probability that equivalence check is not correct\n"
-                + "               d - the probability of the confidence for equivalence check");
-        options.log.println(
-                "   -tree: Use tree-based data structure in the algorithm (Default).");
-        options.log.println(
-                "   -table: Use table-based data structure in the algorithm.");
-        options.log.println(
-                "   -lstar: Use classic L* algorithm.");
-        options.log.println(
-                "   -dfa: Use column based DFA learning algorithm.");
-        options.log.println(
-                "   -ldollar:  Use CNP algorithm and L$ automata to learn Omega regular language.");
-        options.log.println(
-                "   -periodic: Use peridoc FDFA to learn Omega regular language.");
-        options.log.println(
-                "   -recurrent: Use recurrent FDFA to learn Omega regular language.");
-        options.log.println(
-                "   -syntactic: Use syntactic FDFA to learn Omega regular language.");
-        options.log.println(
-                "   -over: Use over Buechi automaton construction for FDFA. (Default)");
-        options.log.println(
-                "   -under: Use under Buechi automaton construction for FDFA.");
-//      options.log.println(
-//              "-samfdfa: Sampling the FDFA before equivalence check. (Not yet supported)");
-//        options.log.println(
-//                "   -sim: Use Similation provided by RABIT to reduce automata before intersection of DFAs.");
-        options.log.println(
-                "   -bs: Use Binary Search to find suffix to be added in column or inner node.");
-//        options.log.println(
-//                "   -min: Use Minimization provided by RABIT to reduce Buechi automata before equivalence check.");
-        options.log.println(
-                "   -lazyeq: Equivalence check as the last resort. ");
-        options.log.println(
-                "   -ldba: Output the learned Buechi as Limit Deterministic Buechi Automaton. ");
+        final int indent = 12;
+        options.log.println("-h", indent, "Show this page");
+        options.log.println("-v", indent, "Verbose mode");
+        options.log.println("-out <file>", indent, "Output learned automaton in <file>");
+        options.log.println("-dot", indent, "Output automaton in DOT format");
+        options.log.println("-test k n", indent, "Test ROLL with k randomly generated Buechi automata of n states");
+        options.log.println("-int", indent, "Test ROLL with k randomly generated Buechi automata of n states");
+        options.log.println("-aut", indent, "Use RABIT or DK package tool as the teacher");
+        options.log.println("-sameq e d", indent, "Sampling as the teacher to check equivalence of two BA automata");
+        options.log.println("", indent + 4, "e - the probability that equivalence check is not correct");
+        options.log.println("", indent + 4, "d - the probability of the confidence for equivalence check");
+        options.log.println("-tree", indent, "Use tree-based data structure in learning (Default)");
+        options.log.println("-table", indent, "Use table-based data structure in learning");
+        options.log.println("-lstar", indent, "Use classic L* algorithm");
+        options.log.println("-dfa", indent, "Use column based DFA learning algorithm");
+        options.log.println("-ldollar", indent, "Use L$ automata to learn Omega regular language");
+        options.log.println("-periodic", indent, "Use peridoc FDFA to learn Omega regular language");
+        options.log.println("-recurrent", indent, "Use recurrent FDFA to learn Omega regular language");
+        options.log.println("-syntactic", indent, "Use syntactic FDFA to learn Omega regular language");
+        options.log.println("-over", indent, "Use over-approximation in Buechi automaton construction for FDFA (Default)");
+        options.log.println("-under", indent, "Use under-approximation in Buechi automaton construction for FDFA");
+        options.log.println("-bs", indent, "Use binary search to find counterexample");
+        options.log.println("-lazyeq", indent, "Equivalence check as the last resort");
+        options.log.println("-ldba", indent, "Output the learned Buechi as Limit Deterministic Buechi Automaton");
         System.exit(0);
     }
     

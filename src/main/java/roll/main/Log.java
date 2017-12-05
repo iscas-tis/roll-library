@@ -75,5 +75,9 @@ public class Log {
         if (mode == ERROR) out = System.err;
         out.printf("%s [%5s] %s\n", dateFormat.format(new Date()), mode, content);
     }
+    
+    public void println(String arg, int indent, String description) {
+        log.printf("  %-" + indent + "s %s\n", arg, description);
+    }
 
 }
