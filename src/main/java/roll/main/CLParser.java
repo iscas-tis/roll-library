@@ -186,19 +186,19 @@ public class CLParser {
         
         options.log.println(
                 "Usage: java -jar ROLL.jar [aut.ba, aut.hoa] [options]");
-
-        options.log.println("Recommended use: java -jar ROLL.jar -int -lstar");
-        options.log.println("             or: java -jar ROLL.jar aut.ba -aut -table -periodic -under");
-        options.log.println("             or: java -jar ROLL.jar aut.hoa -aut -table -periodic -under");
-        options.log.println("             or: java -jar ROLL.jar -test 3 3 -table -periodic -under");
-        options.log.println("\noptions:");
         final int indent = 12;
+        options.log.println("Recommended use", indent, "java -jar ROLL.jar -int -lstar");
+        options.log.println("             or", indent, "java -jar ROLL.jar aut.ba -aut -table -periodic -under");
+        options.log.println("             or", indent, "java -jar ROLL.jar aut.hoa -aut -table -periodic -under");
+        options.log.println("             or", indent, "java -jar ROLL.jar -test 3 3 -table -periodic -under");
+        options.log.println("\noptions:");
+        
         options.log.println("-h", indent, "Show this page");
         options.log.println("-v", indent, "Verbose mode");
         options.log.println("-out <file>", indent, "Output learned automaton in <file>");
         options.log.println("-dot", indent, "Output automaton in DOT format");
         options.log.println("-test k n", indent, "Test ROLL with k randomly generated Buechi automata of n states");
-        options.log.println("-int", indent, "Test ROLL with k randomly generated Buechi automata of n states");
+        options.log.println("-int", indent, "You play the role as a teacher");
         options.log.println("-aut", indent, "Use RABIT or DK package tool as the teacher");
         options.log.println("-sameq e d", indent, "Sampling as the teacher to check equivalence of two BA automata");
         options.log.println("", indent + 4, "e - the probability that equivalence check is not correct");
