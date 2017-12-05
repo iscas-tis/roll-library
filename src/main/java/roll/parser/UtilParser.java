@@ -21,6 +21,9 @@ import java.io.PrintStream;
 import java.util.function.Function;
 
 import roll.automata.NBA;
+import roll.main.Options;
+import roll.parser.ba.BAParser;
+import roll.parser.hoa.HOAParser;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -50,6 +53,16 @@ public class UtilParser {
         printer.print("  " + nba.getStateSize() + " [label=\"\", shape = plaintext];\n");
         printer.print("  " + nba.getStateSize() + " -> " + nba.getInitialState() + " [label=\"\"];\n");
         printer.print("}\n\n");
+    }
+    
+    public static Parser prepare(Options options, String file, Format format) {
+        if(format == Format.BA) {
+            return new BAParser(options, file);
+        }else if(format == Format.HOA) {
+            return new HOAParser(options, file);
+        }
+        
+        return null;
     }
 
 }

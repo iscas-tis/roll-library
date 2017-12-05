@@ -16,6 +16,11 @@
 
 package roll.main;
 
+import roll.automata.NBA;
+import roll.parser.Parser;
+import roll.parser.UtilParser;
+import roll.util.Timer;
+
 /**
  * 
  * Main entry of the tool
@@ -26,6 +31,80 @@ package roll.main;
 public final class ROLL {
     
     public static void main(String[] args) {
+        // select mode to execute
+        CLParser clParser = new CLParser();
+        clParser.prepareOptions(args);
+        Options options = clParser.getOptions();
+        switch(options.runningMode) {
+        case TEST:
+            runTestMode(options);
+            break;
+        case INTERACTIVE:
+            runInteractiveMode(options);
+            break;
+        case AUTOMATIC:
+            runAutomaticMode(options);
+            break;
+        case SAMPLING:
+            throw new UnsupportedOperationException("Unsupported for sampling as teacher");
+        default :
+                options.log.err("Incorrect running mode.");
+        }
+    }
+    
+    private static void runTestMode(Options options) {
+        
+        for(int n = 0; n < options.numOfTests; n ++) {
+//            Statistics.target = aut;
+//            try{
+//                AutoExecution.execute(aut);
+//            }catch (Exception e)
+//            {
+//                e.printStackTrace();
+//                Options.log.err("Exception occured, Learning aborted...");
+//                aut.saveAutomaton("bug-test.ba");
+//                System.exit(-1);
+//            }
+            options.log.info("Done for case " + (n + 1));
+        }
+    }
+    
+    private static void runInteractiveMode(Options options) {
+//        PlayExecution.execute();
+    }
+    
+    private static void runAutomaticMode(Options options) {
+//        Statistics.reset();
+//        
+        Timer timer = new Timer();
+        timer.start();
+        // prepare the parser
+        Parser parser = UtilParser.prepare(options, options.inputFile, options.format);
+        NBA target = parser.parse();
+        
+        // learn the target automaton
+//        AutoExecution.execute(target);
+//        
+        timer.stop();
+//        Statistics.timeTotal = timer.getTimeElapsed();
+//        // output target automaton
+//        if(Options.outputFile != null) {
+//            try {
+//                parser.print(Statistics.hypothesis, new FileOutputStream(new File(Options.outputFile)));
+//            } catch (FileNotFoundException e) {
+//                // TODO Auto-generated catch block
+//                e.printStackTrace();
+//            }
+//        }else {
+//            Options.log.println("target automaton:");
+//            parser.print(Statistics.target, Options.log.getOutputStream());
+//            Options.log.println("hypothesis automaton:");
+//            parser.print(Statistics.hypothesis, Options.log.getOutputStream());
+//        }
+        parser.close();
+//
+        // output statistics
+//        Statistics.print();
         
     }
 
