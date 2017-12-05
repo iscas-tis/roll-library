@@ -16,6 +16,7 @@
 
 package roll.main;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,36 +24,89 @@ import java.util.List;
  * */
 public class Statistics {
     
-    public int numTransHypothesis  ; // number of transitions in hypothesis
+    public int numOfStatesInTraget;
+    public int numOfTransInTraget;
     
-    public int numMembershipQuery ; // number of membership query
-    public int numEquivalenceQuery ; // number of equivalence query
+    public int numOfStatesInHypothesis ;
+    public int numOfTransInHypothesis  ; // number of transitions in hypothesis
     
-    public int numStatesLeading; // number of states in leading automaton
-    public List<Integer> numStatesProgress; // number of states in progress automata
+    public int numOfMembershipQuery ; // number of membership query
+    public int numOfEquivalenceQuery ; // number of equivalence query
+    
+    public int numOfStatesInLeading; // number of states in leading automaton
+    public List<Integer> numOfStatesInProgress; // number of states in progress automata
     
     
-    public long timeMembershipQuery ; // milliseconds used in membership query 
-    public long timeEquivalenceQuery ;// milliseconds used in equivalence query
-    public long timeLastEquivalenceQuery; // time for last eq check
-    public long timeTotal; // milliseconds used in learning
-    public long timeTranslator; // milliseconds used in CE translation
-    public long timeLearner; // milliseconds used in FDFA learner
+    public long timeOfMembershipQuery ; // milliseconds used in membership query 
+    public long timeOfEquivalenceQuery ;// milliseconds used in equivalence query
+    public long timeOfLastEquivalenceQuery; // time for last eq check
+    public long timeInTotal; // milliseconds used in learning
+    public long timeOfTranslator; // milliseconds used in CE translation
+    public long timeOfLearner; // milliseconds used in FDFA learner
     
-    public long timeLearnerLeading; // milliseconds used in FDFA learner for leading automaton
-    public long timeLearnerProgress; // milliseconds used in FDFA learner for progress automata
+    public long timeOfLearnerLeading; // milliseconds used in FDFA learner for leading automaton
+    public long timeOfLearnerProgress; // milliseconds used in FDFA learner for progress automata
     
-    public long timeMinimizationBuechi; // milliseconds used in Buechi minimization before eq check
-    public long timeSampling; //milliseconds used in sampling
-    public int numMembershipSampling; // number of membership queries in sampling
-    public int numSamplingSucceeded; // number of sampling succeeded
-    public int numSamplingTried; // number of sampling we tried
+    public long timeOfSampling; //milliseconds used in sampling
+    public int numOfMembershipSampling; // number of membership queries in sampling
+    public int numOfSamplingSucceeded; // number of sampling succeeded
+    public int numOfSamplingTried; // number of sampling we tried
     
     // sampling as the teacher
-    public long numSamplingOmegaWord;
+    public long numOfSamplingOmegaWords;
     
-    public Statistics() {
+    private final Log log;
+    private final Options options;
+    
+    public Statistics(Options options) {
+        this.options = options;
+        this.log = options.log;
+        this.numOfStatesInProgress = new ArrayList<>();
+    }
+    
+    public void print() {
+
+        log.println("");
+        log.println("");
+        log.println("#T.S = " + numOfStatesInTraget + "    //#states of target");
+        log.println("#T.T = " + numOfTransInTraget + "    //#transitions of target");
         
+        log.println("#H.S = " + numOfStatesInHypothesis + "    //#states of learned automaton");
+        log.println("#H.T = " + numOfTransInHypothesis + "    //#transitions of learned automaton");
+        
+        int numTotal = numOfStatesInLeading;
+        log.println("#L.S = " + numOfStatesInLeading + "    // #states of leading automaton or L$");
+        log.print("#P.S = [" );
+        for(Integer numStates : numOfStatesInProgress) {
+            log.print(numStates + ", ");
+            numTotal += numStates;
+        }
+        log.println(" ]    // #states of each progress automaton");
+        // total number of the states in final FDFA
+        log.println("#F.S = " + numTotal + "    // #L.S + #P.S");
+        
+        log.println("#MQ = " + numOfMembershipQuery + "    // #membership query");
+        log.println("#EQ = " + numOfEquivalenceQuery + "    // #equivalence query");
+        
+        log.println("#TMQ = " + timeOfMembershipQuery + " (ms)" + "    // time for membership queries");
+        log.println("#TEQ = " + timeOfEquivalenceQuery + " (ms)" + "    // time for equivalence queries");
+        log.println("#TLEQ = " + timeOfLastEquivalenceQuery + " (ms)" + "    // time for the last equivalence query");
+        log.println("#TTR = " + timeOfTranslator + " (ms)" + "    // time for the translator");
+        
+        log.println("#TLR = " + timeOfLearner + " (ms)" + "    // time for the learner");
+        log.println("#TLRL = " + timeOfLearnerLeading + " (ms)"  + "    // time for the learning leading automaton" );
+        log.println("#TLRP = " + timeOfLearnerProgress + " (ms)" + "    // time for the learning progress automata" );
+        
+        if(options.runningMode == Options.RunningMode.SAMPLING) {
+            log.println("#SW = " + numOfSamplingOmegaWords);
+            log.println("#SMQ = " + numOfMembershipSampling);
+            log.println("#ST = " + numOfSamplingTried);
+            log.println("#SSD = " + numOfSamplingSucceeded);
+            log.println("#TSA = " + timeOfSampling);
+        }
+                
+        log.println("#TTO = " + timeInTotal + " (ms)" + "    //total time for learning Buechi automata");
+                
     }
 
 }

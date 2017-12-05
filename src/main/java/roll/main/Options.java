@@ -76,10 +76,12 @@ public final class Options {
     
     public Options(OutputStream out) {
         this.log = new Log(this, new PrintStream(out));
+        this.stats = new Statistics(this);
     }
     
     public Options() {
         this.log = new Log(this, new PrintStream(System.out));
+        this.stats = new Statistics(this);
     }
     
     public static enum RunningMode {
