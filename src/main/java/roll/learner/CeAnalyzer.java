@@ -16,10 +16,33 @@
 
 package roll.learner;
 
+import roll.table.ExprValue;
+import roll.table.HashableValue;
+
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public interface CeAnalyzer {
+public abstract class CeAnalyzer {
+
+    protected ExprValue experiment;
+    protected ExprValue partition;
+    protected final ExprValue exprValue; 
+    protected final HashableValue result;
+    
+    public CeAnalyzer(ExprValue exprValue, HashableValue result) {
+        this.exprValue = exprValue;
+        this.result = result;
+    }
+    
+    public ExprValue getNewExpriment() {
+        return experiment;
+    }
+    
+    public ExprValue getNewPartition() {
+        return partition;
+    }
+    
+    public abstract void analyze();
 
 }

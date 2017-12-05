@@ -22,7 +22,7 @@ package roll.parser;
 
 public enum Format {
     
-    BA,  // Buechi format proposed by RABIT
+    BA,  // Buechi format supported by RABIT
     
     HOA  // Hanoi Omega Automata Format
 
