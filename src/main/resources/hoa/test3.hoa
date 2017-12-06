@@ -1,0 +1,19 @@
+HOA: v1
+tool: "ROLL"
+properties: explicit-labels state-acc trans-labels 
+States: 3
+Start: 0
+acc-name: Buchi
+Acceptance: 1 Inf(0)
+AP: 3 "0" "1" "2"
+--BODY--
+State: 0
+[((!0&((!1&(2)))))]  0
+[((!0&((!1&(2)))))]  1
+[((0 & ((!1&(!2)))))]  0
+State: 1 {0}
+[((!0&((1 & (!2)))))]  2
+[((!0&((!1&(2)))))]  1
+State: 2
+[((!0&((1 & (!2)))))]  2
+--END--
