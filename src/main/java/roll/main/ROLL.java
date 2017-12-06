@@ -35,6 +35,7 @@ public final class ROLL {
         CLParser clParser = new CLParser();
         clParser.prepareOptions(args);
         Options options = clParser.getOptions();
+        System.out.println("\n" + options.toString());
         switch(options.runningMode) {
         case TEST:
             runTestMode(options);
@@ -81,7 +82,7 @@ public final class ROLL {
         // prepare the parser
         Parser parser = UtilParser.prepare(options, options.inputFile, options.format);
         NBA target = parser.parse();
-        
+        parser.print(target, System.out);
         // learn the target automaton
 //        AutoExecution.execute(target);
 //        

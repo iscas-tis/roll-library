@@ -103,7 +103,7 @@ public class FDFAOperations {
             for (State s : acc) {
                 State ini = suf.getInitialState();
                 s.setAccept(false);
-                s.addTransition(new Transition('$', ini));
+                s.addTransition(new Transition(Alphabet.DOLLAR, ini));
             }
             pre.restoreInvariant();
             result = result.union(pre);

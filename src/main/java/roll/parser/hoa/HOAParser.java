@@ -185,7 +185,6 @@ public class HOAParser implements Parser, HOAConsumer{
 		valCharMap.put(label, ch);
 		charValMap.put(ch, label);
 		alphabet.addLetter(ch);
-		System.out.println("Hello");
 		return ch;
 	}
 	
@@ -286,7 +285,7 @@ public class HOAParser implements Parser, HOAConsumer{
     @Override
     public void notifyEnd() throws HOAConsumerException {
         nba = NBAOperations.fromDkNBA(automaton, alphabet);
-        System.out.println(automaton.toDot());
+//        System.out.println(automaton.toDot());
         automaton = null;
     }
 	

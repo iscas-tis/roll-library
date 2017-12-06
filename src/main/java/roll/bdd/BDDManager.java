@@ -44,11 +44,12 @@ public final class BDDManager {
     private final static int NUM_NODES = 125000;
     private final static int NUM_CACHE = 100000;
     private final static int NUM_INC = 10000;
+    private final static String LIB = "jdd";
 
     private TIntObjectMap<String> varsMap = new TIntObjectHashMap<>();
 
     public BDDManager(int numNodes, int numCache) {
-        bdd = BDDFactory.init(numNodes, numCache);
+        bdd = BDDFactory.init(LIB, numNodes, numCache);
         bdd.setMaxIncrease(NUM_INC);
     }
 

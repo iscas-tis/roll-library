@@ -65,7 +65,6 @@ public class CLParser {
                 options.runningMode = Options.RunningMode.INTERACTIVE;
                 continue;
             }
-            
             if(args[i].compareTo("-test") == 0) {
                 options.runningMode = Options.RunningMode.TEST;
                 options.numOfTests = Integer.parseInt(args[i+1]);
@@ -73,7 +72,6 @@ public class CLParser {
                 i += 2;
                 continue;
             }
-            
             if(args[i].compareTo("-sameq") == 0) {
                 options.runningMode = Options.RunningMode.SAMPLING;
                 options.epsilon = Double.parseDouble(args[i+1]);
@@ -81,7 +79,6 @@ public class CLParser {
                 i += 2;
                 continue;
             }
-            
             if(args[i].compareTo("-v")==0){
                 options.verbose=true;
                 continue;
@@ -91,29 +88,27 @@ public class CLParser {
                 options.binarySearch = true;
                 continue;
             }
-            
             if(args[i].compareTo("-out")==0){
                 options.outputFile = args[i+1];
                 i += 1;
                 continue;
             }
-            
             if(args[i].compareTo("-table") == 0) {
                 options.structure = Options.Structure.TABLE;
                 continue;
             }
-            
             if(args[i].compareTo("-tree") == 0) {
                 options.structure = Options.Structure.TREE;
                 continue;
             }
-            
             if(args[i].compareTo("-lstar") == 0) {
                 options.algorithm = Options.Algorithm.DFA_LSTAR;
+                options.automaton = Options.Automaton.DFA;
                 continue;
             }
             if(args[i].compareTo("-dfa") == 0) {
                 options.algorithm = Options.Algorithm.DFA_COLUMN;
+                options.automaton = Options.Automaton.DFA;
                 continue;
             }
             if(args[i].compareTo("-ldollar") == 0) {
@@ -121,52 +116,50 @@ public class CLParser {
                 continue;
             }
             if(args[i].compareTo("-syntactic") == 0) {
-                options.algorithm = Options.Algorithm.NBA_SYNTACTIC;
+                options.algorithm = Options.Algorithm.SYNTACTIC;
                 continue;
             }
             if(args[i].compareTo("-recurrent") == 0) {
-                options.algorithm = Options.Algorithm.NBA_RECURRENT;
+                options.algorithm = Options.Algorithm.RECURRENT;
                 continue;
             }
             if(args[i].compareTo("-periodic") == 0) {
-                options.algorithm = Options.Algorithm.NBA_PERIODIC;
+                options.algorithm = Options.Algorithm.PERIODIC;
                 continue;
             }
-            
             if(args[i].compareTo("-under") == 0) {
                 options.approximation = Options.Approximation.UNDER;
                 continue;
             }
-            
-            
             if(args[i].compareTo("-over") == 0) {
                 options.approximation = Options.Approximation.OVER;
                 continue;
             }
-
-
-            
             if(args[i].compareTo("-lazyeq") == 0) {
                 options.optimization = Options.Optimization.LAZY_EQ;
                 continue;
             }
-            
             if(args[i].compareTo("-ldba") == 0) {
-                options.buchi = Options.Buchi.LDBA;
+                options.automaton = Options.Automaton.LDBA;
                 continue;
             }
-            
+            if(args[i].compareTo("-nba") == 0) {
+                options.automaton = Options.Automaton.NBA;
+                continue;
+            }
+            if(args[i].compareTo("-fdfa") == 0) {
+                options.automaton = Options.Automaton.FDFA;
+                continue;
+            }
             if(args[i].compareTo("-dot") == 0) {
                 options.dot = true;
                 continue;
             }
-            
             if(args[i].endsWith(".ba")) {
                 options.inputFile = args[i];
                 options.format = Format.BA;
                 continue;
             }
-            
             if(args[i].endsWith(".hoa")) {
                 options.inputFile = args[i];
                 options.format = Format.HOA;
@@ -175,8 +168,7 @@ public class CLParser {
 
         }
         
-        
-        
+        options.checkConsistency();
     }
     
     
@@ -215,7 +207,9 @@ public class CLParser {
         options.log.println("-under", indent, "Use under-approximation in Buechi automaton construction for FDFA");
         options.log.println("-bs", indent, "Use binary search to find counterexample");
         options.log.println("-lazyeq", indent, "Equivalence check as the last resort");
-        options.log.println("-ldba", indent, "Output the learned Buechi as Limit Deterministic Buechi Automaton");
+        options.log.println("-ldba", indent, "Learning target is a limit deterministic Buechi automaton");
+        options.log.println("-fdfa", indent, "Learning target is an FDFA");
+        options.log.println("-nba", indent, "Learning target is a BA");
         System.exit(0);
     }
     

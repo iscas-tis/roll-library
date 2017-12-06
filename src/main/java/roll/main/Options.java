@@ -30,19 +30,19 @@ public final class Options {
     public RunningMode runningMode; 
     
     // learning data structure
-    public Structure structure;
+    public Structure structure = Structure.TREE;
     
     // learning algorithm
     public Algorithm algorithm;
     
     // approximation method for the ultimately periodic words of FDFA
-    public Approximation approximation = Approximation.UNDER;
+    public Approximation approximation = Approximation.OVER;
     
     // optimization for learning
     public Optimization optimization = Optimization.NONE;
     
     // the type of learned buchi
-    public Buchi buchi = Buchi.NBA;
+    public Automaton automaton = Automaton.DFA;
     
     // sampling precision
     public double epsilon;
@@ -53,7 +53,7 @@ public final class Options {
     public int numOfStatesForTest;
     
     // output mode
-    public boolean verbose = true;
+    public boolean verbose = false;
     
     // search method for counterexample
     public boolean binarySearch = false;
@@ -88,7 +88,11 @@ public final class Options {
         TEST,
         INTERACTIVE,
         AUTOMATIC,
-        SAMPLING
+        SAMPLING;
+        
+        boolean isTestMode() {
+            return this == TEST;
+        }
     }
     
     public static enum Structure {
@@ -100,9 +104,13 @@ public final class Options {
         DFA_LSTAR,
         DFA_COLUMN,
         NBA_LDOLLAR,
-        NBA_PERIODIC,
-        NBA_SYNTACTIC,
-        NBA_RECURRENT
+        PERIODIC,
+        SYNTACTIC,
+        RECURRENT;
+        
+        boolean isTargetDFA() {
+            return this == DFA_LSTAR || this == DFA_COLUMN;
+        }        
     }
     
     public static enum Approximation {
@@ -117,9 +125,61 @@ public final class Options {
         MINIMIZATION
     }
     
-    public static enum Buchi {
+    public static enum Automaton {
+        DFA,
+        FDFA,
         NBA,
-        LDBA
+        LDBA;
+        
+        boolean isBA() {
+            return this == NBA || this == LDBA;
+        }
+        
+        boolean isDFA() {
+            return this == DFA;
+        }
+        
+        boolean isFDFA() {
+            return this == FDFA;
+        }
+    }
+    
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(runningMode + ",");
+        builder.append(structure + ",");
+        builder.append(algorithm + ",");
+        builder.append(optimization + ",");
+        builder.append(automaton + ",");
+        if(automaton.isBA()) {
+            builder.append(approximation + ",");
+        }
+        // not yet supported
+        if(runningMode == RunningMode.SAMPLING) {
+            builder.append("e=" + epsilon + "," + "d=" + delta + ",");
+        }
+        if(runningMode == RunningMode.TEST) {
+            builder.append("k=" + numOfTests + "," + "n=" + numOfStatesForTest + ",");
+        }
+        builder.append("verbose=" + verbose + ",");
+        builder.append("bs=" + binarySearch + ",");
+        builder.append("dot=" + dot + ",");
+        builder.append("inputfile=" + inputFile + ",");
+        builder.append("outputfile=" + outputFile + "\n");
+        return builder.toString();
+    }
+    
+    protected void checkConsistency() {
+        
+        if((algorithm.isTargetDFA() && ! automaton.isDFA())
+          || (!algorithm.isTargetDFA() && automaton.isDFA())) {
+            throw new UnsupportedOperationException("algorithm and target automaton are not consistent");
+        }
+        if(runningMode.isTestMode() 
+          && (numOfTests == 0 || numOfStatesForTest == 0)) {
+            throw new UnsupportedOperationException("arguments for test mode are illegal");
+        }
+        
     }
 
 
