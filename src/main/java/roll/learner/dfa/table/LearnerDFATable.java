@@ -16,35 +16,258 @@
 
 package roll.learner.dfa.table;
 
-import roll.learner.table.LearnerTable;
+import java.util.ArrayList;
+import java.util.List;
 
-public class LearnerDFATable extends LearnerTable {
+import roll.automata.DFA;
+import roll.automata.StateDFA;
+import roll.learner.LearnerDFA;
+import roll.main.Options;
+import roll.query.MembershipOracle;
+import roll.query.Query;
+import roll.query.QuerySimple;
+import roll.table.ExprValue;
+import roll.table.HashableValue;
+import roll.table.ObservationRow;
+import roll.table.ObservationTableAbstract;
+import roll.words.Alphabet;
+import roll.words.Word;
+
+public abstract class LearnerDFATable extends LearnerDFA {
 	
-//	public LearnerDFATable(Alphabet aps, MembershipOracle<HashableValue> membershipOracle) {
-//		super(aps, membershipOracle);
-//	}
-//
-//	@Override
-//	public LearnerType getLearnerType() {
-//		return LearnerType.DFA_TABLE;
-//	}
-//
-//	@Override
-//	protected ObservationTableAbstract getTableInstance() {
-//		return new ObservationTableDFA();
-//	}
-//
-//	@Override
-//	protected CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
-//		// TODO Auto-generated method stub
-//		return new CeAnalyzerTable(exprValue, result);
-//	}
-//	
-//	protected class CeAnalyzerTable extends CeAnalyzer {
-//
-//		public CeAnalyzerTable(ExprValue exprValue, HashableValue result) {
-//			super(exprValue, result);
-//		}
-//	}
+    protected ObservationTableAbstract observationTable;
+    
+    public LearnerDFATable(Options options, Alphabet alphabet
+            , MembershipOracle<HashableValue> membershipOracle) {
+        super(options, alphabet, membershipOracle);
+        this.observationTable = getTableInstance();
+    }
+    
+    protected Query<HashableValue> processMembershipQuery(ObservationRow row, int offset, ExprValue valueExpr) {
+        Query<HashableValue> query = new QuerySimple<>(row, row.getWord(), valueExpr.get(), offset);
+        HashableValue result = membershipOracle.answerMembershipQuery(query);
+        Query<HashableValue> queryResult = new QuerySimple<>(row, row.getWord(), valueExpr.get(), offset);
+        queryResult.answerQuery(result);
+        return queryResult;
+    }
+
+    
+    protected void initialize() {
+        
+        Word wordEmpty = alphabet.getEmptyWord();
+        observationTable.addUpperRow(wordEmpty);
+        ExprValue exprValue = getExprValueWord(wordEmpty);
+        
+        // add empty word column
+        observationTable.addColumn(exprValue);
+        // add every alphabet
+        for(int letterNr = 0; letterNr < alphabet.getLetterSize(); letterNr ++) {
+            observationTable.addLowerRow(alphabet.getLetterWord(letterNr));
+        }
+        
+        // ask initial queries for upper table
+        processMembershipQueries(observationTable.getUpperTable()
+                , 0, observationTable.getColumns().size());
+        // ask initial queries for lower table
+        processMembershipQueries(observationTable.getLowerTable()
+                , 0, observationTable.getColumns().size());
+        
+        makeTableClosed();
+        
+    }
+    
+    protected void processMembershipQueries(List<ObservationRow> rows
+            , int colOffset, int length) {
+        List<Query<HashableValue>> results = new ArrayList<>();
+        List<ExprValue> columns = observationTable.getColumns();
+        int endNr = length + colOffset;
+        for(ObservationRow row : rows) {
+            for(int colNr = colOffset; colNr < endNr; colNr ++) {
+                results.add(processMembershipQuery(row, colNr, columns.get(colNr)));
+            }
+        }
+        putQueryAnswers(results);
+    }
+        
+    protected void putQueryAnswers(List<Query<HashableValue>> queries) {
+        for(Query<HashableValue> query : queries) {
+            putQueryAnswers(query);
+        }
+    }
+    
+    protected void putQueryAnswers(Query<HashableValue> query) {
+        ObservationRow row = query.getPrefixRow();
+        HashableValue result = query.getQueryAnswer();
+        assert result != null;
+        row.set(query.getSuffixColumn(), result);
+    }
+    
+    protected void makeTableClosed() {
+        ObservationRow lowerRow = observationTable.getUnclosedLowerRow();
+        
+        while(lowerRow != null) {
+            // 1. move to upper table
+            observationTable.moveRowFromLowerToUpper(lowerRow);
+            // 2. add one letter to lower table
+            List<ObservationRow> newLowerRows = new ArrayList<>();
+            for(int letterNr = 0; letterNr < alphabet.getLetterSize(); letterNr ++) {
+                Word newWord = lowerRow.getWord().append(letterNr);
+                ObservationRow row = observationTable.getTableRow(newWord); // already existing
+                if(row != null) continue;
+                ObservationRow newRow = observationTable.addLowerRow(newWord);
+                newLowerRows.add(newRow);
+            }
+            // 3. process membership queries
+            processMembershipQueries(newLowerRows, 0, observationTable.getColumns().size());
+            lowerRow = observationTable.getUnclosedLowerRow();
+        }
+        
+        constructHypothesis();
+    }
+    
+    // return counter example for hypothesis
+    @Override
+    public void refineHypothesis(Query<HashableValue> ceQuery) {
+        
+        ExprValue exprValue = getCounterExampleWord(ceQuery);
+        HashableValue result = processMembershipQuery(ceQuery);
+        CeAnalyzer analyzer = getCeAnalyzerInstance(exprValue, result);
+        analyzer.analyze();
+        observationTable.addColumn(analyzer.getNewExpriment()); // add new experiment
+        processMembershipQueries(observationTable.getUpperTable(), observationTable.getColumns().size() - 1, 1);
+        processMembershipQueries(observationTable.getLowerTable(), observationTable.getColumns().size() - 1, 1);
+        
+        makeTableClosed();
+        
+    }
+    
+    
+    // Default learner for DFA
+    protected void constructHypothesis() {
+        
+        dfa = new DFA(alphabet);
+        
+        List<ObservationRow> upperTable = observationTable.getUpperTable();
+        
+        for(int rowNr = 0; rowNr < upperTable.size(); rowNr ++) {
+            dfa.createState();
+        }
+        
+        for(int rowNr = 0; rowNr < upperTable.size(); rowNr ++) {
+            StateDFA state = dfa.getState(rowNr);
+            for(int letterNr = 0; letterNr < alphabet.getLetterSize(); letterNr ++) {
+                int succNr = getSuccessorRow(rowNr, letterNr);
+                state.addTransition(letterNr, succNr);
+            }
+            
+            if(getStateLabel(rowNr).isEmpty()) {
+                dfa.setInitial(rowNr);
+            }
+            
+            if(isAccepting(rowNr)) {
+                dfa.setFinal(rowNr);
+            }
+        }
+        
+    }
+    
+    // a state is accepting iff it accepts empty language
+    private boolean isAccepting(int state) {
+        ObservationRow stateRow = observationTable.getUpperTable().get(state);
+        int emptyNr = observationTable.getColumnIndex(getExprValueWord(alphabet.getEmptyWord()));
+        assert emptyNr != -1 : "index -> " + emptyNr;
+        return stateRow.getValues().get(emptyNr).isAccepting();
+    }
+
+    protected int getSuccessorRow(int state, int letter) {
+        ObservationRow stateRow = observationTable.getUpperTable().get(state);
+        Word succWord = stateRow.getWord().append(letter);
+
+        // search in upper table
+        for(int succ = 0; succ < observationTable.getUpperTable().size(); succ ++) {
+            ObservationRow succRow = observationTable.getUpperTable().get(succ);
+            if(succRow.getWord().equals(succWord)) {
+                return succ;
+            }
+        }
+        // search in lower table
+        ObservationRow succRow = observationTable.getLowerTableRow(succWord);
+        assert succRow != null;
+        for(int succ = 0; succ < observationTable.getUpperTable().size(); succ ++) {
+            ObservationRow upperRow = observationTable.getUpperTable().get(succ);
+            if(succRow.valuesEqual(upperRow)) {
+                return succ;
+            }
+        }
+        assert false : "successor values not found";
+        return -1;
+    }
+
+    
+    public String toString() {
+        return observationTable.toString();
+    }
+    
+    @Override
+    public Word getStateLabel(int state) {
+        return observationTable.getUpperTable().get(state).getWord();
+    }
+    
+    protected ObservationTableAbstract getTableInstance() {
+        return new ObservationTableDFA();
+    }
+    
+    protected class CeAnalyzerTable extends CeAnalyzer {
+
+        public CeAnalyzerTable(ExprValue exprValue, HashableValue result) {
+            super(exprValue, result);
+        }
+
+        @Override
+        public void analyze() {
+            Word wordCE = exprValue.get();
+            if(!options.binarySearch) {
+                HashableValue resultPrev = result;
+                int statePrev = dfa.getInitialState(), stateCurr;
+                for (int letterNr = 0; letterNr < wordCE.length(); letterNr++) {
+                    stateCurr = dfa.getSuccessor(statePrev, wordCE.getLetter(letterNr));
+                    Word prefix = getStateLabel(stateCurr);
+                    Word suffix = wordCE.getSuffix(letterNr + 1);
+                    HashableValue resultCurr = processMembershipQuery(prefix, suffix);
+                    if (!resultPrev.valueEqual(resultCurr)) {
+                        experiment = getExprValueWord(suffix);
+                        break;
+                    }
+                    statePrev = stateCurr;
+                }
+            }else {
+                // binary search
+                int low = 0, high = wordCE.length() - 1;
+                while(low <= high) {
+                    int mid = (low + high) / 2;
+                    assert mid < wordCE.length();
+                    int s = dfa.getSuccessor(wordCE.getPrefix(mid));
+                    int t = dfa.getSuccessor(s, wordCE.getLetter(mid));
+                    Word sLabel = getStateLabel(s);
+                    Word tLabel = getStateLabel(t);
+                                        
+                    HashableValue memS = processMembershipQuery(sLabel, wordCE.getSuffix(mid));
+                    HashableValue memT = processMembershipQuery(tLabel, wordCE.getSuffix(mid + 1));
+                    
+                    if (! memS.valueEqual(memT)) {
+                        experiment = getExprValueWord(wordCE.getSuffix(mid + 1));
+                        break;
+                    }
+
+                    if (memS.valueEqual(result)) {
+                        low = mid + 1;
+                    } else {
+                        high = mid;
+                    }
+                }
+            }
+        }
+    }
+
 	
 }

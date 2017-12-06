@@ -94,4 +94,28 @@ public abstract class LearnerDFA extends LearnerBase<DFA> {
 		return membershipOracle.answerMembershipQuery(query);
 	}
 	
+	public static abstract class CeAnalyzer {
+
+	    protected ExprValue experiment;
+	    protected ExprValue partition;
+	    protected final ExprValue exprValue; 
+	    protected final HashableValue result;
+	    
+	    public CeAnalyzer(ExprValue exprValue, HashableValue result) {
+	        this.exprValue = exprValue;
+	        this.result = result;
+	    }
+	    
+	    public ExprValue getNewExpriment() {
+	        return experiment;
+	    }
+	    
+	    // only for tree-based algorithm
+	    public ExprValue getNewPartition() {
+	        return partition;
+	    }
+	    
+	    public abstract void analyze();
+
+	}
 }

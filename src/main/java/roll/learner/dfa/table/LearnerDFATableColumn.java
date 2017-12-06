@@ -14,39 +14,33 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner;
+package roll.learner.dfa.table;
+
+import roll.learner.LearnerType;
+import roll.main.Options;
+import roll.query.MembershipOracle;
+import roll.table.ExprValue;
+import roll.table.HashableValue;
+import roll.words.Alphabet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public enum LearnerType {
-	
-	DFA_TABLE_LSTAR,
-	DFA_TREE_COLUMN,
-	DFA_TABLE_COLUMN,
-	DFA_TREE_KV,
-	NFA_TABLE_NLSTAR,
-	WEIGHT,
-	BUECHI,
-	NBA_TABLE_LDOLLAR,
-	NBA_TREE_LDOLLAR,
-	
-	// FDFA
-	
-	FDFA,
-	
-	FDFA_LEADING,
-	FDFA_PROGRESS,
-	
-	FDFA_LEADING_TREE,
-	FDFA_PROGRESS_TREE,
-	
-	FDFA_PERIODIC_TABLE,
-	FDFA_SYNTACTIC_TABLE,
-	FDFA_RECURRENT_TABLE,
-	
-	FDFA_PERIODIC_TREE,
-	FDFA_SYNTACTIC_TREE,
-	FDFA_RECURRENT_TREE,
-	
+
+public class LearnerDFATableColumn extends LearnerDFATable {
+
+    public LearnerDFATableColumn(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
+        super(options, alphabet, membershipOracle);
+    }
+
+    @Override
+    public LearnerType getLearnerType() {
+        return LearnerType.DFA_TABLE_COLUMN;
+    }
+
+    @Override
+    protected CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
+        return new CeAnalyzerTable(exprValue, result);
+    }
+
 }

@@ -14,35 +14,33 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner;
+package roll.learner.dfa.table;
 
+import roll.learner.LearnerType;
+import roll.main.Options;
+import roll.query.MembershipOracle;
 import roll.table.ExprValue;
 import roll.table.HashableValue;
+import roll.words.Alphabet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public abstract class CeAnalyzer {
+public class LearnerDFATableLStar extends LearnerDFATable {
 
-    protected ExprValue experiment;
-    protected ExprValue partition;
-    protected final ExprValue exprValue; 
-    protected final HashableValue result;
-    
-    public CeAnalyzer(ExprValue exprValue, HashableValue result) {
-        this.exprValue = exprValue;
-        this.result = result;
+    public LearnerDFATableLStar(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
+        super(options, alphabet, membershipOracle);
     }
-    
-    public ExprValue getNewExpriment() {
-        return experiment;
+
+    @Override
+    public LearnerType getLearnerType() {
+        return LearnerType.DFA_TABLE_LSTAR;
     }
-    
-    public ExprValue getNewPartition() {
-        return partition;
+
+    @Override
+    protected CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
+        return null;
     }
-    
-    public abstract void analyze();
 
 }
