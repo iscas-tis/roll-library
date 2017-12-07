@@ -227,18 +227,17 @@ public abstract class LearnerDFATable extends LearnerDFA {
         public void analyze() {
             Word wordCE = exprValue.get();
             if(!options.binarySearch) {
-                HashableValue resultPrev = result;
-                int statePrev = dfa.getInitialState(), stateCurr;
+                int s = dfa.getInitialState();
                 for (int letterNr = 0; letterNr < wordCE.length(); letterNr++) {
-                    stateCurr = dfa.getSuccessor(statePrev, wordCE.getLetter(letterNr));
-                    Word prefix = getStateLabel(stateCurr);
+                    int t = dfa.getSuccessor(s, wordCE.getLetter(letterNr));
+                    Word prefix = getStateLabel(t);
                     Word suffix = wordCE.getSuffix(letterNr + 1);
-                    HashableValue resultCurr = processMembershipQuery(prefix, suffix);
-                    if (!resultPrev.valueEqual(resultCurr)) {
+                    HashableValue mem = processMembershipQuery(prefix, suffix);
+                    if (!result.valueEqual(mem)) {
                         experiment = getExprValueWord(suffix);
                         break;
                     }
-                    statePrev = stateCurr;
+                    s = t;
                 }
             }else {
                 // binary search
