@@ -14,42 +14,36 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.nba.ldollar;
 
-import roll.automata.NBA;
-import roll.learner.LearnerBase;
-import roll.learner.LearnerType;
-import roll.query.Query;
+package roll.tree;
+
 import roll.table.HashableValue;
 
-/**
- * @author Yong Li (liyong@ios.ac.cn)
- * */
-
-public class LearnerLDollar extends LearnerBase<NBA>{
-
-    @Override
-    public LearnerType getLearnerType() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void startLearning() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public NBA getHypothesis() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void refineHypothesis(Query<HashableValue> query) {
-        // TODO Auto-generated method stub
-        
-    }
-
+/** not only keeps the information of LCA, 
+ * but also store the branching information
+ *  */
+public class LCA<V> {
+	
+	public Node<V> commonAncestor;
+	public HashableValue firstBranch;
+	public HashableValue secondBranch;
+	public Node<V> firstChild;
+	public Node<V> secondChild;
+	
+	public LCA() {
+		
+	}
+	
+	public void setChild(boolean first, Node<V> child, HashableValue branch) {
+		assert child != null && branch != null;
+		if(first) {
+			firstChild = child;
+			firstBranch = branch;
+		}else {
+			secondChild = child;
+			secondBranch = branch;
+		}
+		
+	}
+	
 }

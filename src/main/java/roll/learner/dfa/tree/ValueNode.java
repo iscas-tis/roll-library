@@ -14,42 +14,44 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.nba.ldollar;
+package roll.learner.dfa.tree;
 
-import roll.automata.NBA;
-import roll.learner.LearnerBase;
-import roll.learner.LearnerType;
-import roll.query.Query;
-import roll.table.HashableValue;
+import java.util.BitSet;
+
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import roll.tree.Node;
+import roll.words.Word;
 
 /**
- * @author Yong Li (liyong@ios.ac.cn)
+ * Value in node 
  * */
-
-public class LearnerLDollar extends LearnerBase<NBA>{
-
-    @Override
-    public LearnerType getLearnerType() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void startLearning() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public NBA getHypothesis() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void refineHypothesis(Query<HashableValue> query) {
-        // TODO Auto-generated method stub
-        
-    }
+public class ValueNode {
+	
+	public final int id;
+	public Node<ValueNode> node;
+	public final Word label;
+	public TIntObjectMap<BitSet> predecessors; // use more efficient way to store
+	
+	public ValueNode(int id, Word label) {
+		this.id = id;
+		this.label = label;
+		predecessors = new TIntObjectHashMap<>();
+	}
+	
+	public void addPredecessor(int source, int letter) {
+		if(predecessors.containsKey(letter)) {
+			BitSet states = predecessors.get(letter);
+			states.set(source);
+		}else {
+			BitSet states = new BitSet();
+			states.set(source);
+			predecessors.put(letter, states);
+		}
+	}
+	
+	public String toString() {
+		return id + " : " + label.toStringWithAlphabet();
+	}
 
 }

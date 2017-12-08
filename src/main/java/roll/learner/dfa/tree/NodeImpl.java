@@ -14,42 +14,42 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.nba.ldollar;
+package roll.learner.dfa.tree;
 
-import roll.automata.NBA;
-import roll.learner.LearnerBase;
-import roll.learner.LearnerType;
-import roll.query.Query;
+import roll.table.ExprValue;
 import roll.table.HashableValue;
+import roll.tree.Node;
+import roll.tree.NodeAbstract;
+import roll.words.Word;
 
-/**
- * @author Yong Li (liyong@ios.ac.cn)
- * */
+class NodeImpl extends NodeAbstract<ValueNode> {
 
-public class LearnerLDollar extends LearnerBase<NBA>{
+	public NodeImpl(Node<ValueNode> parent, HashableValue branch, ExprValue exprValue) {
+		super(parent, branch, exprValue);
+	}
 
-    @Override
-    public LearnerType getLearnerType() {
-        // TODO Auto-generated method stub
-        return null;
-    }
+	private boolean isAccepting = false;
 
-    @Override
-    public void startLearning() {
-        // TODO Auto-generated method stub
-        
-    }
+	@Override
+	public void setAcceting() {
+		isAccepting = true;
+	}
 
-    @Override
-    public NBA getHypothesis() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void refineHypothesis(Query<HashableValue> query) {
-        // TODO Auto-generated method stub
-        
-    }
-
+	@Override
+	public boolean isAccepting() {
+		return isAccepting;
+	} 
+	
+	public Node<ValueNode> getLeftNode() {
+		return null;
+	}
+	
+	public Node<ValueNode> getRightNode() {
+		return null;
+	}
+	
+	public String toString() {
+		Word label = getLabel().get();  
+		return label.toStringWithAlphabet() + ":" + isLeaf() + ":" + getDepth();
+	}
 }
