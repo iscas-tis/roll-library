@@ -38,7 +38,7 @@ public interface ObservationTable {
 	
 	List<ObservationRow> getLowerTable();
 	
-	// expose row may be modified,should we alow that?
+	// expose row may be modified,should we allow that?
 	ObservationRow getUnclosedLowerRow();
 	
 	// may not be used, should be removed later

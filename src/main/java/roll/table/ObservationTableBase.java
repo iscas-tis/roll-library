@@ -31,7 +31,7 @@ public abstract class ObservationTableBase extends ObservationTableAbstract {
 	
 	
 	@Override
-	public ObservationRowBase getUnclosedLowerRow() {
+	public ObservationRow getUnclosedLowerRow() {
 		for(ObservationRow lowerRow : lowerTable) {
 			boolean found = false;
 			// found equal upper row
@@ -42,7 +42,7 @@ public abstract class ObservationTableBase extends ObservationTableAbstract {
 				}
 			}
 			if(!found) {
-				return (ObservationRowBase)lowerRow;
+				return lowerRow;
 			}
 		}
 		return null;

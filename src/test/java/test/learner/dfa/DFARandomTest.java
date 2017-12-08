@@ -20,6 +20,7 @@ import roll.automata.DFA;
 import roll.automata.operations.DFAGenerator;
 import roll.learner.LearnerDFA;
 import roll.learner.dfa.table.LearnerDFATableColumn;
+import roll.learner.dfa.table.LearnerDFATableLStar;
 import roll.main.Options;
 import roll.query.Query;
 import roll.table.HashableValue;
@@ -30,12 +31,12 @@ public class DFARandomTest {
 	public static void main(String[] args) {
 		
 		if(args.length < 3) {
-			System.out.println("Usage: <PROGRAM> <table|tree> <NUM_OF_CASES> <NUM_OF_STATES_FOR_CASE>");
+			System.out.println("Usage: <PROGRAM> <table|tree|lstar> <NUM_OF_CASES> <NUM_OF_STATES_FOR_CASE>");
 			System.exit(0);
 		}
 		
-		boolean table = true;
-		if(args[0].equals("tree")) table = false;
+		Options.Algorithm algo = Options.Algorithm.DFA_COLUMN;
+		if(args[0].equals("lstar")) algo = Options.Algorithm.DFA_LSTAR;
 		
 		Alphabet input = new Alphabet();
 		input.addLetter('a');
@@ -50,23 +51,24 @@ public class DFARandomTest {
 		for(int i = 0; i < numCases; i ++) {
 			DFA dfa = DFAGenerator.getRandomDFA(input, numStates);
 			System.out.println("Case " + i );
-			if(testLearnerDFA(dfa, input, table)) {
+			if(testLearnerDFA(dfa, input, algo)) {
 				numOK ++;
 			}
 		}
 		long end = System.currentTimeMillis();
+        System.out.println("Algorithm: " + algo);
 		System.out.println("Tested " + numCases + " cases and " + numOK + " cases passed in "
 						+ ((end-start) / 1000) + " secs !");
 		
 	}
 	
-	private static boolean testLearnerDFA(DFA machine, Alphabet alphabet, boolean table) {
+	private static boolean testLearnerDFA(DFA machine, Alphabet alphabet, Options.Algorithm algo) {
 		DFATeacherDK teacher = new DFATeacherDK(machine, alphabet);
 		LearnerDFA learner = null;
 		Options options = new Options();
-		if(table) learner = new LearnerDFATableColumn(options, alphabet, teacher);
+		if(algo == Options.Algorithm.DFA_COLUMN) learner = new LearnerDFATableColumn(options, alphabet, teacher);
 		else {
-		    
+		    learner = new LearnerDFATableLStar(options, alphabet, teacher); 
 		}
 		System.out.println("starting learning");
 		learner.startLearning();
