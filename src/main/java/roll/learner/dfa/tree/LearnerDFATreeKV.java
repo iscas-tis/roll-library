@@ -14,37 +14,31 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.dfa.table;
+package roll.learner.dfa.tree;
 
 import roll.learner.LearnerType;
 import roll.main.Options;
 import roll.query.MembershipOracle;
-import roll.table.ExprValue;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
 
 /**
- * original L* proposed by Dana Angulin
- *    Learning Regular Sets from Queries and Counterexamples
- *    
- *    
+ * original Tree algorithm proposed by M.J.Keans-U.V.Vazirani
+ *   An introduction to Computational Learning Theory
+ *   
+ *   
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class LearnerDFATableLStar extends LearnerDFATable {
+public class LearnerDFATreeKV extends LearnerDFATree {
 
-    public LearnerDFATableLStar(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
+    public LearnerDFATreeKV(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
     }
 
     @Override
     public LearnerType getLearnerType() {
-        return LearnerType.DFA_TABLE_LSTAR;
-    }
-
-    @Override
-    protected CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
-        return null;
+        return LearnerType.DFA_TREE_KV;
     }
 
 }
