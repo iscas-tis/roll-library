@@ -227,17 +227,17 @@ public abstract class LearnerDFATable extends LearnerDFA {
         public void analyze() {
             Word wordCE = exprValue.get();
             if(!options.binarySearch) {
-                int s = dfa.getInitialState();
+                int prev = dfa.getInitialState();
                 for (int letterNr = 0; letterNr < wordCE.length(); letterNr++) {
-                    int t = dfa.getSuccessor(s, wordCE.getLetter(letterNr));
-                    Word prefix = getStateLabel(t);
+                    int curr = dfa.getSuccessor(prev, wordCE.getLetter(letterNr));
+                    Word prefix = getStateLabel(curr);
                     Word suffix = wordCE.getSuffix(letterNr + 1);
                     HashableValue mem = processMembershipQuery(prefix, suffix);
                     if (!result.valueEqual(mem)) {
                         experiment = getExprValueWord(suffix);
                         break;
                     }
-                    s = t;
+                    prev = curr;
                 }
             }else {
                 // binary search
@@ -245,20 +245,20 @@ public abstract class LearnerDFATable extends LearnerDFA {
                 while(low <= high) {
                     int mid = (low + high) / 2;
                     assert mid < wordCE.length();
-                    int s = dfa.getSuccessor(wordCE.getPrefix(mid));
-                    int t = dfa.getSuccessor(s, wordCE.getLetter(mid));
-                    Word sLabel = getStateLabel(s);
-                    Word tLabel = getStateLabel(t);
+                    int fst = dfa.getSuccessor(wordCE.getPrefix(mid));
+                    int snd = dfa.getSuccessor(fst, wordCE.getLetter(mid));
+                    Word fstLabel = getStateLabel(fst);
+                    Word sndLabel = getStateLabel(snd);
                                         
-                    HashableValue memS = processMembershipQuery(sLabel, wordCE.getSuffix(mid));
-                    HashableValue memT = processMembershipQuery(tLabel, wordCE.getSuffix(mid + 1));
+                    HashableValue fstMq = processMembershipQuery(fstLabel, wordCE.getSuffix(mid));
+                    HashableValue sndMq = processMembershipQuery(sndLabel, wordCE.getSuffix(mid + 1));
                     
-                    if (! memS.valueEqual(memT)) {
+                    if (! fstMq.valueEqual(sndMq)) {
                         experiment = getExprValueWord(wordCE.getSuffix(mid + 1));
                         break;
                     }
 
-                    if (memS.valueEqual(result)) {
+                    if (fstMq.valueEqual(result)) {
                         low = mid + 1;
                     } else {
                         high = mid;
