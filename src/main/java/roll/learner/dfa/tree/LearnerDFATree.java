@@ -39,14 +39,14 @@ import roll.words.Word;
  * */
 
 // only apply to DFA
-public abstract class LearnerTree extends LearnerDFA {
+public abstract class LearnerDFATree extends LearnerDFA {
 
 	protected TreeImpl tree;
 	// updates for tree
     protected List<ValueNode> states;
     
     
-	public LearnerTree(Options options, Alphabet alphabet,
+	public LearnerDFATree(Options options, Alphabet alphabet,
 			MembershipOracle<HashableValue> membershipOracle) {
 		super(options, alphabet, membershipOracle);
 		states = new ArrayList<>();
