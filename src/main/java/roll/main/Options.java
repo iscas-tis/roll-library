@@ -102,6 +102,7 @@ public final class Options {
     
     public static enum Algorithm {
         DFA_LSTAR,
+        DFA_KV,
         DFA_COLUMN,
         NBA_LDOLLAR,
         PERIODIC,

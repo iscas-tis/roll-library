@@ -26,7 +26,7 @@ import roll.words.Word;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class ObservationTableDFALStar extends ObservationTableBase {
+class ObservationTableDFALStar extends ObservationTableBase {
     private final Alphabet alphabet;
     
     ObservationTableDFALStar(Alphabet alphabet) {

@@ -52,7 +52,7 @@ public abstract class LearnerDFATree extends LearnerDFA {
 		states = new ArrayList<>();
 	}
 	
-	private ValueNode createNode(Node<ValueNode> node) {
+	protected ValueNode createNode(Node<ValueNode> node) {
 		ValueNode valueNode = new ValueNode(states.size(), node.getLabel().get());
 		states.add(valueNode);
 		valueNode.node = node;
@@ -60,7 +60,7 @@ public abstract class LearnerDFATree extends LearnerDFA {
 		return valueNode;
 	}
 
-
+    @Override
 	protected void initialize() {
 		
 		Word wordEmpty = alphabet.getEmptyWord();

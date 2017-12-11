@@ -21,6 +21,7 @@ import roll.automata.operations.DFAGenerator;
 import roll.learner.LearnerDFA;
 import roll.learner.dfa.table.LearnerDFATableColumn;
 import roll.learner.dfa.table.LearnerDFATableLStar;
+import roll.learner.dfa.tree.LearnerDFATreeKV;
 import roll.main.Options;
 import roll.query.Query;
 import roll.table.HashableValue;
@@ -37,6 +38,7 @@ public class DFARandomTest {
 		
 		Options.Algorithm algo = Options.Algorithm.DFA_COLUMN;
 		if(args[0].equals("lstar")) algo = Options.Algorithm.DFA_LSTAR;
+		if(args[0].equals("tree")) algo = Options.Algorithm.DFA_KV;
 		
 		Alphabet input = new Alphabet();
 		input.addLetter('a');
@@ -67,7 +69,9 @@ public class DFARandomTest {
 		LearnerDFA learner = null;
 		Options options = new Options();
 		if(algo == Options.Algorithm.DFA_COLUMN) learner = new LearnerDFATableColumn(options, alphabet, teacher);
-		else {
+		else if(algo == Options.Algorithm.DFA_KV) {
+		    learner = new LearnerDFATreeKV(options, alphabet, teacher); 
+		}else {
 		    learner = new LearnerDFATableLStar(options, alphabet, teacher); 
 		}
 		System.out.println("starting learning");
