@@ -164,7 +164,6 @@ public class HOAParser implements Parser, HOAConsumer{
 
 	@Override
 	public void close() {
-		// TODO Auto-generated method stub
 	    atomRemaining.free();
 		for(BDD dd : aliasBddMap.values()) {
 			dd.free();
@@ -230,7 +229,7 @@ public class HOAParser implements Parser, HOAConsumer{
 		bdd = new BDDManager();
 		bdd.setNumVar(apset.size());
 		atomRemaining = bdd.getZero();
-		options.log.verbose("alphabet: " + apset + " size: " + apset.size());
+		options.log.verbose("alphabet: " + apset + " size: 2^" + apset.size());
 	}
 
 

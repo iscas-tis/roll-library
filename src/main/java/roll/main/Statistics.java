@@ -24,6 +24,8 @@ import java.util.List;
  * */
 public class Statistics {
     
+    public int numOfLetters;
+    
     public int numOfStatesInTraget;
     public int numOfTransInTraget;
     
@@ -68,6 +70,7 @@ public class Statistics {
 
         log.println("");
         log.println("");
+        log.println("#LT = " + numOfLetters + "    //#number of letters");
         log.println("#T.S = " + numOfStatesInTraget + "    //#states of target");
         log.println("#T.T = " + numOfTransInTraget + "    //#transitions of target");
         
