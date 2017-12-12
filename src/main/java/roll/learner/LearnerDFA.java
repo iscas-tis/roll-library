@@ -94,10 +94,9 @@ public abstract class LearnerDFA extends LearnerBase<DFA> {
 		return membershipOracle.answerMembershipQuery(query);
 	}
 	
-	public static abstract class CeAnalyzer {
+	public abstract class CeAnalyzer {
 
-	    protected ExprValue experiment;
-	    protected ExprValue partition;
+	    protected ExprValue wordExpr;
 	    protected final ExprValue exprValue; 
 	    protected final HashableValue result;
 	    
@@ -106,16 +105,73 @@ public abstract class LearnerDFA extends LearnerBase<DFA> {
 	        this.result = result;
 	    }
 	    
+	    // only for table-based algorithms
 	    public ExprValue getNewExpriment() {
-	        return experiment;
+	        return wordExpr;
 	    }
 	    
-	    // only for tree-based algorithm
-	    public ExprValue getNewPartition() {
-	        return partition;
+	    protected abstract void update(CeAnalysisResult result);
+	    	    
+	    public void analyze() {
+	        CeAnalysisResult result = findBreakIndex();
+	        update(result);
 	    }
 	    
-	    public abstract void analyze();
+	    protected CeAnalysisResult findBreakIndex() {
+	        Word wordCE = this.exprValue.get();
+            // get the initial state from automaton
+           int letterNr = 0, currState = -1, prevState = dfa.getInitialState();
+            if(! options.binarySearch) {
+                for (letterNr = 0; letterNr < wordCE.length(); letterNr++) {
+                    currState = dfa.getSuccessor(prevState, wordCE.getLetter(letterNr));
+                    Word prefix = getStateLabel(currState);
+                    Word suffix = wordCE.getSuffix(letterNr + 1);
+                    HashableValue memMq = processMembershipQuery(prefix, suffix);
+                    if (!result.valueEqual(memMq)) {
+                        break;
+                    }
+                    prevState = currState;
+                }
+            }else {
+                // binary search
+                int low = 0, high = wordCE.length() - 1;
+                while(low <= high) {
+                    int mid = (low + high) / 2;
+                    assert mid < wordCE.length();
+                    int fst = dfa.getSuccessor(wordCE.getPrefix(mid));
+                    int snd = dfa.getSuccessor(fst, wordCE.getLetter(mid));
+                    Word fstLabel = getStateLabel(fst);
+                    Word sndLabel = getStateLabel(snd);
+                                        
+                    HashableValue fstMq = processMembershipQuery(fstLabel, wordCE.getSuffix(mid));
+                    HashableValue sndMq = processMembershipQuery(sndLabel, wordCE.getSuffix(mid + 1));
+                    
+                    if (! fstMq.valueEqual(sndMq)) {
+                        prevState = fst;
+                        letterNr = mid;
+                        currState = snd;
+                        break;
+                    }
 
+                    if (fstMq.valueEqual(result)) {
+                        low = mid + 1;
+                    } else {
+                        high = mid;
+                    }
+                }
+            }
+            CeAnalysisResult result = new CeAnalysisResult();
+            result.breakIndex = letterNr;
+            result.prevState = prevState;
+            result.currState = currState;
+            return result;
+	    }
+
+	}
+	// only valid for column based algorithms
+	protected static class CeAnalysisResult {
+	    public int prevState;
+	    public int currState;
+	    public int breakIndex;
 	}
 }

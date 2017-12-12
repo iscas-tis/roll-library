@@ -280,7 +280,6 @@ public abstract class LearnerDFATree extends LearnerDFA {
 	protected class CeAnalyzerTree extends CeAnalyzer {
 		
 		protected Node<ValueNode> nodePrev = tree.getLamdaLeaf();
-		protected ExprValue wordExpr;
 		protected ExprValue wordLeaf;
 		protected HashableValue leafBranch;
 		protected HashableValue nodePrevBranch;
@@ -302,46 +301,9 @@ public abstract class LearnerDFATree extends LearnerDFA {
 				this.wordLeaf = getExprValueWord(exprValue.get());
 				return ;
 			}
-			
-			Word wordCE = this.exprValue.get();
-			// get the initial state from automaton
-			int letterNr = 0, stateCurr = -1, statePrev = dfa.getInitialState();
-			
-			// binary search, low and high are the lengths of prefix
-			int low = 0, high = wordCE.length() - 1;
-			while (low <= high) {
-
-				int mid = (low + high) / 2;
-
-				assert mid < wordCE.length();
-
-				int sI = dfa.getSuccessor(wordCE.getPrefix(mid));
-				int sJ = dfa.getSuccessor(sI, wordCE.getLetter(mid));
-
-				Word sILabel = getStateLabel(sI);
-				Word sJLabel = getStateLabel(sJ);
-
-				HashableValue memSIAV = processMembershipQuery(sILabel, wordCE.getSuffix(mid));
-				HashableValue memSJV = processMembershipQuery(sJLabel, wordCE.getSuffix(mid + 1));
-
-				if (! memSIAV.valueEqual(memSJV)) {
-					statePrev = sI;
-					letterNr = mid;
-					stateCurr = sJ;
-					break;
-				}
-
-				if (memSIAV.valueEqual(result)) {
-					low = mid + 1;
-				} else {
-					high = mid;
-				}
-			}
-			
-			Word wordPrev = states.get(statePrev).label;         // S(j-1)
-			this.wordExpr = getExprValueWord(wordCE.getSuffix(letterNr + 1));  // y[j+1..n]
-			this.wordLeaf = getExprValueWord(wordPrev.append(wordCE.getLetter(letterNr))); // S(j-1)y[j]
-			this.nodePrev = states.get(stateCurr).node;          // S(j)
+			// when root is not a terminal node
+			CeAnalysisResult result = findBreakIndex();
+			update(result);
 		}
 		
 		public ExprValue getNodeLeaf() {
@@ -363,6 +325,15 @@ public abstract class LearnerDFATree extends LearnerDFA {
 		public HashableValue getNodeSplitBranch() {
 			return nodePrevBranch;
 		}
+
+        @Override
+        protected void update(CeAnalysisResult result) {
+            Word wordCE = exprValue.get();
+            Word wordPrev = getStateLabel(result.prevState);         // S(j-1)
+            this.wordExpr = getExprValueWord(wordCE.getSuffix(result.breakIndex + 1));  // y[j+1..n]
+            this.wordLeaf = getExprValueWord(wordPrev.append(wordCE.getLetter(result.breakIndex))); // S(j-1)y[j]
+            this.nodePrev = states.get(result.currState).node;          // S(j)
+        }
 		
 	}
 	

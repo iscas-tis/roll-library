@@ -110,7 +110,7 @@ public final class Options {
         RECURRENT;
         
         boolean isTargetDFA() {
-            return this == DFA_LSTAR || this == DFA_COLUMN;
+            return this == DFA_LSTAR || this == DFA_COLUMN|| this == DFA_KV;
         }        
     }
     

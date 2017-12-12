@@ -19,8 +19,10 @@ package test.learner.dfa;
 import roll.automata.DFA;
 import roll.automata.operations.DFAGenerator;
 import roll.learner.LearnerDFA;
+import roll.learner.LearnerType;
 import roll.learner.dfa.table.LearnerDFATableColumn;
 import roll.learner.dfa.table.LearnerDFATableLStar;
+import roll.learner.dfa.tree.LearnerDFATreeColumn;
 import roll.learner.dfa.tree.LearnerDFATreeKV;
 import roll.main.Options;
 import roll.query.Query;
@@ -32,13 +34,14 @@ public class DFARandomTest {
 	public static void main(String[] args) {
 		
 		if(args.length < 3) {
-			System.out.println("Usage: <PROGRAM> <table|tree|lstar> <NUM_OF_CASES> <NUM_OF_STATES_FOR_CASE>");
+			System.out.println("Usage: <PROGRAM> <tab|kv|tr|lstar> <NUM_OF_CASES> <NUM_OF_STATES_FOR_CASE>");
 			System.exit(0);
 		}
 		
-		Options.Algorithm algo = Options.Algorithm.DFA_COLUMN;
-		if(args[0].equals("lstar")) algo = Options.Algorithm.DFA_LSTAR;
-		if(args[0].equals("tree")) algo = Options.Algorithm.DFA_KV;
+		LearnerType algo = LearnerType.DFA_TABLE_COLUMN;
+		if(args[0].equals("lstar")) algo = LearnerType.DFA_TABLE_LSTAR;
+		if(args[0].equals("kv")) algo =  LearnerType.DFA_TREE_KV;
+		if(args[0].equals("tr")) algo = LearnerType.DFA_TREE_COLUMN;
 		
 		Alphabet input = new Alphabet();
 		input.addLetter('a');
@@ -64,13 +67,15 @@ public class DFARandomTest {
 		
 	}
 	
-	private static boolean testLearnerDFA(DFA machine, Alphabet alphabet, Options.Algorithm algo) {
+	private static boolean testLearnerDFA(DFA machine, Alphabet alphabet, LearnerType algo) {
 		DFATeacherDK teacher = new DFATeacherDK(machine, alphabet);
 		LearnerDFA learner = null;
 		Options options = new Options();
-		if(algo == Options.Algorithm.DFA_COLUMN) learner = new LearnerDFATableColumn(options, alphabet, teacher);
-		else if(algo == Options.Algorithm.DFA_KV) {
+		if(algo == LearnerType.DFA_TABLE_COLUMN) learner = new LearnerDFATableColumn(options, alphabet, teacher);
+		else if(algo == LearnerType.DFA_TREE_KV) {
 		    learner = new LearnerDFATreeKV(options, alphabet, teacher); 
+		}else if(algo == LearnerType.DFA_TREE_COLUMN){
+		    learner = new LearnerDFATreeColumn(options, alphabet, teacher); 
 		}else {
 		    learner = new LearnerDFATableLStar(options, alphabet, teacher); 
 		}

@@ -224,47 +224,9 @@ public abstract class LearnerDFATable extends LearnerDFA {
         }
 
         @Override
-        public void analyze() {
+        protected void update(CeAnalysisResult result) {
             Word wordCE = exprValue.get();
-            if(!options.binarySearch) {
-                int prev = dfa.getInitialState();
-                for (int letterNr = 0; letterNr < wordCE.length(); letterNr++) {
-                    int curr = dfa.getSuccessor(prev, wordCE.getLetter(letterNr));
-                    Word prefix = getStateLabel(curr);
-                    Word suffix = wordCE.getSuffix(letterNr + 1);
-                    HashableValue mem = processMembershipQuery(prefix, suffix);
-                    if (!result.valueEqual(mem)) {
-                        experiment = getExprValueWord(suffix);
-                        break;
-                    }
-                    prev = curr;
-                }
-            }else {
-                // binary search
-                int low = 0, high = wordCE.length() - 1;
-                while(low <= high) {
-                    int mid = (low + high) / 2;
-                    assert mid < wordCE.length();
-                    int fst = dfa.getSuccessor(wordCE.getPrefix(mid));
-                    int snd = dfa.getSuccessor(fst, wordCE.getLetter(mid));
-                    Word fstLabel = getStateLabel(fst);
-                    Word sndLabel = getStateLabel(snd);
-                                        
-                    HashableValue fstMq = processMembershipQuery(fstLabel, wordCE.getSuffix(mid));
-                    HashableValue sndMq = processMembershipQuery(sndLabel, wordCE.getSuffix(mid + 1));
-                    
-                    if (! fstMq.valueEqual(sndMq)) {
-                        experiment = getExprValueWord(wordCE.getSuffix(mid + 1));
-                        break;
-                    }
-
-                    if (fstMq.valueEqual(result)) {
-                        low = mid + 1;
-                    } else {
-                        high = mid;
-                    }
-                }
-            }
+            wordExpr = getExprValueWord(wordCE.getSuffix(result.breakIndex + 1));  // y[j+1..n]
         }
     }
 
