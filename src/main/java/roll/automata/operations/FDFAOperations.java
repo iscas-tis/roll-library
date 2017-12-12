@@ -221,6 +221,9 @@ public class FDFAOperations {
                 }
 
                 if (! product.getAcceptStates().isEmpty()) {
+                    if(product.getAcceptStates().size() > 1) {
+                        throw new UnsupportedOperationException("FDFAOperations.buildNBA(): More than one accepting state...");
+                    }
                     assert product.getAcceptStates().size() == 1 : "More than one accepting state...";
                     if(dba) {
                         product = DFAOperations.toDBA(product);

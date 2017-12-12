@@ -244,7 +244,7 @@ public final class BDDManager {
         return builder.toString();
     }
 
-    private String getName(int var) {
+    public String getVariableName(int var) {
         String name = varsMap.get(var);
         if (name != null)
             return name;
