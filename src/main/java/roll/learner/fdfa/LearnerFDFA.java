@@ -14,49 +14,15 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.nba.ldollar;
+package roll.learner.fdfa;
 
-import roll.automata.NBA;
+import roll.automata.FDFA;
 import roll.learner.LearnerBase;
-import roll.learner.LearnerType;
-import roll.main.Options;
-import roll.query.Query;
-import roll.table.HashableValue;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class LearnerLDollar extends LearnerBase<NBA>{
-
-    @Override
-    public LearnerType getLearnerType() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void startLearning() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public NBA getHypothesis() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void refineHypothesis(Query<HashableValue> query) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public Options getOptions() {
-        // TODO Auto-generated method stub
-        return null;
-    }
+public abstract class LearnerFDFA extends LearnerBase<FDFA> {
 
 }

@@ -291,9 +291,8 @@ public abstract class LearnerDFATree extends LearnerDFA {
 		// find prefix whose successor needs to be added
 		@Override
 		public void analyze() {
-			boolean isAcc = result.get();
-			this.leafBranch = getHashableValueBoolean(isAcc);
-			this.nodePrevBranch = getHashableValueBoolean(!isAcc);
+			this.leafBranch = result;
+			this.nodePrevBranch = getHashableValueBoolean(!result.isAccepting());
 			// only has one leaf
 			if(tree.getRoot().isLeaf()) {
 				this.wordExpr = getExprValueWord(alphabet.getEmptyWord());

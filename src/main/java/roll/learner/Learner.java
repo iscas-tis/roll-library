@@ -16,6 +16,7 @@
 
 package roll.learner;
 
+import roll.main.Options;
 import roll.query.Query;
 
 /**
@@ -33,5 +34,7 @@ public interface Learner<M, O> {
 	M getHypothesis();
 	
 	void refineHypothesis(Query<O> query);
+	
+	Options getOptions();
 
 }

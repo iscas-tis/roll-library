@@ -81,6 +81,11 @@ public abstract class LearnerDFA extends LearnerBase<DFA> {
 		return dfa;
 	}
 	
+	@Override
+	public Options getOptions() {
+	    return options;
+	}
+	
 	public abstract Word getStateLabel(int state);
 	
 	protected abstract CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result);
