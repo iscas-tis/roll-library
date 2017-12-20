@@ -18,7 +18,6 @@ package roll.automata.operations;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.BasicAutomata;
@@ -77,40 +76,49 @@ public class FDFAOperations {
     public static Automaton buildDDollar(Word prefix, Word suffix) {
         // Finds the smallest period of suffix.
         suffix = getSmallestPeriod(suffix);
-        
-        // shifts prefix to the smallest one.
+        // Shifts prefix to the smallest one.
         while (prefix.getLastLetter() == suffix.getLastLetter()) {
             prefix = prefix.getPrefix(prefix.length() - 1);
             suffix = suffix.getSuffix(suffix.length() - 1).concat(suffix.getPrefix(suffix.length() - 1));
         }
-
-        Automaton result = new Automaton();
-        for (int i = 0; i < suffix.length(); i++) {
-            Automaton suf, pre = new Automaton();
-            suf = BasicAutomata.makeString(suffix.toStringWithAlphabet());
-            if (!prefix.isEmpty()) {
-                pre = BasicAutomata.makeString(prefix.toStringWithAlphabet());
-                pre = pre.concatenate(suf.repeat());
-            } else {
-                pre = suf.repeat();
+        System.out.println("Building Dollar automaton for counterexamples ("
+                + prefix.length() + "," + suffix.length() +")...");
+        // System.out.println(prefix.toStringWithAlphabet() + ',' +
+        // suffix.toStringWithAlphabet());
+        dk.brics.automaton.Automaton result = new dk.brics.automaton.Automaton();
+        
+        // first computer prefix automaton
+        State[] preStates = new State[prefix.length() + suffix.length()];
+        for(int i = 0; i <= prefix.length(); i ++) {
+            preStates[i] = new State();
+            if(i > 0) {
+                char letter = prefix.getAlphabet().getLetter(prefix.getLetter(i-1));
+                preStates[i-1].addTransition(new Transition(letter, preStates[i]));
             }
-            suf = suf.repeat(1);
-            pre.minimize();
-            Set<State> acc = pre.getAcceptStates();
-            if (acc.size() > 1) {
-                throw new UnsupportedOperationException("Error! More than 1 accepted states!");
-            }
-            for (State s : acc) {
-                State ini = suf.getInitialState();
-                s.setAccept(false);
-                s.addTransition(new Transition(Alphabet.DOLLAR, ini));
-            }
-            pre.restoreInvariant();
-            result = result.union(pre);
-            prefix = prefix.append(suffix.getFirstLetter());
-            suffix = suffix.getSubWord(1, suffix.length() - 1).append(suffix.getFirstLetter());
         }
-        result.minimize();
+        // set initial state
+        result.setInitialState(preStates[0]);
+        State curr = preStates[prefix.length()];
+        for(int j = 0; j < suffix.length() - 1; j ++) {
+            int i = j + prefix.length();
+            preStates[i + 1] = new State();
+            char letter = prefix.getAlphabet().getLetter(suffix.getLetter(j));
+            preStates[i].addTransition(new Transition(letter, preStates[i + 1]));
+        }
+        char letter = suffix.getAlphabet().getLetter(suffix.getLastLetter());
+        preStates[prefix.length() + suffix.length() - 1].addTransition(new Transition(letter, curr));
+        int dollar = prefix.length();
+        int length = suffix.length();
+        for(int i = 0; i < length; i ++) {
+            dk.brics.automaton.Automaton suf = BasicAutomata.makeString(suffix.toStringWithAlphabet());
+            suf = suf.repeat(1);
+            suf.minimize();
+            State dollarState = preStates[dollar];
+            State init = suf.getInitialState();
+            dollarState.addTransition(new Transition(Alphabet.DOLLAR, init));
+            suffix = suffix.getSubWord(1, suffix.length() - 1).append(suffix.getFirstLetter());
+            dollar ++;
+        }
         return result;
     }
     
