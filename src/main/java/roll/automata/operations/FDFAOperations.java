@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dk.brics.automaton.Automaton;
-import dk.brics.automaton.BasicAutomata;
 import dk.brics.automaton.State;
 import dk.brics.automaton.Transition;
 import gnu.trove.map.TIntObjectMap;
@@ -71,6 +70,27 @@ public class FDFAOperations {
         return period;
     }
     
+    public static Automaton buildRepeatAutomaton(Word suffix) {
+        assert suffix.length() >= 1;
+        Automaton result = new Automaton();
+        State fst = new State();
+        State snd = new State();
+        result.setInitialState(fst);
+        result.setDeterministic(true);
+        char letter = suffix.getAlphabet().getLetter(suffix.getFirstLetter());
+        fst.addTransition(new Transition(letter, snd));
+        State pre = snd;
+        for(int i = 1; i < suffix.length(); i ++) {
+            State curr = new State();
+            char ch = suffix.getAlphabet().getLetter(suffix.getLetter(i));
+            pre.addTransition(new Transition(ch, curr));
+            pre = curr;
+        }
+        pre.addTransition(new Transition(letter, snd));
+        pre.setAccept(true);
+        return result;
+    }
+    
     // Given word prefix and suffix, we do the shifting operation
     // as well as return the corresponding dk.brics.automaton.
     public static Automaton buildDDollar(Word prefix, Word suffix) {
@@ -85,7 +105,7 @@ public class FDFAOperations {
                 + prefix.length() + "," + suffix.length() +")...");
         // System.out.println(prefix.toStringWithAlphabet() + ',' +
         // suffix.toStringWithAlphabet());
-        dk.brics.automaton.Automaton result = new dk.brics.automaton.Automaton();
+        Automaton result = new Automaton();
         
         // first computer prefix automaton
         State[] preStates = new State[prefix.length() + suffix.length()];
@@ -110,9 +130,7 @@ public class FDFAOperations {
         int dollar = prefix.length();
         int length = suffix.length();
         for(int i = 0; i < length; i ++) {
-            dk.brics.automaton.Automaton suf = BasicAutomata.makeString(suffix.toStringWithAlphabet());
-            suf = suf.repeat(1);
-            suf.minimize();
+            Automaton suf = buildRepeatAutomaton(suffix);
             State dollarState = preStates[dollar];
             State init = suf.getInitialState();
             dollarState.addTransition(new Transition(Alphabet.DOLLAR, init));
