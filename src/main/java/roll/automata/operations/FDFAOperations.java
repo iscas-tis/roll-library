@@ -106,32 +106,35 @@ public class FDFAOperations {
         // System.out.println(prefix.toStringWithAlphabet() + ',' +
         // suffix.toStringWithAlphabet());
         Automaton result = new Automaton();
-        
+        State fst = null, pre = null;
         // first computer prefix automaton
-        State[] preStates = new State[prefix.length() + suffix.length()];
         for(int i = 0; i <= prefix.length(); i ++) {
-            preStates[i] = new State();
+            State curr = new State();
             if(i > 0) {
                 char letter = prefix.getAlphabet().getLetter(prefix.getLetter(i-1));
-                preStates[i-1].addTransition(new Transition(letter, preStates[i]));
+                pre.addTransition(new Transition(letter, curr));
+            }else {
+                fst = curr;
             }
+            pre = curr;
         }
         // set initial state
-        result.setInitialState(preStates[0]);
-        State curr = preStates[prefix.length()];
+        assert fst != null && pre != null;
+        result.setInitialState(fst);
+        State[] suffixStates = new State[suffix.length()];
+        suffixStates[0] = pre; // last state in the prefix
         for(int j = 0; j < suffix.length() - 1; j ++) {
-            int i = j + prefix.length();
-            preStates[i + 1] = new State();
+            suffixStates[j + 1] = new State();
             char letter = prefix.getAlphabet().getLetter(suffix.getLetter(j));
-            preStates[i].addTransition(new Transition(letter, preStates[i + 1]));
+            suffixStates[j].addTransition(new Transition(letter, suffixStates[j + 1]));
         }
         char letter = suffix.getAlphabet().getLetter(suffix.getLastLetter());
-        preStates[prefix.length() + suffix.length() - 1].addTransition(new Transition(letter, curr));
-        int dollar = prefix.length();
+        suffixStates[suffix.length() - 1].addTransition(new Transition(letter, pre));
+        int dollar = 0; // from the first state in repeat 
         int length = suffix.length();
         for(int i = 0; i < length; i ++) {
             Automaton suf = buildRepeatAutomaton(suffix);
-            State dollarState = preStates[dollar];
+            State dollarState = suffixStates[dollar];
             State init = suf.getInitialState();
             dollarState.addTransition(new Transition(Alphabet.DOLLAR, init));
             suffix = suffix.getSubWord(1, suffix.length() - 1).append(suffix.getFirstLetter());
