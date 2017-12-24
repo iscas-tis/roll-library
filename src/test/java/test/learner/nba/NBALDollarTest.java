@@ -97,6 +97,8 @@ public class NBALDollarTest {
         target.setFinal(snd);
         target.setFinal(thd);
         
+        System.out.println(target.toString());
+        
         Options options = new Options();
         options.structure = Options.Structure.TABLE;
         options.epsilon = 0.00018;

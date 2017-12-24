@@ -4,3 +4,4 @@ ROLL library is released under GPL v3.0, but note that
  ROLL uses library jhoafparser (under LGPL v2.1)
  ROLL uses library JavaBDD (under LGPL )
  ROLL uses library JDD (under GPL )
+ ROLL uses library RABIT (under GPL )

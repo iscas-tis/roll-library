@@ -139,7 +139,7 @@ public class LearnerLDollar extends LearnerBase<NBA>{
     
     @Override
     public String toString() {
-        return null;
+        return dfaLearner.toString();
     }
     
 }
