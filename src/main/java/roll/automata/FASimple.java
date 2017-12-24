@@ -107,5 +107,19 @@ abstract class FASimple implements FA {
     public Acc getAcc() {
         return acceptance;
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("digraph {\n");
+        int startNode = this.getStateSize();
+        for (int node = 0; node < this.getStateSize(); node++) {
+            builder.append(this.getState(node).toString());
+        }   
+        builder.append("  " + startNode + " [label=\"\", shape = plaintext];\n");
+        builder.append("  " + startNode + " -> " + this.getInitialState() + " [label=\"\"];\n");
+        builder.append("}\n");
+        return builder.toString();
+    }
 
 }

@@ -72,7 +72,7 @@ public final class Alphabet {
 	
 	public void addLetter(Character obj) {
 		assert !letterList.contains(obj);
-		assert !obj.equals(DOLLAR);
+//		assert !obj.equals(DOLLAR);
 		letterList.add(obj);
 	}
 	
@@ -139,7 +139,7 @@ public final class Alphabet {
         Word loop = getShortestPeriod(suffix);
         // shift prefix to the smallest one.
         Word stem = prefix;
-        while (stem.getLastLetter() == loop.getLastLetter()) {
+        while (!stem.isEmpty() && stem.getLastLetter() == loop.getLastLetter()) {
             stem = stem.getPrefix(stem.length() - 1);
             loop = loop.getSuffix(loop.length() - 1).concat(loop.getPrefix(loop.length() - 1));
         }

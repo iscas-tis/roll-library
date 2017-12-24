@@ -25,26 +25,22 @@ import roll.query.QuerySimple;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
 import roll.util.Pair;
-import roll.words.Alphabet;
 import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class TeacherNBASampler implements Teacher<NBA, Query<Boolean>, HashableValue> {
+public class TeacherNBASampler implements Teacher<NBA, Query<HashableValue>, HashableValue> {
     
     private final Options options;
     private final NBA target;
-    private final Alphabet alphabet;
     private final long numOfSamples;
     
-    public TeacherNBASampler(Options options, NBA target, Alphabet alphabet, 
-            int epsilon, int delta) {
+    public TeacherNBASampler(Options options, NBA target) {
         this.options = options;
         this.target = target;
-        this.alphabet = alphabet;
-        this.numOfSamples = MonteCarloSampler.getSampleSize(epsilon, delta);
+        this.numOfSamples = MonteCarloSampler.getSampleSize(options.epsilon, options.delta);
     }
 
     @Override
@@ -56,7 +52,7 @@ public class TeacherNBASampler implements Teacher<NBA, Query<Boolean>, HashableV
     }
 
     @Override
-    public Query<Boolean> answerEquivalenceQuery(NBA hypothesis) {
+    public Query<HashableValue> answerEquivalenceQuery(NBA hypothesis) {
         // sample words from hypothesis
         for (int i = 0; i < numOfSamples; i++) {
             Pair<Pair<Word, Word>, Boolean> result = MonteCarloSampler.getRandomLasso(hypothesis);
@@ -70,8 +66,8 @@ public class TeacherNBASampler implements Teacher<NBA, Query<Boolean>, HashableV
             boolean acceptedTgt = NBAOperations.accepts(target, word.getLeft(), word.getRight());
             if(acceptedHypo != acceptedTgt) {
                 // found a counterexample
-                Query<Boolean> ceQuery = new QuerySimple<>(word.getLeft(), word.getRight());
-                ceQuery.answerQuery(false);
+                Query<HashableValue> ceQuery = new QuerySimple<>(word.getLeft(), word.getRight());
+                ceQuery.answerQuery(new HashableValueBoolean(false));
                 return ceQuery;
             }
         }
@@ -88,14 +84,16 @@ public class TeacherNBASampler implements Teacher<NBA, Query<Boolean>, HashableV
             boolean acceptedHypo = NBAOperations.accepts(hypothesis, word.getLeft(), word.getRight());
             if(acceptedHypo != acceptedTgt) {
                 // found a counterexample
-                Query<Boolean> ceQuery = new QuerySimple<>(word.getLeft(), word.getRight());
-                ceQuery.answerQuery(false);
+                // found a counterexample
+                Query<HashableValue> ceQuery = new QuerySimple<>(word.getLeft(), word.getRight());
+                ceQuery.answerQuery(new HashableValueBoolean(false));
                 return ceQuery;
             }
         }
         Word wordEmpty = target.getAlphabet().getEmptyWord();
-        Query<Boolean> ceQuery = new QuerySimple<>(wordEmpty, wordEmpty);
-        ceQuery.answerQuery(true);
+        // found a counterexample
+        Query<HashableValue> ceQuery = new QuerySimple<>(wordEmpty, wordEmpty);
+        ceQuery.answerQuery(new HashableValueBoolean(true));
         return ceQuery;
     }
 

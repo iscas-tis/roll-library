@@ -52,4 +52,19 @@ public class StateDFA extends StateFA {
         return successors[letter];
     }
     
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("  " + getId() + " [label=\"" + getId() + "\"");
+        if(dfa.isFinal(getId())) builder.append(", shape = doublecircle");
+        else builder.append(", shape = circle");
+        builder.append("];\n");
+        // transitions
+        for(int i = 0; i < successors.length; i ++) {
+            builder.append("  " + getId() + " -> " + successors[i]
+                    + " [label=\"" + i + "\"];\n");
+        }
+        return builder.toString();
+    }
+    
 }

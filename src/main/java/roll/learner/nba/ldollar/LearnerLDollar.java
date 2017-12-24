@@ -137,4 +137,9 @@ public class LearnerLDollar extends LearnerBase<NBA>{
         constructHypothesis();
     }
     
+    @Override
+    public String toString() {
+        return null;
+    }
+    
 }
