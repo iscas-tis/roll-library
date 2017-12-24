@@ -14,37 +14,13 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.automata;
-
-import roll.automata.operations.NBAOperations;
-import roll.words.Alphabet;
-import roll.words.Word;
+package roll.oracle;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public class NBA extends NFA {
-
-    public NBA(final Alphabet alphabet) {
-        super(alphabet);
-        this.acceptance = new AccNBA(this);
-    }
-
-    @Override
-    public AccType getAccType() {
-        return AccType.NBA;
-    }
-    
-    private class AccNBA extends AccFA {
-
-        public AccNBA(FASimple fa) {
-            super(fa);
-        }
-
-        @Override
-        public boolean isAccepting(Word prefix, Word suffix) {
-            return NBAOperations.accepts((NBA)fa, prefix, suffix);
-        }
-    }
+public interface EquivalenceOracle<M, O> {
+	
+	O answerEquivalenceQuery(M hypothesis);
 
 }

@@ -18,13 +18,11 @@ package roll.learner;
 
 import roll.automata.DFA;
 import roll.main.Options;
-import roll.query.MembershipOracle;
+import roll.oracle.MembershipOracle;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.ExprValue;
-import roll.table.ExprValueWord;
 import roll.table.HashableValue;
-import roll.table.HashableValueBoolean;
 import roll.words.Alphabet;
 import roll.words.Word;
 
@@ -33,18 +31,12 @@ import roll.words.Word;
  * */
 public abstract class LearnerDFA extends LearnerBase<DFA> {
 	
-	protected final Alphabet alphabet;
-	protected final MembershipOracle<HashableValue> membershipOracle;
 	private boolean alreadyStarted = false;
 	protected DFA dfa;
-	protected Options options;
 	
 	public LearnerDFA(Options options, Alphabet alphabet
 	        , MembershipOracle<HashableValue> membershipOracle) {
-		assert options != null && alphabet != null && membershipOracle != null;
-		this.options = options;
-		this.alphabet = alphabet;
-		this.membershipOracle = membershipOracle;
+		super(options, alphabet, membershipOracle);
 	}
 	
 	@Override
@@ -60,21 +52,6 @@ public abstract class LearnerDFA extends LearnerBase<DFA> {
 	}
 	
 	protected abstract void initialize();
-	
-	protected ExprValue getCounterExampleWord(Query<HashableValue> query) {
-		assert query != null;
-		Word word = query.getQueriedWord();
-		assert word != null;
-		return new ExprValueWord(word);
-	}
-	
-	protected ExprValue getExprValueWord(Word word) {
-		return new ExprValueWord(word);
-	}
-	
-	protected HashableValue getHashableValueBoolean(boolean result) {
-		return new HashableValueBoolean(result);
-	}
 
 	@Override
 	public DFA getHypothesis() {

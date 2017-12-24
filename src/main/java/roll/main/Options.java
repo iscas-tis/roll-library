@@ -97,7 +97,10 @@ public final class Options {
     
     public static enum Structure {
         TREE,
-        TABLE
+        TABLE;
+        public boolean isTable() {
+            return this == TABLE;
+        }
     }
     
     public static enum Algorithm {

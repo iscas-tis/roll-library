@@ -18,11 +18,20 @@ package roll.learner.fdfa;
 
 import roll.automata.FDFA;
 import roll.learner.LearnerBase;
+import roll.main.Options;
+import roll.oracle.MembershipOracle;
+import roll.table.HashableValue;
+import roll.words.Alphabet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
 public abstract class LearnerFDFA extends LearnerBase<FDFA> {
+
+    public LearnerFDFA(Options options, Alphabet alphabet
+            , MembershipOracle<HashableValue> membershipOracle) {
+        super(options, alphabet, membershipOracle);
+    }
 
 }

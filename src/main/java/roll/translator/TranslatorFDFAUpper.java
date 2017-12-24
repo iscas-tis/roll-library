@@ -2,7 +2,7 @@ package roll.translator;
 
 import dk.brics.automaton.State;
 import roll.learner.fdfa.LearnerFDFA;
-import roll.query.MembershipOracle;
+import roll.oracle.MembershipOracle;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.util.Timer;

@@ -18,10 +18,11 @@ package roll.words;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+
+import gnu.trove.map.TCharIntMap;
+import gnu.trove.map.hash.TCharIntHashMap;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -29,7 +30,7 @@ import java.util.Map;
 class LetterListSimple implements LetterList {
 
 	private List<Character> letters = new ArrayList<>();
-	private Map<Character, Integer> letterToId = new HashMap<>();
+	private TCharIntMap letterToId = new TCharIntHashMap();
 	private boolean isImmutable;
 	
 	LetterListSimple() {
@@ -43,7 +44,11 @@ class LetterListSimple implements LetterList {
 
 	@Override
 	public boolean contains(Object o) {
-		return letterToId.containsKey(o);
+	    if(!(o instanceof Character)) {
+	        return false;
+	    }
+	    char c = (Character)o;
+		return letterToId.containsKey(c);
 	}
 
 	@Override
@@ -123,9 +128,10 @@ class LetterListSimple implements LetterList {
 
 	@Override
 	public int indexOf(Character letter) {
-		Integer id = letterToId.get(letter);
-		if(id == null) return -1;
-		return id;
+	    if(letterToId.containsKey(letter)) {
+	        return letterToId.get(letter);
+	    }
+		return -1;
 	}
 
 	@Override

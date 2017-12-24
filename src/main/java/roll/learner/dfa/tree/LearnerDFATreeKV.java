@@ -20,7 +20,7 @@ import roll.automata.DFA;
 import roll.automata.StateDFA;
 import roll.learner.LearnerType;
 import roll.main.Options;
-import roll.query.MembershipOracle;
+import roll.oracle.MembershipOracle;
 import roll.table.ExprValue;
 import roll.table.HashableValue;
 import roll.tree.LCA;

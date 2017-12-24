@@ -18,6 +18,7 @@ package roll.automata;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntProcedure;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
 
@@ -61,6 +62,23 @@ public class StateNFA extends StateFA {
             return UtilISet.newISet();
         }
         return succs;
+    }
+    
+    public ISet getEnabledLetters() {
+        ISet letters = UtilISet.newISet();
+        TIntProcedure procedure = new TIntProcedure() {
+            @Override
+            public boolean execute(int letter) {
+                letters.set(letter);
+                return true;
+            }
+        };
+        successors.forEachKey(procedure);
+        return letters;
+    }
+    
+    public void forEachEnabledLetter(TIntProcedure procedure) {
+        successors.forEachKey(procedure);
     }
     
 }

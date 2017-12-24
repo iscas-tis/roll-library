@@ -18,7 +18,7 @@ package roll.learner.dfa.tree;
 
 import roll.learner.LearnerType;
 import roll.main.Options;
-import roll.query.MembershipOracle;
+import roll.oracle.MembershipOracle;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
 

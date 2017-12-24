@@ -25,7 +25,7 @@ import roll.automata.DFA;
 import roll.automata.StateDFA;
 import roll.learner.LearnerDFA;
 import roll.main.Options;
-import roll.query.MembershipOracle;
+import roll.oracle.MembershipOracle;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.ExprValue;
@@ -153,7 +153,10 @@ public abstract class LearnerDFATree extends LearnerDFA {
 	@Override
 	public void refineHypothesis(Query<HashableValue> query) {
 		ExprValue exprValue = getCounterExampleWord(query);
-		HashableValue result = processMembershipQuery(query);
+        HashableValue result = query.getQueryAnswer();
+        if(result == null) {
+            result = processMembershipQuery(query);
+        }
 	    nodeToSplit = updateTree(exprValue, result);
 	    constructHypothesis();
 	}

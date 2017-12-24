@@ -31,7 +31,7 @@ import roll.automata.StateDFA;
 import roll.automata.StateFA;
 import roll.learner.LearnerType;
 import roll.main.Options;
-import roll.query.MembershipOracle;
+import roll.oracle.MembershipOracle;
 import roll.query.Query;
 import roll.table.ExprValue;
 import roll.table.HashableValue;

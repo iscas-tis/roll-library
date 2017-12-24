@@ -16,47 +16,125 @@
 
 package roll.learner.nba.ldollar;
 
+import dk.brics.automaton.Automaton;
+import roll.automata.DFA;
 import roll.automata.NBA;
+import roll.automata.operations.DFAOperations;
+import roll.automata.operations.FDFAOperations;
+import roll.automata.operations.NBAOperations;
 import roll.learner.LearnerBase;
+import roll.learner.LearnerDFA;
 import roll.learner.LearnerType;
+import roll.learner.dfa.table.LearnerDFATableColumn;
+import roll.learner.dfa.tree.LearnerDFATreeColumn;
 import roll.main.Options;
+import roll.oracle.MembershipOracle;
 import roll.query.Query;
+import roll.query.QuerySimple;
 import roll.table.HashableValue;
+import roll.words.Alphabet;
+import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ * This class implements the BA learning algorithm from the paper 
+ * Azadeh Farzan, Yu-Fang Chen, Edmund M. Clarke, Yih-Kuen Tsay, Bow-Yaw Wang
+ *       "Extending automated compositional verification to the full class of omega-regular languages"
+ * In TACAS 2008
  * */
 
 public class LearnerLDollar extends LearnerBase<NBA>{
+    
+    private boolean alreadyStarted = false;
+    private NBA nba;
+    private final int dollarLetter;
+    private final LearnerDFA dfaLearner;
+    private final Automaton nonUPWords;
+    
+    public LearnerLDollar(Options options, Alphabet alphabet
+            , MembershipOracle<HashableValue> membershipOracle) {
+        super(options, alphabet, membershipOracle);
+        // we have to add a new letter '$' for DFA
+        alphabet.addLetter(Alphabet.DOLLAR);
+        dollarLetter = alphabet.indexOf(Alphabet.DOLLAR);
+        Automaton allUPWords = UtilLDollar.getAllUPWords(alphabet, dollarLetter);
+        nonUPWords = allUPWords.complement();
+        MembershipOracleLDollar lDollarMembershipOracle = new MembershipOracleLDollar(membershipOracle, dollarLetter);
+        if(options.structure.isTable()) {
+            dfaLearner = new LearnerDFATableColumn(options, alphabet, lDollarMembershipOracle);
+        }else {
+            dfaLearner = new LearnerDFATreeColumn(options, alphabet, lDollarMembershipOracle);
+        }
+    }
 
     @Override
     public LearnerType getLearnerType() {
-        // TODO Auto-generated method stub
-        return null;
+        return LearnerType.NBA_TREE_LDOLLAR;
     }
 
     @Override
     public void startLearning() {
-        // TODO Auto-generated method stub
+        if(alreadyStarted) {
+            throw new UnsupportedOperationException("Learner can not start twice");
+        }
+        alreadyStarted = true;
+        dfaLearner.startLearning();
+        constructHypothesis();
+    }
+
+    protected void constructHypothesis() {
         
+        Automaton dkAut;
+        while(true) {
+            // first check whether it is a subset of E*$E+
+            DFA dfa = dfaLearner.getHypothesis();
+            dkAut = DFAOperations.toDkDFA(dfa);
+            Automaton dkAutInter = dkAut.intersection(nonUPWords);
+            String counterexample = dkAutInter.getShortestExample(true);
+            if (counterexample != null) {
+                // there is some word not in E*$E+
+                Word word = alphabet.getWordFromString(counterexample);
+                Query<HashableValue> ceQuery = new QuerySimple<>(word, alphabet.getEmptyWord());
+                ceQuery.answerQuery(getHashableValueBoolean(false));
+                dfaLearner.refineHypothesis(ceQuery);
+            }else {
+                // DFA accepts a subset of E*$E+
+                break;
+            }
+        }
+        // now we construct the NBA
+        Automaton ba = UtilLDollar.dkDFAToBuchi(dkAut);
+        nba = NBAOperations.fromDkNBA(ba, alphabet);
     }
 
     @Override
     public NBA getHypothesis() {
-        // TODO Auto-generated method stub
-        return null;
+        return nba;
     }
 
     @Override
     public void refineHypothesis(Query<HashableValue> query) {
-        // TODO Auto-generated method stub
-        
+        Word prefix = query.getPrefix();
+        Word suffix = query.getSuffix();
+        Automaton result = FDFAOperations.buildDDollar(prefix, suffix);
+        // System.out.println(result.toString());
+        String counterexample = null;
+        DFA dfa = dfaLearner.getHypothesis();
+        Automaton dkAut = DFAOperations.toDkDFA(dfa);
+        //System.out.println(dkAut.toString());
+        HashableValue answer = membershipOracle.answerMembershipQuery(query);
+        if (answer.isAccepting()) {
+            counterexample = result.minus(dkAut).getShortestExample(true);
+        } else {
+            counterexample = dkAut.intersection(result).getShortestExample(true);
+        }
+        if(options.verbose) System.out.println("counterexample: " + counterexample);
+        Word word = alphabet.getWordFromString(counterexample);
+        Query<HashableValue> ceQuery = new QuerySimple<>(word, alphabet.getEmptyWord());
+        ceQuery.answerQuery(answer);
+        dfaLearner.refineHypothesis(ceQuery);
+        constructHypothesis();
     }
-
-    @Override
-    public Options getOptions() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
+    
 }

@@ -104,6 +104,47 @@ public final class Alphabet {
         assert prefix != null  && suffix != null;
         return new Pair<>(prefix, suffix);
 	}
+	
+	public static Word getShortestPeriod(Word period) {
+        // from the possible smallest length
+        for(int i = 1; i <= period.length() / 2; i ++) {
+            // can be divided
+            if (period.length() % i == 0) {
+                // repeat word candidate
+                Word rep = period.getPrefix(i);
+                // compute the number of repeat
+                int num = period.length() / i;
+                boolean repeated = true;
+                for(int j = 0; j < num; j ++) {
+                    int pNr = j * i;
+                    Word p = period.getSubWord(pNr, i);
+                    if(! p.equals(rep)) {
+                        repeated = false;
+                        break;
+                    }
+                }
+                // reduce the period
+                if(repeated) { 
+                    period = rep;
+                    break;
+                }
+            }
+        }
+        return period;
+	}
+	
+	// get the normal form of an omega word
+	public static Pair<Word, Word> getNormalForm(Word prefix, Word suffix) {
+	    // compute the smallest period of suffix.
+        Word loop = getShortestPeriod(suffix);
+        // shift prefix to the smallest one.
+        Word stem = prefix;
+        while (stem.getLastLetter() == loop.getLastLetter()) {
+            stem = stem.getPrefix(stem.length() - 1);
+            loop = loop.getSuffix(loop.length() - 1).concat(loop.getPrefix(loop.length() - 1));
+        }
+        return new Pair<>(stem, loop);
+	}
 
 
 }

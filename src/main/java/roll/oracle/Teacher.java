@@ -14,13 +14,12 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.query;
+package roll.oracle;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public interface EquivalenceOracle<M, O> {
-	
-	O answerEquivalenceQuery(M automaton);
+
+public interface Teacher<M, Q, O> extends MembershipOracle<O>, EquivalenceOracle<M, Q> {
 
 }

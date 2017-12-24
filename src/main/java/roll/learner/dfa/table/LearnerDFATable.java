@@ -23,7 +23,7 @@ import roll.automata.DFA;
 import roll.automata.StateDFA;
 import roll.learner.LearnerDFA;
 import roll.main.Options;
-import roll.query.MembershipOracle;
+import roll.oracle.MembershipOracle;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.ExprValue;
@@ -130,7 +130,10 @@ public abstract class LearnerDFATable extends LearnerDFA {
     public void refineHypothesis(Query<HashableValue> ceQuery) {
         
         ExprValue exprValue = getCounterExampleWord(ceQuery);
-        HashableValue result = processMembershipQuery(ceQuery);
+        HashableValue result = ceQuery.getQueryAnswer();
+        if(result == null) {
+            result = processMembershipQuery(ceQuery);
+        }
         CeAnalyzer analyzer = getCeAnalyzerInstance(exprValue, result);
         analyzer.analyze();
         observationTable.addColumn(analyzer.getNewExpriment()); // add new experiment

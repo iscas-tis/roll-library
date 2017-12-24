@@ -28,6 +28,7 @@ import roll.automata.StateFA;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
+import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -46,6 +47,7 @@ public class NBAOperations {
         }
         return nbaState.getId();
     }
+    
     public static NBA fromDkNBA(Automaton dkAut, Alphabet alphabet) {
         NBA nba = new NBA(alphabet);
         TObjectIntMap<State> map = new TObjectIntHashMap<>();
@@ -72,6 +74,18 @@ public class NBAOperations {
         }
         
         return nba;
+    }
+    
+    public static boolean accepts(NBA nba, Word stem, Word loop) {
+        assert nba != null && stem != null && loop != null;
+        NBALasso lasso = new NBALasso(stem, loop);
+        NBAIntersectCheck checker = new NBAIntersectCheck(nba, lasso.getNBA());
+        return !checker.isEmpty();
+    }
+    
+    public static NBA removeDeadStates(NBA nba) {
+        NBA result = new NBA(nba.getAlphabet());
+        return result;
     }
 
 }

@@ -16,11 +16,51 @@
 
 package roll.learner;
 
+import roll.main.Options;
+import roll.oracle.MembershipOracle;
+import roll.query.Query;
+import roll.table.ExprValue;
+import roll.table.ExprValueWord;
 import roll.table.HashableValue;
+import roll.table.HashableValueBoolean;
+import roll.words.Alphabet;
+import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 public abstract class LearnerBase<M> implements Learner<M, HashableValue> {
+    
+    protected final Alphabet alphabet;
+    protected final MembershipOracle<HashableValue> membershipOracle;
+    protected final Options options;
+    
+    public LearnerBase(Options options, Alphabet alphabet
+            , MembershipOracle<HashableValue> membershipOracle) {
+        assert options != null && alphabet != null && membershipOracle != null;
+        this.options = options;
+        this.alphabet = alphabet;
+        this.membershipOracle = membershipOracle;
+    }
+    
+    @Override
+    public Options getOptions() {
+        return options;
+    }
+    
+    protected ExprValue getCounterExampleWord(Query<HashableValue> query) {
+        assert query != null;
+        Word word = query.getQueriedWord();
+        assert word != null;
+        return new ExprValueWord(word);
+    }
+    
+    protected ExprValue getExprValueWord(Word word) {
+        return new ExprValueWord(word);
+    }
+    
+    protected HashableValue getHashableValueBoolean(boolean result) {
+        return new HashableValueBoolean(result);
+    }
 
 }

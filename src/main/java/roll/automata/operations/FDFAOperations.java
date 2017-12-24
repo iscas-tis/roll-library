@@ -42,34 +42,6 @@ public class FDFAOperations {
     private FDFAOperations() {
     }
     
-    public static Word getSmallestPeriod(Word period) {
-        // from the possible smallest length
-        for(int i = 1; i <= period.length() / 2; i ++) {
-            // can be divided
-            if (period.length() % i == 0) {
-                // repeat word candidate
-                Word rep = period.getPrefix(i);
-                // compute the number of repeat
-                int num = period.length() / i;
-                boolean repeated = true;
-                for(int j = 0; j < num; j ++) {
-                    int pNr = j * i;
-                    Word p = period.getSubWord(pNr, i);
-                    if(! p.equals(rep)) {
-                        repeated = false;
-                        break;
-                    }
-                }
-                // reduce the period
-                if(repeated) { 
-                    period = rep;
-                    break;
-                }
-            }
-        }
-        return period;
-    }
-    
     public static Automaton buildRepeatAutomaton(Word suffix) {
         assert suffix.length() >= 1;
         Automaton result = new Automaton();
@@ -95,14 +67,11 @@ public class FDFAOperations {
     // as well as return the corresponding dk.brics.automaton.
     public static Automaton buildDDollar(Word prefix, Word suffix) {
         // Finds the smallest period of suffix.
-        suffix = getSmallestPeriod(suffix);
-        // Shifts prefix to the smallest one.
-        while (prefix.getLastLetter() == suffix.getLastLetter()) {
-            prefix = prefix.getPrefix(prefix.length() - 1);
-            suffix = suffix.getSuffix(suffix.length() - 1).concat(suffix.getPrefix(suffix.length() - 1));
-        }
-        System.out.println("Building Dollar automaton for counterexamples ("
-                + prefix.length() + "," + suffix.length() +")...");
+        Pair<Word, Word> normalForm = Alphabet.getNormalForm(prefix, suffix);
+        prefix = normalForm.getLeft();
+        suffix = normalForm.getRight();
+//        System.out.println("Building Dollar automaton for counterexamples ("
+//                + prefix.length() + "," + suffix.length() +")...");
         // System.out.println(prefix.toStringWithAlphabet() + ',' +
         // suffix.toStringWithAlphabet());
         Automaton result = new Automaton();
@@ -130,16 +99,15 @@ public class FDFAOperations {
         }
         char letter = suffix.getAlphabet().getLetter(suffix.getLastLetter());
         suffixStates[suffix.length() - 1].addTransition(new Transition(letter, pre));
-        int dollar = 0; // from the first state in repeat 
         int length = suffix.length();
         for(int i = 0; i < length; i ++) {
             Automaton suf = buildRepeatAutomaton(suffix);
-            State dollarState = suffixStates[dollar];
+            State dollarState = suffixStates[i];
             State init = suf.getInitialState();
             dollarState.addTransition(new Transition(Alphabet.DOLLAR, init));
             suffix = suffix.getSubWord(1, suffix.length() - 1).append(suffix.getFirstLetter());
-            dollar ++;
         }
+        result.setDeterministic(true);
         return result;
     }
     
