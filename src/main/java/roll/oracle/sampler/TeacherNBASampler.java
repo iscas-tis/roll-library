@@ -34,12 +34,12 @@ public class TeacherNBASampler implements Teacher<NBA, Query<HashableValue>, Has
     
     private final Options options;
     private final NBA target;
-    private final long numOfSamples;
+    private final Sampler sampler;
     
     public TeacherNBASampler(Options options, NBA target) {
         this.options = options;
         this.target = target;
-        this.numOfSamples = MonteCarloSampler.getSampleSize(options.epsilon, options.delta);
+        this.sampler = new SamplerMonteCarlo(options.epsilon, options.delta);
     }
 
     @Override
@@ -63,10 +63,10 @@ public class TeacherNBASampler implements Teacher<NBA, Query<HashableValue>, Has
             B = hypothesis;
         }
         
-        ceQuery = NBAInclusionSampler.isIncluded(A, B, numOfSamples);
+        ceQuery = NBAInclusionSampler.isIncluded(A, B, sampler);
         if(ceQuery != null) return ceQuery;
         
-        ceQuery = NBAInclusionSampler.isIncluded(B, A, numOfSamples);
+        ceQuery = NBAInclusionSampler.isIncluded(B, A, sampler);
         if(ceQuery != null) return ceQuery;
         
         Word wordEmpty = target.getAlphabet().getEmptyWord();

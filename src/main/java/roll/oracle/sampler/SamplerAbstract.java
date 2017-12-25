@@ -20,41 +20,32 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.procedure.TIntProcedure;
 import roll.automata.NBA;
 import roll.automata.StateNFA;
 import roll.util.Pair;
 import roll.util.sets.ISet;
-import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
- * 
- *
- * Radu Grosu and Scott A.Smolka. 
- *  "Monte Carlo Model checking"
- *  
- *  This method cannot sample the omega words whose finite prefixes visit a loop
- *  but this is actually not needed to check emptiness of BA, but this maybe a problem
- *  for BA inclusion check
- *
  * */
 
-public class MonteCarloSampler {
+public abstract class SamplerAbstract implements Sampler {
     
-    private MonteCarloSampler() {
-        
+    protected NBA nba;
+    protected final long numOfSamples;
+    
+    public SamplerAbstract(double epsilon, double delta) {
+        this.numOfSamples = computeSampleSize(epsilon, delta);
     }
     
-    public static long getSampleSize(double epsilon, double delta) {
+    protected long computeSampleSize(double epsilon, double delta) {
         double result = Math.log(delta) / (1.0 * Math.log(1 - epsilon));
         long num = Math.round(result);
         return num;
     }
     
-    private static Pair<Integer, StateNFA> rNext(NBA nba, int s) {
+    protected Pair<Integer, StateNFA> rNext(NBA nba, int s) {
         // uniformly pick the successor
         List<Pair<Integer, StateNFA>> nexts = new ArrayList<>();
         StateNFA curr = nba.getState(s);
@@ -79,46 +70,19 @@ public class MonteCarloSampler {
         assert sNr < nexts.size();
         return nexts.get(sNr);
     }
+    
+    public void setNBA(NBA nba) {
+        this.nba = nba;
+    }
+    
+    @Override
+    public long getSampleSize() {
+        return numOfSamples;
+    }
 
-    /**
-     * Make sure that every state has at least one successor
-     */
-    public static Pair<Pair<Word, Word>, Boolean> getRandomLasso(NBA nba) {
-
-        // start sampling
-        int s = nba.getInitialState();
-        int i = 0, f = -1;
-        TIntIntMap hTable = new TIntIntHashMap();
-        List<Integer> wList = new ArrayList<>();
-        while (!hTable.containsKey(s)) {
-            hTable.put(s, i);
-            if (nba.isFinal(s)) {
-                f = i;
-            }
-            Pair<Integer, StateNFA> pair = rNext(nba, s);
-            wList.add(pair.getLeft());
-            s = pair.getRight().getId();
-            ++i;
-        }
-
-        int start = hTable.get(s); // the state repeat
-        int[] preArr = new int[start];
-        for (int j = 0; j < start; j++) {
-            preArr[j]  = wList.get(j);
-        }
-        int[] sufArr = new int[wList.size() - start]; 
-        for (int j = start; j < wList.size(); j++) {
-            sufArr[j - start] = wList.get(j);
-        }
-        boolean accept;
-        if (hTable.get(s) <= f) {
-            accept = true;
-        } else {
-            accept = false;
-        }
-        Word prefix = nba.getAlphabet().getArrayWord(preArr);
-        Word suffix = nba.getAlphabet().getArrayWord(sufArr);
-        return new Pair<>(new Pair<>(prefix, suffix), accept);
+    @Override
+    public NBA getNBA() {
+        return nba;
     }
 
 }

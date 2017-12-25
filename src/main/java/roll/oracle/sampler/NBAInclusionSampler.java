@@ -35,9 +35,10 @@ public class NBAInclusionSampler {
         
     }
     
-    public static Query<HashableValue> isIncluded(NBA A, NBA B, long numOfSamples) {
-        for (int i = 0; i < numOfSamples; i++) {
-            Pair<Pair<Word, Word>, Boolean> result = MonteCarloSampler.getRandomLasso(A);
+    public static Query<HashableValue> isIncluded(NBA A, NBA B, Sampler sampler) {
+        sampler.setNBA(A);
+        for (int i = 0; i < sampler.getSampleSize(); i++) {
+            Pair<Pair<Word, Word>, Boolean> result = sampler.getRandomLasso();
             Pair<Word, Word> word = result.getLeft();
             boolean needCheck = false;
             if (result.getRight()) {
@@ -56,8 +57,9 @@ public class NBAInclusionSampler {
                 }
             }
         }
-        for (int i = 0; i < numOfSamples; i++) {
-            Pair<Pair<Word, Word>, Boolean> result = MonteCarloSampler.getRandomLasso(B);
+        sampler.setNBA(B);
+        for (int i = 0; i < sampler.getSampleSize(); i++) {
+            Pair<Pair<Word, Word>, Boolean> result = sampler.getRandomLasso();
             Pair<Word, Word> word = result.getLeft();
             boolean needCheck = false;
             if (result.getRight()) {
