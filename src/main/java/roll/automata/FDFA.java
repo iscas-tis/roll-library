@@ -63,9 +63,12 @@ public class FDFA implements Acceptor {
     
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        // todo
-        return sb.toString();
+        StringBuilder builder = new StringBuilder();
+        builder.append("//FDFA-M: \n" + leadingDFA.toString() + "\n");
+        for(int i = 0; i < progressDFAs.size(); i ++) {
+            builder.append("//FDFA-P" + i + ": \n" + progressDFAs.get(i).toString());
+        }
+        return builder.toString();
     }
 
     @Override
