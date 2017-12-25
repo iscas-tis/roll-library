@@ -64,6 +64,7 @@ public class NBALDollarTest {
         while(true) {
             System.out.println("Table is both closed and consistent\n" + learner.toString());
             NBA model = learner.getHypothesis();
+            System.out.println(model.toString());
             // along with ce
             Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(model);
             boolean isEq = ceQuery.getQueryAnswer().get();

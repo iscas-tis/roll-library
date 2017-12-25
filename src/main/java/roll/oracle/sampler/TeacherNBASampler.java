@@ -39,7 +39,7 @@ public class TeacherNBASampler implements Teacher<NBA, Query<HashableValue>, Has
     public TeacherNBASampler(Options options, NBA target) {
         this.options = options;
         this.target = target;
-        this.sampler = new SamplerMonteCarlo(options.epsilon, options.delta);
+        this.sampler = new SamplerIndexedMonteCarlo(options.epsilon, options.delta);
     }
 
     @Override
@@ -49,7 +49,7 @@ public class TeacherNBASampler implements Teacher<NBA, Query<HashableValue>, Has
         boolean answer = NBAOperations.accepts(target, prefix, suffix);
         return new HashableValueBoolean(answer);
     }
-
+    
     @Override
     public Query<HashableValue> answerEquivalenceQuery(NBA hypothesis) {
         // sample words from hypothesis
@@ -63,10 +63,14 @@ public class TeacherNBASampler implements Teacher<NBA, Query<HashableValue>, Has
             B = hypothesis;
         }
         
-        ceQuery = NBAInclusionSampler.isIncluded(A, B, sampler);
+        if(!isEmptyNBA(A)) {
+            ceQuery = NBAInclusionSampler.isIncluded(A, B, sampler);
+        }
         if(ceQuery != null) return ceQuery;
         
-        ceQuery = NBAInclusionSampler.isIncluded(B, A, sampler);
+        if(!isEmptyNBA(B)) {
+            ceQuery = NBAInclusionSampler.isIncluded(B, A, sampler);
+        }
         if(ceQuery != null) return ceQuery;
         
         Word wordEmpty = target.getAlphabet().getEmptyWord();
@@ -74,6 +78,13 @@ public class TeacherNBASampler implements Teacher<NBA, Query<HashableValue>, Has
         ceQuery = new QuerySimple<>(wordEmpty, wordEmpty);
         ceQuery.answerQuery(new HashableValueBoolean(true));
         return ceQuery;
+    }
+    
+    private boolean isEmptyNBA(NBA nba) {
+        if(nba.getStateSize() > 1) {
+            return false;
+        }
+        return nba.getState(0).getEnabledLetters().cardinality() == 0;
     }
 
 }
