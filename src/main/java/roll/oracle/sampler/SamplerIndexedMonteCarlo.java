@@ -18,11 +18,14 @@ package roll.oracle.sampler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
+import roll.automata.NBA;
 import roll.automata.StateNFA;
 import roll.util.Pair;
+import roll.words.Alphabet;
 import roll.words.Word;
 
 /**
@@ -37,6 +40,12 @@ public class SamplerIndexedMonteCarlo extends SamplerAbstract {
         super(epsilon, delta);
     }
 
+    // only for 1 and 2, only allowed three apearacnces for one state
+    private boolean terminate(int index) {
+        if(index >= 2) return true;
+        int sNr = ThreadLocalRandom.current().nextInt(0, 2);
+        return sNr == 1;
+    }
     /**
      * Make sure that every state has at least one successor
      */
@@ -49,9 +58,26 @@ public class SamplerIndexedMonteCarlo extends SamplerAbstract {
         int s = nba.getInitialState();
         int i = 0, f = -1;
         TIntIntMap hTable = new TIntIntHashMap();
+        TIntIntMap countTable = new TIntIntHashMap();
         List<Integer> wList = new ArrayList<>();
-        while (!hTable.containsKey(s)) {
-            hTable.put(s, i);
+        while (true) {
+            boolean occured = hTable.containsKey(s);
+            if(occured) {
+                // already occured before
+                assert countTable.containsKey(s);
+                int index = countTable.get(s);
+                if(terminate(index)) {
+                    break;
+                }else {
+                    index ++;
+                    countTable.put(s, index);
+                }
+            }else {
+                // next time, it should be one
+                countTable.put(s, 1);
+            }
+            // record last appearance
+            hTable.put(s, i); 
             if (nba.isFinal(s)) {
                 f = i;
             }
@@ -81,39 +107,39 @@ public class SamplerIndexedMonteCarlo extends SamplerAbstract {
         return new Pair<>(new Pair<>(prefix, suffix), accept);
     }
     
-    private class Elem {
-        int state;
-        int count;
+    public static void main(String[] args) {
+        Alphabet alphabet = new Alphabet();
+        alphabet.addLetter('a');
+        alphabet.addLetter('b');
         
-        Elem(int state, int count) {
-            this.state = state;
-            this.count = count;
-        }
+        NBA nba = new NBA(alphabet);
+        nba.createState();
+        nba.createState();
+        nba.createState();
+        nba.createState();
+        nba.createState();
         
-        boolean isLastTime() {
-            return count == 4;
-        }
+        final int zero = 0, one = 1, two = 2, three = 3, four = 4;
+        // 
+        nba.setInitial(zero);
+        nba.getState(zero).addTransition(0, one);
+        nba.getState(one).addTransition(0, zero);
+        nba.getState(one).addTransition(1, two);
+        nba.getState(two).addTransition(1, three);
+        nba.getState(three).addTransition(1, two);
+        nba.getState(three).addTransition(0, four);
+        nba.getState(four).addTransition(0, four);
+        nba.getState(four).addTransition(1, three);
+        nba.setFinal(two);
         
-        @Override
-        public int hashCode() {
-            return count * nba.getStateSize() + state;
-        }
+        System.out.println(nba.toString());
         
-        @Override
-        public boolean equals(Object obj) {
-            if(this == obj) return true;
-            if(obj == null) return false;
-            if(obj instanceof Elem) {
-                Elem other = (Elem)obj;
-                return other.state == state
-                    && other.count == count;
-            }
-            return false;
-        }
-        @Override
-        public String toString() {
-            return state + ":" + count;
-        }
+        Sampler sampler = new SamplerIndexedMonteCarlo(0.01, 0.01);
+        sampler.setNBA(nba);
+        Pair<Pair<Word, Word>, Boolean> result = sampler.getRandomLasso();
+        System.out.println("prefix: " + result.getLeft().getLeft());
+        System.out.println("prefix: " + result.getLeft().getRight());
+        System.out.println("membership: " + result.getRight());
     }
 
 }
