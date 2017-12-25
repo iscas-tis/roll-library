@@ -55,14 +55,22 @@ public class TeacherNBARABIT implements Teacher<NBA, Query<HashableValue>, Hasha
     @Override
     public Query<HashableValue> answerEquivalenceQuery(NBA hypothesis) {
         FiniteAutomaton rabitHypo = UtilRABIT.toRABITNBA(hypothesis);
-        Pair<Word, Word> result = UtilRABIT.isIncluded(target.getAlphabet(), rabitHypo, rabitTgt);
+        FiniteAutomaton A, B;
+        if(rabitHypo.states.size() > rabitTgt.states.size()) {
+            A = rabitHypo;
+            B = rabitTgt;
+        }else {
+            A = rabitTgt;
+            B = rabitHypo;
+        }
+        Pair<Word, Word> result = UtilRABIT.isIncluded(target.getAlphabet(), A, B);
         Query<HashableValue> ceQuery = null;
         if(result != null) {
             ceQuery = new QuerySimple<>(result.getLeft(), result.getRight());
             ceQuery.answerQuery(new HashableValueBoolean(false));
             return ceQuery;
         }
-        result = UtilRABIT.isIncluded(target.getAlphabet(), rabitTgt, rabitHypo);
+        result = UtilRABIT.isIncluded(target.getAlphabet(), B, A);
         if(result != null) {
             ceQuery = new QuerySimple<>(result.getLeft(), result.getRight());
             ceQuery.answerQuery(new HashableValueBoolean(false));
