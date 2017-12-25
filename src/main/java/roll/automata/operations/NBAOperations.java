@@ -85,6 +85,7 @@ public class NBAOperations {
     
     public static NBA removeDeadStates(NBA nba) {
         NBA result = new NBA(nba.getAlphabet());
+        
         return result;
     }
 

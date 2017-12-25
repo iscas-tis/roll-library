@@ -57,11 +57,11 @@ public class TeacherNBARABIT implements Teacher<NBA, Query<HashableValue>, Hasha
         FiniteAutomaton rabitHypo = UtilRABIT.toRABITNBA(hypothesis);
         FiniteAutomaton A, B;
         if(rabitHypo.states.size() > rabitTgt.states.size()) {
-            A = rabitHypo;
-            B = rabitTgt;
-        }else {
             A = rabitTgt;
             B = rabitHypo;
+        }else {
+            A = rabitHypo;
+            B = rabitTgt;
         }
         Pair<Word, Word> result = UtilRABIT.isIncluded(target.getAlphabet(), A, B);
         Query<HashableValue> ceQuery = null;

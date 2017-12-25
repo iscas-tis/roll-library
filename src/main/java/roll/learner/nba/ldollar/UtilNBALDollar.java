@@ -213,7 +213,7 @@ public class UtilNBALDollar {
                 }
             }
         }
-        
+        dollarAut.removeDeadTransitions();
         return dollarAut;
     }
 

@@ -36,7 +36,9 @@ import roll.words.Word;
  * Radu Grosu and Scott A.Smolka. 
  *  "Monte Carlo Model checking"
  *  
- *  This method cannot sample those omega word whose finite prefix can visit a loop
+ *  This method cannot sample the omega words whose finite prefixes visit a loop
+ *  but this is actually not needed to check emptiness of BA, but this maybe a problem
+ *  for BA inclusion check
  *
  * */
 
