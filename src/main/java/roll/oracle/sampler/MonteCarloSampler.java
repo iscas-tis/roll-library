@@ -35,6 +35,8 @@ import roll.words.Word;
  *
  * Radu Grosu and Scott A.Smolka. 
  *  "Monte Carlo Model checking"
+ *  
+ *  This method cannot sample those omega word whose finite prefix can visit a loop
  *
  * */
 

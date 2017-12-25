@@ -24,7 +24,6 @@ import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
-import roll.util.Pair;
 import roll.words.Word;
 
 /**
@@ -54,45 +53,25 @@ public class TeacherNBASampler implements Teacher<NBA, Query<HashableValue>, Has
     @Override
     public Query<HashableValue> answerEquivalenceQuery(NBA hypothesis) {
         // sample words from hypothesis
-        for (int i = 0; i < numOfSamples; i++) {
-            Pair<Pair<Word, Word>, Boolean> result = MonteCarloSampler.getRandomLasso(hypothesis);
-            Pair<Word, Word> word = result.getLeft();
-            boolean acceptedHypo = false;
-            if (result.getRight()) {
-                acceptedHypo = true;
-            } else {
-                acceptedHypo = NBAOperations.accepts(hypothesis, word.getLeft(), word.getRight());
-            }
-            boolean acceptedTgt = NBAOperations.accepts(target, word.getLeft(), word.getRight());
-            if(acceptedHypo != acceptedTgt) {
-                // found a counterexample
-                Query<HashableValue> ceQuery = new QuerySimple<>(word.getLeft(), word.getRight());
-                ceQuery.answerQuery(new HashableValueBoolean(false));
-                return ceQuery;
-            }
+        Query<HashableValue> ceQuery = null;
+        NBA A, B;
+        if(target.getStateSize() > hypothesis.getStateSize()) {
+            A = hypothesis;
+            B = target;
+        }else {
+            A = target;
+            B = hypothesis;
         }
-        // sample from target
-        for (int i = 0; i < numOfSamples; i++) {
-            Pair<Pair<Word, Word>, Boolean> result = MonteCarloSampler.getRandomLasso(target);
-            Pair<Word, Word> word = result.getLeft();
-            boolean acceptedTgt = false;
-            if (result.getRight()) {
-                acceptedTgt = true;
-            } else {
-                acceptedTgt = NBAOperations.accepts(target, word.getLeft(), word.getRight());
-            }
-            boolean acceptedHypo = NBAOperations.accepts(hypothesis, word.getLeft(), word.getRight());
-            if(acceptedHypo != acceptedTgt) {
-                // found a counterexample
-                // found a counterexample
-                Query<HashableValue> ceQuery = new QuerySimple<>(word.getLeft(), word.getRight());
-                ceQuery.answerQuery(new HashableValueBoolean(false));
-                return ceQuery;
-            }
-        }
+        
+        ceQuery = NBAInclusionSampler.isIncluded(A, B, numOfSamples);
+        if(ceQuery != null) return ceQuery;
+        
+        ceQuery = NBAInclusionSampler.isIncluded(B, A, numOfSamples);
+        if(ceQuery != null) return ceQuery;
+        
         Word wordEmpty = target.getAlphabet().getEmptyWord();
         // found a counterexample
-        Query<HashableValue> ceQuery = new QuerySimple<>(wordEmpty, wordEmpty);
+        ceQuery = new QuerySimple<>(wordEmpty, wordEmpty);
         ceQuery.answerQuery(new HashableValueBoolean(true));
         return ceQuery;
     }

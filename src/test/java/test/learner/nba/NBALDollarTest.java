@@ -34,7 +34,7 @@ import roll.words.Alphabet;
 public class NBALDollarTest {
     
     @Test
-    public void test() {
+    public void testSampler() {
         Alphabet alphabet = new Alphabet();
         alphabet.addLetter('a');
         alphabet.addLetter('b');
