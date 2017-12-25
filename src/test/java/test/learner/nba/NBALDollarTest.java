@@ -19,7 +19,7 @@ package test.learner.nba;
 import org.junit.Test;
 
 import roll.automata.NBA;
-import roll.learner.nba.ldollar.LearnerLDollar;
+import roll.learner.nba.ldollar.LearnerNBALDollar;
 import roll.main.Options;
 import roll.oracle.rabit.TeacherNBARABIT;
 import roll.oracle.sampler.TeacherNBASampler;
@@ -58,7 +58,7 @@ public class NBALDollarTest {
         options.epsilon = 0.00018;
         options.delta = 0.0001;
         TeacherNBASampler teacher = new TeacherNBASampler(options, target);
-        LearnerLDollar learner = new LearnerLDollar(options, alphabet, teacher);
+        LearnerNBALDollar learner = new LearnerNBALDollar(options, alphabet, teacher);
         System.out.println("starting learning");
         learner.startLearning();
         while(true) {
@@ -104,7 +104,7 @@ public class NBALDollarTest {
         options.epsilon = 0.00018;
         options.delta = 0.0001;
         TeacherNBARABIT teacher = new TeacherNBARABIT(options, target);
-        LearnerLDollar learner = new LearnerLDollar(options, alphabet, teacher);
+        LearnerNBALDollar learner = new LearnerNBALDollar(options, alphabet, teacher);
         System.out.println("starting learning");
         learner.startLearning();
         while(true) {

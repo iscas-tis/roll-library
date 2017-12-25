@@ -27,10 +27,10 @@ import roll.words.Word;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-class MembershipOracleLDollar implements MembershipOracle<HashableValue> {
+class MembershipOracleNBALDollar implements MembershipOracle<HashableValue> {
     private final MembershipOracle<HashableValue> membershipOracle;
     private final int dollarLetter ;
-    public MembershipOracleLDollar(
+    public MembershipOracleNBALDollar(
             MembershipOracle<HashableValue> membershipOracle,
             final int dollarLetter) {
         this.membershipOracle = membershipOracle;

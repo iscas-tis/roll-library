@@ -44,7 +44,7 @@ import roll.words.Word;
  * In TACAS 2008
  * */
 
-public class LearnerLDollar extends LearnerBase<NBA>{
+public class LearnerNBALDollar extends LearnerBase<NBA>{
     
     private boolean alreadyStarted = false;
     private NBA nba;
@@ -52,15 +52,15 @@ public class LearnerLDollar extends LearnerBase<NBA>{
     private final LearnerDFA dfaLearner;
     private final Automaton nonUPWords;
     
-    public LearnerLDollar(Options options, Alphabet alphabet
+    public LearnerNBALDollar(Options options, Alphabet alphabet
             , MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
         // we have to add a new letter '$' for DFA
         alphabet.addLetter(Alphabet.DOLLAR);
         dollarLetter = alphabet.indexOf(Alphabet.DOLLAR);
-        Automaton allUPWords = UtilLDollar.getAllUPWords(alphabet, dollarLetter);
+        Automaton allUPWords = UtilNBALDollar.getAllUPWords(alphabet, dollarLetter);
         nonUPWords = allUPWords.complement();
-        MembershipOracleLDollar lDollarMembershipOracle = new MembershipOracleLDollar(membershipOracle, dollarLetter);
+        MembershipOracleNBALDollar lDollarMembershipOracle = new MembershipOracleNBALDollar(membershipOracle, dollarLetter);
         if(options.structure.isTable()) {
             dfaLearner = new LearnerDFATableColumn(options, alphabet, lDollarMembershipOracle);
         }else {
@@ -104,7 +104,7 @@ public class LearnerLDollar extends LearnerBase<NBA>{
             }
         }
         // now we construct the NBA
-        Automaton ba = UtilLDollar.dkDFAToBuchi(dkAut);
+        Automaton ba = UtilNBALDollar.dkDFAToBuchi(dkAut);
         nba = NBAOperations.fromDkNBA(ba, alphabet);
     }
 

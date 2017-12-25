@@ -1,7 +1,7 @@
 package roll.translator;
 
 import roll.automata.NBA;
-import roll.learner.nba.ldollar.LearnerLDollar;
+import roll.learner.nba.ldollar.LearnerNBALDollar;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.util.Timer;
@@ -9,9 +9,9 @@ import roll.util.Timer;
 public class TranslatorBuechi extends TranslatorSimple<NBA> {
 
 	
-	protected LearnerLDollar learnerLDollar;
+	protected LearnerNBALDollar learnerLDollar;
 
-	public TranslatorBuechi(LearnerLDollar learner) {
+	public TranslatorBuechi(LearnerNBALDollar learner) {
 		super(learner);
 		this.learnerLDollar = learner;
 	}

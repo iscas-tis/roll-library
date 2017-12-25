@@ -34,9 +34,9 @@ import roll.words.Alphabet;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class UtilLDollar {
+public class UtilNBALDollar {
     
-    private UtilLDollar() {
+    private UtilNBALDollar() {
         
     }
     /**
