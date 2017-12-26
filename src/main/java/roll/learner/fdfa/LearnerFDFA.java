@@ -16,12 +16,22 @@
 
 package roll.learner.fdfa;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import roll.automata.DFA;
 import roll.automata.FDFA;
 import roll.learner.LearnerBase;
+import roll.learner.LearnerType;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
+import roll.query.Query;
+import roll.query.QuerySimple;
+import roll.table.ExprValue;
 import roll.table.HashableValue;
+import roll.util.Timer;
 import roll.words.Alphabet;
+import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -29,9 +39,150 @@ import roll.words.Alphabet;
 
 public abstract class LearnerFDFA extends LearnerBase<FDFA> {
 
+    protected LearnerLeading learnerLeading;
+    protected List<LearnerProgress> learnerProgress;
+    private boolean alreadyStarted;
+    protected FDFA fdfa;
     public LearnerFDFA(Options options, Alphabet alphabet
             , MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
+        this.learnerProgress = new ArrayList<>();
     }
+    
+    @Override
+    public void startLearning() {
+        if(alreadyStarted)
+            try {
+                throw new UnsupportedOperationException("Learner should not be started twice");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        alreadyStarted = true;
+        learnerLeading = getLearnerLeading();
+        Timer timer = new Timer();
+        timer.start();
+        learnerLeading.startLearning();
+        timer.stop();
+        options.stats.timeOfLearnerLeading += timer.getTimeElapsed();
+        
+        DFA dfa = learnerLeading.getHypothesis();
+        for(int state = 0; state < dfa.getStateSize(); state ++ ) {
+            LearnerProgress learner = getLearnerProgress(learnerLeading.getStateLabel(state));
+            learnerProgress.add(learner);
+            timer.start();
+            learner.startLearning();
+            timer.stop();
+            options.stats.timeOfLearnerProgress += timer.getTimeElapsed();
+        }
+        constructHypothesis();
+    }
+    
+    protected void constructHypothesis() {
+        DFA leadDFA = learnerLeading.getHypothesis();
+        List<DFA> proDFAs = new ArrayList<>();
+        for(LearnerProgress learner : learnerProgress) {
+            DFA progressDFA = (DFA)learner.getHypothesis();
+            proDFAs.add(progressDFA);
+        }
+        fdfa = new FDFA(leadDFA, proDFAs);
+    }
+
+    @Override
+    public LearnerType getLearnerType() {
+        return LearnerType.FDFA;
+    }
+    
+    protected abstract LearnerLeading getLearnerLeading();
+    
+    protected abstract LearnerProgress getLearnerProgress(Word label);
+    
+    protected abstract boolean isPeriodic();
+ 
+
+    @Override
+    public FDFA getHypothesis() {
+        return fdfa;
+    }
+
+    // refine FDFA by counter example
+    @Override
+    public void refineHypothesis(Query<HashableValue> query) {
+        // we assume that the counterexample returned are normalized w.r.t the leading DFA
+        ExprValue expr = learnerLeading.getExprValueWord(query.getPrefix(), query.getSuffix());
+        if(options.verbose) {
+            System.out.println("normalized factorization: " + expr.toString());
+        }
+        DFA leadDFA = learnerLeading.getHypothesis();
+        int s = leadDFA.getSuccessor(expr.getLeft());
+        Word label = learnerLeading.getStateLabel(s);
+        Query<HashableValue> queryLabel = new QuerySimple<HashableValue>(label, expr.getRight());
+        HashableValue resultLabel = membershipOracle.answerMembershipQuery(queryLabel);
+        Query<HashableValue> queryLeading = new QuerySimple<HashableValue>(expr.getLeft(), expr.getRight());
+        options.log.verbose("Starting counterexample analysis in the learner ("
+                +((Word)expr.getLeft()).length() + "," + ((Word)expr.getRight()).length() + ") ...");
+        HashableValue resultCE = query.getQueryAnswer();
+        if(resultCE == null) {
+            resultCE = membershipOracle.answerMembershipQuery(queryLeading);
+        }
+        queryLeading.answerQuery(resultCE);
+        if(! resultLabel.equals(resultCE)) { // refine leading automaton
+            Timer timer = new Timer();
+            timer.start();
+            learnerLeading.refineHypothesis(queryLeading);
+            timer.stop();
+            options.stats.timeOfLearnerLeading += timer.getTimeElapsed();
+            
+            timer.start();
+            if(! isPeriodic()) {
+                // Syntactic and Recurrent FDFA should restart progress learning
+                for(LearnerProgress learner : learnerProgress) {
+                    learner.startLearning();
+                }
+            }
+            // new states, not just one (for table-based leading automaton)
+            for(Word word : learnerLeading.getNewStates()) {
+                LearnerProgress learner = getLearnerProgress(word);
+                learner.startLearning();
+                learnerProgress.add(learner);
+            }
+            timer.stop();
+            options.stats.timeOfLearnerProgress += timer.getTimeElapsed();
+        }else { // refine progress automaton
+            Timer timer = new Timer();
+            timer.start();
+            LearnerProgress learnerPro = null;
+            for(LearnerProgress learner : learnerProgress) {
+                if(learner.getLeadingLabel().equals(label)) {
+                    learnerPro = learner;
+                    break;
+                }
+            }
+            learnerPro.refineHypothesis(queryLeading);
+            timer.stop();
+            options.stats.timeOfLearnerProgress += timer.getTimeElapsed();
+        }
+        options.log.verbose("Finished counterexample analysis in the learner...");
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("T: \n" + learnerLeading.toString() + "\n");
+        
+        for(LearnerProgress learner : learnerProgress) {
+            builder.append(learner.getLeadingLabel().toStringWithAlphabet() + ": \n");
+            builder.append(learner.toString());
+        }
+        return builder.toString();
+    }
+    
+//    // -------------- some helper function
+//    public Word getProgressStateLabel(int stateLeading, int stateProgress) {
+//        return learnerProgress.get(stateLeading).getStateLabel(stateProgress);
+//    }
+//    
+//    public Word getLeadingStateLabel(int stateLeading) {
+//        return learnerLeading.getStateLabel(stateLeading);
+//    }
 
 }
