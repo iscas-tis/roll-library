@@ -33,8 +33,7 @@ import roll.words.Alphabet;
 
 public class NBALDollarTest {
     
-    @Test
-    public void testSampler() {
+    private NBA getNBA() {
         Alphabet alphabet = new Alphabet();
         alphabet.addLetter('a');
         alphabet.addLetter('b');
@@ -53,12 +52,19 @@ public class NBALDollarTest {
         target.setFinal(snd);
         target.setFinal(thd);
         
+        return target;
+    }
+    
+    @Test
+    public void testSampler() {
+        NBA target = getNBA();
+        
         Options options = new Options();
         options.structure = Options.Structure.TABLE;
         options.epsilon = 0.00018;
         options.delta = 0.0001;
         TeacherNBASampler teacher = new TeacherNBASampler(options, target);
-        LearnerNBALDollar learner = new LearnerNBALDollar(options, alphabet, teacher);
+        LearnerNBALDollar learner = new LearnerNBALDollar(options, target.getAlphabet(), teacher);
         System.out.println("starting learning");
         learner.startLearning();
         while(true) {
@@ -80,23 +86,7 @@ public class NBALDollarTest {
     
     @Test
     public void testRABIT() {
-        Alphabet alphabet = new Alphabet();
-        alphabet.addLetter('a');
-        alphabet.addLetter('b');
-        NBA target = new NBA(alphabet);
-        target.createState();
-        target.createState();
-        target.createState();
-        
-        // a^w + ab^w
-        int fst = 0, snd = 1, thd = 2;
-        target.getState(fst).addTransition(alphabet.indexOf('a'), snd);
-        target.getState(fst).addTransition(alphabet.indexOf('a'), thd);
-        target.getState(snd).addTransition(alphabet.indexOf('a'), snd);
-        target.getState(thd).addTransition(alphabet.indexOf('b'), thd);
-        target.setInitial(fst);
-        target.setFinal(snd);
-        target.setFinal(thd);
+        NBA target = getNBA();
         
         System.out.println(target.toString());
         
@@ -105,7 +95,7 @@ public class NBALDollarTest {
         options.epsilon = 0.00018;
         options.delta = 0.0001;
         TeacherNBARABIT teacher = new TeacherNBARABIT(options, target);
-        LearnerNBALDollar learner = new LearnerNBALDollar(options, alphabet, teacher);
+        LearnerNBALDollar learner = new LearnerNBALDollar(options, target.getAlphabet(), teacher);
         System.out.println("starting learning");
         learner.startLearning();
         while(true) {
