@@ -35,14 +35,18 @@ import roll.words.Word;
  * */
 
 public class SamplerIndexedMonteCarlo extends SamplerAbstract {
-    
+    // the number of visiting times, should be the number of
+    // states in the minimal deterministic omega automaton recognizing
+    // L(A) where A is the given Buchi automaton
+    int K; 
     public SamplerIndexedMonteCarlo(double epsilon, double delta) {
         super(epsilon, delta);
     }
 
     // only for 1 and 2, only allowed three apearacnces for one state
     private boolean terminate(int index) {
-        if(index >= 2) return true;
+        if(index >= K) return true;
+        // the probability whether to stop right now or not
         int sNr = ThreadLocalRandom.current().nextInt(0, 2);
         return sNr == 1;
     }
@@ -56,6 +60,7 @@ public class SamplerIndexedMonteCarlo extends SamplerAbstract {
         }
         // start sampling
         int s = nba.getInitialState();
+        K = nba.getStateSize(); // set it as default
         int i = 0, f = -1;
         TIntIntMap hTable = new TIntIntHashMap();
         TIntIntMap countTable = new TIntIntHashMap();
