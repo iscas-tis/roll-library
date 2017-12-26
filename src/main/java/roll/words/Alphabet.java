@@ -67,6 +67,8 @@ public final class Alphabet {
 	}
 	
 	public Word getArrayWord(int ... word) {
+	    if(word.length == 0) return epsilon;
+	    if(word.length == 1) return getLetterWord(word[0]);
 		return new WordArray(this, word);
 	}
 	

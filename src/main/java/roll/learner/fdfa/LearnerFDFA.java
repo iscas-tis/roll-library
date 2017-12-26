@@ -104,7 +104,7 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
         return fdfa;
     }
 
-    // refine FDFA by counter example
+    // refine FDFA by counterexample
     @Override
     public void refineHypothesis(Query<HashableValue> query) {
         // we assume that the counterexample returned are normalized w.r.t the leading DFA

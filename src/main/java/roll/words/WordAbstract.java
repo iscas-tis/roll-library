@@ -55,12 +55,12 @@ abstract class WordAbstract implements Word {
 
 	@Override
 	public Word getLetterWord(int letter) {
-		return new WordLetter(alphabet, letter);
+		return alphabet.getLetterWord(letter);
 	}
 
 	@Override
 	public Word fromLetters(int... letters) {
-		return new WordArray(alphabet, letters);
+		return alphabet.getArrayWord(letters);
 	}
 
 	@Override
