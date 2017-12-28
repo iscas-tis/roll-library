@@ -35,7 +35,7 @@ public class LearnerDFATableColumn extends LearnerDFATable {
 
     @Override
     public LearnerType getLearnerType() {
-        return LearnerType.DFA_TABLE_COLUMN;
+        return LearnerType.DFA_COLUMN_TABLE;
     }
 
     @Override

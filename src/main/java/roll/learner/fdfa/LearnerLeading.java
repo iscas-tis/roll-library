@@ -37,5 +37,6 @@ public abstract class LearnerLeading extends LearnerGeneral {
     }
     
     abstract List<Word> getNewStates(); 
+    
 	
 }

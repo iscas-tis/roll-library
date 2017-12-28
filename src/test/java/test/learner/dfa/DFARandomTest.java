@@ -38,10 +38,10 @@ public class DFARandomTest {
 			System.exit(0);
 		}
 		
-		LearnerType algo = LearnerType.DFA_TABLE_COLUMN;
-		if(args[0].equals("lstar")) algo = LearnerType.DFA_TABLE_LSTAR;
-		if(args[0].equals("kv")) algo =  LearnerType.DFA_TREE_KV;
-		if(args[0].equals("tr")) algo = LearnerType.DFA_TREE_COLUMN;
+		LearnerType algo = LearnerType.DFA_COLUMN_TABLE;
+		if(args[0].equals("lstar")) algo = LearnerType.DFA_LSTAR;
+		if(args[0].equals("kv")) algo =  LearnerType.DFA_KV;
+		if(args[0].equals("tr")) algo = LearnerType.DFA_COLUMN_TREE;
 		
 		Alphabet input = new Alphabet();
 		input.addLetter('a');
@@ -71,10 +71,10 @@ public class DFARandomTest {
 		DFATeacherDK teacher = new DFATeacherDK(machine, alphabet);
 		LearnerDFA learner = null;
 		Options options = new Options();
-		if(algo == LearnerType.DFA_TABLE_COLUMN) learner = new LearnerDFATableColumn(options, alphabet, teacher);
-		else if(algo == LearnerType.DFA_TREE_KV) {
+		if(algo == LearnerType.DFA_COLUMN_TABLE) learner = new LearnerDFATableColumn(options, alphabet, teacher);
+		else if(algo == LearnerType.DFA_KV) {
 		    learner = new LearnerDFATreeKV(options, alphabet, teacher); 
-		}else if(algo == LearnerType.DFA_TREE_COLUMN){
+		}else if(algo == LearnerType.DFA_COLUMN_TREE){
 		    learner = new LearnerDFATreeColumn(options, alphabet, teacher); 
 		}else {
 		    learner = new LearnerDFATableLStar(options, alphabet, teacher); 

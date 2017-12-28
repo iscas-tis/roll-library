@@ -70,7 +70,7 @@ public class LearnerNBALDollar extends LearnerBase<NBA>{
 
     @Override
     public LearnerType getLearnerType() {
-        return LearnerType.NBA_TREE_LDOLLAR;
+        return LearnerType.NBA_LDOLLAR;
     }
 
     @Override

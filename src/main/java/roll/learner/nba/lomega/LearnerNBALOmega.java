@@ -19,6 +19,7 @@ package roll.learner.nba.lomega;
 import roll.automata.NBA;
 import roll.learner.LearnerBase;
 import roll.learner.LearnerType;
+import roll.learner.fdfa.LearnerFDFA;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
@@ -31,31 +32,42 @@ import roll.words.Alphabet;
 
 public class LearnerNBALOmega extends LearnerBase<NBA>{
 
+    private boolean alreadyStarted = false;
+    private NBA nba;
+    private final LearnerFDFA fdfaLearner;
     public LearnerNBALOmega(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
+        fdfaLearner = UtilLOmega.getLearnerFDFA(options);
     }
 
     @Override
     public LearnerType getLearnerType() {
-        // TODO Auto-generated method stub
-        return null;
+        return LearnerType.NBA_FDFA;
     }
 
     @Override
     public void startLearning() {
-        // TODO Auto-generated method stub
+        if(alreadyStarted) {
+            throw new UnsupportedOperationException("Learner can not start twice");
+        }
+        alreadyStarted = true;
+        fdfaLearner.startLearning();
+        constructHypothesis();
+    }
+
+    protected void constructHypothesis() {
+        
         
     }
 
     @Override
     public NBA getHypothesis() {
-        // TODO Auto-generated method stub
-        return null;
+        return nba;
     }
 
     @Override
     public void refineHypothesis(Query<HashableValue> query) {
-        // TODO Auto-generated method stub
+        
         
     }
 

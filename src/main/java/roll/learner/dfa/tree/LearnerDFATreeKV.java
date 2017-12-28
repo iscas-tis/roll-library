@@ -137,7 +137,7 @@ public class LearnerDFATreeKV extends LearnerDFATree {
 
     @Override
     public LearnerType getLearnerType() {
-        return LearnerType.DFA_TREE_KV;
+        return LearnerType.DFA_KV;
     }
 
 }

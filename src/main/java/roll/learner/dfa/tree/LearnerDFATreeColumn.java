@@ -34,7 +34,7 @@ public class LearnerDFATreeColumn extends LearnerDFATree {
 
     @Override
     public LearnerType getLearnerType() {
-        return LearnerType.DFA_TREE_COLUMN;
+        return LearnerType.DFA_COLUMN_TREE;
     }
 
 }

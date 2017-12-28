@@ -250,7 +250,7 @@ public class LearnerDFATableLStar extends LearnerDFATable {
 
     @Override
     public LearnerType getLearnerType() {
-        return LearnerType.DFA_TABLE_LSTAR;
+        return LearnerType.DFA_LSTAR;
     }
 
     @Override
