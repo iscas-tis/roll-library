@@ -17,28 +17,16 @@
 package roll.learner.fdfa;
 
 import roll.automata.DFA;
-import roll.learner.LearnerDFA;
-import roll.main.Options;
-import roll.oracle.MembershipOracle;
+import roll.learner.Learner;
 import roll.table.HashableValue;
-import roll.words.Alphabet;
 import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public abstract class LearnerGeneral extends LearnerDFA {
-    
-    public LearnerGeneral(Options options, Alphabet alphabet
-            , MembershipOracle<HashableValue> membershipOracle) {
-        super(options, alphabet, membershipOracle);
-    }
+public interface LearnerGeneral extends Learner<DFA, HashableValue> {
 
-    Word getStateLabel(Word word) {
-        DFA dfa = getHypothesis();
-        int target = dfa.getSuccessor(word);
-        return getStateLabel(target);
-    }
+    Word getStateLabel(Word word);
 
 }

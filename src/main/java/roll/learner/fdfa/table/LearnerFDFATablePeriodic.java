@@ -14,11 +14,38 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.fdfa;
+package roll.learner.fdfa.table;
 
+import roll.learner.fdfa.LearnerFDFA;
+import roll.learner.fdfa.LearnerLeading;
+import roll.learner.fdfa.LearnerProgress;
+import roll.main.Options;
+import roll.oracle.MembershipOracle;
+import roll.table.HashableValue;
+import roll.words.Alphabet;
 import roll.words.Word;
 
-public interface LearnerProgress extends LearnerGeneral {
-	
-    Word getLeadingLabel();
+public class LearnerFDFATablePeriodic extends LearnerFDFA {
+
+	public LearnerFDFATablePeriodic(Options options, Alphabet alphabet,
+            MembershipOracle<HashableValue> membershipOracle) {
+        super(options, alphabet, membershipOracle);
+        // TODO Auto-generated constructor stub
+    }
+
+    @Override
+	protected boolean isPeriodic() {
+		return true;
+	}
+
+    @Override
+    protected LearnerLeading getLearnerLeading() {
+        return null;
+    }
+
+    @Override
+    protected LearnerProgress getLearnerProgress(Word label) {
+        return null;
+    }
+
 }

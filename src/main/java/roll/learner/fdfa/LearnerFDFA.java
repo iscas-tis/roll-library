@@ -96,7 +96,9 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
     
     protected abstract LearnerProgress getLearnerProgress(Word label);
     
-    protected abstract boolean isPeriodic();
+    protected boolean isPeriodic() {
+        return false;
+    }
  
 
     @Override

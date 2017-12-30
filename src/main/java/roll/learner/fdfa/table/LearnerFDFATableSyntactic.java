@@ -13,12 +13,36 @@
 
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+package roll.learner.fdfa.table;
 
-package roll.learner.fdfa;
-
+import roll.learner.fdfa.LearnerFDFA;
+import roll.learner.fdfa.LearnerLeading;
+import roll.learner.fdfa.LearnerProgress;
+import roll.main.Options;
+import roll.oracle.MembershipOracle;
+import roll.table.HashableValue;
+import roll.words.Alphabet;
 import roll.words.Word;
 
-public interface LearnerProgress extends LearnerGeneral {
-	
-    Word getLeadingLabel();
+public class LearnerFDFATableSyntactic extends LearnerFDFA {
+
+	public LearnerFDFATableSyntactic(Options options, Alphabet alphabet,
+            MembershipOracle<HashableValue> membershipOracle) {
+        super(options, alphabet, membershipOracle);
+        // TODO Auto-generated constructor stub
+    }
+
+    @Override
+    protected LearnerLeading getLearnerLeading() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected LearnerProgress getLearnerProgress(Word label) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
+

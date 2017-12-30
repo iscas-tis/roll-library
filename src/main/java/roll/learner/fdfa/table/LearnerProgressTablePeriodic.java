@@ -14,23 +14,46 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.fdfa;
+package roll.learner.fdfa.table;
 
-import java.util.List;
-
+import roll.learner.LearnerType;
+import roll.main.Options;
+import roll.oracle.MembershipOracle;
 import roll.table.ExprValue;
-import roll.table.ExprValueWordPair;
+import roll.table.HashableValue;
+import roll.words.Alphabet;
 import roll.words.Word;
 
-public interface LearnerLeading extends LearnerGeneral {
+public class LearnerProgressTablePeriodic extends LearnerProgressTable {
 
-    default ExprValue getExprValueWord(Word left, Word right) {
-        return new ExprValueWordPair(left, right);
+    public LearnerProgressTablePeriodic(Options options, Alphabet alphabet,
+            MembershipOracle<HashableValue> membershipOracle, Word label) {
+        super(options, alphabet, membershipOracle, label);
+       
     }
-    
-    List<Word> getNewStates(); 
-    
-    Word getStateLabel(int state);
-    
-	
+
+    @Override
+    public Word getLeadingLabel() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Word getStateLabel(Word word) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public LearnerType getLearnerType() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

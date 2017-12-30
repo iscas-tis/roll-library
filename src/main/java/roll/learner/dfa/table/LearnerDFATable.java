@@ -50,13 +50,12 @@ public abstract class LearnerDFATable extends LearnerDFA {
         queryResult.answerQuery(result);
         return queryResult;
     }
-
     
     protected void initialize() {
         
         Word wordEmpty = alphabet.getEmptyWord();
         observationTable.addUpperRow(wordEmpty);
-        ExprValue exprValue = getExprValueWord(wordEmpty);
+        ExprValue exprValue = getInitialColumnExprValue();
         
         // add empty word column
         observationTable.addColumn(exprValue);

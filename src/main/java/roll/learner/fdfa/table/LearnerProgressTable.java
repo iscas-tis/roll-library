@@ -14,11 +14,27 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.fdfa;
+package roll.learner.fdfa.table;
 
+import roll.learner.dfa.table.LearnerDFATable;
+import roll.learner.fdfa.LearnerLeading;
+import roll.learner.fdfa.LearnerProgress;
+import roll.main.Options;
+import roll.oracle.MembershipOracle;
+import roll.table.HashableValue;
+import roll.words.Alphabet;
 import roll.words.Word;
 
-public interface LearnerProgress extends LearnerGeneral {
+abstract class LearnerProgressTable extends LearnerDFATable implements LearnerProgress {
+    protected final Word label; 
+    protected LearnerLeading learnerLeading;
+    protected int state;
+	public LearnerProgressTable(Options options, Alphabet alphabet
+	        , MembershipOracle<HashableValue> membershipOracle, Word label) {
+        super(options, alphabet, membershipOracle);
+        this.label = label;
+    }
+
 	
-    Word getLeadingLabel();
+
 }

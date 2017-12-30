@@ -14,23 +14,47 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.fdfa;
+package roll.learner.fdfa.table;
 
 import java.util.List;
 
+import roll.learner.LearnerType;
+import roll.learner.dfa.table.LearnerDFATable;
+import roll.learner.fdfa.LearnerLeading;
+import roll.main.Options;
+import roll.oracle.MembershipOracle;
 import roll.table.ExprValue;
-import roll.table.ExprValueWordPair;
+import roll.table.HashableValue;
+import roll.words.Alphabet;
 import roll.words.Word;
 
-public interface LearnerLeading extends LearnerGeneral {
+public class LearnerLeadingTable extends LearnerDFATable implements LearnerLeading {
 
-    default ExprValue getExprValueWord(Word left, Word right) {
-        return new ExprValueWordPair(left, right);
+    public LearnerLeadingTable(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
+        super(options, alphabet, membershipOracle);
     }
-    
-    List<Word> getNewStates(); 
-    
-    Word getStateLabel(int state);
-    
-	
+
+    @Override
+    public Word getStateLabel(Word word) {
+        return null;
+    }
+
+    @Override
+    public LearnerType getLearnerType() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<Word> getNewStates() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

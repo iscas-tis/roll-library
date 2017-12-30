@@ -51,6 +51,12 @@ public abstract class LearnerDFA extends LearnerBase<DFA> {
 		initialize();
 	}
 	
+    protected ExprValue getInitialColumnExprValue() {
+        Word wordEmpty = alphabet.getEmptyWord();
+        ExprValue exprValue = getExprValueWord(wordEmpty);
+        return exprValue;
+    }
+	
 	protected abstract void initialize();
 
 	@Override
