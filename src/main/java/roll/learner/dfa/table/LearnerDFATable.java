@@ -227,7 +227,7 @@ public abstract class LearnerDFATable extends LearnerDFA {
 
         @Override
         protected void update(CeAnalysisResult result) {
-            Word wordCE = exprValue.get();
+            Word wordCE = getWordExperiment();
             wordExpr = getExprValueWord(wordCE.getSuffix(result.breakIndex + 1));  // y[j+1..n]
         }
     }

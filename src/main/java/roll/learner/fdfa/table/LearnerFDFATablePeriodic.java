@@ -29,7 +29,6 @@ public class LearnerFDFATablePeriodic extends LearnerFDFA {
 	public LearnerFDFATablePeriodic(Options options, Alphabet alphabet,
             MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
-        // TODO Auto-generated constructor stub
     }
 
     @Override

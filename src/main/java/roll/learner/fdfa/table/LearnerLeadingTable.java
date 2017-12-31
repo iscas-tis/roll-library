@@ -21,6 +21,7 @@ import roll.learner.fdfa.LearnerLeading;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
+import roll.query.QuerySimple;
 import roll.table.ExprValue;
 import roll.table.ExprValueWordPair;
 import roll.table.HashableValue;
@@ -56,6 +57,41 @@ public class LearnerLeadingTable extends LearnerOmegaTable implements LearnerLea
     @Override
     public LearnerType getLearnerType() {
         return LearnerType.FDFA_LEADING_TABLE;
+    }
+    
+    //only for values
+    @Override
+    protected HashableValue processMembershipQuery(Word prefix, Word suffix) {
+        prefix = prefix.concat(suffix);
+        assert loop != null;
+        Query<HashableValue> query = new QuerySimple<>(null, prefix, loop, -1);
+        return membershipOracle.answerMembershipQuery(query);
+    }
+    
+    protected Word loop;
+    
+    protected class CeAnalyzerLeadingTable extends CeAnalyzerTable {
+
+        public CeAnalyzerLeadingTable(ExprValue exprValue, HashableValue result) {
+            super(exprValue, result);
+        }
+        
+        @Override
+        protected Word getWordExperiment() {
+            loop = this.exprValue.getRight();
+            return this.exprValue.getLeft();
+        }
+
+        @Override
+        protected void update(CeAnalysisResult result) {
+            Word wordCE = exprValue.getLeft();
+            wordExpr = getExprValueWord(wordCE.getSuffix(result.breakIndex + 1), loop);  // y[j+1..n]
+        }
+    }
+    
+    @Override
+    protected CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
+        return new CeAnalyzerLeadingTable(exprValue, result);
     }
 
 }

@@ -22,6 +22,7 @@ import roll.oracle.MembershipOracle;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.ExprValue;
+import roll.table.ExprValueWordPair;
 import roll.table.HashableValue;
 import roll.table.ObservationRow;
 import roll.words.Alphabet;
@@ -43,6 +44,15 @@ abstract class LearnerOmegaTable extends LearnerDFATable {
 
     protected HashableValue processMembershipQuery(ObservationRow row, Word prefix, Word suffix, int column) {
         return membershipOracle.answerMembershipQuery(getQuerySimple(row, prefix, suffix, column));
+    }
+    
+    @Override
+    protected ExprValue getCounterExampleWord(Query<HashableValue> query) {
+        assert query != null;
+        Word left = query.getPrefix();
+        Word right = query.getSuffix();
+        assert left != null && right != null;
+        return new ExprValueWordPair(left, right);
     }
     
     @Override

@@ -105,10 +105,14 @@ public abstract class LearnerDFA extends LearnerBase<DFA> {
 	        update(result);
 	    }
 	    
+	    protected Word getWordExperiment() {
+	        return this.exprValue.get();
+	    }
+	    
 	    protected CeAnalysisResult findBreakIndex() {
-	        Word wordCE = this.exprValue.get();
+	        Word wordCE = getWordExperiment();
             // get the initial state from automaton
-           int letterNr = 0, currState = -1, prevState = dfa.getInitialState();
+            int letterNr = 0, currState = -1, prevState = dfa.getInitialState();
             if(! options.binarySearch) {
                 for (letterNr = 0; letterNr < wordCE.length(); letterNr++) {
                     currState = dfa.getSuccessor(prevState, wordCE.getLetter(letterNr));
