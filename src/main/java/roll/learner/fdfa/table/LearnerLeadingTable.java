@@ -90,6 +90,11 @@ public class LearnerLeadingTable extends LearnerOmegaTable implements LearnerLea
     }
     
     @Override
+    protected boolean isAccepting(int state) {
+        return false;
+    }
+    
+    @Override
     protected CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
         return new CeAnalyzerLeadingTable(exprValue, result);
     }

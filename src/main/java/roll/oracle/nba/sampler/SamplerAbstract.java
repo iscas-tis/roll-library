@@ -14,7 +14,7 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.oracle.sampler;
+package roll.oracle.nba.sampler;
 
 import java.util.ArrayList;
 import java.util.List;

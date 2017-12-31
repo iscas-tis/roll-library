@@ -67,5 +67,22 @@ abstract class LearnerProgressTable extends LearnerOmegaTable implements Learner
         query.answerQuery(result);
         return query;
     }
+    
+    protected class CeAnalyzerProgressTable extends CeAnalyzerTable {
+
+        public CeAnalyzerProgressTable(ExprValue exprValue, HashableValue result) {
+            super(exprValue, result);
+        }
+        
+        @Override
+        protected Word getWordExperiment() {
+            return this.exprValue.getRight();
+        }
+    }
+    
+    @Override
+    protected CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
+        return new CeAnalyzerProgressTable(exprValue, result);
+    }
 
 }

@@ -14,9 +14,8 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.oracle.rabit;
+package roll.oracle.nba.sampler;
 
-import automata.FiniteAutomaton;
 import roll.automata.NBA;
 import roll.automata.operations.NBAOperations;
 import roll.main.Options;
@@ -25,23 +24,22 @@ import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
-import roll.util.Pair;
 import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class TeacherNBARABIT implements Teacher<NBA, Query<HashableValue>, HashableValue> {
+public class TeacherNBASampler implements Teacher<NBA, Query<HashableValue>, HashableValue> {
     
     private final Options options;
     private final NBA target;
-    private final FiniteAutomaton rabitTgt;
+    private final Sampler sampler;
     
-    public TeacherNBARABIT(Options options, NBA target) {
+    public TeacherNBASampler(Options options, NBA target) {
         this.options = options;
         this.target = target;
-        this.rabitTgt = UtilRABIT.toRABITNBA(target);
+        this.sampler = new SamplerIndexedMonteCarlo(options.epsilon, options.delta);
     }
 
     @Override
@@ -51,35 +49,42 @@ public class TeacherNBARABIT implements Teacher<NBA, Query<HashableValue>, Hasha
         boolean answer = NBAOperations.accepts(target, prefix, suffix);
         return new HashableValueBoolean(answer);
     }
-
+    
     @Override
     public Query<HashableValue> answerEquivalenceQuery(NBA hypothesis) {
-        FiniteAutomaton rabitHypo = UtilRABIT.toRABITNBA(hypothesis);
-        FiniteAutomaton A, B;
-        if(rabitHypo.states.size() > rabitTgt.states.size()) {
-            A = rabitTgt;
-            B = rabitHypo;
-        }else {
-            A = rabitHypo;
-            B = rabitTgt;
-        }
-        Pair<Word, Word> result = UtilRABIT.isIncluded(target.getAlphabet(), A, B);
+        // sample words from hypothesis
         Query<HashableValue> ceQuery = null;
-        if(result != null) {
-            ceQuery = new QuerySimple<>(result.getLeft(), result.getRight());
-            ceQuery.answerQuery(new HashableValueBoolean(false));
-            return ceQuery;
+        NBA A, B;
+        if(target.getStateSize() > hypothesis.getStateSize()) {
+            A = hypothesis;
+            B = target;
+        }else {
+            A = target;
+            B = hypothesis;
         }
-        result = UtilRABIT.isIncluded(target.getAlphabet(), B, A);
-        if(result != null) {
-            ceQuery = new QuerySimple<>(result.getLeft(), result.getRight());
-            ceQuery.answerQuery(new HashableValueBoolean(false));
-            return ceQuery;
+        
+        if(!isEmptyNBA(A)) {
+            ceQuery = NBAInclusionSampler.isIncluded(A, B, sampler);
         }
+        if(ceQuery != null) return ceQuery;
+        
+        if(!isEmptyNBA(B)) {
+            ceQuery = NBAInclusionSampler.isIncluded(B, A, sampler);
+        }
+        if(ceQuery != null) return ceQuery;
+        
         Word wordEmpty = target.getAlphabet().getEmptyWord();
+        // found a counterexample
         ceQuery = new QuerySimple<>(wordEmpty, wordEmpty);
         ceQuery.answerQuery(new HashableValueBoolean(true));
         return ceQuery;
+    }
+    
+    private boolean isEmptyNBA(NBA nba) {
+        if(nba.getStateSize() > 1) {
+            return false;
+        }
+        return nba.getState(0).getEnabledLetters().cardinality() == 0;
     }
 
 }

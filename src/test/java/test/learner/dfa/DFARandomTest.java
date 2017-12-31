@@ -25,6 +25,7 @@ import roll.learner.dfa.table.LearnerDFATableLStar;
 import roll.learner.dfa.tree.LearnerDFATreeColumn;
 import roll.learner.dfa.tree.LearnerDFATreeKV;
 import roll.main.Options;
+import roll.oracle.dfa.dk.TeacherDFADK;
 import roll.query.Query;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
@@ -68,7 +69,7 @@ public class DFARandomTest {
 	}
 	
 	private static boolean testLearnerDFA(DFA machine, Alphabet alphabet, LearnerType algo) {
-		DFATeacherDK teacher = new DFATeacherDK(machine, alphabet);
+		TeacherDFADK teacher = new TeacherDFADK(machine, alphabet);
 		LearnerDFA learner = null;
 		Options options = new Options();
 		if(algo == LearnerType.DFA_COLUMN_TABLE) learner = new LearnerDFATableColumn(options, alphabet, teacher);
@@ -92,6 +93,7 @@ public class DFARandomTest {
 				System.out.println(model.toString());
 				break;
 			}
+			ceQuery.answerQuery(null);
 //			HashableValue val = teacher.answerMembershipQuery(ceQuery);
 //			ceQuery.answerQuery(val);
 			learner.refineHypothesis(ceQuery);

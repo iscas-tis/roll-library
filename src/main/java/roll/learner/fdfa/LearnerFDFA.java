@@ -155,7 +155,7 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
             timer.start();
             LearnerProgress learnerPro = null;
             for(LearnerProgress learner : learnerProgress) {
-                if(learner.getLeadingLabel().equals(label)) {
+                if(learner.getLeadingState() == s) {
                     learnerPro = learner;
                     break;
                 }

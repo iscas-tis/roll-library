@@ -14,7 +14,7 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package test.learner.dfa;
+package roll.oracle.dfa.dk;
 
 import dk.brics.automaton.Automaton;
 import roll.automata.DFA;
@@ -28,7 +28,7 @@ import roll.table.HashableValueBoolean;
 import roll.words.Alphabet;
 import roll.words.Word;
 
-public class DFATeacherDK implements MembershipOracle<HashableValue>, EquivalenceOracle<DFA, Query<HashableValue>> {
+public class TeacherDFADK implements MembershipOracle<HashableValue>, EquivalenceOracle<DFA, Query<HashableValue>> {
 
 	private final Automaton automaton;
 	private final DFA dfa;
@@ -37,7 +37,7 @@ public class DFATeacherDK implements MembershipOracle<HashableValue>, Equivalenc
 	private int numMembership = 0;
 	private int numEquiv = 0;
 	
-	public DFATeacherDK(DFA dfa, Alphabet alphabet) {
+	public TeacherDFADK(DFA dfa, Alphabet alphabet) {
 		this.automaton = DFAOperations.toDkDFA(dfa);
 		this.dfa = dfa;
 		this.alphabet = alphabet;
