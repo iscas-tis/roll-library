@@ -16,25 +16,56 @@
 
 package roll.learner.fdfa.table;
 
-import roll.learner.dfa.table.LearnerDFATable;
 import roll.learner.fdfa.LearnerLeading;
 import roll.learner.fdfa.LearnerProgress;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
+import roll.query.Query;
+import roll.table.ExprValue;
 import roll.table.HashableValue;
+import roll.table.ObservationRow;
 import roll.words.Alphabet;
 import roll.words.Word;
 
-abstract class LearnerProgressTable extends LearnerDFATable implements LearnerProgress {
-    protected final Word label; 
-    protected LearnerLeading learnerLeading;
+abstract class LearnerProgressTable extends LearnerOmegaTable implements LearnerProgress {
+
+    protected final LearnerLeading learnerLeading;
     protected int state;
+    protected final Word label;
 	public LearnerProgressTable(Options options, Alphabet alphabet
-	        , MembershipOracle<HashableValue> membershipOracle, Word label) {
+	        , MembershipOracle<HashableValue> membershipOracle
+	        , LearnerLeading learnerLeading, int state) {
         super(options, alphabet, membershipOracle);
-        this.label = label;
+        this.state = state;
+        this.learnerLeading = learnerLeading;
+        this.label = learnerLeading.getStateLabel(state);
+    }
+	
+    @Override
+    public Word getLeadingLabel() {
+        return label;
+    }
+    
+    @Override
+    public LearnerLeading getLearnerLeading() {
+        return learnerLeading;
     }
 
-	
+    @Override
+    public int getLeadingState() {
+        return state;
+    }
+        
+    @Override
+    protected Query<HashableValue> processMembershipQuery(ObservationRow row, int offset, ExprValue valueExpr) {
+        Word x = row.getWord(); //x
+        Word e = valueExpr.get(); //e
+        Word suffix = x.concat(e); //(xe)^w
+        HashableValue resultLeft = processMembershipQuery(row, label, suffix, offset);
+        Query<HashableValue> query = getQuerySimple(row, label, suffix, offset);
+        HashableValue result = prepareHashableValue(resultLeft.get(), x, e);
+        query.answerQuery(result);
+        return query;
+    }
 
 }

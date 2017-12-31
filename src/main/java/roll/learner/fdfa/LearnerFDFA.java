@@ -67,7 +67,7 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
         
         DFA dfa = learnerLeading.getHypothesis();
         for(int state = 0; state < dfa.getStateSize(); state ++ ) {
-            LearnerProgress learner = getLearnerProgress(learnerLeading.getStateLabel(state));
+            LearnerProgress learner = getLearnerProgress(state);
             learnerProgress.add(learner);
             timer.start();
             learner.startLearning();
@@ -94,7 +94,7 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
     
     protected abstract LearnerLeading getLearnerLeading();
     
-    protected abstract LearnerProgress getLearnerProgress(Word label);
+    protected abstract LearnerProgress getLearnerProgress(int state);
     
     protected boolean isPeriodic() {
         return false;
@@ -141,9 +141,10 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
                     learner.startLearning();
                 }
             }
+            DFA leadDFAPrime = learnerLeading.getHypothesis();
             // new states, not just one (for table-based leading automaton)
-            for(Word word : learnerLeading.getNewStates()) {
-                LearnerProgress learner = getLearnerProgress(word);
+            for(int state = leadDFA.getStateSize(); state < leadDFAPrime.getStateSize(); state ++) {
+                LearnerProgress learner = getLearnerProgress(state);
                 learner.startLearning();
                 learnerProgress.add(learner);
             }

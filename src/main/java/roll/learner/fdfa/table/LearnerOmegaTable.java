@@ -16,46 +16,38 @@
 
 package roll.learner.fdfa.table;
 
-import roll.learner.LearnerType;
-import roll.learner.fdfa.LearnerLeading;
+import roll.learner.dfa.table.LearnerDFATable;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
+import roll.query.QuerySimple;
 import roll.table.ExprValue;
-import roll.table.ExprValueWordPair;
 import roll.table.HashableValue;
 import roll.table.ObservationRow;
 import roll.words.Alphabet;
 import roll.words.Word;
 
-public class LearnerLeadingTable extends LearnerOmegaTable implements LearnerLeading {
+/**
+ * @author Yong Li (liyong@ios.ac.cn)
+ * */
+
+abstract class LearnerOmegaTable extends LearnerDFATable {
     
-    public LearnerLeadingTable(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
+    public LearnerOmegaTable(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
     }
-    
-    protected ExprValue getInitialColumnExprValue() {
-        Word wordEmpty = alphabet.getEmptyWord();
-        ExprValue exprValue = getExprValueWord(wordEmpty, wordEmpty);
-        return exprValue;
-    }
-    
-    @Override
-    protected Query<HashableValue> processMembershipQuery(ObservationRow row, int offset, ExprValue valueExpr) {
-        assert valueExpr instanceof ExprValueWordPair;
-        Word prefix = row.getWord();        //u
-        Word left = valueExpr.getLeft();    //x
-        prefix = prefix.concat(left);       //ux
-        Word suffix = valueExpr.getRight();  // ux(y)^w
-        HashableValue result = processMembershipQuery(row, prefix, suffix, offset);
-        Query<HashableValue> query = getQuerySimple(row, prefix, suffix, offset);
-        query.answerQuery(result);
-        return query;
+
+    protected Query<HashableValue> getQuerySimple(ObservationRow row, Word prefix, Word suffix, int column) {
+        return new QuerySimple<>(row, prefix, suffix, column);
     }
 
+    protected HashableValue processMembershipQuery(ObservationRow row, Word prefix, Word suffix, int column) {
+        return membershipOracle.answerMembershipQuery(getQuerySimple(row, prefix, suffix, column));
+    }
+    
     @Override
-    public LearnerType getLearnerType() {
-        return LearnerType.FDFA_LEADING_TABLE;
+    protected CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
+        return new CeAnalyzerTable(exprValue, result);
     }
 
 }

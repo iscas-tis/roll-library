@@ -16,9 +16,31 @@
 
 package roll.learner.fdfa;
 
+import roll.table.HashableValue;
+import roll.table.HashableValueBoolean;
+import roll.table.HashableValueBooleanPair;
+import roll.table.HashableValueIntEnum;
 import roll.words.Word;
 
 public interface LearnerProgress extends LearnerGeneral {
 	
     Word getLeadingLabel();
+    
+    LearnerLeading getLearnerLeading();
+    
+    default HashableValue getHashableValueIntBoolPair(int state, boolean recur, boolean mq) {
+        return new HashableValueIntEnum(state, recur, mq);
+    }
+    
+    default HashableValue getHashableValueBoolPair(boolean recur, boolean mq) {
+        return new HashableValueBooleanPair(recur, mq);
+    }
+    
+    default HashableValue getHashableValueBool(boolean result) {
+        return new HashableValueBoolean(result);
+    }
+    
+    HashableValue prepareHashableValue(boolean mqResult, Word x, Word e);
+    
+    int getLeadingState();
 }

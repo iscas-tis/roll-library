@@ -27,6 +27,11 @@ import roll.words.Word;
 
 public interface LearnerGeneral extends Learner<DFA, HashableValue> {
 
-    Word getStateLabel(Word word);
+    default Word getStateLabel(Word word) {
+        DFA dfa = this.getHypothesis();
+        return getStateLabel(dfa.getSuccessor(word));
+    }
+    
+    Word getStateLabel(int state);
 
 }

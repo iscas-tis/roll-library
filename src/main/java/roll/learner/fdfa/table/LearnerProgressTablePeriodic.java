@@ -17,43 +17,23 @@
 package roll.learner.fdfa.table;
 
 import roll.learner.LearnerType;
+import roll.learner.fdfa.LearnerLeading;
+import roll.learner.fdfa.LearnerProgressPeriodic;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
-import roll.table.ExprValue;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
-import roll.words.Word;
 
-public class LearnerProgressTablePeriodic extends LearnerProgressTable {
+public class LearnerProgressTablePeriodic extends LearnerProgressTable implements LearnerProgressPeriodic {
 
     public LearnerProgressTablePeriodic(Options options, Alphabet alphabet,
-            MembershipOracle<HashableValue> membershipOracle, Word label) {
-        super(options, alphabet, membershipOracle, label);
-       
-    }
-
-    @Override
-    public Word getLeadingLabel() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Word getStateLabel(Word word) {
-        // TODO Auto-generated method stub
-        return null;
+            MembershipOracle<HashableValue> membershipOracle, LearnerLeading learnerLeading, int state) {
+        super(options, alphabet, membershipOracle, learnerLeading, state);
     }
 
     @Override
     public LearnerType getLearnerType() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    protected CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
-        // TODO Auto-generated method stub
-        return null;
+        return LearnerType.FDFA_PERIODIC_TABLE;
     }
 
 }

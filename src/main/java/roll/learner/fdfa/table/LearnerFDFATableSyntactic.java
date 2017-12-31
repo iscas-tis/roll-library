@@ -22,26 +22,23 @@ import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
-import roll.words.Word;
 
 public class LearnerFDFATableSyntactic extends LearnerFDFA {
 
 	public LearnerFDFATableSyntactic(Options options, Alphabet alphabet,
             MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
-        // TODO Auto-generated constructor stub
     }
 
     @Override
     protected LearnerLeading getLearnerLeading() {
-        // TODO Auto-generated method stub
-        return null;
+        return new LearnerLeadingTable(options, alphabet, membershipOracle);
     }
 
     @Override
-    protected LearnerProgress getLearnerProgress(Word label) {
-        // TODO Auto-generated method stub
-        return null;
+    protected LearnerProgress getLearnerProgress(int state) {
+        assert learnerLeading != null;
+        return new LearnerProgressTableSyntactic(options, alphabet, membershipOracle, learnerLeading, state);
     }
 
 }

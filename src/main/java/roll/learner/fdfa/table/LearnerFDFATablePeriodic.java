@@ -23,7 +23,6 @@ import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
-import roll.words.Word;
 
 public class LearnerFDFATablePeriodic extends LearnerFDFA {
 
@@ -40,12 +39,13 @@ public class LearnerFDFATablePeriodic extends LearnerFDFA {
 
     @Override
     protected LearnerLeading getLearnerLeading() {
-        return null;
+        return new LearnerLeadingTable(options, alphabet, membershipOracle);
     }
 
     @Override
-    protected LearnerProgress getLearnerProgress(Word label) {
-        return null;
+    protected LearnerProgress getLearnerProgress(int state) {
+        assert learnerLeading != null;
+        return new LearnerProgressTablePeriodic(options, alphabet, membershipOracle, learnerLeading, state);
     }
 
 }

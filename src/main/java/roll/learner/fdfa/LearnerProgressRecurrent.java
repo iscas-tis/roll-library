@@ -14,26 +14,25 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.fdfa.table;
+package roll.learner.fdfa;
 
-import roll.learner.LearnerType;
-import roll.learner.fdfa.LearnerLeading;
-import roll.learner.fdfa.LearnerProgressRecurrent;
-import roll.main.Options;
-import roll.oracle.MembershipOracle;
+import roll.automata.DFA;
 import roll.table.HashableValue;
-import roll.words.Alphabet;
+import roll.words.Word;
 
-public class LearnerProgressTableRecurrent extends LearnerProgressTable implements LearnerProgressRecurrent {
+/**
+ * @author Yong Li (liyong@ios.ac.cn)
+ * */
 
-    public LearnerProgressTableRecurrent(Options options, Alphabet alphabet,
-            MembershipOracle<HashableValue> membershipOracle, LearnerLeading learnerLeading, int state) {
-        super(options, alphabet, membershipOracle, learnerLeading, state);
-    }
-
+public interface LearnerProgressRecurrent extends LearnerProgress {
+    
     @Override
-    public LearnerType getLearnerType() {
-        return LearnerType.FDFA_RECURRENT_TABLE;
+    default HashableValue prepareHashableValue(boolean mqResult, Word x, Word e) {
+        DFA leadDFA = getLearnerLeading().getHypothesis();
+        int stateUX = leadDFA.getSuccessor(getLeadingState(), x);
+        int stateUXE = leadDFA.getSuccessor(stateUX, e);
+        boolean recur = stateUXE == getLeadingState();
+        return getHashableValueBoolPair(recur, mqResult);
     }
 
 }

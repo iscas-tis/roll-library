@@ -16,8 +16,6 @@
 
 package roll.learner.fdfa;
 
-import java.util.List;
-
 import roll.table.ExprValue;
 import roll.table.ExprValueWordPair;
 import roll.words.Word;
@@ -26,11 +24,6 @@ public interface LearnerLeading extends LearnerGeneral {
 
     default ExprValue getExprValueWord(Word left, Word right) {
         return new ExprValueWordPair(left, right);
-    }
+    }    
     
-    List<Word> getNewStates(); 
-    
-    Word getStateLabel(int state);
-    
-	
 }
