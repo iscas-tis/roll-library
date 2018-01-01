@@ -1,20 +1,22 @@
-package roll.translator;
+package roll.learner.nba.lomega.translator;
 
 import dk.brics.automaton.State;
 import roll.learner.fdfa.LearnerFDFA;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
 import roll.query.QuerySimple;
+import roll.table.HashableValue;
+import roll.table.HashableValueBoolean;
 import roll.util.Timer;
 import roll.words.Word;
 
-public class TranslatorFDFAUpper extends TranslatorFDFA {
+public class TranslatorFDFAOver extends TranslatorFDFA {
 
-	private MembershipOracle<Boolean> membershipOracle;
+	private MembershipOracle<HashableValue> membershipOracle;
 	private boolean result ;
 	
-	public TranslatorFDFAUpper(LearnerFDFA learner
-			, MembershipOracle<Boolean> membershipOracle) {
+	public TranslatorFDFAOver(LearnerFDFA learner
+			, MembershipOracle<HashableValue> membershipOracle) {
 		super(learner);
 		assert membershipOracle != null;
  		this.membershipOracle = membershipOracle;
@@ -22,28 +24,30 @@ public class TranslatorFDFAUpper extends TranslatorFDFA {
 	
 
 	@Override
-	public Query<Boolean> translate() {
+	public Query<HashableValue> translate() {
+	    fdfa = fdfaLearner.getHypothesis();
 		Timer timer = new Timer();
 		timer.start();
 		String counterexample = translateUpper();
 		timer.stop();
 		options.stats.timeOfTranslator += timer.getTimeElapsed();
-		return getQuery(counterexample, result);
+		return getQuery(counterexample, new HashableValueBoolean(result));
 	}
 	
 	private String translateUpper() {
 		// for general case 
 //		if(Options.verbose) AutomatonPrinter.print(autUVOmega, System.out);
 //		if(Options.verbose) learnerFDFA.getHypothesis();
-		if(ceQuery.getQueryAnswer()) {
+	    boolean isCeInTarget = ceQuery.getQueryAnswer().get();
+		if(isCeInTarget) {
 			// (u, v) is in L, but it is not in FDFA
 			result = true;
-			return getPositiveCounterExample(learnerFDFA, autUVOmega);
+			return getPositiveCounterExample(autUVOmega);
 		}else {
 			// (u, v) is not in L, but it is in constructed Buechi
 			// possibly it is not in FDFA, already normalized.
 			result = false;
-			return getCorrectNormalizedCounterExample(learnerFDFA, membershipOracle);
+			return getCorrectNormalizedCounterExample(fdfaLearner, membershipOracle);
 		}
 	}
 	
@@ -69,7 +73,7 @@ public class TranslatorFDFAUpper extends TranslatorFDFA {
 	}
 	
 	private String getCorrectNormalizedCounterExample(LearnerFDFA learnerFDFA
-			, MembershipOracle<Boolean> membershipOracle) {
+			, MembershipOracle<HashableValue> membershipOracle) {
 		
 //		Word pre = null, suf = null;
 //		// 1. first build dollar deterministic automaton for (u, v) 

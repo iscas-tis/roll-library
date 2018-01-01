@@ -16,8 +16,19 @@
 
 package roll.learner.nba.lomega;
 
+import dk.brics.automaton.Automaton;
+import roll.automata.FDFA;
+import roll.automata.NBA;
+import roll.automata.operations.FDFAOperations;
+import roll.automata.operations.NBAOperations;
 import roll.learner.fdfa.LearnerFDFA;
+import roll.learner.nba.lomega.translator.TranslatorFDFA;
+import roll.learner.nba.lomega.translator.TranslatorFDFAOver;
+import roll.learner.nba.lomega.translator.TranslatorFDFAUnder;
 import roll.main.Options;
+import roll.oracle.MembershipOracle;
+import roll.table.HashableValue;
+import roll.words.Alphabet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -57,6 +68,33 @@ public class UtilLOmega {
             }
         }
         return fdfaLearner;
+    }
+    
+    public static NBA constructNBA(Options options, FDFA fdfa) {
+        Automaton dkAut = null;
+        Alphabet alphabet = fdfa.getAlphabet();
+        if(options.approximation == Options.Approximation.OVER) {
+            dkAut = FDFAOperations.buildOverNBA(fdfa);
+        }else if(options.approximation == Options.Approximation.UNDER){
+            dkAut = FDFAOperations.buildUnderNBA(fdfa);
+        }else {
+            throw new UnsupportedOperationException("Unknown approximation for fdfa");
+        }
+        NBA nba = NBAOperations.fromDkNBA(dkAut, alphabet);
+        return nba;
+    }
+    
+    public static TranslatorFDFA getTranslator(Options options
+            , LearnerFDFA fdfaLearner, MembershipOracle<HashableValue> membershipOracle) {
+        TranslatorFDFA translator = null;
+        if(options.approximation == Options.Approximation.OVER) {
+            translator = new TranslatorFDFAOver(fdfaLearner, membershipOracle);
+        }else if(options.approximation == Options.Approximation.UNDER){
+            translator = new TranslatorFDFAUnder(fdfaLearner);
+        }else {
+            throw new UnsupportedOperationException("Unknown approximation for fdfa");
+        }
+        return translator;
     }
 
 }

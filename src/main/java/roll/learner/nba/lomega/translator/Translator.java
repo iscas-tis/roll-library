@@ -14,10 +14,11 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.translator;
+package roll.learner.nba.lomega.translator;
 
 import roll.main.Options;
 import roll.query.Query;
+import roll.table.HashableValue;
 import roll.words.Alphabet;
 
 /**
@@ -35,8 +36,8 @@ public interface Translator {
     
     boolean canRefine();
     
-    void setQuery(Query<Boolean> query);
+    void setQuery(Query<HashableValue> query);
     
-    Query<Boolean> translate();
+    Query<HashableValue> translate();
 
 }

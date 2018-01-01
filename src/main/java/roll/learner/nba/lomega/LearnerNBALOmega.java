@@ -16,10 +16,12 @@
 
 package roll.learner.nba.lomega;
 
+import roll.automata.FDFA;
 import roll.automata.NBA;
 import roll.learner.LearnerBase;
 import roll.learner.LearnerType;
 import roll.learner.fdfa.LearnerFDFA;
+import roll.learner.nba.lomega.translator.TranslatorFDFA;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
@@ -56,8 +58,9 @@ public class LearnerNBALOmega extends LearnerBase<NBA>{
     }
 
     protected void constructHypothesis() {
-        
-        
+        // construct BA from FDFA
+        FDFA fdfa = fdfaLearner.getHypothesis();
+        nba = UtilLOmega.constructNBA(options, fdfa);
     }
 
     @Override
@@ -67,7 +70,21 @@ public class LearnerNBALOmega extends LearnerBase<NBA>{
 
     @Override
     public void refineHypothesis(Query<HashableValue> query) {
-        
+        TranslatorFDFA translator = UtilLOmega.getTranslator(options, fdfaLearner, membershipOracle);
+        // lazy equivalence check is implemented here
+        HashableValue mqResult = query.getQueryAnswer();
+        if(mqResult == null) {
+            mqResult = membershipOracle.answerMembershipQuery(query);
+        }
+        query.answerQuery(mqResult);
+        translator.setQuery(query);
+        while(translator.canRefine()) {
+            Query<HashableValue> ceQuery = translator.translate();
+            fdfaLearner.refineHypothesis(ceQuery);
+            // usually lazyeq is not very useful
+            if(options.optimization != Options.Optimization.LAZY_EQ) break;
+        }
+        constructHypothesis();
         
     }
 
