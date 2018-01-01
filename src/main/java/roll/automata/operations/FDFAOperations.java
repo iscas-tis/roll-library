@@ -130,7 +130,7 @@ public class FDFAOperations {
             Automaton dkAutP = DFAOperations.toDkDFA(fdfa.getProgressDFA(stateNr));
             if(complement) {
                 // whether we need the complement of A^a
-                dkAutP.complement();
+                dkAutP = dkAutP.complement();
             }
             Automaton product = dkAutLOther.intersection(dkAutP);
             product.minimize();

@@ -38,20 +38,19 @@ public class TeacherFDFADK implements MembershipOracle<HashableValue>, Equivalen
 
     private final FDFA fdfa;
     private final Alphabet alphabet;
-    private final Automaton d1; 
-    private int numMembership = 0;
-    private int numEquiv = 0;
     
     public TeacherFDFADK(FDFA fdfa, Alphabet alphabet) {
         this.fdfa = fdfa;
         this.alphabet = alphabet;
-        this.d1 = FDFAOperations.buildDOne(fdfa);
     }
     
     @Override
     public Query<HashableValue> answerEquivalenceQuery(FDFA hypothesis) {
         Automaton hypo = FDFAOperations.buildDOne(hypothesis);
-        Automaton temp = hypo.clone().minus(d1.clone());
+        System.out.println("hypo:\n " + hypo.toDot());
+        Automaton target = FDFAOperations.buildDTwo(fdfa);
+        System.out.println("target:\n " + target.toDot());
+        Automaton temp = hypo.intersection(target);
         String ce = temp.getShortestExample(true);
 
         Query<HashableValue> ceQuery = null;
@@ -61,7 +60,11 @@ public class TeacherFDFADK implements MembershipOracle<HashableValue>, Equivalen
             ceQuery.answerQuery(new HashableValueBoolean(false));
             return ceQuery;
         }
-        temp = d1.clone().minus(hypo.clone());
+        hypo = FDFAOperations.buildDTwo(hypothesis);
+        System.out.println("hypo:\n " + hypo.toDot());
+        target = FDFAOperations.buildDOne(fdfa);
+        System.out.println("target:\n " + target.toDot());
+        temp = hypo.intersection(target);
         ce = temp.getShortestExample(true);
         if(ce != null) {
             Pair<Word, Word> pair = alphabet.getWordPairFromString(ce);

@@ -78,7 +78,7 @@ class WordLetter extends WordAbstract {
 
 	@Override
 	public Word getSuffix(int startIndex) {
-		assert startIndex <= 1;
+		assert startIndex <= 1 : "word: " + letter + " index: " + startIndex;
 		if(startIndex >= 1) return getEmptyWord();
 		return this;
 	}

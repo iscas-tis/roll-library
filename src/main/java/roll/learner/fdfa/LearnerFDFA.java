@@ -164,6 +164,7 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
             timer.stop();
             options.stats.timeOfLearnerProgress += timer.getTimeElapsed();
         }
+        constructHypothesis();
         options.log.verbose("Finished counterexample analysis in the learner...");
     }
     
