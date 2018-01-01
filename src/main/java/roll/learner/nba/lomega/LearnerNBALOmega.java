@@ -30,6 +30,11 @@ import roll.words.Alphabet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ *  * This class implements the BA learning algorithm from the paper 
+ * Yong Li, Yu-Fang Chen, Lijun Zhang and Depeng Liu
+ *       "A Novel Learning Algorithm for  Büchi Automata based on Family of DFAs and Classification Trees"
+ * In TACAS 2017
  * */
 
 public class LearnerNBALOmega extends LearnerBase<NBA>{

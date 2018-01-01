@@ -35,6 +35,11 @@ import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ * Dana Angluin and Dana Fisman. "Learning Regular Omega Languages" in ALT 2014
+ * Yong Li, Yu-Fang Chen, Lijun Zhang and Depeng Liu.
+ *       "A Novel Learning Algorithm for  Büchi Automata based on Family of DFAs and Classification Trees"
+ * in TACAS 2017
  * */
 
 public abstract class LearnerFDFA extends LearnerBase<FDFA> {
