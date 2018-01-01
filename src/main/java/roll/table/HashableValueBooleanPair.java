@@ -32,8 +32,9 @@ public class HashableValueBooleanPair implements HashableValue {
 
 	@Override
 	public boolean valueEqual(HashableValue rvalue) {
-		return valueLeft == (Boolean)rvalue.getLeft()
-			&& valueRight == (Boolean)rvalue.getRight();
+	    boolean left = valueLeft && valueRight;
+	    boolean right = (Boolean)rvalue.getLeft() && (Boolean)rvalue.getRight();
+		return left == right;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -42,6 +43,7 @@ public class HashableValueBooleanPair implements HashableValue {
 		return new Pair<>(valueLeft, valueRight);
 	}
 	
+	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof HashableValueBooleanPair) {
 			HashableValueBooleanPair pair = (HashableValueBooleanPair)obj;
@@ -50,11 +52,13 @@ public class HashableValueBooleanPair implements HashableValue {
 		return false;
 	}
 	
+	@Override
 	public String toString() {
 		return "(" +  (valueLeft ? "+" : "-")
 				+ ", " + (valueRight ? "+" : "-") + ")";
 	}
 	
+	@Override
 	public int hashCode() {
 		int value = valueLeft ? 0 : 1;
 		value = value * 2 + (valueRight ? 0 : 1);

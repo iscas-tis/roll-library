@@ -42,6 +42,11 @@ abstract class LearnerProgressTable extends LearnerOmegaTable implements Learner
     }
 	
     @Override
+    public void startLearning() {
+        initialize();
+    }
+
+    @Override
     public Word getLeadingLabel() {
         return label;
     }

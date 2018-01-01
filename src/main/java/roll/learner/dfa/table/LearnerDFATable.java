@@ -53,6 +53,7 @@ public abstract class LearnerDFATable extends LearnerDFA {
     
     protected void initialize() {
         
+        observationTable.clear();
         Word wordEmpty = alphabet.getEmptyWord();
         observationTable.addUpperRow(wordEmpty);
         ExprValue exprValue = getInitialColumnExprValue();

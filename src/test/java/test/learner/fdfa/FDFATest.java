@@ -24,6 +24,8 @@ import roll.automata.DFA;
 import roll.automata.FDFA;
 import roll.learner.fdfa.LearnerFDFA;
 import roll.learner.fdfa.table.LearnerFDFATablePeriodic;
+import roll.learner.fdfa.table.LearnerFDFATableRecurrent;
+import roll.learner.fdfa.table.LearnerFDFATableSyntactic;
 import roll.main.Options;
 import roll.oracle.fdfa.dk.TeacherFDFADK;
 import roll.query.Query;
@@ -150,14 +152,14 @@ public class FDFATest {
         TeacherFDFADK teacher = new TeacherFDFADK(fdfa, alphabet);
         LearnerFDFA learner = null;
         Options options = new Options();
-        learner = new LearnerFDFATablePeriodic(options, alphabet, teacher);
-//        else if(algo == LearnerType.DFA_KV) {
-//            learner = new LearnerDFATreeKV(options, alphabet, teacher); 
-//        }else if(algo == LearnerType.DFA_COLUMN_TREE){
-//            learner = new LearnerDFATreeColumn(options, alphabet, teacher); 
-//        }else {
-//            learner = new LearnerDFATableLStar(options, alphabet, teacher); 
-//        }
+        options.algorithm = Options.Algorithm.RECURRENT;
+        if(options.algorithm == Options.Algorithm.PERIODIC) {
+            learner = new LearnerFDFATablePeriodic(options, alphabet, teacher); 
+        }else if(options.algorithm == Options.Algorithm.SYNTACTIC){
+            learner = new LearnerFDFATableSyntactic(options, alphabet, teacher); 
+        }else {
+            learner = new LearnerFDFATableRecurrent(options, alphabet, teacher); 
+        }
         System.out.println("starting learning");
         learner.startLearning();
 
