@@ -21,6 +21,7 @@ import roll.learner.fdfa.LearnerProgress;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
+import roll.query.QuerySimple;
 import roll.table.ExprValue;
 import roll.table.HashableValue;
 import roll.table.ObservationRow;
@@ -71,6 +72,15 @@ abstract class LearnerProgressTable extends LearnerOmegaTable implements Learner
         HashableValue result = prepareHashableValue(resultLeft.get(), x, e);
         query.answerQuery(result);
         return query;
+    }
+    
+    @Override
+    protected HashableValue processMembershipQuery(Word prefix, Word suffix) {
+        Word loop = prefix.concat(suffix);
+        Query<HashableValue> query = new QuerySimple<>(null, label, loop, -1);
+        HashableValue mqResult = membershipOracle.answerMembershipQuery(query);
+        HashableValue result = prepareHashableValue(mqResult.get(), prefix, suffix);
+        return result;
     }
     
     protected class CeAnalyzerProgressTable extends CeAnalyzerTable {

@@ -79,6 +79,7 @@ public class NBAOperations {
     public static boolean accepts(NBA nba, Word stem, Word loop) {
         assert nba != null && stem != null && loop != null;
         NBALasso lasso = new NBALasso(stem, loop);
+        if(loop.isEmpty()) return false;
         NBAIntersectCheck checker = new NBAIntersectCheck(nba, lasso.getNBA());
         return !checker.isEmpty();
     }

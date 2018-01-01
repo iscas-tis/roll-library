@@ -152,7 +152,7 @@ public class FDFATest {
         TeacherFDFADK teacher = new TeacherFDFADK(fdfa, alphabet);
         LearnerFDFA learner = null;
         Options options = new Options();
-        options.algorithm = Options.Algorithm.PERIODIC;
+        options.algorithm = Options.Algorithm.RECURRENT;
         if(options.algorithm == Options.Algorithm.PERIODIC) {
             learner = new LearnerFDFATablePeriodic(options, alphabet, teacher); 
         }else if(options.algorithm == Options.Algorithm.SYNTACTIC){

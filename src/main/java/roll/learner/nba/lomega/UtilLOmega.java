@@ -22,6 +22,9 @@ import roll.automata.NBA;
 import roll.automata.operations.FDFAOperations;
 import roll.automata.operations.NBAOperations;
 import roll.learner.fdfa.LearnerFDFA;
+import roll.learner.fdfa.table.LearnerFDFATablePeriodic;
+import roll.learner.fdfa.table.LearnerFDFATableRecurrent;
+import roll.learner.fdfa.table.LearnerFDFATableSyntactic;
 import roll.learner.nba.lomega.translator.TranslatorFDFA;
 import roll.learner.nba.lomega.translator.TranslatorFDFAOver;
 import roll.learner.nba.lomega.translator.TranslatorFDFAUnder;
@@ -36,18 +39,19 @@ import roll.words.Alphabet;
 
 public class UtilLOmega {
     
-    static LearnerFDFA getLearnerFDFA(Options options) {
+    static LearnerFDFA getLearnerFDFA(Options options, Alphabet alphabet
+            , MembershipOracle<HashableValue> membershipOracle) {
         LearnerFDFA fdfaLearner = null;
         if(options.structure.isTable()) {
             switch(options.algorithm) {
             case PERIODIC:
-                fdfaLearner = null;
+                fdfaLearner = new LearnerFDFATablePeriodic(options, alphabet, membershipOracle);
                 break;
             case SYNTACTIC:
-                fdfaLearner = null;
+                fdfaLearner = new LearnerFDFATableSyntactic(options, alphabet, membershipOracle);
                 break;
             case RECURRENT:
-                fdfaLearner = null;
+                fdfaLearner = new LearnerFDFATableRecurrent(options, alphabet, membershipOracle);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown FDFA learner");

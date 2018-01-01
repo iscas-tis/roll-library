@@ -39,7 +39,7 @@ public class LearnerNBALOmega extends LearnerBase<NBA>{
     private final LearnerFDFA fdfaLearner;
     public LearnerNBALOmega(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
-        fdfaLearner = UtilLOmega.getLearnerFDFA(options);
+        fdfaLearner = UtilLOmega.getLearnerFDFA(options, alphabet, membershipOracle);
     }
 
     @Override
@@ -70,6 +70,9 @@ public class LearnerNBALOmega extends LearnerBase<NBA>{
 
     @Override
     public void refineHypothesis(Query<HashableValue> query) {
+        if(options.verbose) {
+            System.out.println(fdfaLearner.getHypothesis().toString());
+        }
         TranslatorFDFA translator = UtilLOmega.getTranslator(options, fdfaLearner, membershipOracle);
         // lazy equivalence check is implemented here
         HashableValue mqResult = query.getQueryAnswer();
@@ -86,6 +89,11 @@ public class LearnerNBALOmega extends LearnerBase<NBA>{
         }
         constructHypothesis();
         
+    }
+    
+    @Override
+    public String toString() {
+        return fdfaLearner.toString();
     }
 
 }

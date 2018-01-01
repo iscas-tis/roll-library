@@ -36,7 +36,7 @@ public final class Options {
     public Algorithm algorithm;
     
     // approximation method for the ultimately periodic words of FDFA
-    public Approximation approximation = Approximation.OVER;
+    public Approximation approximation = Approximation.UNDER;
     
     // optimization for learning
     public Optimization optimization = Optimization.NONE;
