@@ -25,7 +25,7 @@ import roll.words.Word;
 
 public interface LearnerProgressPeriodic extends LearnerProgress {
 
-    default HashableValue prepareHashableValue(boolean mqResult, Word x, Word e) {
+    default HashableValue prepareRowHashableValue(boolean mqResult, Word x, Word e) {
         return getHashableValueBool(mqResult);
     }
     

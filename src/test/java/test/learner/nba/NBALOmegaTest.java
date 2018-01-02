@@ -19,11 +19,9 @@ package test.learner.nba;
 import org.junit.Test;
 
 import roll.automata.NBA;
-import roll.learner.nba.ldollar.LearnerNBALDollar;
 import roll.learner.nba.lomega.LearnerNBALOmega;
 import roll.main.Options;
 import roll.oracle.nba.rabit.TeacherNBARABIT;
-import roll.oracle.nba.sampler.TeacherNBASampler;
 import roll.query.Query;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
@@ -56,44 +54,63 @@ public class NBALOmegaTest {
         return target;
     }
     
-    @Test
-    public void testSampler() {
-        NBA target = getNBA();
+    private NBA getNBA2() {
+        Alphabet alphabet = new Alphabet();
+        alphabet.addLetter('a');
+        alphabet.addLetter('b');
+        NBA target = new NBA(alphabet);
+        target.createState();
+        target.createState();
         
-        Options options = new Options();
-        options.structure = Options.Structure.TABLE;
-        options.epsilon = 0.00018;
-        options.delta = 0.0001;
-        TeacherNBASampler teacher = new TeacherNBASampler(options, target);
-        LearnerNBALDollar learner = new LearnerNBALDollar(options, target.getAlphabet(), teacher);
-        System.out.println("starting learning");
-        learner.startLearning();
-        while(true) {
-            System.out.println("Table is both closed and consistent\n" + learner.toString());
-            NBA model = learner.getHypothesis();
-            System.out.println(model.toString());
-            // along with ce
-            Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(model);
-            boolean isEq = ceQuery.getQueryAnswer().get();
-            if(isEq) {
-                System.out.println(model.toString());
-                break;
-            }
-            ceQuery.answerQuery(null);
-            learner.refineHypothesis(ceQuery);
-        }
+        // a^w + ab^w
+        int fst = 0, snd = 1;
+        target.getState(fst).addTransition(alphabet.indexOf('a'), snd);
+        target.getState(fst).addTransition(alphabet.indexOf('b'), fst);
+        target.getState(snd).addTransition(alphabet.indexOf('b'), snd);
+        target.setInitial(fst);
+        target.setFinal(snd);
         
+        return target;
     }
+    
+//    @Test
+//    public void testSampler() {
+//        NBA target = getNBA();
+//        
+//        Options options = new Options();
+//        options.structure = Options.Structure.TABLE;
+//        options.epsilon = 0.00018;
+//        options.delta = 0.0001;
+//        TeacherNBASampler teacher = new TeacherNBASampler(options, target);
+//        LearnerNBALDollar learner = new LearnerNBALDollar(options, target.getAlphabet(), teacher);
+//        System.out.println("starting learning");
+//        learner.startLearning();
+//        while(true) {
+//            System.out.println("Table is both closed and consistent\n" + learner.toString());
+//            NBA model = learner.getHypothesis();
+//            System.out.println(model.toString());
+//            // along with ce
+//            Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(model);
+//            boolean isEq = ceQuery.getQueryAnswer().get();
+//            if(isEq) {
+//                System.out.println(model.toString());
+//                break;
+//            }
+//            ceQuery.answerQuery(null);
+//            learner.refineHypothesis(ceQuery);
+//        }
+//        
+//    }
     
     @Test
     public void testRABIT() {
-        NBA target = getNBA();
+        NBA target = getNBA2();
         
         System.out.println(target.toString());
         
         Options options = new Options();
         options.structure = Options.Structure.TABLE;
-        options.algorithm = Options.Algorithm.RECURRENT;
+        options.algorithm = Options.Algorithm.PERIODIC;
         options.verbose = true;
         TeacherNBARABIT teacher = new TeacherNBARABIT(options, target);
         LearnerNBALOmega learner = new LearnerNBALOmega(options, target.getAlphabet(), teacher);

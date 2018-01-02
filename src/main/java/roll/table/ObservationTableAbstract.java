@@ -125,6 +125,7 @@ public abstract class ObservationTableAbstract implements ObservationTable {
 		int index = columns.size();
 		columns.add(column);
 		assert columns.get(index).equals(column);
+		assert columns.indexOf(column) == index : "new column to be added: " + column;
 		return index;
 	}
 	

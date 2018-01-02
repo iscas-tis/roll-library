@@ -165,7 +165,7 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
                     break;
                 }
             }
-            HashableValue result = learnerPro.prepareHashableValue(resultCE.get(), alphabet.getEmptyWord(), queryLeading.getSuffix());
+            HashableValue result = learnerPro.getCeAnalyzerHashableValue(resultCE.get(), alphabet.getEmptyWord(), queryLeading.getSuffix());
             queryLeading.answerQuery(result);
             learnerPro.refineHypothesis(queryLeading);
             timer.stop();

@@ -40,7 +40,11 @@ public interface LearnerProgress extends LearnerGeneral {
         return new HashableValueBoolean(result);
     }
     
-    HashableValue prepareHashableValue(boolean mqResult, Word x, Word e);
+    HashableValue prepareRowHashableValue(boolean mqResult, Word x, Word e);
+    
+    default HashableValue getCeAnalyzerHashableValue(boolean mqResult, Word x, Word e) {
+        return prepareRowHashableValue(mqResult, x, e);
+    }
     
     int getLeadingState();
 }

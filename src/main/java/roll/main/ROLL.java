@@ -55,11 +55,12 @@ public final class ROLL {
     }
     
     private static void runTestMode(Options options) {
-        final int numLetter = 3;
+        final int numLetter = 2;
         for(int n = 0; n < options.numOfTests; n ++) {
-            
+            options.log.println("Testing case " + (n + 1) + " ...");
             NBA nba = NBAGenerator.getRandomNBA(options.numOfStatesForTest, numLetter);
             try{
+                System.out.println("target: \n" + nba.toString());
                 AutomaticMode.execute(options, nba);
             }catch (Exception e)
             {

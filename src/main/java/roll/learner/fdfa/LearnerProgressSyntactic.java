@@ -27,12 +27,21 @@ import roll.words.Word;
 public interface LearnerProgressSyntactic extends LearnerProgress {
     
     @Override
-    default HashableValue prepareHashableValue(boolean mqResult, Word x, Word e) {
+    default HashableValue prepareRowHashableValue(boolean mqResult, Word x, Word e) {
         DFA leadDFA = getLearnerLeading().getHypothesis();
         int stateUX = leadDFA.getSuccessor(getLeadingState(), x);
         int stateUXE = leadDFA.getSuccessor(stateUX, e);
         boolean recur = stateUXE == getLeadingState();
         return getHashableValueIntBoolPair(stateUX, recur, mqResult);
+    }
+    
+    @Override
+    default HashableValue getCeAnalyzerHashableValue(boolean mqResult, Word x, Word e) {
+        DFA leadDFA = getLearnerLeading().getHypothesis();
+        int stateUX = leadDFA.getSuccessor(getLeadingState(), x);
+        int stateUXE = leadDFA.getSuccessor(stateUX, e);
+        boolean recur = stateUXE == getLeadingState();
+        return getHashableValueBoolPair(recur, mqResult);
     }
 
 }

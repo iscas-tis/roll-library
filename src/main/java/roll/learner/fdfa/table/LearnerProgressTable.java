@@ -69,7 +69,7 @@ abstract class LearnerProgressTable extends LearnerOmegaTable implements Learner
         Word suffix = x.concat(e); //(xe)^w
         HashableValue resultLeft = processMembershipQuery(row, label, suffix, offset);
         Query<HashableValue> query = getQuerySimple(row, label, suffix, offset);
-        HashableValue result = prepareHashableValue(resultLeft.get(), x, e);
+        HashableValue result = prepareRowHashableValue(resultLeft.get(), x, e);
         query.answerQuery(result);
         return query;
     }
@@ -79,7 +79,7 @@ abstract class LearnerProgressTable extends LearnerOmegaTable implements Learner
         Word loop = prefix.concat(suffix);
         Query<HashableValue> query = new QuerySimple<>(null, label, loop, -1);
         HashableValue mqResult = membershipOracle.answerMembershipQuery(query);
-        HashableValue result = prepareHashableValue(mqResult.get(), prefix, suffix);
+        HashableValue result = getCeAnalyzerHashableValue(mqResult.get(), prefix, suffix);
         return result;
     }
     

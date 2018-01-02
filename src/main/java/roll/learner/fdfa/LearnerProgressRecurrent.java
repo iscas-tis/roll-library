@@ -27,7 +27,7 @@ import roll.words.Word;
 public interface LearnerProgressRecurrent extends LearnerProgress {
     
     @Override
-    default HashableValue prepareHashableValue(boolean mqResult, Word x, Word e) {
+    default HashableValue prepareRowHashableValue(boolean mqResult, Word x, Word e) {
         DFA leadDFA = getLearnerLeading().getHypothesis();
         int stateUX = leadDFA.getSuccessor(getLeadingState(), x);
         int stateUXE = leadDFA.getSuccessor(stateUX, e);
