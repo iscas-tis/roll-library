@@ -31,10 +31,12 @@ public static NBA getRandomNBA(int numState, int numLetter) {
         
         assert numLetter <= 5: "only allow a,b,c,d,e";
         Alphabet alphabet = new Alphabet();
-        char[] letters = new char[numLetter];
-        for(char c : letters) {
-            alphabet.addLetter(c);
+        char[] letters = {'a', 'b', 'c', 'd', 'e'};
+        
+        for(int i = 0; i < numLetter && i < letters.length; i ++) {
+            alphabet.addLetter(letters[i]);
         }
+        
         NBA result = new NBA(alphabet);
         Random r = new Random(System.currentTimeMillis());
         
