@@ -61,7 +61,7 @@ public final class ROLL {
             NBA nba = NBAGenerator.getRandomNBA(options.numOfStatesForTest, numLetter);
             try{
                 System.out.println("target: \n" + nba.toString());
-                AutomaticMode.execute(options, nba);
+                Executor.executeRABIT(options, nba);
             }catch (Exception e)
             {
                 e.printStackTrace();
@@ -87,8 +87,7 @@ public final class ROLL {
         NBA target = parser.parse();
         parser.print(target, System.out);
         // learn the target automaton
-        AutomaticMode.execute(options, target);
-       
+        Executor.executeRABIT(options, target);
         timer.stop();
         options.stats.timeInTotal = timer.getTimeElapsed();
         // output target automaton

@@ -22,6 +22,7 @@ import roll.learner.nba.ldollar.LearnerNBALDollar;
 import roll.learner.nba.lomega.LearnerNBALOmega;
 import roll.oracle.Teacher;
 import roll.oracle.nba.rabit.TeacherNBARABIT;
+import roll.oracle.nba.sampler.TeacherNBASampler;
 import roll.query.Query;
 import roll.table.HashableValue;
 
@@ -29,11 +30,20 @@ import roll.table.HashableValue;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class AutomaticMode {
+public class Executor {
     
-    public static void execute(Options options, NBA target) {
-        
+    public static void executeRABIT(Options options, NBA target) {
         TeacherNBARABIT teacher = new TeacherNBARABIT(options, target);
+        Executor.execute(options, target, teacher);
+    }
+    
+    public static void executeSampler(Options options, NBA target) {
+        TeacherNBASampler teacher = new TeacherNBASampler(options, target);
+        Executor.execute(options, target, teacher);
+    }
+    
+    private static void execute(Options options, NBA target,
+            Teacher<NBA, Query<HashableValue>, HashableValue> teacher) {
         LearnerBase<NBA> learner = getLearner(options, target, teacher);
         options.log.println("Starting learning...");
         learner.startLearning();
@@ -54,9 +64,8 @@ public class AutomaticMode {
         }
         options.log.println("Learning completed...");
     }
-    
-    
-    public static LearnerBase<NBA> getLearner(Options options, NBA nba,
+
+    private static LearnerBase<NBA> getLearner(Options options, NBA nba,
             Teacher<NBA, Query<HashableValue>, HashableValue> teacher) {
         LearnerBase<NBA> learner = null;
         if(options.algorithm == Options.Algorithm.NBA_LDOLLAR) {
@@ -71,5 +80,4 @@ public class AutomaticMode {
         
         return learner;
     }
-
 }
