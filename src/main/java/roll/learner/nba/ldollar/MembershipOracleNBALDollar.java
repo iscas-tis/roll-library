@@ -45,9 +45,9 @@ class MembershipOracleNBALDollar implements MembershipOracle<HashableValue> {
         if (word.getLastLetter() == dollarLetter) {
             return new HashableValueBoolean(false);
         }
-        // Counts the number of $.
+        // counts the number of $.
         int counter = 0;
-        // Records u,v of Word u$v.
+        // records u,v of Word u$v.
         Word prefix = null, suffix = null;
         for (int letterNr = 0; letterNr < word.length(); letterNr++) {
             if (word.getLetter(letterNr) == dollarLetter) {
