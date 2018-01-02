@@ -23,7 +23,7 @@ import roll.util.Timer;
 
 /**
  * 
- * Main entry of the tool
+ * Main entry of the tool Regular Omega Language Learning Library
  * 
  * 
  * @author Yong Li (liyong@ios.ac.cn)
