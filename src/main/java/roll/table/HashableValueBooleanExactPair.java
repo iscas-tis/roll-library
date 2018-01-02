@@ -14,28 +14,22 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.fdfa;
-
-import roll.automata.DFA;
-import roll.table.HashableValue;
-import roll.words.Word;
+package roll.table;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
+public class HashableValueBooleanExactPair extends HashableValueBooleanPair {
+		
+	public HashableValueBooleanExactPair(boolean left, boolean right) {
+		super(left, right);
+	}
 
-public interface LearnerProgressRecurrent extends LearnerProgress {
-    
-    //(m1, c1) and (m2, c2), one out of thoese two is (true, true) 
-    @Override
-    default HashableValue prepareRowHashableValue(boolean mqResult, Word x, Word e) {
-        DFA leadDFA = getLearnerLeading().getHypothesis();
-        int stateUX = leadDFA.getSuccessor(getLeadingState(), x);
-        int stateUXE = leadDFA.getSuccessor(stateUX, e);
-        boolean recur = stateUXE == getLeadingState();
-        return getHashableValueBoolPair(recur, mqResult);
-    }
-    
-    
+	@Override
+	public boolean valueEqual(HashableValue rvalue) {
+	    boolean left = (Boolean)rvalue.getLeft();
+	    boolean right = (Boolean)rvalue.getRight();
+		return left == this.getLeft() && right == this.getRight();
+	}
 
 }
