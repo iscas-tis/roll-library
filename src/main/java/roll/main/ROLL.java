@@ -45,10 +45,10 @@ public final class ROLL {
             runInteractiveMode(options);
             break;
         case AUTOMATIC:
-            runAutomaticMode(options);
+            runAutomaticMode(options, false);
             break;
         case SAMPLING:
-            throw new UnsupportedOperationException("Unsupported for sampling as teacher");
+            runAutomaticMode(options, true);
         default :
                 options.log.err("Incorrect running mode.");
         }
@@ -77,7 +77,7 @@ public final class ROLL {
 //        PlayExecution.execute();
     }
     
-    private static void runAutomaticMode(Options options) {
+    private static void runAutomaticMode(Options options, boolean sampling) {
 //        Statistics.reset();
 //        
         Timer timer = new Timer();
@@ -87,8 +87,12 @@ public final class ROLL {
         NBA target = parser.parse();
         parser.print(target, System.out);
         // learn the target automaton
-        Executor.executeRABIT(options, target);
         timer.stop();
+        if(sampling) {
+            Executor.executeSampler(options, target);
+        }else {
+            Executor.executeRABIT(options, target);
+        }
         options.stats.timeInTotal = timer.getTimeElapsed();
         // output target automaton
         if(options.outputFile != null) {
