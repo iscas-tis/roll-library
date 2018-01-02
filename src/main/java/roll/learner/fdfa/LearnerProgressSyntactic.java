@@ -18,7 +18,6 @@ package roll.learner.fdfa;
 
 import roll.automata.DFA;
 import roll.table.HashableValue;
-import roll.table.HashableValueBooleanExactPair;
 import roll.words.Word;
 
 /**
@@ -45,7 +44,7 @@ public interface LearnerProgressSyntactic extends LearnerProgress {
         int stateUX = leadDFA.getSuccessor(getLeadingState(), x);
         int stateUXE = leadDFA.getSuccessor(stateUX, e);
         boolean recur = stateUXE == getLeadingState();
-        return new HashableValueBooleanExactPair(recur, mqResult);
+        return getHashableValueBoolExactPair(recur, mqResult);
     }
 
 }
