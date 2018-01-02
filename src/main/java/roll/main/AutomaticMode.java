@@ -16,10 +16,60 @@
 
 package roll.main;
 
+import roll.automata.NBA;
+import roll.learner.LearnerBase;
+import roll.learner.nba.ldollar.LearnerNBALDollar;
+import roll.learner.nba.lomega.LearnerNBALOmega;
+import roll.oracle.Teacher;
+import roll.oracle.nba.rabit.TeacherNBARABIT;
+import roll.query.Query;
+import roll.table.HashableValue;
+
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
 public class AutomaticMode {
+    
+    public static void execute(Options options, NBA target) {
+        
+        TeacherNBARABIT teacher = new TeacherNBARABIT(options, target);
+        LearnerBase<NBA> learner = getLearner(options, target, teacher);
+        options.log.println("Starting learning...");
+        learner.startLearning();
+        NBA hypothesis = null;
+        while(true) {
+            options.log.verbose("Table is both closed and consistent\n" + learner.toString());
+            hypothesis = learner.getHypothesis();
+            // along with ce
+            options.log.println("Resolving equivalence query...");
+            Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(hypothesis);
+            boolean isEq = ceQuery.getQueryAnswer().get();
+            if(isEq) {
+                break;
+            }
+            ceQuery.answerQuery(null);
+            options.log.println("Counterexample is: " + ceQuery.toString());
+            learner.refineHypothesis(ceQuery);
+        }
+        options.log.println("Learning completed...");
+    }
+    
+    
+    public static LearnerBase<NBA> getLearner(Options options, NBA nba,
+            Teacher<NBA, Query<HashableValue>, HashableValue> teacher) {
+        LearnerBase<NBA> learner = null;
+        if(options.algorithm == Options.Algorithm.NBA_LDOLLAR) {
+            learner = new LearnerNBALDollar(options, nba.getAlphabet(), teacher);
+        }else if(options.algorithm == Options.Algorithm.PERIODIC
+             || options.algorithm == Options.Algorithm.SYNTACTIC
+             || options.algorithm == Options.Algorithm.RECURRENT) {
+            learner = new LearnerNBALOmega(options, nba.getAlphabet(), teacher);
+        }else {
+            throw new UnsupportedOperationException("Unsupported BA Learner");
+        }
+        
+        return learner;
+    }
 
 }

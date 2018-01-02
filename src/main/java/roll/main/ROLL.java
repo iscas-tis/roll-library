@@ -17,6 +17,7 @@
 package roll.main;
 
 import roll.automata.NBA;
+import roll.automata.operations.NBAGenerator;
 import roll.parser.Parser;
 import roll.parser.UtilParser;
 import roll.util.Timer;
@@ -54,18 +55,19 @@ public final class ROLL {
     }
     
     private static void runTestMode(Options options) {
-        
+        final int numLetter = 3;
         for(int n = 0; n < options.numOfTests; n ++) {
-//            Statistics.target = aut;
-//            try{
-//                AutoExecution.execute(aut);
-//            }catch (Exception e)
-//            {
-//                e.printStackTrace();
-//                Options.log.err("Exception occured, Learning aborted...");
-//                aut.saveAutomaton("bug-test.ba");
-//                System.exit(-1);
-//            }
+            
+            NBA nba = NBAGenerator.getRandomNBA(options.numOfStatesForTest, numLetter);
+            try{
+                AutomaticMode.execute(options, nba);
+            }catch (Exception e)
+            {
+                e.printStackTrace();
+                options.log.err("Exception occured, Learning aborted...");
+                System.out.println(nba.toString());
+                System.exit(-1);
+            }
             options.log.info("Done for case " + (n + 1));
         }
     }
@@ -84,24 +86,24 @@ public final class ROLL {
         NBA target = parser.parse();
         parser.print(target, System.out);
         // learn the target automaton
-//        AutoExecution.execute(target);
-//        
+        AutomaticMode.execute(options, target);
+       
         timer.stop();
-//        Statistics.timeTotal = timer.getTimeElapsed();
-//        // output target automaton
-//        if(Options.outputFile != null) {
+        options.stats.timeInTotal = timer.getTimeElapsed();
+        // output target automaton
+        if(options.outputFile != null) {
 //            try {
-//                parser.print(Statistics.hypothesis, new FileOutputStream(new File(Options.outputFile)));
+//                parser.print(Statistics.hypothesis, );
 //            } catch (FileNotFoundException e) {
 //                // TODO Auto-generated catch block
 //                e.printStackTrace();
 //            }
-//        }else {
-//            Options.log.println("target automaton:");
+        }else {
+//            options.log.println("target automaton:");
 //            parser.print(Statistics.target, Options.log.getOutputStream());
-//            Options.log.println("hypothesis automaton:");
+//            options.log.println("hypothesis automaton:");
 //            parser.print(Statistics.hypothesis, Options.log.getOutputStream());
-//        }
+        }
         parser.close();
 //
         // output statistics
