@@ -38,6 +38,7 @@ public interface LearnerProgressSyntactic extends LearnerProgress {
     // pairs (m1, c1) and (m2, c2), 1. c1 != c2 or (m1 != m2)
     // c1 != c2 means that M(x1) != M(x2) since M(ux1ae1) = M(u) but M(ux2e2) != M(u)
     // m1 != m2 means that c1 = c2 = true but m1 != m2 so x1 and x2 are distinguished
+    // first pair must be A or B since c1 should be true at first
     @Override
     default HashableValue getCeAnalyzerHashableValue(boolean mqResult, Word x, Word e) {
         DFA leadDFA = getLearnerLeading().getHypothesis();
