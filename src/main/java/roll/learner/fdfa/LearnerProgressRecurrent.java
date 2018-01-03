@@ -26,7 +26,7 @@ import roll.words.Word;
 
 public interface LearnerProgressRecurrent extends LearnerProgress {
     
-    //(m1, c1) and (m2, c2), one out of thoese two is (true, true) 
+    //(m1, c1) and (m2, c2), one out of these two is (true, true) for counterexample analysis
     @Override
     default HashableValue prepareRowHashableValue(boolean mqResult, Word x, Word e) {
         DFA leadDFA = getLearnerLeading().getHypothesis();

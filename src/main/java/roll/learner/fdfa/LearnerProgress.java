@@ -18,7 +18,6 @@ package roll.learner.fdfa;
 
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
-import roll.table.HashableValueBooleanExactPair;
 import roll.table.HashableValueBooleanPair;
 import roll.table.HashableValueIntEnum;
 import roll.words.Word;
@@ -29,24 +28,27 @@ public interface LearnerProgress extends LearnerGeneral {
     
     LearnerLeading getLearnerLeading();
     
+    // only for syntactic FDFA
     default HashableValue getHashableValueIntBoolPair(int state, boolean recur, boolean mq) {
         return new HashableValueIntEnum(state, recur, mq);
     }
     
+    // only for recurrent FDFA
     default HashableValue getHashableValueBoolPair(boolean recur, boolean mq) {
         return new HashableValueBooleanPair(recur, mq);
     }
     
-    default HashableValue getHashableValueBoolExactPair(boolean recur, boolean mq) {
-        return new HashableValueBooleanExactPair(recur, mq);
-    }
-    
+//    default HashableValue getHashableValueBoolExactPair(boolean recur, boolean mq) {
+//        return new HashableValueBooleanExactPair(recur, mq);
+//    }
+    // for periodic FDFA
     default HashableValue getHashableValueBool(boolean result) {
         return new HashableValueBoolean(result);
     }
-    
+    // prepare entry value in the observation table
     HashableValue prepareRowHashableValue(boolean mqResult, Word x, Word e);
     
+    // get entry value for counterexample analysis
     default HashableValue getCeAnalyzerHashableValue(boolean mqResult, Word x, Word e) {
         return prepareRowHashableValue(mqResult, x, e);
     }

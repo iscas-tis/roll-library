@@ -44,7 +44,8 @@ public interface LearnerProgressSyntactic extends LearnerProgress {
         int stateUX = leadDFA.getSuccessor(getLeadingState(), x);
         int stateUXE = leadDFA.getSuccessor(stateUX, e);
         boolean recur = stateUXE == getLeadingState();
-        return getHashableValueBoolExactPair(recur, mqResult);
+        final int stateNotUsed = -1;
+        return getHashableValueIntBoolPair(stateNotUsed, recur, mqResult);
     }
 
 }

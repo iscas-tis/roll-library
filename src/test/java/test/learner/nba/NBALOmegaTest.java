@@ -110,7 +110,7 @@ public class NBALOmegaTest {
         
         Options options = new Options();
         options.structure = Options.Structure.TABLE;
-        options.algorithm = Options.Algorithm.PERIODIC;
+        options.algorithm = Options.Algorithm.SYNTACTIC;
         options.verbose = true;
         TeacherNBARABIT teacher = new TeacherNBARABIT(options, target);
         LearnerNBALOmega learner = new LearnerNBALOmega(options, target.getAlphabet(), teacher);
