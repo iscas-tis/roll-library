@@ -123,7 +123,10 @@ public class LearnerNBALDollar extends LearnerBase<NBA>{
         DFA dfa = dfaLearner.getHypothesis();
         Automaton dkAut = DFAOperations.toDkDFA(dfa);
         //System.out.println(dkAut.toString());
-        HashableValue answer = membershipOracle.answerMembershipQuery(query);
+        HashableValue answer = query.getQueryAnswer();
+        if(answer == null) {
+            answer = membershipOracle.answerMembershipQuery(query);
+        }
         if (answer.isAccepting()) {
             counterexample = result.minus(dkAut).getShortestExample(true);
         } else {
