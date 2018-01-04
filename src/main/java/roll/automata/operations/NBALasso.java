@@ -32,7 +32,20 @@ public class NBALasso {
         assert stem != null && loop != null;
         this.stem = stem;
         this.loop = loop;
-        
+        if(loop.isEmpty()) {
+            // if loop is empty, so set it empty automaton
+            setEmptyAutomaton();
+        }
+    }
+    
+    private void setEmptyAutomaton() {
+        this.result = new NBA(stem.getAlphabet());
+        final int state = 0;
+        this.result.createState();
+        for(int letter = 0; letter < result.getAlphabetSize(); letter ++) {
+            this.result.getState(state).addTransition(letter, state);
+        }
+        this.result.setFinal(state);
     }
     
     public NBA getNBA() {
