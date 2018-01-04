@@ -25,6 +25,9 @@ import roll.learner.fdfa.LearnerFDFA;
 import roll.learner.fdfa.table.LearnerFDFATablePeriodic;
 import roll.learner.fdfa.table.LearnerFDFATableRecurrent;
 import roll.learner.fdfa.table.LearnerFDFATableSyntactic;
+import roll.learner.fdfa.tree.LearnerFDFATreePeriodic;
+import roll.learner.fdfa.tree.LearnerFDFATreeRecurrent;
+import roll.learner.fdfa.tree.LearnerFDFATreeSyntactic;
 import roll.learner.nba.lomega.translator.TranslatorFDFA;
 import roll.learner.nba.lomega.translator.TranslatorFDFAOver;
 import roll.learner.nba.lomega.translator.TranslatorFDFAUnder;
@@ -59,13 +62,13 @@ public class UtilLOmega {
         }else {
             switch(options.algorithm) {
             case PERIODIC:
-                fdfaLearner = null;
+                fdfaLearner = new LearnerFDFATreePeriodic(options, alphabet, membershipOracle);
                 break;
             case SYNTACTIC:
-                fdfaLearner = null;
+                fdfaLearner = new LearnerFDFATreeSyntactic(options, alphabet, membershipOracle);
                 break;
             case RECURRENT:
-                fdfaLearner = null;
+                fdfaLearner = new LearnerFDFATreeRecurrent(options, alphabet, membershipOracle);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown FDFA learner");

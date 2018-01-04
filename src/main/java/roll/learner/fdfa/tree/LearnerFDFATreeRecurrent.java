@@ -14,34 +14,35 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.fdfa;
+package roll.learner.fdfa.tree;
 
-import roll.automata.DFA;
+import roll.learner.fdfa.LearnerFDFA;
+import roll.learner.fdfa.LearnerLeading;
+import roll.learner.fdfa.LearnerProgress;
+import roll.main.Options;
+import roll.oracle.MembershipOracle;
 import roll.table.HashableValue;
-import roll.words.Word;
+import roll.words.Alphabet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public interface LearnerProgressRecurrent extends LearnerProgress {
-    
-    //(m1, c1) and (m2, c2), one out of these two is (true, true) for counterexample analysis
-    @Override
-    default HashableValue prepareRowHashableValue(boolean mqResult, Word x, Word e) {
-        DFA leadDFA = getLearnerLeading().getHypothesis();
-        int stateUX = leadDFA.getSuccessor(getLeadingState(), x);
-        int stateUXE = leadDFA.getSuccessor(stateUX, e);
-        boolean recur = stateUXE == getLeadingState();
-        return getHashableValueBoolPair(recur, mqResult);
+public class LearnerFDFATreeRecurrent extends LearnerFDFA {
+
+    public LearnerFDFATreeRecurrent(Options options, Alphabet alphabet,
+            MembershipOracle<HashableValue> membershipOracle) {
+        super(options, alphabet, membershipOracle);
     }
-    
+
     @Override
-    default HashableValue getCeAnalyzerHashableValue(boolean mqResult, Word x, Word e) {
-        HashableValue value = prepareRowHashableValue(mqResult, x, e);
-        return getHashableValueBool(value.isAccepting());
+    protected LearnerLeading getLearnerLeading() {
+        return new LearnerLeadingTree(options, alphabet, membershipOracle);
     }
-    
-    
+
+    @Override
+    protected LearnerProgress getLearnerProgress(int state) {
+        return new LearnerProgressTreeRecurrent(options, alphabet, membershipOracle, learnerLeading, state);
+    }
 
 }
