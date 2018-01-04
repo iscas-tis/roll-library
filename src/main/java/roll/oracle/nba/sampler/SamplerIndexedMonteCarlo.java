@@ -38,6 +38,8 @@ public class SamplerIndexedMonteCarlo extends SamplerAbstract {
     // the number of visiting times, should be the number of
     // states in the minimal deterministic omega automaton recognizing
     // L(A) where A is the given Buchi automaton
+    // the upper bound of K is the 2^n where n is the number of states
+    // in the second automaton B for inclusion checking
     public int K = -1; 
     public SamplerIndexedMonteCarlo(double epsilon, double delta) {
         super(epsilon, delta);
