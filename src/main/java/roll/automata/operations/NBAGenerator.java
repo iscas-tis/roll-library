@@ -29,7 +29,9 @@ public class NBAGenerator {
     
 public static NBA getRandomNBA(int numState, int numLetter) {
         
-        assert numLetter <= 5: "only allow a,b,c,d,e";
+        if( numLetter > 5) {
+            throw new UnsupportedOperationException("only allow a,b,c,d,e letters in generated NBA");
+        }
         Alphabet alphabet = new Alphabet();
         char[] letters = {'a', 'b', 'c', 'd', 'e'};
         
