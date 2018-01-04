@@ -38,7 +38,7 @@ public class SamplerIndexedMonteCarlo extends SamplerAbstract {
     // the number of visiting times, should be the number of
     // states in the minimal deterministic omega automaton recognizing
     // L(A) where A is the given Buchi automaton
-    int K; 
+    public int K = -1; 
     public SamplerIndexedMonteCarlo(double epsilon, double delta) {
         super(epsilon, delta);
     }
@@ -60,7 +60,7 @@ public class SamplerIndexedMonteCarlo extends SamplerAbstract {
         }
         // start sampling
         int s = nba.getInitialState();
-        K = nba.getStateSize(); // set it as default
+        if(K == -1) K = nba.getStateSize(); // set it as default
         int i = 0, f = -1;
         TIntIntMap hTable = new TIntIntHashMap();
         TIntIntMap countTable = new TIntIntHashMap();
@@ -109,7 +109,8 @@ public class SamplerIndexedMonteCarlo extends SamplerAbstract {
         }
         Word prefix = nba.getAlphabet().getArrayWord(preArr);
         Word suffix = nba.getAlphabet().getArrayWord(sufArr);
-        return new Pair<>(new Pair<>(prefix, suffix), accept);
+        Pair<Word, Word> normForm = Alphabet.getNormalForm(prefix, suffix);
+        return new Pair<>(new Pair<>(normForm.getLeft(), normForm.getRight()), accept);
     }
     
     public static void main(String[] args) {

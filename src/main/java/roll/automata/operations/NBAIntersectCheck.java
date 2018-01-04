@@ -23,7 +23,6 @@ import java.util.Stack;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import roll.automata.NBA;
-import roll.automata.StateFA;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
@@ -34,20 +33,30 @@ import roll.words.Alphabet;
 
 public class NBAIntersectCheck {
     
-    private final NBA fstOp;
-    private final NBA sndOp;
+    private NBA fstOp;
+    private NBA sndOp;
     private boolean empty = true;
-    private final NBA result;
-    private final ISet fstAcc;
-    private final ISet sndAcc;
+    private NBA result;
+    private ISet fstAcc;
+    private ISet sndAcc;
+    private boolean needCE;
+    private int numStates;
     
     public NBAIntersectCheck(NBA fstOp, NBA sndOp) {
+        this(fstOp, sndOp, false);
+    }
+    
+    public NBAIntersectCheck(NBA fstOp, NBA sndOp, boolean needCE) {
         assert fstOp != null && sndOp != null;
+        this.needCE = needCE;
         this.fstOp = fstOp;
         this.sndOp = sndOp;
-        this.result = new NBA(fstOp.getAlphabet());
-        this.fstAcc = UtilISet.newISet();
-        this.sndAcc = UtilISet.newISet();
+        this.numStates = 0;
+        if(needCE) {
+            this.result = new NBA(fstOp.getAlphabet());
+            this.fstAcc = UtilISet.newISet();
+            this.sndAcc = UtilISet.newISet();
+        }
         new AsccExplore();
     }
     
@@ -119,21 +128,26 @@ public class NBAIntersectCheck {
             if(map.containsKey(prod)) {
                 return map.get(prod);
             }
-            StateFA state = result.createState();
-            prod.resState = state.getId();
+            prod.resState = numStates;
             map.put(prod, prod);
-            if(fstOp.isFinal(fst)) {
-                fstAcc.set(prod.resState);
+            ++ numStates;
+            if(needCE) {
+                result.createState();
+                assert numStates == result.getStateSize();
+                if(fstOp.isFinal(fst)) {
+                    fstAcc.set(prod.resState);
+                }
+                if(sndOp.isFinal(snd)) {
+                    sndAcc.set(prod.resState);
+                }
             }
-            if(sndOp.isFinal(snd)) {
-                sndAcc.set(prod.resState);
-            }
+            
             return prod;
         }
         
         private ProductState initialize() {
             ProductState prod = getOrAddState(fstOp.getInitialState(), sndOp.getInitialState());
-            result.setInitial(prod.resState);
+            if(needCE) result.setInitial(prod.resState);
             return prod;
         }
 
@@ -161,7 +175,7 @@ public class NBAIntersectCheck {
                 for(int sndSucc : sndOp.getSuccessors(prod.sndState, letter)) {
                     for(int fstSucc : fstOp.getSuccessors(prod.fstState, letter)) {
                         ProductState succ = getOrAddState(fstSucc, sndSucc);
-                        result.getState(prod.resState).addTransition(letter, succ.resState);
+                        if(needCE) result.getState(prod.resState).addTransition(letter, succ.resState);
                         if (!dfsNum.containsKey(succ.resState)) {
                             strongConnect(succ);
                             if(!empty) return ;
