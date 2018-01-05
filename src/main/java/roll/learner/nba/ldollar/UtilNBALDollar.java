@@ -28,6 +28,7 @@ import java.util.Set;
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.State;
 import dk.brics.automaton.Transition;
+import roll.automata.operations.DFAOperations;
 import roll.words.Alphabet;
 
 /**
@@ -129,40 +130,6 @@ public class UtilNBALDollar {
         }
         return result;
     }
-    
-    //add specific(not general) epsilon transition in an NFA.
-    public static Automaton addEpsilon (Automaton A) {
-        State epsilon = new State();
-        epsilon.setAccept(true);
-        Set<State> acc = A.getAcceptStates();
-        //Only one accepted state.
-        if(acc.size() > 1)  {
-            throw new UnsupportedOperationException("multiple final states while add epsilon transitions");
-        }
-        
-        State accept = acc.iterator().next();
-        accept.setAccept(false);
-        //Records transitions to be added to epsilon state.
-        Set<Transition> transToAcc = new HashSet<Transition>();
-        
-        for (State s: A.getStates()) {
-            for (Transition t: s.getTransitions()){
-                if (t.getDest() == accept)
-                    transToAcc.add(new Transition(t.getMin(), t.getMax(), s));
-            }
-        }
-        
-        // first add transitions from epsilon state
-        State ini = A.getInitialState();
-        for (Transition t : ini.getTransitions())
-            epsilon.addTransition(new Transition(t.getMin(), t.getMax(), t.getDest()));
-        
-        // add transition to epsilon
-        for(Transition t: transToAcc)
-            t.getDest().addTransition(new Transition(t.getMin(), t.getMax(), epsilon));
-        
-        return A;
-    }
 
     public static Automaton dkDFAToBuchi(Automaton dollarAut) {
         Map<State, State> spairs = new HashMap<>();
@@ -205,7 +172,7 @@ public class UtilNBALDollar {
                     if(product.getAcceptStates().size() > 1) {
                         throw new UnsupportedOperationException("More than one accepting state...");
                     }
-                    product = addEpsilon(product);
+                    product = DFAOperations.addEpsilon(product);
                     State init = product.getInitialState();
                     // add epsilon transitions to accepting parts
                     for (Transition t : init.getTransitions())

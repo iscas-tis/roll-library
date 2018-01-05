@@ -123,8 +123,7 @@ public class DFAOperations {
         return null;
     }
     
-    //Adds specific(not general) epsilon transition in an NFA.
-    //A only has one accepting state, TODO flawed
+    //add specific(not general) epsilon transition in an NFA.
     public static Automaton addEpsilon(Automaton A) {
         State epsilon = new State();
         epsilon.setAccept(true);
