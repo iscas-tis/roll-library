@@ -35,5 +35,10 @@ public class LearnerProgressTableSyntactic extends LearnerProgressTable implemen
     public LearnerType getLearnerType() {
         return LearnerType.FDFA_SYNTACTIC_TABLE;
     }
+    
+    @Override
+    public void startLearning() {
+        initialize();
+    }
 
 }

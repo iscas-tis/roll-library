@@ -41,11 +41,6 @@ abstract class LearnerProgressTable extends LearnerOmegaTable implements Learner
         this.learnerLeading = learnerLeading;
         this.label = learnerLeading.getStateLabel(state);
     }
-	
-    @Override
-    public void startLearning() {
-        initialize();
-    }
 
     @Override
     public Word getLeadingLabel() {

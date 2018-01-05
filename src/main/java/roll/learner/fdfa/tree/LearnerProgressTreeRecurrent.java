@@ -43,6 +43,11 @@ public class LearnerProgressTreeRecurrent extends LearnerProgressTree implements
     }
     
     @Override
+    public void startLearning() {
+        initialize();
+    }
+    
+    @Override
     public HashableValue prepareRowHashableValue(boolean mqResult, Word x, Word e) {
         DFA leadDFA = getLearnerLeading().getHypothesis();
         int stateUX = leadDFA.getSuccessor(getLeadingState(), x);

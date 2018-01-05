@@ -35,5 +35,10 @@ public class LearnerProgressTableRecurrent extends LearnerProgressTable implemen
     public LearnerType getLearnerType() {
         return LearnerType.FDFA_RECURRENT_TABLE;
     }
+    
+    @Override
+    public void startLearning() {
+        initialize();
+    }
 
 }

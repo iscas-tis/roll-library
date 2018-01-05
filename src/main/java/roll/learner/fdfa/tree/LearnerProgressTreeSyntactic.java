@@ -41,6 +41,11 @@ public class LearnerProgressTreeSyntactic extends LearnerProgressTree implements
         return LearnerType.FDFA_SYNTACTIC_TREE;
     }
     
+    @Override
+    public void startLearning() {
+        initialize();
+    }
+    
     protected class CeAnalyzerProgressTreeSyntactic extends CeAnalyzerProgressTree {
 
         public CeAnalyzerProgressTreeSyntactic(ExprValue exprValue, HashableValue result) {
@@ -68,5 +73,7 @@ public class LearnerProgressTreeSyntactic extends LearnerProgressTree implements
     protected CeAnalyzerTree getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
         return new CeAnalyzerProgressTreeSyntactic(exprValue, result);
     }
+    
+    // there is a chance that new lead node is not yet in the tree
 
 }
