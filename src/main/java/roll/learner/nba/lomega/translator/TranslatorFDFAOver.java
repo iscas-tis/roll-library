@@ -154,8 +154,8 @@ public class TranslatorFDFAOver extends TranslatorFDFA {
 					if(options.verbose) System.out.println("dkNFA\n " + dkAutP.toDot());
 					// build deterministic automaton 
 					Automaton dkAutCE = dkAutP.intersection(dkAutLOther);  
-					Word p = learnerFDFA.getProgressStateLabel(stateNr, accNr);
-					suf = findCorrectPeriod(dkAutCE, pre, p, period, membershipOracle);
+//					Word p = learnerFDFA.getProgressStateLabel(stateNr, accNr);
+					suf = findCorrectPeriod(dkAutCE, pre, period, membershipOracle);
 		    	}
 		    	if(found) break;
 		    }
@@ -169,7 +169,7 @@ public class TranslatorFDFAOver extends TranslatorFDFA {
 	
 	// complex analysis for counter example
 	private Word findCorrectPeriod(Automaton dkAutCE
-			, Word pre, Word p, String period, MembershipOracle<HashableValue> membershipOracle) {
+			, Word pre, String period, MembershipOracle<HashableValue> membershipOracle) {
 		
 		int startNr = 0;
 		Word suf = null;
