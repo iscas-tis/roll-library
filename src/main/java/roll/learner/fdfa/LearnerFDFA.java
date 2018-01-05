@@ -187,10 +187,11 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
         return builder.toString();
     }
     
-//    // -------------- some helper function
-//    public Word getProgressStateLabel(int stateLeading, int stateProgress) {
-//        return learnerProgress.get(stateLeading).getStateLabel(stateProgress);
-//    }
+    // -------------- some helper function
+    // for FDFA learning, this function should not be visible
+    public Word getProgressStateLabel(int stateLeading, int stateProgress) {
+        return learnerProgress.get(stateLeading).getStateLabel(stateProgress);
+    }
 //    
 //    public Word getLeadingStateLabel(int stateLeading) {
 //        return learnerLeading.getStateLabel(stateLeading);
