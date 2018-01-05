@@ -16,11 +16,15 @@
 
 package roll.main;
 
+import roll.automata.DFA;
+import roll.automata.FDFA;
 import roll.automata.NBA;
 import roll.learner.LearnerBase;
 import roll.learner.nba.ldollar.LearnerNBALDollar;
 import roll.learner.nba.lomega.LearnerNBALOmega;
+import roll.learner.nba.lomega.UtilLOmega;
 import roll.oracle.Teacher;
+import roll.oracle.nba.TeacherNBA;
 import roll.oracle.nba.rabit.TeacherNBARABIT;
 import roll.oracle.nba.sampler.TeacherNBASampler;
 import roll.query.Query;
@@ -43,7 +47,7 @@ public class Executor {
     }
     
     private static void execute(Options options, NBA target,
-            Teacher<NBA, Query<HashableValue>, HashableValue> teacher) {
+            TeacherNBA teacher) {
         LearnerBase<NBA> learner = getLearner(options, target, teacher);
         options.log.println("Starting learning...");
         learner.startLearning();
@@ -56,6 +60,27 @@ public class Executor {
             Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(hypothesis);
             boolean isEq = ceQuery.getQueryAnswer().get();
             if(isEq) {
+                // store statistics
+                options.stats.numOfStatesInHypothesis = hypothesis.getStateSize();
+                if(learner instanceof LearnerNBALOmega) {
+                    LearnerNBALOmega learnerLOmega = (LearnerNBALOmega)learner;
+                    FDFA fdfa = learnerLOmega.getLearnerFDFA().getHypothesis();
+                    options.stats.numOfStatesInLeading = fdfa.getLeadingDFA().getStateSize();
+                    for(int state = 0; state < fdfa.getLeadingDFA().getStateSize(); state ++) {
+                        options.stats.numOfStatesInProgress.add(fdfa.getProgressDFA(state).getStateSize());
+                    }
+                    if(options.automaton.isLDBA()) {
+                        options.stats.hypothesis = UtilLOmega.constructLDBA(options, fdfa);
+                    }
+                }else if(learner instanceof LearnerNBALDollar) {
+                    LearnerNBALDollar learnerLDollar = (LearnerNBALDollar)learner;
+                    DFA dfa = learnerLDollar.getLearnerDFA().getHypothesis();
+                    options.stats.numOfStatesInLeading = dfa.getStateSize();
+                }else {
+                    throw new UnsupportedOperationException("Unsupported BA Learner");
+                }
+                options.stats.hypothesis = hypothesis;
+                options.stats.numOfStatesInHypothesis = hypothesis.getStateSize();
                 break;
             }
             ceQuery.answerQuery(null);

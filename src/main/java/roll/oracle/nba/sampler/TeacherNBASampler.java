@@ -17,9 +17,8 @@
 package roll.oracle.nba.sampler;
 
 import roll.automata.NBA;
-import roll.automata.operations.NBAOperations;
 import roll.main.Options;
-import roll.oracle.Teacher;
+import roll.oracle.nba.TeacherNBA;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.HashableValue;
@@ -30,28 +29,24 @@ import roll.words.Word;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class TeacherNBASampler implements Teacher<NBA, Query<HashableValue>, HashableValue> {
+public class TeacherNBASampler extends TeacherNBA {
     
-    private final Options options;
-    private final NBA target;
     private final Sampler sampler;
     
     public TeacherNBASampler(Options options, NBA target) {
-        this.options = options;
-        this.target = target;
+        super(options, target);
         this.sampler = new SamplerIndexedMonteCarlo(options.epsilon, options.delta);
+    }
+    
+    private boolean isEmptyNBA(NBA nba) {
+        if(nba.getStateSize() > 1) {
+            return false;
+        }
+        return nba.getState(0).getEnabledLetters().cardinality() == 0;
     }
 
     @Override
-    public HashableValue answerMembershipQuery(Query<HashableValue> query) {
-        Word prefix = query.getPrefix();
-        Word suffix = query.getSuffix();
-        boolean answer = NBAOperations.accepts(target, prefix, suffix);
-        return new HashableValueBoolean(answer);
-    }
-    
-    @Override
-    public Query<HashableValue> answerEquivalenceQuery(NBA hypothesis) {
+    protected Query<HashableValue> checkEquivalence(NBA hypothesis) {
         // sample words from hypothesis
         Query<HashableValue> ceQuery = null;
         NBA A, B;
@@ -78,13 +73,6 @@ public class TeacherNBASampler implements Teacher<NBA, Query<HashableValue>, Has
         ceQuery = new QuerySimple<>(wordEmpty, wordEmpty);
         ceQuery.answerQuery(new HashableValueBoolean(true));
         return ceQuery;
-    }
-    
-    private boolean isEmptyNBA(NBA nba) {
-        if(nba.getStateSize() > 1) {
-            return false;
-        }
-        return nba.getState(0).getEnabledLetters().cardinality() == 0;
     }
 
 }

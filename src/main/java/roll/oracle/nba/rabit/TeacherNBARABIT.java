@@ -18,9 +18,8 @@ package roll.oracle.nba.rabit;
 
 import automata.FiniteAutomaton;
 import roll.automata.NBA;
-import roll.automata.operations.NBAOperations;
 import roll.main.Options;
-import roll.oracle.Teacher;
+import roll.oracle.nba.TeacherNBA;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.HashableValue;
@@ -32,28 +31,17 @@ import roll.words.Word;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class TeacherNBARABIT implements Teacher<NBA, Query<HashableValue>, HashableValue> {
-    
-    private final Options options;
-    private final NBA target;
+public class TeacherNBARABIT extends TeacherNBA {
+   
     private final FiniteAutomaton rabitTgt;
     
     public TeacherNBARABIT(Options options, NBA target) {
-        this.options = options;
-        this.target = target;
+        super(options, target);
         this.rabitTgt = UtilRABIT.toRABITNBA(target);
     }
 
     @Override
-    public HashableValue answerMembershipQuery(Query<HashableValue> query) {
-        Word prefix = query.getPrefix();
-        Word suffix = query.getSuffix();
-        boolean answer = NBAOperations.accepts(target, prefix, suffix);
-        return new HashableValueBoolean(answer);
-    }
-
-    @Override
-    public Query<HashableValue> answerEquivalenceQuery(NBA hypothesis) {
+    protected Query<HashableValue> checkEquivalence(NBA hypothesis) {
         FiniteAutomaton rabitHypo = UtilRABIT.toRABITNBA(hypothesis);
         FiniteAutomaton A, B;
         if(rabitHypo.states.size() > rabitTgt.states.size()) {

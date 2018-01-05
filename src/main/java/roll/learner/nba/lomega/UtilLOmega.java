@@ -91,6 +91,20 @@ public class UtilLOmega {
         return nba;
     }
     
+    public static NBA constructLDBA(Options options, FDFA fdfa) {
+        Automaton dkAut = null;
+        Alphabet alphabet = fdfa.getAlphabet();
+        if(options.approximation == Options.Approximation.OVER) {
+            dkAut = FDFAOperations.buildOverLDBA(fdfa);
+        }else if(options.approximation == Options.Approximation.UNDER){
+            dkAut = FDFAOperations.buildUnderLDBA(fdfa);
+        }else {
+            throw new UnsupportedOperationException("Unknown approximation for fdfa");
+        }
+        NBA nba = NBAOperations.fromDkNBA(dkAut, alphabet);
+        return nba;
+    }
+    
     public static TranslatorFDFA getTranslator(Options options
             , LearnerFDFA fdfaLearner, MembershipOracle<HashableValue> membershipOracle) {
         TranslatorFDFA translator = null;

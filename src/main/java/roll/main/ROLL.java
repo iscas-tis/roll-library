@@ -16,6 +16,10 @@
 
 package roll.main;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+
 import roll.automata.NBA;
 import roll.automata.operations.NBAGenerator;
 import roll.parser.Parser;
@@ -78,8 +82,7 @@ public final class ROLL {
     }
     
     private static void runAutomaticMode(Options options, boolean sampling) {
-//        Statistics.reset();
-//        
+
         Timer timer = new Timer();
         timer.start();
         // prepare the parser
@@ -87,31 +90,30 @@ public final class ROLL {
         NBA target = parser.parse();
         parser.print(target, System.out);
         // learn the target automaton
-        timer.stop();
+        
         if(sampling) {
             Executor.executeSampler(options, target);
         }else {
             Executor.executeRABIT(options, target);
         }
+        timer.stop();
         options.stats.timeInTotal = timer.getTimeElapsed();
         // output target automaton
         if(options.outputFile != null) {
-//            try {
-//                parser.print(Statistics.hypothesis, );
-//            } catch (FileNotFoundException e) {
-//                // TODO Auto-generated catch block
-//                e.printStackTrace();
-//            }
+            try {
+                parser.print(options.stats.hypothesis, new FileOutputStream(new File(options.outputFile)));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }else {
-//            options.log.println("target automaton:");
-//            parser.print(Statistics.target, Options.log.getOutputStream());
-//            options.log.println("hypothesis automaton:");
-//            parser.print(Statistics.hypothesis, Options.log.getOutputStream());
+            options.log.println("target automaton:");
+            parser.print(target, options.log.getOutputStream());
+            options.log.println("hypothesis automaton:");
+            parser.print(options.stats.hypothesis, options.log.getOutputStream());
         }
         parser.close();
-//
         // output statistics
-//        Statistics.print();
+        options.stats.print();
         
     }
 

@@ -19,6 +19,8 @@ package roll.main;
 import java.util.ArrayList;
 import java.util.List;
 
+import roll.automata.NBA;
+
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
@@ -59,6 +61,8 @@ public class Statistics {
     
     private final Log log;
     private final Options options;
+    
+    public NBA hypothesis;
     
     public Statistics(Options options) {
         this.options = options;

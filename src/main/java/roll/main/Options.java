@@ -146,6 +146,10 @@ public final class Options {
         boolean isFDFA() {
             return this == FDFA;
         }
+        
+        boolean isLDBA() {
+            return this == LDBA;
+        }
     }
     
     public String toString() {

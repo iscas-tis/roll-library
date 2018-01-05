@@ -93,7 +93,10 @@ public class LearnerNBALOmega extends LearnerBase<NBA>{
             if(options.optimization != Options.Optimization.LAZY_EQ) break;
         }
         constructHypothesis();
-        
+    }
+    
+    public LearnerFDFA getLearnerFDFA() {
+        return fdfaLearner;
     }
     
     @Override
