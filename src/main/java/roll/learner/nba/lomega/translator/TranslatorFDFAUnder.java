@@ -28,7 +28,7 @@ public class TranslatorFDFAUnder extends TranslatorFDFA {
 	
 	// -------- this is for lower BA construction ----------------
 	private String translateLower() {
-		if(options.verbose) System.out.println(autUVOmega.toString());
+		if(options.verbose) System.out.println(autUVOmega.toDot());
 		boolean isCeInTarget = ceQuery.getQueryAnswer().get();
 		
 		String ceStr = null;

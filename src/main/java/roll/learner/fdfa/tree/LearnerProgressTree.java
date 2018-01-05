@@ -20,6 +20,9 @@ import roll.learner.fdfa.LearnerLeading;
 import roll.learner.fdfa.LearnerProgress;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
+import roll.query.Query;
+import roll.query.QuerySimple;
+import roll.table.ExprValue;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
 import roll.words.Word;
@@ -56,6 +59,43 @@ abstract class LearnerProgressTree extends LearnerOmegaTree implements LearnerPr
     @Override
     public int getLeadingState() {
         return state;
+    }
+    
+    // this is for counterexample analysis
+    @Override
+    protected HashableValue processMembershipQuery(Word prefix, Word suffix) {
+        Word loop = prefix.concat(suffix);
+        Query<HashableValue> query = new QuerySimple<>(null, label, loop, -1);
+        HashableValue mqResult = membershipOracle.answerMembershipQuery(query);
+        HashableValue result = getCeAnalyzerHashableValue(mqResult.get(), prefix, suffix);
+        return result;
+    }
+    
+    // this is for tree construction
+    @Override
+    protected HashableValue processMembershipQuery(Word prefix, ExprValue exprValue) {
+        Word suffix = exprValue.get();
+        Word loop = prefix.concat(suffix);
+        HashableValue mqResult = membershipOracle.answerMembershipQuery(new QuerySimple<>(label, loop));
+        HashableValue result = prepareRowHashableValue(mqResult.get(), prefix, suffix);
+        return result;
+    }
+    
+    protected class CeAnalyzerProgressTree extends CeAnalyzerTree {
+
+        public CeAnalyzerProgressTree(ExprValue exprValue, HashableValue result) {
+            super(exprValue, result);
+        }
+        
+        @Override
+        protected Word getWordExperiment() {
+            return this.exprValue.getRight();
+        }
+    }
+    
+    @Override
+    protected CeAnalyzerTree getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
+        return new CeAnalyzerProgressTree(exprValue, result);
     }
 
 }

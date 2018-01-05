@@ -21,6 +21,7 @@ import roll.learner.fdfa.LearnerLeading;
 import roll.learner.fdfa.LearnerProgressSyntactic;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
+import roll.table.ExprValue;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
 
@@ -38,6 +39,34 @@ public class LearnerProgressTreeSyntactic extends LearnerProgressTree implements
     @Override
     public LearnerType getLearnerType() {
         return LearnerType.FDFA_SYNTACTIC_TREE;
+    }
+    
+    protected class CeAnalyzerProgressTreeSyntactic extends CeAnalyzerProgressTree {
+
+        public CeAnalyzerProgressTreeSyntactic(ExprValue exprValue, HashableValue result) {
+            super(exprValue, result);
+        }
+        
+        @Override
+        public void analyze() {
+            this.leafBranch = result;
+            this.nodePrevBranch = getHashableValueBoolean(!result.isAccepting());
+            // only has one leaf
+            if(tree.getRoot().isLeaf()) {
+                this.wordExpr = getExprValueWord(alphabet.getEmptyWord());
+                this.nodePrev = tree.getRoot();
+                this.wordLeaf = getExprValueWord(getWordExperiment());
+                return ;
+            }
+            // when root is not a terminal node
+            CeAnalysisResult result = findBreakIndex();
+            update(result);
+        }
+    }
+    
+    @Override
+    protected CeAnalyzerTree getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
+        return new CeAnalyzerProgressTreeSyntactic(exprValue, result);
     }
 
 }

@@ -103,7 +103,7 @@ public abstract class LearnerDFATree extends LearnerDFA {
 					s.addTransition(letter, state.id);
 				}
 			}
-			if(state.node.isAccepting()) {
+			if(isAccepting(state)) {
 			    dfa.setFinal(state.id);;
 			}
 			if(state.label.isEmpty()) {
@@ -111,6 +111,10 @@ public abstract class LearnerDFATree extends LearnerDFA {
 			}
 		}
 		this.dfa = dfa;
+	}
+	
+	protected boolean isAccepting(ValueNode state) {
+	    return state.node.isAccepting();
 	}
 	
 	// needs to check , s <- a - t then t has a successor s 
@@ -300,7 +304,7 @@ public abstract class LearnerDFATree extends LearnerDFA {
 			if(tree.getRoot().isLeaf()) {
 				this.wordExpr = getExprValueWord(alphabet.getEmptyWord());
 				this.nodePrev = tree.getRoot();
-				this.wordLeaf = getExprValueWord(exprValue.get());
+				this.wordLeaf = getExprValueWord(getWordExperiment());
 				return ;
 			}
 			// when root is not a terminal node
@@ -330,7 +334,7 @@ public abstract class LearnerDFATree extends LearnerDFA {
 
         @Override
         protected void update(CeAnalysisResult result) {
-            Word wordCE = exprValue.get();
+            Word wordCE = getWordExperiment();
             Word wordPrev = getStateLabel(result.prevState);         // S(j-1)
             this.wordExpr = getExprValueWord(wordCE.getSuffix(result.breakIndex + 1));  // y[j+1..n]
             this.wordLeaf = getExprValueWord(wordPrev.append(wordCE.getLetter(result.breakIndex))); // S(j-1)y[j]

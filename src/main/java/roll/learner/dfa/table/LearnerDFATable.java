@@ -34,7 +34,7 @@ import roll.words.Alphabet;
 import roll.words.Word;
 
 public abstract class LearnerDFATable extends LearnerDFA {
-	
+    
     protected ObservationTableAbstract observationTable;
     
     public LearnerDFATable(Options options, Alphabet alphabet
@@ -233,5 +233,5 @@ public abstract class LearnerDFATable extends LearnerDFA {
         }
     }
 
-	
+    
 }

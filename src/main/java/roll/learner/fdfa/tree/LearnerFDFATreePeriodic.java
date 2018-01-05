@@ -44,5 +44,10 @@ public class LearnerFDFATreePeriodic extends LearnerFDFA {
     protected LearnerProgress getLearnerProgress(int state) {
         return new LearnerProgressTreePeriodic(options, alphabet, membershipOracle, learnerLeading, state);
     }
+    
+    @Override
+    protected boolean isPeriodic() {
+        return true;
+    }
 
 }

@@ -59,6 +59,11 @@ public class LearnerLeadingTable extends LearnerOmegaTable implements LearnerLea
         return LearnerType.FDFA_LEADING_TABLE;
     }
     
+    @Override
+    protected boolean isAccepting(int state) {
+        return false;
+    }
+    
     //only for values
     @Override
     protected HashableValue processMembershipQuery(Word prefix, Word suffix) {
@@ -68,35 +73,58 @@ public class LearnerLeadingTable extends LearnerOmegaTable implements LearnerLea
         return membershipOracle.answerMembershipQuery(query);
     }
     
+    // remember the loop of current counterexample
     protected Word loop;
     
     protected class CeAnalyzerLeadingTable extends CeAnalyzerTable {
-
-        public CeAnalyzerLeadingTable(ExprValue exprValue, HashableValue result) {
+        private final CeAnalysisLeadingHelper ceAnalysisLeadingHelper;
+        public CeAnalyzerLeadingTable(ExprValue exprValue, HashableValue result, LearnerLeading learner) {
             super(exprValue, result);
+            this.ceAnalysisLeadingHelper = new CeAnalysisLeadingHelper(learner);
         }
         
         @Override
         protected Word getWordExperiment() {
-            loop = this.exprValue.getRight();
-            return this.exprValue.getLeft();
+            return ceAnalysisLeadingHelper.computeWordExperiment(exprValue);
         }
 
         @Override
         protected void update(CeAnalysisResult result) {
-            Word wordCE = exprValue.getLeft();
-            wordExpr = getExprValueWord(wordCE.getSuffix(result.breakIndex + 1), loop);  // y[j+1..n]
+            wordExpr = ceAnalysisLeadingHelper.computeNewExprValue(exprValue, result);
         }
     }
     
     @Override
-    protected boolean isAccepting(int state) {
-        return false;
+    protected CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
+        return new CeAnalyzerLeadingTable(exprValue, result, this);
+    }
+
+    @Override
+    public void setCeAnalysisLoop(Word loop) {
+        this.loop = loop;
+    }
+
+    @Override
+    public Word getCeAnalysisLoop() {
+        return loop;
     }
     
-    @Override
-    protected CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
-        return new CeAnalyzerLeadingTable(exprValue, result);
+    public static class CeAnalysisLeadingHelper {
+        LearnerLeading learnerLeading;
+        public CeAnalysisLeadingHelper(LearnerLeading learnerLeading) {
+            this.learnerLeading = learnerLeading;
+        }
+        
+        public Word computeWordExperiment(ExprValue exprValue) {
+            learnerLeading.setCeAnalysisLoop(exprValue.getRight());
+            return exprValue.getLeft();
+        }
+        
+        public ExprValue computeNewExprValue(ExprValue exprValue, CeAnalysisResult result) {
+            Word wordCE = exprValue.getLeft();
+            return learnerLeading.getExprValueWord(wordCE.getSuffix(result.breakIndex + 1)
+                    , learnerLeading.getCeAnalysisLoop());  // y[j+1..n]
+        }
     }
 
 }

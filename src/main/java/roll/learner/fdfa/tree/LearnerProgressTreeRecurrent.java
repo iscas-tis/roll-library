@@ -16,6 +16,7 @@
 
 package roll.learner.fdfa.tree;
 
+import roll.automata.DFA;
 import roll.learner.LearnerType;
 import roll.learner.fdfa.LearnerLeading;
 import roll.learner.fdfa.LearnerProgressRecurrent;
@@ -23,6 +24,7 @@ import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
+import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -38,6 +40,15 @@ public class LearnerProgressTreeRecurrent extends LearnerProgressTree implements
     @Override
     public LearnerType getLearnerType() {
         return LearnerType.FDFA_RECURRENT_TREE;
+    }
+    
+    @Override
+    public HashableValue prepareRowHashableValue(boolean mqResult, Word x, Word e) {
+        DFA leadDFA = getLearnerLeading().getHypothesis();
+        int stateUX = leadDFA.getSuccessor(getLeadingState(), x);
+        int stateUXE = leadDFA.getSuccessor(stateUX, e);
+        boolean recur = stateUXE == getLeadingState();
+        return getHashableValueBool(recur && mqResult);
     }
 
 }

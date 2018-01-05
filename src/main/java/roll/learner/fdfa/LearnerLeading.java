@@ -24,6 +24,10 @@ public interface LearnerLeading extends LearnerGeneral {
 
     default ExprValue getExprValueWord(Word left, Word right) {
         return new ExprValueWordPair(left, right);
-    } 
+    }
+    
+    void setCeAnalysisLoop(Word loop);
+    
+    Word getCeAnalysisLoop();
     
 }

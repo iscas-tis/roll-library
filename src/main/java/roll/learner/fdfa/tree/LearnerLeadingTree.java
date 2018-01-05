@@ -17,11 +17,18 @@
 package roll.learner.fdfa.tree;
 
 import roll.learner.LearnerType;
+import roll.learner.dfa.tree.ValueNode;
 import roll.learner.fdfa.LearnerLeading;
+import roll.learner.fdfa.table.LearnerLeadingTable.CeAnalysisLeadingHelper;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
+import roll.query.Query;
+import roll.query.QuerySimple;
+import roll.table.ExprValue;
+import roll.table.ExprValueWordPair;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
+import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -29,13 +36,92 @@ import roll.words.Alphabet;
 
 public class LearnerLeadingTree extends LearnerOmegaTree implements LearnerLeading{
 
-    public LearnerLeadingTree(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
+    public LearnerLeadingTree(Options options, Alphabet alphabet
+            , MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
     }
 
     @Override
     public LearnerType getLearnerType() {
         return LearnerType.FDFA_LEADING_TREE;
+    }
+    
+    @Override
+    protected HashableValue processMembershipQuery(Word label, ExprValue valueExpr) {
+        assert valueExpr instanceof ExprValueWordPair;
+        ExprValueWordPair valueExprPair = (ExprValueWordPair) valueExpr;
+        Query<HashableValue> query = getQuerySimple(label.concat(valueExprPair.getLeft()), valueExprPair.getRight());
+        return membershipOracle.answerMembershipQuery(query);
+    }
+    
+    @Override
+    protected HashableValue processMembershipQuery(Word prefix, Word suffix) {
+        prefix = prefix.concat(suffix);
+        assert loop != null;
+        Query<HashableValue> query = new QuerySimple<>(null, prefix, loop, -1);
+        return membershipOracle.answerMembershipQuery(query);
+    }
+    
+    @Override
+    protected boolean isAccepting(ValueNode state) {
+        return false;
+    }
+    
+    // remember the loop of current counterexample
+    protected Word loop;
+    
+    protected class CeAnalyzerLeadingTree extends CeAnalyzerTree {
+        
+        private final CeAnalysisLeadingHelper ceAnalysisLeadingHelper;
+        public CeAnalyzerLeadingTree(ExprValue exprValue, HashableValue result, LearnerLeading learner) {
+            super(exprValue, result);
+            this.ceAnalysisLeadingHelper = new CeAnalysisLeadingHelper(learner);
+        }
+        
+        @Override
+        public void analyze() {
+            this.leafBranch = result;
+            this.nodePrevBranch = getHashableValueBoolean(!result.isAccepting());
+            // only has one leaf
+            if(tree.getRoot().isLeaf()) {
+                this.wordExpr = getExprValueWord(alphabet.getEmptyWord(), this.exprValue.getRight());
+                this.nodePrev = tree.getRoot();
+                this.wordLeaf = getExprValueWord(exprValue.getLeft());
+                return ;
+            }
+            // when root is not a terminal node
+            CeAnalysisResult result = findBreakIndex();
+            update(result);
+        }
+        
+        @Override
+        protected Word getWordExperiment() {
+            return ceAnalysisLeadingHelper.computeWordExperiment(exprValue);
+        }
+
+        @Override
+        protected void update(CeAnalysisResult result) {
+            Word wordCE = getWordExperiment();
+            Word wordPrev = getStateLabel(result.prevState);         // S(j-1)
+            this.wordExpr = ceAnalysisLeadingHelper.computeNewExprValue(exprValue, result);  // y[j+1..n]
+            this.wordLeaf = getExprValueWord(wordPrev.append(wordCE.getLetter(result.breakIndex))); // S(j-1)y[j]
+            this.nodePrev = states.get(result.currState).node;          // S(j)
+        }
+    }
+    
+    @Override
+    protected CeAnalyzerTree getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
+        return new CeAnalyzerLeadingTree(exprValue, result, this);
+    }
+
+    @Override
+    public void setCeAnalysisLoop(Word loop) {
+        this.loop = loop;
+    }
+
+    @Override
+    public Word getCeAnalysisLoop() {
+        return loop;
     }
 
 }

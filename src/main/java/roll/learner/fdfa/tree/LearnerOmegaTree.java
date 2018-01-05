@@ -19,8 +19,13 @@ package roll.learner.fdfa.tree;
 import roll.learner.dfa.tree.LearnerDFATree;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
+import roll.query.Query;
+import roll.query.QuerySimple;
+import roll.table.ExprValue;
+import roll.table.ExprValueWordPair;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
+import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -28,8 +33,22 @@ import roll.words.Alphabet;
 
 public abstract class LearnerOmegaTree extends LearnerDFATree {
 
-    public LearnerOmegaTree(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
+    public LearnerOmegaTree(Options options, Alphabet alphabet
+            , MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
+    }
+    
+    protected Query<HashableValue> getQuerySimple(Word prefix, Word suffix) {
+        return new QuerySimple<>(prefix, suffix);
+    }
+    
+    @Override
+    protected ExprValue getCounterExampleWord(Query<HashableValue> query) {
+        assert query != null;
+        Word left = query.getPrefix();
+        Word right = query.getSuffix();
+        assert left != null && right != null;
+        return new ExprValueWordPair(left, right);
     }
 
 }
