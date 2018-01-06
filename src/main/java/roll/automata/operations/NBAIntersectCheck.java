@@ -67,7 +67,7 @@ public class NBAIntersectCheck {
     }
     
     public void computePath() {
-        if(fstAcc == null || sndAcc == null) {
+        if(!needCE || fstAcc == null || sndAcc == null) {
             throw new UnsupportedOperationException("No accepting loop");
         }
         
