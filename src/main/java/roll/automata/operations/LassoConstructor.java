@@ -89,7 +89,7 @@ public class LassoConstructor {
                 boolean found = false;
                 for(final int succ : succs) {
                     if(fstF == succ) {
-                        wordSuffix.append(c);
+                        wordSuffix = wordSuffix.append(c);
                         found = true;
                         break;
                     }else if(scc.get(succ)){
@@ -104,7 +104,7 @@ public class LassoConstructor {
             // we have to set them differently
             assert state != -1 : "successor " + state;
             assert letter != -1 : "letter " + letter;
-            wordSuffix.append(letter);
+            wordSuffix = wordSuffix.append(letter);
             runSuffix.add(state);
             findPath(state, sndF, false);
         }else {
@@ -143,7 +143,7 @@ public class LassoConstructor {
         // must have a path from s to t
         LinkedList<Integer> run = new LinkedList<>();
         LinkedList<Integer> word = new LinkedList<>();
-        Integer cur = t;
+        int cur = t;
         while(cur != s) {
             run.addFirst(cur);
             word.addFirst(predElems.get(cur));
@@ -164,8 +164,15 @@ public class LassoConstructor {
         }
         
         for(Integer letter : word) {
-            w.append(letter);
+            w = w.append(letter);
         }
+        
+        if(prefix) {
+             wordPrefix = w;
+        }else {
+             wordSuffix = w;         
+        }
+        
     }
 
     

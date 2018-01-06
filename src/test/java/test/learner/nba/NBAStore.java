@@ -89,5 +89,29 @@ public class NBAStore {
         
         return target;
     }
+    
+    public static NBA getNBA4() {
+        Alphabet alphabet = new Alphabet();
+        alphabet.addLetter('a');
+        alphabet.addLetter('b');
+        NBA target = new NBA(alphabet);
+        target.createState();
+        target.createState();
+        target.createState();
+        
+        
+        int fst = 0, snd = 1, thd = 2;
+        target.getState(fst).addTransition(alphabet.indexOf('b'), thd);
+        target.getState(snd).addTransition(alphabet.indexOf('a'), fst);
+        target.getState(thd).addTransition(alphabet.indexOf('b'), fst);
+        target.getState(thd).addTransition(alphabet.indexOf('b'), snd);
+        target.getState(thd).addTransition(alphabet.indexOf('a'), thd);
+        target.getState(thd).addTransition(alphabet.indexOf('a'), snd);
+
+        target.setInitial(fst);
+        target.setFinal(snd);
+        
+        return target;
+    }
 
 }

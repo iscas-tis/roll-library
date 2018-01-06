@@ -63,6 +63,7 @@ public class NBAIntersectCheck {
         new AsccExplore();
         if(needCE) {
             checker = new NBAEmptinessCheck(result, fstAcc, sndAcc);
+            checker.isEmpty();
         }
     }
     
@@ -226,11 +227,6 @@ public class NBAIntersectCheck {
                 do {
                     assert !act.isEmpty() : "Act empty";
                     u = act.pop();
-                    // remove nonaccepting sccs
-                    if(needCE) {
-                        fstAcc.clear(u);
-                        sndAcc.clear(u);
-                    }
                 }while(u != prod.resState);
             }
         }
