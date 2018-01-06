@@ -24,54 +24,12 @@ import roll.main.Options;
 import roll.oracle.nba.rabit.TeacherNBARABIT;
 import roll.query.Query;
 import roll.table.HashableValue;
-import roll.words.Alphabet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
 public class NBALOmegaTest {
-    
-    private NBA getNBA() {
-        Alphabet alphabet = new Alphabet();
-        alphabet.addLetter('a');
-        alphabet.addLetter('b');
-        NBA target = new NBA(alphabet);
-        target.createState();
-        target.createState();
-        target.createState();
-        
-        // a^w + ab^w
-        int fst = 0, snd = 1, thd = 2;
-        target.getState(fst).addTransition(alphabet.indexOf('a'), snd);
-        target.getState(fst).addTransition(alphabet.indexOf('a'), thd);
-        target.getState(snd).addTransition(alphabet.indexOf('a'), snd);
-        target.getState(thd).addTransition(alphabet.indexOf('b'), thd);
-        target.setInitial(fst);
-        target.setFinal(snd);
-        target.setFinal(thd);
-        
-        return target;
-    }
-    
-    private NBA getNBA2() {
-        Alphabet alphabet = new Alphabet();
-        alphabet.addLetter('a');
-        alphabet.addLetter('b');
-        NBA target = new NBA(alphabet);
-        target.createState();
-        target.createState();
-        
-        // a^w + ab^w
-        int fst = 0, snd = 1;
-        target.getState(fst).addTransition(alphabet.indexOf('a'), snd);
-        target.getState(fst).addTransition(alphabet.indexOf('b'), fst);
-        target.getState(snd).addTransition(alphabet.indexOf('b'), snd);
-        target.setInitial(fst);
-        target.setFinal(snd);
-        
-        return target;
-    }
     
 //    @Test
 //    public void testSampler() {
@@ -104,13 +62,14 @@ public class NBALOmegaTest {
     
     @Test
     public void testRABIT() {
-        NBA target = getNBA2();
+        NBA target = NBAStore.getNBA3();
         
         System.out.println(target.toString());
         
         Options options = new Options();
         options.structure = Options.Structure.TABLE;
-        options.algorithm = Options.Algorithm.SYNTACTIC;
+        options.approximation = Options.Approximation.UNDER;
+        options.algorithm = Options.Algorithm.PERIODIC;
         options.verbose = true;
         TeacherNBARABIT teacher = new TeacherNBARABIT(options, target);
         LearnerNBALOmega learner = new LearnerNBALOmega(options, target.getAlphabet(), teacher);
@@ -119,7 +78,7 @@ public class NBALOmegaTest {
         while(true) {
             System.out.println("Table is both closed and consistent\n" + learner.toString());
             NBA model = learner.getHypothesis();
-            System.out.println(model.toString());
+            System.out.println("Hypothesis:\n" + model.toString());
             // along with ce
             Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(model);
             boolean isEq = ceQuery.getQueryAnswer().get();
@@ -131,6 +90,8 @@ public class NBALOmegaTest {
             System.out.println(ceQuery.toString());
             learner.refineHypothesis(ceQuery);
         }
+        
+        options.stats.print();
         
     }
 

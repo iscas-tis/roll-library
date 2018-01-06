@@ -71,48 +71,53 @@ public class Statistics {
     }
     
     public void print() {
-
+        int indent = 30;
+        if(numOfStatesInProgress.size() > indent) {
+            indent = 4 * numOfStatesInProgress.size();
+        }
         log.println("");
         log.println("");
-        log.println("#LT = " + numOfLetters + "    //#number of letters");
-        log.println("#T.S = " + numOfStatesInTraget + "    //#states of target");
-        log.println("#T.T = " + numOfTransInTraget + "    //#transitions of target");
+        log.println("#LT = " + numOfLetters, indent , "    // #number of letters");
+        log.println("#T.S = " + numOfStatesInTraget , indent , "    // #states of target");
+        log.println("#T.T = " + numOfTransInTraget , indent , "    // #transitions of target");
         
-        log.println("#H.S = " + numOfStatesInHypothesis + "    //#states of learned automaton");
-        log.println("#H.T = " + numOfTransInHypothesis + "    //#transitions of learned automaton");
+        log.println("#H.S = " + numOfStatesInHypothesis , indent , "    // #states of learned automaton");
+        log.println("#H.T = " + numOfTransInHypothesis , indent , "    // #transitions of learned automaton");
         
         int numTotal = numOfStatesInLeading;
-        log.println("#L.S = " + numOfStatesInLeading + "    // #states of leading automaton or L$");
-        log.print("#P.S = [" );
+        log.println("#L.S = " + numOfStatesInLeading , indent , "    // #states of leading automaton or L$");
+        StringBuilder builder = new StringBuilder();
+        builder.append("#P.S = [" );
         for(Integer numStates : numOfStatesInProgress) {
-            log.print(numStates + ", ");
+            builder.append(numStates + ", ");
             numTotal += numStates;
         }
-        log.println(" ]    // #states of each progress automaton");
+        builder.append("]");
+        log.println(builder.toString(),  indent ,"    // #states of each progress automaton");
         // total number of the states in final FDFA
-        log.println("#F.S = " + numTotal + "    // #L.S + #P.S");
+        log.println("#F.S = " + numTotal , indent , "    // #L.S + #P.S");
         
-        log.println("#MQ = " + numOfMembershipQuery + "    // #membership query");
-        log.println("#EQ = " + numOfEquivalenceQuery + "    // #equivalence query");
+        log.println("#MQ = " + numOfMembershipQuery , indent , "    // #membership query");
+        log.println("#EQ = " + numOfEquivalenceQuery , indent , "    // #equivalence query");
         
-        log.println("#TMQ = " + timeOfMembershipQuery + " (ms)" + "    // time for membership queries");
-        log.println("#TEQ = " + timeOfEquivalenceQuery + " (ms)" + "    // time for equivalence queries");
-        log.println("#TLEQ = " + timeOfLastEquivalenceQuery + " (ms)" + "    // time for the last equivalence query");
-        log.println("#TTR = " + timeOfTranslator + " (ms)" + "    // time for the translator");
+        log.println("#TMQ = " + timeOfMembershipQuery + " (ms)" , indent , "    // time for membership queries");
+        log.println("#TEQ = " + timeOfEquivalenceQuery + " (ms)" , indent , "    // time for equivalence queries");
+        log.println("#TLEQ = " + timeOfLastEquivalenceQuery + " (ms)" , indent , "    // time for the last equivalence query");
+        log.println("#TTR = " + timeOfTranslator + " (ms)" , indent , "    // time for the translator");
         
-        log.println("#TLR = " + timeOfLearner + " (ms)" + "    // time for the learner");
-        log.println("#TLRL = " + timeOfLearnerLeading + " (ms)"  + "    // time for the learning leading automaton" );
-        log.println("#TLRP = " + timeOfLearnerProgress + " (ms)" + "    // time for the learning progress automata" );
+        log.println("#TLR = " + timeOfLearner + " (ms)" , indent , "    // time for the learner");
+        log.println("#TLRL = " + timeOfLearnerLeading + " (ms)"  , indent , "    // time for the learning leading automaton" );
+        log.println("#TLRP = " + timeOfLearnerProgress + " (ms)" , indent , "    // time for the learning progress automata" );
         
         if(options.runningMode == Options.RunningMode.SAMPLING) {
-            log.println("#SW = " + numOfSamplingOmegaWords);
-            log.println("#SMQ = " + numOfMembershipSampling);
-            log.println("#ST = " + numOfSamplingTried);
-            log.println("#SSD = " + numOfSamplingSucceeded);
-            log.println("#TSA = " + timeOfSampling);
+            log.println("#SW = " + numOfSamplingOmegaWords, indent, "    // #number of sample omega words");
+            log.println("#SMQ = " + numOfMembershipSampling, indent, "    // #number of sample membership queries");
+            log.println("#ST = " + numOfSamplingTried, indent, "    // #number of sample have been tried");
+            log.println("#SSD = " + numOfSamplingSucceeded, indent, "    // #number of sample succeeded");
+            log.println("#TSA = " + timeOfSampling, indent, "    // time of sampling");
         }
                 
-        log.println("#TTO = " + timeInTotal + " (ms)" + "    //total time for learning Buechi automata");
+        log.println("#TTO = " + timeInTotal + " (ms)" , indent , "    // total time for learning Buechi automata");
                 
     }
 

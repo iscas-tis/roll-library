@@ -25,7 +25,6 @@ import roll.oracle.nba.rabit.TeacherNBARABIT;
 import roll.oracle.nba.sampler.TeacherNBASampler;
 import roll.query.Query;
 import roll.table.HashableValue;
-import roll.words.Alphabet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -33,31 +32,9 @@ import roll.words.Alphabet;
 
 public class NBALDollarTest {
     
-    private NBA getNBA() {
-        Alphabet alphabet = new Alphabet();
-        alphabet.addLetter('a');
-        alphabet.addLetter('b');
-        NBA target = new NBA(alphabet);
-        target.createState();
-        target.createState();
-        target.createState();
-        
-        // a^w + ab^w
-        int fst = 0, snd = 1, thd = 2;
-        target.getState(fst).addTransition(alphabet.indexOf('a'), snd);
-        target.getState(fst).addTransition(alphabet.indexOf('a'), thd);
-        target.getState(snd).addTransition(alphabet.indexOf('a'), snd);
-        target.getState(thd).addTransition(alphabet.indexOf('b'), thd);
-        target.setInitial(fst);
-        target.setFinal(snd);
-        target.setFinal(thd);
-        
-        return target;
-    }
-    
     @Test
     public void testSampler() {
-        NBA target = getNBA();
+        NBA target = NBAStore.getNBA1();
         
         Options options = new Options();
         options.structure = Options.Structure.TABLE;
@@ -86,7 +63,7 @@ public class NBALDollarTest {
     
     @Test
     public void testRABIT() {
-        NBA target = getNBA();
+        NBA target = NBAStore.getNBA3();
         
         System.out.println(target.toString());
         
@@ -111,6 +88,8 @@ public class NBALDollarTest {
             ceQuery.answerQuery(null);
             learner.refineHypothesis(ceQuery);
         }
+        
+        options.stats.print();
         
     }
 
