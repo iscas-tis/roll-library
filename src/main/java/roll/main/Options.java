@@ -42,7 +42,7 @@ public final class Options {
     public Optimization optimization = Optimization.NONE;
     
     // the type of learned buchi
-    public Automaton automaton = Automaton.DFA;
+    public TargetAutomaton automaton = TargetAutomaton.DFA;
     
     // sampling precision
     public double epsilon;
@@ -129,7 +129,7 @@ public final class Options {
         MINIMIZATION
     }
     
-    public static enum Automaton {
+    public static enum TargetAutomaton {
         DFA,
         FDFA,
         NBA,

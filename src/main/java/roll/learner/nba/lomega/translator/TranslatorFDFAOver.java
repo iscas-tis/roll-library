@@ -178,13 +178,17 @@ public class TranslatorFDFAOver extends TranslatorFDFA {
 			
 			int lastNr = getLastIndexAtFinal(dkAutCE, startNr, period);
 			// only one x left, and (u, x) not in L
+//			assert startNr <= lastNr + 1 && startNr >= 0 && lastNr + 1 <= period.length();
+			if(options.verbose) {
+			    options.log.println("startNr=" + startNr + " lastNr=" + lastNr + " |period|=" + period.length());
+			}
+			if(lastNr < 0) break;       
 			Word x = alphabet.getWordFromString(period.substring(startNr, lastNr + 1));
 			if(lastNr == period.length() - 1) {
 				HashableValue r = membershipOracle.answerMembershipQuery(new QuerySimple<>(pre, x));
 				if(! r.isAccepting()) {
 					suf = x;
 				}
-				
 				break;
 			}
 			// now it must be at least two period, x, y
@@ -200,7 +204,7 @@ public class TranslatorFDFAOver extends TranslatorFDFA {
 		}
 		
 		if(suf == null) {
-			System.err.println("Not able to find counterexample...");
+			options.log.err("Not able to find counterexample...");
 			System.exit(-1);
 		}
 		return suf;

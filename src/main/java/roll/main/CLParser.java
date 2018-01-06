@@ -103,12 +103,12 @@ public class CLParser {
             }
             if(args[i].compareTo("-lstar") == 0) {
                 options.algorithm = Options.Algorithm.DFA_LSTAR;
-                options.automaton = Options.Automaton.DFA;
+                options.automaton = Options.TargetAutomaton.DFA;
                 continue;
             }
             if(args[i].compareTo("-dfa") == 0) {
                 options.algorithm = Options.Algorithm.DFA_COLUMN;
-                options.automaton = Options.Automaton.DFA;
+                options.automaton = Options.TargetAutomaton.DFA;
                 continue;
             }
             if(args[i].compareTo("-ldollar") == 0) {
@@ -140,15 +140,15 @@ public class CLParser {
                 continue;
             }
             if(args[i].compareTo("-ldba") == 0) {
-                options.automaton = Options.Automaton.LDBA;
+                options.automaton = Options.TargetAutomaton.LDBA;
                 continue;
             }
             if(args[i].compareTo("-nba") == 0) {
-                options.automaton = Options.Automaton.NBA;
+                options.automaton = Options.TargetAutomaton.NBA;
                 continue;
             }
             if(args[i].compareTo("-fdfa") == 0) {
-                options.automaton = Options.Automaton.FDFA;
+                options.automaton = Options.TargetAutomaton.FDFA;
                 continue;
             }
             if(args[i].compareTo("-dot") == 0) {
