@@ -17,7 +17,6 @@
 package roll.learner.dfa.tree;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.List;
 
 import gnu.trove.iterator.TIntObjectIterator;
@@ -31,6 +30,8 @@ import roll.query.QuerySimple;
 import roll.table.ExprValue;
 import roll.table.HashableValue;
 import roll.tree.Node;
+import roll.util.sets.ISet;
+import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
 import roll.words.Word;
 
@@ -94,11 +95,9 @@ public abstract class LearnerDFATree extends LearnerDFA {
 		
 		for(ValueNode state : states) {
 			for(int letter = 0; letter < alphabet.getLetterSize(); letter ++) {
-				BitSet preds = state.predecessors.get(letter);
+				ISet preds = state.predecessors.get(letter);
 				if(preds == null) continue;
-				for(int predNr = preds.nextSetBit(0)
-						; predNr >= 0
-						; predNr = preds.nextSetBit(predNr + 1)) {
+				for(final int predNr : preds) {
 					StateDFA s = dfa.getState(predNr);
 					s.addTransition(letter, state.id);
 				}
@@ -120,17 +119,15 @@ public abstract class LearnerDFATree extends LearnerDFA {
 	// needs to check , s <- a - t then t has a successor s 
 	protected void updatePredecessors() {
 		
-		TIntObjectIterator<BitSet> iterator = nodeToSplit.getValue().predecessors.iterator();
+		TIntObjectIterator<ISet> iterator = nodeToSplit.getValue().predecessors.iterator();
 		Node<ValueNode> parent = nodeToSplit.getParent();
-		BitSet letterToDeleted = new BitSet();
+		ISet letterToDeleted = UtilISet.newISet();
 		while(iterator.hasNext()) {
 			iterator.advance();
 			int letter = iterator.key();
-			BitSet statePrevs = iterator.value();
-			BitSet stateLeft = (BitSet) statePrevs.clone();
-			for(int stateNr = statePrevs.nextSetBit(0)
-					; stateNr >= 0
-					; stateNr = statePrevs.nextSetBit(stateNr + 1)) {
+			ISet statePrevs = iterator.value();
+			ISet stateLeft = statePrevs.clone();
+			for(final int stateNr : statePrevs) {
 				ValueNode statePrev = states.get(stateNr);
 				Node<ValueNode> nodeOther = sift(statePrev.label.append(letter), parent);
 				if (nodeOther != nodeToSplit) {
@@ -145,9 +142,7 @@ public abstract class LearnerDFATree extends LearnerDFA {
 			}
 		}
 		
-		for(int letter = letterToDeleted.nextSetBit(0)
-				; letter >= 0
-				; letter = letterToDeleted.nextSetBit(letter + 1)) {
+		for(final int letter : letterToDeleted) {
 			nodeToSplit.getValue().predecessors.remove(letter);
 		}
 		

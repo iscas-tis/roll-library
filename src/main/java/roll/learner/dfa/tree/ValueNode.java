@@ -16,11 +16,11 @@
 
 package roll.learner.dfa.tree;
 
-import java.util.BitSet;
-
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import roll.tree.Node;
+import roll.util.sets.ISet;
+import roll.util.sets.UtilISet;
 import roll.words.Word;
 
 /**
@@ -31,7 +31,7 @@ public class ValueNode {
 	public final int id;
 	public Node<ValueNode> node;
 	public final Word label;
-	public TIntObjectMap<BitSet> predecessors; // use more efficient way to store
+	public TIntObjectMap<ISet> predecessors; // use more efficient way to store
 	
 	public ValueNode(int id, Word label) {
 		this.id = id;
@@ -41,10 +41,10 @@ public class ValueNode {
 	
 	public void addPredecessor(int source, int letter) {
 		if(predecessors.containsKey(letter)) {
-			BitSet states = predecessors.get(letter);
+			ISet states = predecessors.get(letter);
 			states.set(source);
 		}else {
-			BitSet states = new BitSet();
+			ISet states = UtilISet.newISet();
 			states.set(source);
 			predecessors.put(letter, states);
 		}
