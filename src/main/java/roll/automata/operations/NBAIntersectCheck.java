@@ -23,9 +23,11 @@ import java.util.Stack;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import roll.automata.NBA;
+import roll.util.Pair;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
+import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -58,6 +60,14 @@ public class NBAIntersectCheck {
             this.sndAcc = UtilISet.newISet();
         }
         new AsccExplore();
+    }
+    
+    public void computePath() {
+        
+    }
+    
+    public Pair<Word, Word> getCounterexample() {
+        return null;
     }
     
     public boolean isEmpty() {

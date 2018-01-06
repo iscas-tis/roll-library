@@ -175,7 +175,6 @@ public class LearnerProgressTreeSyntactic extends LearnerProgressTree implements
         // test whether this node is accepting
         Word period = nodeLabel.get();
         HashableValue result = processMembershipQuery(period, tree.getRoot().getLabel());
-//      Boolean isAccepting = result.getLeft();
         if(result.isAccepting()) nodeLeaf.setAcceting();
         
         updatePredecessors(stateLeaf.id, 0, alphabet.getLetterSize() - 1);

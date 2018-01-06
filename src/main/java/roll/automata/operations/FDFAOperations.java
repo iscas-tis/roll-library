@@ -272,5 +272,51 @@ public class FDFAOperations {
         if(wordStr == null) return null;
         return fdfa.getAlphabet().getWordPairFromString(wordStr);
     }
+    
+    public static Automaton buildNegNBA(FDFA fdfa) {
+        DFA autL = fdfa.getLeadingDFA();
+        TIntObjectMap<State> map = new TIntObjectHashMap<>();
+        Automaton dkAutL = DFAOperations.toDkDFA(map, autL);
+        for (int stateNr = 0; stateNr < autL.getStateSize(); stateNr++) {
+            DFA autP = fdfa.getProgressDFA(stateNr);
+            List<Automaton> accAuts = new ArrayList<>();
+            int stateInitP = autP.getInitialState();
+            for (int accNr = 0; accNr < autP.getStateSize(); accNr ++) {
+                // reverse all the states here
+                if(autP.isFinal(accNr)) continue;
+                Automaton dkAutP = DFAOperations.toDkDFA(autP, stateInitP, accNr);
+                dkAutP.minimize();
+                Automaton dkAutLOther = DFAOperations.toDkDFA(autL, stateNr, stateNr);
+                dkAutLOther.minimize();
+                
+                Automaton product = dkAutP.intersection(dkAutLOther);                
+                product.minimize();
+                
+                Automaton dkAutNq = DFAOperations.toDkDFA(autP, accNr, accNr);
+                dkAutNq.minimize();
+
+                product = product.intersection(dkAutNq);
+                product.minimize();
+
+                if (! product.getAcceptStates().isEmpty()) {
+                    assert product.getAcceptStates().size() == 1;
+                    if(product.getAcceptStates().size() > 1) {
+                        throw new UnsupportedOperationException("More than one accepting state...");
+                    }
+                    product = DFAOperations.addEpsilon(product);
+                    accAuts.add(product);
+                }
+            }
+
+            State u = map.get(stateNr); // make epsilon or Dollar transitions
+            for (Automaton dkAut : accAuts) {
+                State init = dkAut.getInitialState();
+                for (Transition t : init.getTransitions())
+                    u.addTransition(new Transition(t.getMin(), t.getMax(), t.getDest()));
+            }
+        }
+//      dkAutL.removeDeadTransitions();
+        return dkAutL;
+    }
 
 }
