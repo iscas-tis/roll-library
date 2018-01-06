@@ -152,7 +152,7 @@ public class NBAInclusionTeacher implements Teacher<FDFA, Query<HashableValue>, 
                 prefix = pair.getLeft();
                 suffix = pair.getRight();
                 isEq = true;
-                options.log.println("Inclusion violated... ");
+                options.log.println("Not included");
                 options.log.println("prefix: " + parser.translate(prefix));
                 options.log.println("loop: " + parser.translate(suffix));
             }else {
@@ -193,9 +193,9 @@ public class NBAInclusionTeacher implements Teacher<FDFA, Query<HashableValue>, 
                         isInTarget = false;
                         boolean isAStr = NBAOperations.accepts(A, prefix, suffix);
                         if(isAStr) {
-                            System.out.println("Inclusion violated... ");
-                            System.out.println("prefix: " + parser.translate(prefix));
-                            System.out.println("loop: " + parser.translate(suffix));
+                            options.log.println("Not included");
+                            options.log.println("prefix: " + parser.translate(prefix));
+                            options.log.println("loop: " + parser.translate(suffix));
                             isEq = true;
                         }
                     }else {
@@ -208,7 +208,7 @@ public class NBAInclusionTeacher implements Teacher<FDFA, Query<HashableValue>, 
                         String prefixStr = RABIT.getPrefix();
                         String suffixStr = RABIT.getSuffix();
                         if(isIncluded) {
-                            options.log.println("Inclusion holds ...");
+                            options.log.println("Included");
                             isEq = true;
                         }else {
                             isInTarget = false;
@@ -218,7 +218,7 @@ public class NBAInclusionTeacher implements Teacher<FDFA, Query<HashableValue>, 
                             boolean isAStr = NBAOperations.accepts(A, prefix, suffix);
                             
                             if(isAStr) {
-                                System.out.println("Inclusion violated... ");
+                                System.out.println("Not included");
                                 System.out.println("prefix: " + parser.translate(prefix));
                                 System.out.println("loop: " + parser.translate(suffix));
                                 isEq = true;
