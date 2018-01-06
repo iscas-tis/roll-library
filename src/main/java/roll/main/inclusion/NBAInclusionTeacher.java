@@ -184,6 +184,7 @@ public class NBAInclusionTeacher implements Teacher<FDFA, Query<HashableValue>, 
                     }
                     // by sampler
                     SamplerIndexedMonteCarlo sampler = new SamplerIndexedMonteCarlo(options.epsilon, options.delta);
+                    sampler.K = B.getStateSize();
                     Query<HashableValue> ceQuery = NBAInclusionSampler.isIncluded(BFC, B, sampler);
                     
                     if(ceQuery != null) {
@@ -247,6 +248,17 @@ public class NBAInclusionTeacher implements Teacher<FDFA, Query<HashableValue>, 
         
         if(options.verbose) System.out.println("counter example = " + query);
         return query;
+    }
+    
+    public void print() {
+        options.log.println("#B(F)/\\B = " + numInterBandBF);
+        options.log.println("t#B(F)/\\B = " + timeInterBandBF + " ms");
+        options.log.println("#A/\\B(F) = " + numInterAandBF);
+        options.log.println("t#A/\\B(F) = " + timeInterAandBF + " ms");
+        options.log.println("#B(F^c)/\\B(F) = " + numInterBFCandBF);
+        options.log.println("t#B(F^c)/\\B(F) = " + timeInterBFCandBF + " ms");
+        options.log.println("#!A<B = " + numBFCLessB );
+        options.log.println("#t!A<B = " + timeBFCLessB + " ms");
     }
 
 }

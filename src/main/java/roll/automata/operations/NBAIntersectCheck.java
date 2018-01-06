@@ -43,6 +43,7 @@ public class NBAIntersectCheck {
     private ISet sndAcc;
     private boolean needCE;
     private int numStates;
+    private NBAEmptinessCheck checker;
     
     public NBAIntersectCheck(NBA fstOp, NBA sndOp) {
         this(fstOp, sndOp, false);
@@ -60,14 +61,24 @@ public class NBAIntersectCheck {
             this.sndAcc = UtilISet.newISet();
         }
         new AsccExplore();
+        if(needCE) {
+            checker = new NBAEmptinessCheck(result, fstAcc, sndAcc);
+        }
     }
     
     public void computePath() {
+        if(fstAcc == null || sndAcc == null) {
+            throw new UnsupportedOperationException("No accepting loop");
+        }
         
+        if(fstAcc.isEmpty() || sndAcc.isEmpty()) {
+            throw new UnsupportedOperationException("No accepting loop");
+        }
+        checker.findpath();
     }
     
     public Pair<Word, Word> getCounterexample() {
-        return null;
+        return checker.getCounterexample();
     }
     
     public boolean isEmpty() {
@@ -173,14 +184,12 @@ public class NBAIntersectCheck {
         }
 
         void strongConnect(ProductState prod) {
-            
             ++ depth;
             dfsNum.put(prod.resState, depth);
             sccs.push(new Elem(prod, getLabel(prod)));
             act.push(prod.resState);
             
             Alphabet alphabet = fstOp.getAlphabet();
-            
             for (int letter = 0; letter < alphabet.getLetterSize(); letter ++) {
                 for(int sndSucc : sndOp.getSuccessors(prod.sndState, letter)) {
                     for(int fstSucc : fstOp.getSuccessors(prod.fstState, letter)) {
@@ -209,8 +218,7 @@ public class NBAIntersectCheck {
                 }
             }
             
-            // if current number is done, 
-            // then we should remove all 
+            // if current number is done, then we should remove all 
             // active states in the same scc
             if(sccs.peek().state.resState == prod.resState) {
                 sccs.pop();
@@ -218,6 +226,11 @@ public class NBAIntersectCheck {
                 do {
                     assert !act.isEmpty() : "Act empty";
                     u = act.pop();
+                    // remove nonaccepting sccs
+                    if(needCE) {
+                        fstAcc.clear(u);
+                        sndAcc.clear(u);
+                    }
                 }while(u != prod.resState);
             }
         }
