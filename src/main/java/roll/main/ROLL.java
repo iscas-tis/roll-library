@@ -40,7 +40,7 @@ public final class ROLL {
         CLParser clParser = new CLParser();
         clParser.prepareOptions(args);
         Options options = clParser.getOptions();
-        System.out.println("\n" + options.toString());
+        options.log.println("\n" + options.toString());
         switch(options.runningMode) {
         case TEST:
             runTestMode(options);
