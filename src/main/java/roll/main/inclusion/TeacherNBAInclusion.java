@@ -232,7 +232,7 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
             }
             
         }
-        System.out.println("Done for checking equivalence...");
+        options.log.println("Done for checking equivalence...");
         Query<HashableValue> query = null;
         isInTarget = ! isInTarget;
         

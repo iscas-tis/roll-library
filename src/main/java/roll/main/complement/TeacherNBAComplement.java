@@ -17,16 +17,26 @@
 package roll.main.complement;
 
 import automata.FiniteAutomaton;
+import dk.brics.automaton.Automaton;
+import mainfiles.RABIT;
 import roll.automata.FDFA;
 import roll.automata.NBA;
+import roll.automata.operations.FDFAOperations;
+import roll.automata.operations.NBAIntersectCheck;
 import roll.automata.operations.NBAOperations;
 import roll.main.Options;
 import roll.main.inclusion.UtilInclusion;
 import roll.oracle.Teacher;
+import roll.oracle.nba.sampler.NBAInclusionSampler;
+import roll.oracle.nba.sampler.SamplerIndexedMonteCarlo;
 import roll.query.Query;
+import roll.query.QuerySimple;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
+import roll.table.HashableValueBooleanExactPair;
+import roll.util.Pair;
 import roll.util.Timer;
+import roll.words.Alphabet;
 import roll.words.Word;
 
 /**
@@ -35,14 +45,16 @@ import roll.words.Word;
 
 public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>, HashableValue> {
 
-    private final NBA nba;
+    private final NBA B;
     private final Options options;
     private final FiniteAutomaton rB;
+    private final Alphabet alphabet;
     
     public TeacherNBAComplement(Options options, NBA nba) {
         assert options != null && nba != null;
         this.options = options;
-        this.nba = nba;
+        this.B = nba;
+        this.alphabet = nba.getAlphabet();
         this.rB = UtilInclusion.toRABITNBA(nba);
     }
     
@@ -58,7 +70,7 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
         if(suffix.isEmpty()) {
             return new HashableValueBoolean(false);
         }else {
-            result = NBAOperations.accepts(nba, prefix, suffix);
+            result = NBAOperations.accepts(B, prefix, suffix);
         }
         
         timer.stop();
@@ -66,10 +78,137 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
         ++ options.stats.numOfMembershipQuery; 
         return new HashableValueBoolean(!result); // reverse the result for Buechi automaton
     }
+    
+    public int numInterBandBF;
+    public long timeInterBandBF;
+    
+    public int numInterAandBF;
+    public long timeInterAandBF;
+    
+    public int numInterBFCandBF;
+    public long timeInterBFCandBF;
+    
+    public int numBFCLessB;
+    public long timeBFCLessB;
+    
+    public boolean sampling = false;
 
     @Override
     public Query<HashableValue> answerEquivalenceQuery(FDFA hypothesis) {
-        return null;
+        Timer timer = new Timer();
+        timer.start();
+        options.log.println("Translating FDFA to Under Buechi automaton ...");
+        Automaton dkBF = FDFAOperations.buildUnderNBA(hypothesis);
+        NBA BF = NBAOperations.fromDkNBA(dkBF, alphabet);
+        ++ this.numInterBandBF;
+        options.log.println("Checking the intersection of BF (" + BF.getStateSize() + ") and B ("+ B.getStateSize() + ")...");
+        long t = timer.getCurrentTime();
+        NBAIntersectCheck interCheck = new NBAIntersectCheck(BF, B, true);
+        boolean isEmpty = interCheck.isEmpty();
+        t = timer.getCurrentTime() - t;
+        this.timeInterBandBF += t;
+        if(options.verbose) {
+            options.log.println("Hypothesis for complementation B");
+            options.log.println(BF.toString());
+        }
+        Word prefix = null;
+        Word suffix = null;
+        boolean isEq = false, isInTarget = false;
+        if(! isEmpty) {
+            // we have omega word in FDFA which should not be there
+            interCheck.computePath();
+            Pair<Word, Word> pair = interCheck.getCounterexample();
+            prefix = pair.getLeft();
+            suffix = pair.getRight();
+            isEq = false;
+            isInTarget = true;
+        } else {
+            Automaton dkBFC = FDFAOperations.buildNegNBA(hypothesis);
+            NBA BFC = NBAOperations.fromDkNBA(dkBFC, alphabet);
+            options.log.println("Checking the intersection for B(F) (" + BF.getStateSize() + ") and B(F^c) ("
+                    + BFC.getStateSize() + ")...");
+            ++this.numInterBFCandBF;
+            t = timer.getCurrentTime();
+            interCheck = new NBAIntersectCheck(BFC, BF, true);
+            isEmpty = interCheck.isEmpty();
+            t = timer.getCurrentTime() - t;
+            this.timeInterBFCandBF += t;
+
+            if (!isEmpty) {
+                // we have found counterexample now
+                interCheck.computePath();
+                Pair<Word, Word> pair = interCheck.getCounterexample();
+                prefix = pair.getLeft();
+                suffix = pair.getRight();
+                isEq = false;
+                isInTarget = NBAOperations.accepts(B, prefix, suffix);
+            } else {
+                // we have to resort to the equivalence check for hypothesisNotA
+                ++this.numBFCLessB;
+                options.log.println("Checking the inclusion between B(F^c) (" + BFC.getStateSize() + ") and B ("
+                        + B.getStateSize() + ")...");
+                if (options.verbose) {
+                    options.log.println("B(F^c): \n" + BFC.toString());
+                }
+                // by sampler
+                boolean hasCE = false;
+                
+                if(sampling) {
+                    options.log.println("Sampling for a counterexample to the inclusion...");
+                    SamplerIndexedMonteCarlo sampler = new SamplerIndexedMonteCarlo(options.epsilon, options.delta);
+                    sampler.K = B.getStateSize();
+                    Query<HashableValue> ceQuery = NBAInclusionSampler.isIncluded(BFC, B, sampler);
+                    if (ceQuery != null) {
+                        prefix = ceQuery.getPrefix();
+                        suffix = ceQuery.getSuffix();
+                        isInTarget = false;
+                        isEq = true;
+                        hasCE = true;
+                    }
+                }
+                
+                if(! hasCE) {
+                    // by rabit
+                    options.log.println("RABIT for a counterexample to the inclusion...");
+                    t = timer.getCurrentTime();
+                    FiniteAutomaton rBFC = UtilInclusion.toRABITNBA(BFC);
+                    boolean isIncluded = RABIT.isIncluded(rBFC, rB);
+                    t = timer.getCurrentTime() - t;
+                    this.timeBFCLessB += t;
+                    String prefixStr = RABIT.getPrefix();
+                    String suffixStr = RABIT.getSuffix();
+                    if (isIncluded) {
+                        isEq = true;
+                    } else {
+                        isInTarget = false;
+                        // check whether it is in A
+                        prefix = alphabet.getWordFromString(prefixStr);
+                        suffix = alphabet.getWordFromString(suffixStr);
+                        isEq = true;
+                    }
+                }
+            }
+        }
+        
+        options.log.println("Done for checking equivalence...");
+        Query<HashableValue> query = null;
+        isInTarget = ! isInTarget;
+        
+        if(isEq) {
+            query = new QuerySimple<>(alphabet.getEmptyWord(), alphabet.getEmptyWord());
+            query.answerQuery(new HashableValueBooleanExactPair(true, true));
+        }else {
+            query = new QuerySimple<>(prefix, suffix);
+            query.answerQuery(new HashableValueBooleanExactPair(false, isInTarget));
+        }
+        
+        timer.stop();
+        options.stats.timeOfEquivalenceQuery += timer.getTimeElapsed();
+        ++ options.stats.numOfEquivalenceQuery;
+        options.stats.timeOfLastEquivalenceQuery = timer.getTimeElapsed();
+        
+        if(options.verbose) System.out.println("counter example = " + query);
+        return query;
     }
 
 }
