@@ -71,7 +71,7 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
         Word suffix = query.getSuffix();
         
         if(suffix.isEmpty()) {
-            result = false;
+            return new HashableValueBoolean(false);
         }else {
             result = NBAOperations.accepts(B, prefix, suffix);
         }

@@ -16,12 +16,18 @@
 
 package roll.main.complement;
 
+import automata.FiniteAutomaton;
 import roll.automata.FDFA;
 import roll.automata.NBA;
+import roll.automata.operations.NBAOperations;
 import roll.main.Options;
+import roll.main.inclusion.UtilInclusion;
 import roll.oracle.Teacher;
 import roll.query.Query;
 import roll.table.HashableValue;
+import roll.table.HashableValueBoolean;
+import roll.util.Timer;
+import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -29,13 +35,36 @@ import roll.table.HashableValue;
 
 public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>, HashableValue> {
 
+    private final NBA nba;
+    private final Options options;
+    private final FiniteAutomaton rB;
+    
     public TeacherNBAComplement(Options options, NBA nba) {
-        
+        assert options != null && nba != null;
+        this.options = options;
+        this.nba = nba;
+        this.rB = UtilInclusion.toRABITNBA(nba);
     }
     
     @Override
     public HashableValue answerMembershipQuery(Query<HashableValue> query) {
-        return null;
+        Timer timer = new Timer();
+        timer.start();
+        
+        boolean result;
+        Word prefix = query.getPrefix();
+        Word suffix = query.getSuffix();
+        
+        if(suffix.isEmpty()) {
+            return new HashableValueBoolean(false);
+        }else {
+            result = NBAOperations.accepts(nba, prefix, suffix);
+        }
+        
+        timer.stop();
+        options.stats.timeOfMembershipQuery += timer.getTimeElapsed();
+        ++ options.stats.numOfMembershipQuery; 
+        return new HashableValueBoolean(!result); // reverse the result for Buechi automaton
     }
 
     @Override
