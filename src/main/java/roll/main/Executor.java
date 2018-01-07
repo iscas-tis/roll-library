@@ -46,6 +46,29 @@ public class Executor {
         Executor.execute(options, target, teacher);
     }
     
+    private static void prepareStats(Options options, LearnerBase<NBA> learner, NBA hypothesis) {
+        options.stats.numOfStatesInHypothesis = hypothesis.getStateSize();
+        if(learner instanceof LearnerNBALOmega) {
+            LearnerNBALOmega learnerLOmega = (LearnerNBALOmega)learner;
+            FDFA fdfa = learnerLOmega.getLearnerFDFA().getHypothesis();
+            options.stats.numOfStatesInLeading = fdfa.getLeadingDFA().getStateSize();
+            for(int state = 0; state < fdfa.getLeadingDFA().getStateSize(); state ++) {
+                options.stats.numOfStatesInProgress.add(fdfa.getProgressDFA(state).getStateSize());
+            }
+            if(options.automaton.isLDBA()) {
+                hypothesis = UtilLOmega.constructLDBA(options, fdfa);
+            }
+        }else if(learner instanceof LearnerNBALDollar) {
+            LearnerNBALDollar learnerLDollar = (LearnerNBALDollar)learner;
+            DFA dfa = learnerLDollar.getLearnerDFA().getHypothesis();
+            options.stats.numOfStatesInLeading = dfa.getStateSize();
+        }else {
+            throw new UnsupportedOperationException("Unsupported BA Learner");
+        }
+        options.stats.hypothesis = hypothesis;
+        options.stats.numOfStatesInHypothesis = hypothesis.getStateSize();
+    }
+    
     private static void execute(Options options, NBA target,
             TeacherNBA teacher) {
         LearnerBase<NBA> learner = getLearner(options, target, teacher);
@@ -61,26 +84,7 @@ public class Executor {
             boolean isEq = ceQuery.getQueryAnswer().get();
             if(isEq) {
                 // store statistics
-                options.stats.numOfStatesInHypothesis = hypothesis.getStateSize();
-                if(learner instanceof LearnerNBALOmega) {
-                    LearnerNBALOmega learnerLOmega = (LearnerNBALOmega)learner;
-                    FDFA fdfa = learnerLOmega.getLearnerFDFA().getHypothesis();
-                    options.stats.numOfStatesInLeading = fdfa.getLeadingDFA().getStateSize();
-                    for(int state = 0; state < fdfa.getLeadingDFA().getStateSize(); state ++) {
-                        options.stats.numOfStatesInProgress.add(fdfa.getProgressDFA(state).getStateSize());
-                    }
-                    if(options.automaton.isLDBA()) {
-                        options.stats.hypothesis = UtilLOmega.constructLDBA(options, fdfa);
-                    }
-                }else if(learner instanceof LearnerNBALDollar) {
-                    LearnerNBALDollar learnerLDollar = (LearnerNBALDollar)learner;
-                    DFA dfa = learnerLDollar.getLearnerDFA().getHypothesis();
-                    options.stats.numOfStatesInLeading = dfa.getStateSize();
-                }else {
-                    throw new UnsupportedOperationException("Unsupported BA Learner");
-                }
-                options.stats.hypothesis = hypothesis;
-                options.stats.numOfStatesInHypothesis = hypothesis.getStateSize();
+                prepareStats(options, learner, hypothesis);
                 break;
             }
             ceQuery.answerQuery(null);
