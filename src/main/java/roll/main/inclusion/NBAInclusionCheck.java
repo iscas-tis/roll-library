@@ -53,6 +53,8 @@ public class NBAInclusionCheck {
         // default number
         options.epsilon = 0.0018;
         options.delta = 0.001;
+        options.algorithm = Options.Algorithm.RECURRENT;
+        options.structure = Options.Structure.TABLE;
         // parse input arguments
         for(int i = 0; i < args.length; i ++) {
             if(args[i].compareTo("-h")==0) {
@@ -181,7 +183,7 @@ public class NBAInclusionCheck {
         }
         timer.stop();
         options.log.println("Total sampling time: " + timer.getTimeElapsed()/ 1000.0 + " secs");
-        options.log.println("Possibly Included and we will use learning algorithm to prove inclusion...");
+        options.log.println("Possibly Included and we use learning algorithm to prove inclusion...");
         // learning algorithm
         TeacherNBAInclusion teacher = new TeacherNBAInclusion(options, symbol, A, B);
         LearnerFDFA learner = UtilLOmega.getLearnerFDFA(options, symbol.getAlphabet(), teacher);
@@ -244,6 +246,7 @@ public class NBAInclusionCheck {
         options.log.println("-periodic", indent, "Use peridoc FDFA to learn Omega regular language");
         options.log.println("-recurrent", indent, "Use recurrent FDFA to learn Omega regular language");
         options.log.println("-syntactic", indent, "Use syntactic FDFA to learn Omega regular language");
+        System.exit(0);
     }
 
 }

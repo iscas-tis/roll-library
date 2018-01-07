@@ -87,8 +87,9 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
         ++ options.stats.numOfMembershipQuery; 
         if(terminate) {
             options.log.println("Not included");
-            System.out.println("prefix: " + symbol.translate(prefix));
-            System.out.println("loop: " + symbol.translate(suffix));
+            options.log.println("prefix: " + symbol.translate(prefix));
+            options.log.println("loop: " + symbol.translate(suffix));
+            options.log.println("Learning completed...");
             System.exit(0);
         }
         return new HashableValueBoolean(!result); // reverse the result for Buechi automaton
@@ -183,6 +184,7 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
                         options.log.println("B(F^c): \n" + BFC.toString());
                     }
                     // by sampler
+                    options.log.println("Sampling for a counterexample to the inclusion...");
                     SamplerIndexedMonteCarlo sampler = new SamplerIndexedMonteCarlo(options.epsilon, options.delta);
                     sampler.K = B.getStateSize();
                     Query<HashableValue> ceQuery = NBAInclusionSampler.isIncluded(BFC, B, sampler);
@@ -200,6 +202,7 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
                         }
                     }else {
                         // by rabit
+                        options.log.println("RABIT for a counterexample to the inclusion...");
                         t = timer.getCurrentTime();    
                         FiniteAutomaton rBFC = UtilInclusion.toRABITNBA(BFC);
                         boolean isIncluded = RABIT.isIncluded(rBFC, rB);
