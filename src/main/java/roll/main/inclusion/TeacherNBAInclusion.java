@@ -28,11 +28,11 @@ import roll.main.Options;
 import roll.oracle.Teacher;
 import roll.oracle.nba.sampler.NBAInclusionSampler;
 import roll.oracle.nba.sampler.SamplerIndexedMonteCarlo;
-import roll.parser.ba.BAParser;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
+import roll.table.HashableValueBooleanExactPair;
 import roll.util.Pair;
 import roll.util.Timer;
 import roll.words.Alphabet;
@@ -42,19 +42,19 @@ import roll.words.Word;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class NBAInclusionTeacher implements Teacher<FDFA, Query<HashableValue>, HashableValue>{
+public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, HashableValue>{
 
     private final Options options;
     private final Alphabet alphabet;
     private final NBA A;
     private final NBA B;
-    private final BAParser parser;
+    private final Symbol symbol;
     private final FiniteAutomaton rB;
     
-    public NBAInclusionTeacher(Options options, BAParser parser, NBA A, NBA B) {
-        assert options != null && parser!= null && A != null && B != null;
+    public TeacherNBAInclusion(Options options, Symbol symbol, NBA A, NBA B) {
+        assert options != null && symbol!= null && A != null && B != null;
         this.options = options;
-        this.parser = parser;
+        this.symbol = symbol;
         this.A = A;
         this.B = B;
         this.alphabet = A.getAlphabet();
@@ -87,8 +87,8 @@ public class NBAInclusionTeacher implements Teacher<FDFA, Query<HashableValue>, 
         ++ options.stats.numOfMembershipQuery; 
         if(terminate) {
             options.log.println("Not included");
-            System.out.println("prefix: " + parser.translate(prefix));
-            System.out.println("loop: " + parser.translate(suffix));
+            System.out.println("prefix: " + symbol.translate(prefix));
+            System.out.println("loop: " + symbol.translate(suffix));
             System.exit(0);
         }
         return new HashableValueBoolean(!result); // reverse the result for Buechi automaton
@@ -153,8 +153,8 @@ public class NBAInclusionTeacher implements Teacher<FDFA, Query<HashableValue>, 
                 suffix = pair.getRight();
                 isEq = true;
                 options.log.println("Not included");
-                options.log.println("prefix: " + parser.translate(prefix));
-                options.log.println("loop: " + parser.translate(suffix));
+                options.log.println("prefix: " + symbol.translate(prefix));
+                options.log.println("loop: " + symbol.translate(suffix));
             }else {
                 Automaton dkBFC = FDFAOperations.buildNegNBA(hypothesis);
                 NBA BFC = NBAOperations.fromDkNBA(dkBFC, alphabet);
@@ -194,8 +194,8 @@ public class NBAInclusionTeacher implements Teacher<FDFA, Query<HashableValue>, 
                         boolean isAStr = NBAOperations.accepts(A, prefix, suffix);
                         if(isAStr) {
                             options.log.println("Not included");
-                            options.log.println("prefix: " + parser.translate(prefix));
-                            options.log.println("loop: " + parser.translate(suffix));
+                            options.log.println("prefix: " + symbol.translate(prefix));
+                            options.log.println("loop: " + symbol.translate(suffix));
                             isEq = true;
                         }
                     }else {
@@ -219,8 +219,8 @@ public class NBAInclusionTeacher implements Teacher<FDFA, Query<HashableValue>, 
                             
                             if(isAStr) {
                                 System.out.println("Not included");
-                                System.out.println("prefix: " + parser.translate(prefix));
-                                System.out.println("loop: " + parser.translate(suffix));
+                                System.out.println("prefix: " + symbol.translate(prefix));
+                                System.out.println("loop: " + symbol.translate(suffix));
                                 isEq = true;
                             }
                         }
@@ -235,10 +235,10 @@ public class NBAInclusionTeacher implements Teacher<FDFA, Query<HashableValue>, 
         
         if(isEq) {
             query = new QuerySimple<>(alphabet.getEmptyWord(), alphabet.getEmptyWord());
-            query.answerQuery(new HashableValueBoolean(true));
+            query.answerQuery(new HashableValueBooleanExactPair(true, true));
         }else {
             query = new QuerySimple<>(prefix, suffix);
-            query.answerQuery(new HashableValueBoolean(false));
+            query.answerQuery(new HashableValueBooleanExactPair(false, isInTarget));
         }
         
         timer.stop();

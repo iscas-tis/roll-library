@@ -16,6 +16,9 @@
 
 package roll.main.inclusion;
 
+import java.util.Set;
+import java.util.TreeSet;
+
 import automata.FAState;
 import automata.FiniteAutomaton;
 import gnu.trove.map.TIntObjectMap;
@@ -61,5 +64,35 @@ public class UtilInclusion {
         }
         
         return result;
+    }
+    
+    public static boolean removeDeadStates(FiniteAutomaton automaton) {
+        // preprocessing, make sure every state in automaton has successors
+        Set<FAState> states = new TreeSet<>();
+        states.addAll(automaton.states);
+        while (true) {
+            boolean changed = false;
+            Set<FAState> temp = new TreeSet<>();
+            for (FAState st : states) {
+                if (st.getNext().isEmpty()) {
+                    automaton.removeState(st);
+                    temp.add(st);
+                    changed = true;
+                }
+            }
+            if (!changed)
+                break;
+            else {
+                states.removeAll(temp);
+            }
+        }
+        states = null;
+        if (automaton.F.isEmpty())
+            return true;
+        // start sampling
+        FAState s = automaton.getInitialState();
+        if (s.getNext().isEmpty())
+            return true;
+        return false;
     }
 }

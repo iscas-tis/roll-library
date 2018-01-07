@@ -38,7 +38,6 @@ import roll.main.Options;
 import roll.parser.Parser;
 import roll.parser.UtilParser;
 import roll.words.Alphabet;
-import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -169,14 +168,6 @@ public class BAParser implements Parser {
 		}
 		return state;
 	}
-	
-    public String translate(Word word) {
-        StringBuilder builder = new StringBuilder();
-        for (int letterNr = 0; letterNr < word.length(); letterNr ++) {
-            builder.append(charStrMap.get(alphabet.getLetter(word.getLetter(letterNr))));
-        }
-        return builder.toString();
-    }
 	
 //	public String translate(List<String> strs) {
 //		StringBuilder builder = new StringBuilder();

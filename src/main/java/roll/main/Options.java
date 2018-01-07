@@ -24,7 +24,7 @@ import roll.parser.Format;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public final class Options {
+public class Options {
     
     // running mode
     public RunningMode runningMode; 

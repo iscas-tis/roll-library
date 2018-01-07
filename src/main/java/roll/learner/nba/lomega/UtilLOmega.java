@@ -42,7 +42,7 @@ import roll.words.Alphabet;
 
 public class UtilLOmega {
     
-    static LearnerFDFA getLearnerFDFA(Options options, Alphabet alphabet
+    public static LearnerFDFA getLearnerFDFA(Options options, Alphabet alphabet
             , MembershipOracle<HashableValue> membershipOracle) {
         LearnerFDFA fdfaLearner = null;
         if(options.structure.isTable()) {
