@@ -63,7 +63,9 @@ public class NBAIntersectCheck {
         new AsccExplore();
         if(needCE) {
             checker = new NBAEmptinessCheck(result, fstAcc, sndAcc);
-            checker.isEmpty();
+            if(!empty) { // is not empty
+                checker.isEmpty(); // find accepting loop
+            }
         }
     }
     
@@ -135,7 +137,8 @@ public class NBAIntersectCheck {
         private final Stack<Elem> sccs;           // C99 's root stack
         private final Stack<Integer> act;            // tarjan's stack
         private final TIntIntMap dfsNum;        
-        private final Map<ProductState, ProductState> map;               
+        private final Map<ProductState, ProductState> map; 
+        
         public AsccExplore() {
             this.sccs = new Stack<>();
             this.act = new Stack<>();

@@ -34,8 +34,8 @@ public class NBAEmptinessCheck {
     private int index = 0;
     private Stack<Integer> SCCs;
     private NBA nba;
-    private TIntIntMap vIndex ;
-    private TIntIntMap vLowlink ;
+    private TIntIntMap vIndex;
+    private TIntIntMap vLowlink;
     private int fstF = -1;
     private int sndF = -1;
     private ISet scc;
@@ -44,6 +44,7 @@ public class NBAEmptinessCheck {
     
     private LassoConstructor constructor;
     
+    // input BA is generalized BA
     public NBAEmptinessCheck(NBA nba, ISet fstAcc, ISet sndAcc){
         this.nba  = nba;
         this.fstAcc = fstAcc;
@@ -74,7 +75,7 @@ public class NBAEmptinessCheck {
         return true;
     }
 
-    
+    // terminate on the first accepting loop
     boolean tarjan(int v) {
         vIndex.put(v, index);
         vLowlink.put(v, index);

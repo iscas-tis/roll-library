@@ -69,7 +69,7 @@ public class LassoConstructor {
     private void computePrefix() {
         int initial = result.getInitialState();
         runPrefix.add(initial);
-        // compute a path to a final state
+        // compute a path to the first final state
         findPath(initial, fstF, true);
     }
     
@@ -115,10 +115,11 @@ public class LassoConstructor {
         
     }
 
+    // usually s is not the same as t
     private void findPath(int s, int t, boolean prefix) {
         // store the predecessors (value) of the specific states (key)
-        TIntIntMap preds = new TIntIntHashMap();
-        TIntIntMap predElems = new TIntIntHashMap();
+        TIntIntMap predStates = new TIntIntHashMap();
+        TIntIntMap predLabels = new TIntIntHashMap();
         Alphabet alphabet = result.getAlphabet();
         ISet visited = UtilISet.newISet();
         Queue<Integer> queue = new LinkedList<>();
@@ -133,8 +134,8 @@ public class LassoConstructor {
                 for (final int succ : succs) {
                     if (!visited.get(succ)) {// in states allowed and not visited
                         queue.add(succ); // add in queue
-                        preds.put(succ, cur); // record predecessors
-                        predElems.put(succ, c); // record previous letter
+                        predStates.put(succ, cur); // record predecessors
+                        predLabels.put(succ, c); // record previous letter
                         visited.set(succ);
                     }
                 }
@@ -146,8 +147,8 @@ public class LassoConstructor {
         int cur = t;
         while(cur != s) {
             run.addFirst(cur);
-            word.addFirst(predElems.get(cur));
-            cur = preds.get(cur);
+            word.addFirst(predLabels.get(cur));
+            cur = predStates.get(cur);
         }
         List<Integer> r;
         Word w;
