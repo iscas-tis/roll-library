@@ -18,12 +18,16 @@ package test.learner.nba;
 
 import org.junit.Test;
 
+import automata.FiniteAutomaton;
 import roll.automata.NBA;
 import roll.learner.nba.lomega.LearnerNBALOmega;
 import roll.main.Options;
 import roll.oracle.nba.rabit.TeacherNBARABIT;
+import roll.oracle.nba.rabit.UtilRABIT;
+import roll.oracle.nba.sampler.TeacherNBASampler;
 import roll.query.Query;
 import roll.table.HashableValue;
+import roll.words.Alphabet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -31,34 +35,47 @@ import roll.table.HashableValue;
 
 public class NBALOmegaTest {
     
-//    @Test
-//    public void testSampler() {
-//        NBA target = getNBA();
-//        
-//        Options options = new Options();
-//        options.structure = Options.Structure.TABLE;
-//        options.epsilon = 0.00018;
-//        options.delta = 0.0001;
-//        TeacherNBASampler teacher = new TeacherNBASampler(options, target);
-//        LearnerNBALDollar learner = new LearnerNBALDollar(options, target.getAlphabet(), teacher);
-//        System.out.println("starting learning");
-//        learner.startLearning();
-//        while(true) {
-//            System.out.println("Table is both closed and consistent\n" + learner.toString());
-//            NBA model = learner.getHypothesis();
-//            System.out.println(model.toString());
-//            // along with ce
-//            Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(model);
-//            boolean isEq = ceQuery.getQueryAnswer().get();
-//            if(isEq) {
-//                System.out.println(model.toString());
-//                break;
-//            }
-//            ceQuery.answerQuery(null);
-//            learner.refineHypothesis(ceQuery);
-//        }
-//        
-//    }
+    private boolean isIncluded(NBA A, NBA B) {
+        Alphabet alphabet = A.getAlphabet();
+        FiniteAutomaton rA = UtilRABIT.toRABITNBA(A);
+        FiniteAutomaton rB = UtilRABIT.toRABITNBA(B);
+        return UtilRABIT.isIncluded(alphabet, rA, rB) == null;
+    }
+    
+    @Test
+    public void testSampler() {
+        NBA target = NBAStore.getNBA3();
+        System.out.println("Target: " + target.toString());
+        Options options = new Options();
+        options.structure = Options.Structure.TABLE;
+        options.approximation = Options.Approximation.UNDER;
+        options.algorithm = Options.Algorithm.RECURRENT;
+        options.epsilon = 0.00018;
+        options.delta = 0.0001;
+        TeacherNBASampler teacher = new TeacherNBASampler(options, target);
+        LearnerNBALOmega learner = new LearnerNBALOmega(options, target.getAlphabet(), teacher);
+        System.out.println("starting learning");
+        learner.startLearning();
+        NBA model = null;
+        while(true) {
+            System.out.println("Table is both closed and consistent\n" + learner.toString());
+            model = learner.getHypothesis();
+            System.out.println(model.toString());
+            // along with ce
+            Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(model);
+            boolean isEq = ceQuery.getQueryAnswer().get();
+            if(isEq) {
+                System.out.println(model.toString());
+                break;
+            }
+            ceQuery.answerQuery(null);
+            learner.refineHypothesis(ceQuery);
+        }
+       
+        options.stats.print();
+        System.out.println("L(H) <= L(B): " + isIncluded(model, target));
+        System.out.println("L(B) <= L(H): " + isIncluded(target, model));
+    }
     
     @Test
     public void testRABIT() {

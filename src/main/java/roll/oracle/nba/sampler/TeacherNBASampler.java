@@ -31,7 +31,7 @@ import roll.words.Word;
 
 public class TeacherNBASampler extends TeacherNBA {
     
-    private final Sampler sampler;
+    private final SamplerIndexedMonteCarlo sampler;
     
     public TeacherNBASampler(Options options, NBA target) {
         super(options, target);
@@ -59,11 +59,13 @@ public class TeacherNBASampler extends TeacherNBA {
         }
         
         if(!isEmptyNBA(A)) {
+            sampler.K = B.getStateSize();
             ceQuery = NBAInclusionSampler.isIncluded(A, B, sampler);
         }
         if(ceQuery != null) return ceQuery;
         
         if(!isEmptyNBA(B)) {
+            sampler.K = A.getStateSize();
             ceQuery = NBAInclusionSampler.isIncluded(B, A, sampler);
         }
         if(ceQuery != null) return ceQuery;
