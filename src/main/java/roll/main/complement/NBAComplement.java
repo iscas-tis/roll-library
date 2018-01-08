@@ -20,6 +20,8 @@ package roll.main.complement;
  * @author Yong Li (liyong@ios.ac.cn)
  * 
  * Complementing Buechi automata via learning algorithms
+ * Learning algorithm to complement the given Buechi automata B
+ * , that is, learning to obtain a Buechi automaton B' which accepts the complement of L(B)
  * 
  * */
 

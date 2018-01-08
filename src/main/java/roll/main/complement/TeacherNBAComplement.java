@@ -41,6 +41,10 @@ import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ * Yong Li, Andrea Turrini, Lijun Zhang and Sven Schewe
+ *    "Learning to Complement Büchi Automata"
+ * in VMCAI 2018
  * */
 
 public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>, HashableValue> {

@@ -41,7 +41,7 @@ import roll.words.Word;
  * This class implements the BA learning algorithm from the paper 
  * Azadeh Farzan, Yu-Fang Chen, Edmund M. Clarke, Yih-Kuen Tsay and Bow-Yaw Wang
  *       "Extending automated compositional verification to the full class of omega-regular languages"
- * In TACAS 2008
+ * in TACAS 2008
  * */
 
 public class LearnerNBALDollar extends LearnerBase<NBA>{
