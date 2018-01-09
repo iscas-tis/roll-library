@@ -19,75 +19,48 @@ package roll.oracle.dfa.dk;
 import dk.brics.automaton.Automaton;
 import roll.automata.DFA;
 import roll.automata.operations.DFAOperations;
-import roll.oracle.EquivalenceOracle;
-import roll.oracle.MembershipOracle;
+import roll.main.Options;
+import roll.oracle.dfa.TeacherDFA;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
-import roll.words.Alphabet;
 import roll.words.Word;
 
-public class TeacherDFADK implements MembershipOracle<HashableValue>, EquivalenceOracle<DFA, Query<HashableValue>> {
+public class TeacherDFADK extends TeacherDFA {
 
 	private final Automaton automaton;
-	private final DFA dfa;
-	private final Alphabet alphabet;
 	
-	private int numMembership = 0;
-	private int numEquiv = 0;
-	
-	public TeacherDFADK(DFA dfa, Alphabet alphabet) {
+	public TeacherDFADK(Options options, DFA dfa) {
+	    super(options, dfa);
 		this.automaton = DFAOperations.toDkDFA(dfa);
-		this.dfa = dfa;
-		this.alphabet = alphabet;
 	}
 	
 	private Word parseString(String counterexample) {
 		return alphabet.getWordFromString(counterexample);
 	}
-	
-	@Override
-	public Query<HashableValue> answerEquivalenceQuery(DFA machine) {
-		numEquiv ++;
-		Automaton conjecture = DFAOperations.toDkDFA(machine);
-		Automaton result = automaton.clone().minus(conjecture.clone());
-		String counterexample = result.getShortestExample(true);
-		Word wordCE = alphabet.getEmptyWord();
-		boolean isEq = true;
-		
-		if(counterexample == null) {
-			result = conjecture.clone().minus(automaton.clone());
-			counterexample = result.getShortestExample(true);
-		}
-		
-		if(counterexample != null) {
-			wordCE = parseString(counterexample);
-			isEq = false;
-		}
-		
-		
-		Query<HashableValue> ceQuery = new QuerySimple<>(wordCE);
-		ceQuery.answerQuery(new HashableValueBoolean(isEq));
-		return ceQuery;
-	}
 
-	@Override
-	public HashableValue answerMembershipQuery(Query<HashableValue> query) {
-		numMembership ++;
-		Word word = query.getQueriedWord();
-		boolean result = dfa.isFinal(dfa.getSuccessor(word));
-		return new HashableValueBoolean(result);
-	}
-	
-	
-	public int getNumMembership() {
-		return numMembership;
-	}
-	
-	public int getNumEquivalence() {
-		return numEquiv;
-	}
-	
+    @Override
+    protected Query<HashableValue> checkEquivalence(DFA hypothesis) {
+        Automaton conjecture = DFAOperations.toDkDFA(hypothesis);
+        Automaton result = automaton.clone().minus(conjecture.clone());
+        String counterexample = result.getShortestExample(true);
+        Word wordCE = alphabet.getEmptyWord();
+        boolean isEq = true;
+        
+        if(counterexample == null) {
+            result = conjecture.clone().minus(automaton.clone());
+            counterexample = result.getShortestExample(true);
+        }
+        
+        if(counterexample != null) {
+            wordCE = parseString(counterexample);
+            isEq = false;
+        }
+        
+        Query<HashableValue> ceQuery = new QuerySimple<>(wordCE);
+        ceQuery.answerQuery(new HashableValueBoolean(isEq));
+        return ceQuery;
+    }
 
 }

@@ -16,6 +16,7 @@
 
 package test.learner.nba;
 
+
 import org.junit.Test;
 
 import automata.FiniteAutomaton;
@@ -27,6 +28,7 @@ import roll.oracle.nba.rabit.UtilRABIT;
 import roll.oracle.nba.sampler.TeacherNBASampler;
 import roll.query.Query;
 import roll.table.HashableValue;
+import roll.util.Timer;
 import roll.words.Alphabet;
 
 /**
@@ -52,6 +54,8 @@ public class NBALOmegaTest {
         options.algorithm = Options.Algorithm.RECURRENT;
         options.epsilon = 0.00018;
         options.delta = 0.0001;
+        Timer timer = new Timer();
+        timer.start();
         TeacherNBASampler teacher = new TeacherNBASampler(options, target);
         LearnerNBALOmega learner = new LearnerNBALOmega(options, target.getAlphabet(), teacher);
         System.out.println("starting learning");
@@ -71,7 +75,8 @@ public class NBALOmegaTest {
             ceQuery.answerQuery(null);
             learner.refineHypothesis(ceQuery);
         }
-       
+        timer.stop();
+        System.out.println("Totoal used time " + timer.getTimeElapsed() + " ms");
         options.stats.print();
         System.out.println("L(H) <= L(B): " + isIncluded(model, target));
         System.out.println("L(B) <= L(H): " + isIncluded(target, model));
@@ -86,8 +91,10 @@ public class NBALOmegaTest {
         Options options = new Options();
         options.structure = Options.Structure.TABLE;
         options.approximation = Options.Approximation.UNDER;
-        options.algorithm = Options.Algorithm.PERIODIC;
-        options.verbose = true;
+        options.algorithm = Options.Algorithm.RECURRENT;
+        options.verbose = false;
+        Timer timer = new Timer();
+        timer.start();
         TeacherNBARABIT teacher = new TeacherNBARABIT(options, target);
         LearnerNBALOmega learner = new LearnerNBALOmega(options, target.getAlphabet(), teacher);
         System.out.println("starting learning");
@@ -107,7 +114,8 @@ public class NBALOmegaTest {
             System.out.println(ceQuery.toString());
             learner.refineHypothesis(ceQuery);
         }
-        
+        timer.stop();
+        System.out.println("Totoal used time " + timer.getTimeElapsed() + " ms");
         options.stats.print();
         
     }

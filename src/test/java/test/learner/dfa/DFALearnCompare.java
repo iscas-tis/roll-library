@@ -22,7 +22,7 @@ public class DFALearnCompare {
 	private static long timeEqTree = 0;
 	
 	private static long testLearnerDFA(DFA dfa, Options options, Alphabet alphabet, boolean table) {
-	    TeacherDFADK teacher = new TeacherDFADK(dfa, alphabet);
+	    TeacherDFADK teacher = new TeacherDFADK(options, dfa);
 		Learner<DFA, HashableValue> learner = null;
 		if(table) learner = new LearnerDFATableColumn(options, alphabet, teacher);
 		else learner = new LearnerDFATreeColumn(options, alphabet, teacher);
@@ -50,26 +50,29 @@ public class DFALearnCompare {
 				break;
 			}
 			HashableValue val = teacher.answerMembershipQuery(ceQuery);
+			int i = 0;
 			do {
-			     model = learner.getHypothesis();
+			     i ++;
 		         Word word = ceQuery.getQueriedWord();
-		         boolean accepted = model.getAcc().isAccepting(word, word.getEmptyWord());
-		         if(val.isAccepting() == accepted) {
-		             break;
-		         }
 		         ceQuery.answerQuery(val);		         
 		         learner.refineHypothesis(ceQuery);
+		         model = learner.getHypothesis();
+		         boolean accepted = model.getAcc().isAccepting(word, word.getEmptyWord());
+		         if(val.isAccepting() == accepted) {
+                     System.out.println("Get out after " + i + " times");
+                     break;
+                 }
 			}while(lazyeq);
 
 		}
 		
 		time = System.currentTimeMillis() - time;
 		if(table) {
-			numMemTable += teacher.getNumMembership();
-			numEqTable += teacher.getNumEquivalence();
+			numMemTable += options.stats.numOfMembershipQuery;
+			numEqTable += options.stats.numOfEquivalenceQuery;
 		}else {
-			numMemTree += teacher.getNumMembership();
-			numEqTree += teacher.getNumEquivalence();
+			numMemTree += options.stats.numOfMembershipQuery;
+			numEqTree += options.stats.numOfEquivalenceQuery;
 		}
 		System.out.println("finished learning");
 		return time;
@@ -85,7 +88,7 @@ public class DFALearnCompare {
 		long timeTree = 0;
 		
 		int n = 0;
-		Options options = new Options();
+		
 		for(int k = apSize; k <= apSize; k ++) {
 			for(int i = 0; i < numCases; i ++) {
 				n ++;
@@ -94,6 +97,7 @@ public class DFALearnCompare {
 				for(int c = 0; c < apSize; c ++) {
 					alphabet.addLetter((char)c);
 				}
+				Options options = new Options();
 				DFA dfa = DFAGenerator.getRandomDFA(alphabet, numStates);
 				timeTable += testLearnerDFA(dfa, options, alphabet, true);
 				timeTree += testLearnerDFA(dfa, options, alphabet, false);

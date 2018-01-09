@@ -54,6 +54,7 @@ public class DFARandomTest {
 		int numOK = 0;
 		
 		long start = System.currentTimeMillis();
+		
 		for(int i = 0; i < numCases; i ++) {
 			DFA dfa = DFAGenerator.getRandomDFA(input, numStates);
 			System.out.println("Case " + i );
@@ -69,9 +70,10 @@ public class DFARandomTest {
 	}
 	
 	private static boolean testLearnerDFA(DFA machine, Alphabet alphabet, LearnerType algo) {
-		TeacherDFADK teacher = new TeacherDFADK(machine, alphabet);
+	    Options options = new Options();
+		TeacherDFADK teacher = new TeacherDFADK(options, machine);
 		LearnerDFA learner = null;
-		Options options = new Options();
+		
 		if(algo == LearnerType.DFA_COLUMN_TABLE) learner = new LearnerDFATableColumn(options, alphabet, teacher);
 		else if(algo == LearnerType.DFA_KV) {
 		    learner = new LearnerDFATreeKV(options, alphabet, teacher); 

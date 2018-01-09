@@ -59,11 +59,12 @@ public class DFATest {
     
     @Test
     public void test4nPlus3() {
+        Options options = new Options();
         DFA machine = getDFA();
         Alphabet alphabet = machine.getAlphabet();
-        TeacherDFADK teacher = new TeacherDFADK(machine, alphabet);
+        TeacherDFADK teacher = new TeacherDFADK(options, machine);
         LearnerDFA learner = null;
-        Options options = new Options();
+        
         learner = new LearnerDFATableColumn(options, alphabet, teacher);
 //        else if(algo == LearnerType.DFA_KV) {
 //            learner = new LearnerDFATreeKV(options, alphabet, teacher); 
