@@ -24,6 +24,10 @@ import roll.oracle.MembershipOracle;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
 
+/**
+ * @author Yong Li (liyong@ios.ac.cn)
+ * */
+
 public class LearnerFDFATablePeriodic extends LearnerFDFA {
 
 	public LearnerFDFATablePeriodic(Options options, Alphabet alphabet,

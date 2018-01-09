@@ -23,6 +23,10 @@ import roll.oracle.MembershipOracle;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
 
+/**
+ * @author Yong Li (liyong@ios.ac.cn)
+ * */
+
 public class LearnerFDFATableSyntactic extends LearnerFDFA {
 
 	public LearnerFDFATableSyntactic(Options options, Alphabet alphabet,

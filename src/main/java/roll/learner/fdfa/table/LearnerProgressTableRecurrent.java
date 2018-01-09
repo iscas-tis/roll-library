@@ -24,6 +24,10 @@ import roll.oracle.MembershipOracle;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
 
+/**
+ * @author Yong Li (liyong@ios.ac.cn)
+ * */
+
 public class LearnerProgressTableRecurrent extends LearnerProgressTable implements LearnerProgressRecurrent {
 
     public LearnerProgressTableRecurrent(Options options, Alphabet alphabet,

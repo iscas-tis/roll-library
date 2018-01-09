@@ -29,6 +29,10 @@ import roll.table.ObservationRow;
 import roll.words.Alphabet;
 import roll.words.Word;
 
+/**
+ * @author Yong Li (liyong@ios.ac.cn)
+ * */
+
 public class LearnerLeadingTable extends LearnerOmegaTable implements LearnerLeading {
     
     public LearnerLeadingTable(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {

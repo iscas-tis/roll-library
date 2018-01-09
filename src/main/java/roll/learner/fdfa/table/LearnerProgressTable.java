@@ -28,6 +28,10 @@ import roll.table.ObservationRow;
 import roll.words.Alphabet;
 import roll.words.Word;
 
+/**
+ * @author Yong Li (liyong@ios.ac.cn)
+ * */
+
 abstract class LearnerProgressTable extends LearnerOmegaTable implements LearnerProgress {
 
     protected final LearnerLeading learnerLeading;

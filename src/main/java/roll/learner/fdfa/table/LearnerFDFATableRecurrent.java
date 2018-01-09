@@ -25,6 +25,10 @@ import roll.oracle.MembershipOracle;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
 
+/**
+ * @author Yong Li (liyong@ios.ac.cn)
+ * */
+
 public class LearnerFDFATableRecurrent extends LearnerFDFA {
 
 	public LearnerFDFATableRecurrent(Options options, Alphabet alphabet,
