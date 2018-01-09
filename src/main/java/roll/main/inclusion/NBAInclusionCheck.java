@@ -182,8 +182,19 @@ public class NBAInclusionCheck {
             }
         }
         timer.stop();
+        timer.start();
         options.log.println("Total sampling time: " + timer.getTimeElapsed()/ 1000.0 + " secs");
-        options.log.println("Possibly Included and we use learning algorithm to prove inclusion...");
+        options.log.println("Start using simulation algorithm to prove inclusion...");
+        Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>> pair = UtilInclusion.prepocess(aut1, aut2);
+        if(pair.getLeft()) {
+            options.log.println("Included");
+            timer.stop();
+            options.log.println("Total simulation time: " + timer.getTimeElapsed()/ 1000.0 + " secs");
+            System.exit(0);
+        }
+        A = symbol.toNBA(pair.getRight().getLeft());
+        B = symbol.toNBA(pair.getRight().getRight());
+        options.log.println("Start using learning algorithm to prove inclusion...");
         // learning algorithm
         TeacherNBAInclusion teacher = new TeacherNBAInclusion(options, symbol, A, B);
         LearnerFDFA learner = UtilLOmega.getLearnerFDFA(options, symbol.getAlphabet(), teacher);

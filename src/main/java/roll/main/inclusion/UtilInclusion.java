@@ -19,11 +19,14 @@ package roll.main.inclusion;
 import java.util.Set;
 import java.util.TreeSet;
 
+import algorithms.Minimization;
+import algorithms.Simulation;
 import automata.FAState;
 import automata.FiniteAutomaton;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import roll.automata.NBA;
+import roll.util.Pair;
 import roll.util.sets.ISet;
 import roll.words.Alphabet;
 
@@ -94,5 +97,23 @@ public class UtilInclusion {
         if (s.getNext().isEmpty())
             return true;
         return false;
+    }
+    
+    public static Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>>
+          prepocess(FiniteAutomaton system, FiniteAutomaton spec) {
+        Minimization minimizer = new Minimization();
+        Simulation simulation = new Simulation();
+        Set<datastructure.Pair<FAState, FAState>> frel, drel;
+        frel = simulation.ForwardSimRelNBW(system, spec);
+        if(frel.contains(new datastructure.Pair<FAState, FAState>(system.getInitialState(), spec.getInitialState())))
+            return new Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>>(true, null);
+        system = minimizer.quotient(system, frel);
+        spec = minimizer.quotient(spec, frel);
+        drel = simulation.DelayedSimRelNBW(system, spec);
+        if(drel.contains(new datastructure.Pair<FAState, FAState>(system.getInitialState(), spec.getInitialState())))
+            return new Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>>(true, null);
+        system = minimizer.quotient(system, drel);
+        spec = minimizer.quotient(spec, drel);
+        return new Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>>(false, new Pair<>(system, spec));
     }
 }
