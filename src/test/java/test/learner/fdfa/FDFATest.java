@@ -149,9 +149,10 @@ public class FDFATest {
         FDFA fdfa = getFDFA();
         System.out.println("FDFA \n" + fdfa.toString());
         Alphabet alphabet = fdfa.getAlphabet();
-        TeacherFDFADK teacher = new TeacherFDFADK(fdfa, alphabet);
-        LearnerFDFA learner = null;
         Options options = new Options();
+        TeacherFDFADK teacher = new TeacherFDFADK(options, fdfa);
+        LearnerFDFA learner = null;
+        
         options.algorithm = Options.Algorithm.RECURRENT;
         if(options.algorithm == Options.Algorithm.PERIODIC) {
             learner = new LearnerFDFATablePeriodic(options, alphabet, teacher); 

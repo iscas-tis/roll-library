@@ -20,8 +20,8 @@ import dk.brics.automaton.Automaton;
 import roll.automata.DFA;
 import roll.automata.FDFA;
 import roll.automata.operations.FDFAOperations;
-import roll.oracle.EquivalenceOracle;
-import roll.oracle.MembershipOracle;
+import roll.main.Options;
+import roll.oracle.TeacherAbstract;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.HashableValue;
@@ -34,18 +34,19 @@ import roll.words.Word;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class TeacherFDFADK implements MembershipOracle<HashableValue>, EquivalenceOracle<FDFA, Query<HashableValue>> {
+public class TeacherFDFADK extends TeacherAbstract<FDFA> {
 
     private final FDFA fdfa;
     private final Alphabet alphabet;
     
-    public TeacherFDFADK(FDFA fdfa, Alphabet alphabet) {
+    public TeacherFDFADK(Options options, FDFA fdfa) {
+        super(options);
         this.fdfa = fdfa;
-        this.alphabet = alphabet;
+        this.alphabet = fdfa.getAlphabet();
     }
     
     @Override
-    public Query<HashableValue> answerEquivalenceQuery(FDFA hypothesis) {
+    protected Query<HashableValue> checkEquivalence(FDFA hypothesis) {
         Automaton hypo = FDFAOperations.buildDOne(hypothesis);
         System.out.println("hypo:\n " + hypo.toDot());
         Automaton target = FDFAOperations.buildDTwo(fdfa);
@@ -79,7 +80,7 @@ public class TeacherFDFADK implements MembershipOracle<HashableValue>, Equivalen
     }
 
     @Override
-    public HashableValue answerMembershipQuery(Query<HashableValue> query) {
+    protected HashableValue checkMembership(Query<HashableValue> query) {
         Word prefix = query.getPrefix();
         Word suffix = query.getSuffix();
         if(suffix.isEmpty()) {
