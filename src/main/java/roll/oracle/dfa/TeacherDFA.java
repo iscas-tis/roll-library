@@ -18,11 +18,10 @@ package roll.oracle.dfa;
 
 import roll.automata.DFA;
 import roll.main.Options;
-import roll.oracle.Teacher;
+import roll.oracle.TeacherAbstract;
 import roll.query.Query;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
-import roll.util.Timer;
 import roll.words.Alphabet;
 import roll.words.Word;
 
@@ -30,42 +29,22 @@ import roll.words.Word;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public abstract class TeacherDFA implements Teacher<DFA, Query<HashableValue>, HashableValue>{
+public abstract class TeacherDFA extends TeacherAbstract<DFA>{
 
     protected final DFA target;
     protected final Alphabet alphabet;
-    protected final Options options;
     
     public TeacherDFA(Options options, DFA dfa) {
-        this.options = options;
+        super(options);
         this.target = dfa;
         this.alphabet = dfa.getAlphabet();
     }
     
     @Override
-    public HashableValue answerMembershipQuery(Query<HashableValue> query) {
-        Timer timer = new Timer();
-        timer.start();
+    protected HashableValue checkMembership(Query<HashableValue> query) {
         Word word = query.getQueriedWord();
         boolean answer = target.isFinal(target.getSuccessor(word));
-        timer.stop();
-        options.stats.timeOfMembershipQuery += timer.getTimeElapsed();
-        options.stats.numOfMembershipQuery ++;
         return new HashableValueBoolean(answer);
     }
-    
-    @Override
-    public Query<HashableValue> answerEquivalenceQuery(DFA hypothesis) {
-        Timer timer = new Timer();
-        timer.start();
-        Query<HashableValue> result = checkEquivalence(hypothesis);
-        timer.stop();
-        options.stats.numOfEquivalenceQuery ++;
-        options.stats.timeOfEquivalenceQuery += timer.getTimeElapsed();
-        options.stats.timeOfLastEquivalenceQuery = timer.getTimeElapsed();
-        return result;
-    }
-    
-    protected abstract Query<HashableValue> checkEquivalence(DFA hypothesis);
 
 }

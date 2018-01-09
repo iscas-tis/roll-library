@@ -27,6 +27,13 @@ import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
 import roll.words.Word;
 
+/**
+ * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ * Use dk.brics.automaton package as DFA teacher
+ * 
+ * */
+
 public class TeacherDFADK extends TeacherDFA {
 
 	private final Automaton automaton;

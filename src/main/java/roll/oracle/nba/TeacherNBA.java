@@ -19,52 +19,30 @@ package roll.oracle.nba;
 import roll.automata.NBA;
 import roll.automata.operations.NBAOperations;
 import roll.main.Options;
-import roll.oracle.Teacher;
+import roll.oracle.TeacherAbstract;
 import roll.query.Query;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
-import roll.util.Timer;
 import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public abstract class TeacherNBA implements Teacher<NBA, Query<HashableValue>, HashableValue> {
-    protected final Options options;
+public abstract class TeacherNBA extends TeacherAbstract<NBA> {
     protected final NBA target;
     
     public TeacherNBA(Options options, NBA target) {
-        assert options != null && target != null;
-        this.options = options;
+        super(options);
         this.target = target;
     }
 
     @Override
-    public HashableValue answerMembershipQuery(Query<HashableValue> query) {
-        Timer timer = new Timer();
-        timer.start();
+    protected HashableValue checkMembership(Query<HashableValue> query) {
         Word prefix = query.getPrefix();
         Word suffix = query.getSuffix();
         boolean answer = NBAOperations.accepts(target, prefix, suffix);
-        timer.stop();
-        options.stats.timeOfMembershipQuery += timer.getTimeElapsed();
-        options.stats.numOfMembershipQuery ++;
         return new HashableValueBoolean(answer);
-    }
-    
-    protected abstract Query<HashableValue> checkEquivalence(NBA hypothesis);
-
-    @Override
-    public Query<HashableValue> answerEquivalenceQuery(NBA hypothesis) {
-        Timer timer = new Timer();
-        timer.start();
-        Query<HashableValue> result = checkEquivalence(hypothesis);
-        timer.stop();
-        options.stats.numOfEquivalenceQuery ++;
-        options.stats.timeOfEquivalenceQuery += timer.getTimeElapsed();
-        options.stats.timeOfLastEquivalenceQuery = timer.getTimeElapsed();
-        return result;
     }
 
 }

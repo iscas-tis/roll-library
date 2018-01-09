@@ -24,6 +24,7 @@ import roll.table.HashableValue;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * Use DFA sampler as DFA teacher TODO
  * */
 
 public class TeacherDFASampler extends TeacherDFA {
