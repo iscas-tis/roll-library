@@ -34,6 +34,8 @@ import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ * NOT FINISHED
  * */
 
 public class LearnerProgressTreeSyntactic extends LearnerProgressTree implements LearnerProgressSyntactic {
@@ -41,6 +43,7 @@ public class LearnerProgressTreeSyntactic extends LearnerProgressTree implements
     public LearnerProgressTreeSyntactic(Options options, Alphabet alphabet,
             MembershipOracle<HashableValue> membershipOracle, LearnerLeading learnerLeading, int state) {
         super(options, alphabet, membershipOracle, learnerLeading, state);
+        throw new UnsupportedOperationException("TREE SYNTACTIC NOT FINISHED");
     }
 
     @Override
