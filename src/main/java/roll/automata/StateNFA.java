@@ -104,4 +104,16 @@ public class StateNFA extends StateFA {
         return builder.toString();
     }
     
+    @Override
+    public boolean equals(Object obj) {
+        if(this == obj) return true;
+        if(obj == null) return false;
+        if(obj instanceof StateNFA) {
+            StateNFA other = (StateNFA)obj;
+            return getId() == other.getId()
+                && nfa == other.nfa;
+        }
+        return false;
+    }
+    
 }

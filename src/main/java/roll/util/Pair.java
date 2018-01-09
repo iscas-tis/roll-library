@@ -34,7 +34,10 @@ public class Pair<L, R> {
 		return this.right;
 	}
 	
+	@Override
 	public boolean equals(Object obj) {
+	    if(this == obj) return true;
+	    if(obj == null) return false;
 		if(obj instanceof Pair<?, ?>) {
 			@SuppressWarnings("unchecked")
 			Pair<L, R> p = (Pair<L, R>)obj;
@@ -44,6 +47,7 @@ public class Pair<L, R> {
 		return false;
 	}
 	
+	@Override
 	public String toString() {
 		return "(" + left.toString() + ", " + right.toString() + ")";
 	}

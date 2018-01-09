@@ -67,4 +67,16 @@ public class StateDFA extends StateFA {
         return builder.toString();
     }
     
+    @Override
+    public boolean equals(Object obj) {
+        if(this == obj) return true;
+        if(obj == null) return false;
+        if(obj instanceof StateDFA) {
+            StateDFA other = (StateDFA)obj;
+            return getId() == other.getId()
+                && dfa == other.dfa;
+        }
+        return false;
+    }
+    
 }
