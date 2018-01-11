@@ -113,5 +113,49 @@ public class NBAStore {
         
         return target;
     }
+    
+    public static NBA getNBA5() {
+        Alphabet alphabet = new Alphabet();
+        alphabet.addLetter('a');
+        alphabet.addLetter('b');
+        NBA target = new NBA(alphabet);
+        target.createState();
+        target.createState();
+        
+        
+        int fst = 0, snd = 1;
+        target.getState(fst).addTransition(alphabet.indexOf('b'), fst);
+        target.getState(fst).addTransition(alphabet.indexOf('a'), fst);
+        target.getState(fst).addTransition(alphabet.indexOf('b'), snd);
+        target.getState(fst).addTransition(alphabet.indexOf('a'), snd);
+        target.getState(snd).addTransition(alphabet.indexOf('a'), fst);
+        target.getState(snd).addTransition(alphabet.indexOf('b'), fst);
+
+        target.setInitial(fst);
+        target.setFinal(snd);
+        
+        return target;
+    }
+    
+    public static NBA getNBA6() {
+        Alphabet alphabet = new Alphabet();
+        alphabet.addLetter('a');
+        alphabet.addLetter('b');
+        NBA target = new NBA(alphabet);
+        target.createState();
+        target.createState();
+        
+        
+        int fst = 0, snd = 1;
+        target.getState(fst).addTransition(alphabet.indexOf('b'), fst);
+        target.getState(fst).addTransition(alphabet.indexOf('a'), fst);
+        target.getState(fst).addTransition(alphabet.indexOf('b'), snd);
+        target.getState(snd).addTransition(alphabet.indexOf('b'), snd);
+
+        target.setInitial(fst);
+        target.setFinal(snd);
+        
+        return target;
+    }
 
 }
