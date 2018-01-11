@@ -105,6 +105,23 @@ public class StateNFA extends StateFA {
     }
     
     @Override
+    public String toBA() {
+        StringBuilder builder = new StringBuilder();
+        // transitions
+        TIntObjectProcedure<ISet> procedure = new TIntObjectProcedure<ISet> () {
+            @Override
+            public boolean execute(int letter, ISet succs) {
+                for(int succ : succs) {
+                    builder.append("a" + letter + ",[" + getId() + "]->[" + succ + "]\n");
+                }
+                return true;
+            }
+        };
+        successors.forEachEntry(procedure);
+        return builder.toString();
+    }
+    
+    @Override
     public boolean equals(Object obj) {
         if(this == obj) return true;
         if(obj == null) return false;

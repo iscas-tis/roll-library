@@ -18,8 +18,12 @@ package test.learner.nba;
 
 import org.junit.Test;
 
+import automata.FiniteAutomaton;
 import roll.automata.NBA;
+import roll.automata.operations.NBAGenerator;
 import roll.automata.operations.nba.universality.NBAUniversalityCheck;
+import roll.oracle.nba.rabit.UtilRABIT;
+import roll.util.Timer;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -41,6 +45,34 @@ public class NBAUnivTest {
         System.out.println("Model: \n" + nba.toString());
         NBAUniversalityCheck checker = new NBAUniversalityCheck(nba);
         assert !checker.isUniversal(): "Wrong, should be universal";
+    }
+    
+    @Test
+    public void testRandom() {
+        final int test = 20;
+        for(int i = 0; i < test; i ++) {
+            NBA nba = NBAGenerator.getRandomNBA(20, 2);
+            NBA univ = NBAStore.getNBA5();
+            System.out.println("Model: \n" + nba.toString());
+            Timer timer = new Timer();
+            FiniteAutomaton rA = UtilRABIT.toRABITNBA(univ);
+            FiniteAutomaton rB = UtilRABIT.toRABITNBA(nba);
+            timer.start();
+            boolean isUniv2 = UtilRABIT.isIncluded(univ.getAlphabet(), rA, rB) == null;
+            timer.stop();
+            System.out.println("RABIT checking: " + timer.getTimeElapsed());
+            timer.start();
+            NBAUniversalityCheck checker = new NBAUniversalityCheck(nba);
+            boolean isUniv1 = checker.isUniversal();
+            timer.stop();
+            System.out.println("Rank-based checking: " + timer.getTimeElapsed());
+            System.out.println("Result: " + isUniv1 + ", " + isUniv2);
+            if(isUniv1) {
+                System.out.println(nba.toBA());
+            }
+            assert isUniv1 == isUniv2: "Wrong answer";
+        }
+
     }
 
 }

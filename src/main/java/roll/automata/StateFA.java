@@ -41,5 +41,8 @@ public abstract class StateFA implements State {
     public String toString() {
         return "" + id;
     }
+    
+    //
+    public abstract String toBA();
 
 }

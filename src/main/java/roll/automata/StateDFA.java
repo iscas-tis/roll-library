@@ -68,6 +68,16 @@ public class StateDFA extends StateFA {
     }
     
     @Override
+    public String toBA() {
+        StringBuilder builder = new StringBuilder();
+        // transitions
+        for(int i = 0; i < successors.length; i ++) {
+            builder.append("a" + i + ",[" + getId() + "]->[" + successors[i] + "]\n");
+        }
+        return builder.toString();
+    }
+    
+    @Override
     public boolean equals(Object obj) {
         if(this == obj) return true;
         if(obj == null) return false;

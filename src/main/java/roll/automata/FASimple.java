@@ -121,5 +121,17 @@ abstract class FASimple implements FA {
         builder.append("}\n");
         return builder.toString();
     }
+    
+    public String toBA() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("[" + getInitialState() + "]\n");
+        for (int node = 0; node < this.getStateSize(); node++) {
+            builder.append(this.getState(node).toBA());
+        }
+        for (int acc : finalStates) {
+            builder.append("[" + acc + "]\n");
+        }
+        return builder.toString();
+    }
 
 }
