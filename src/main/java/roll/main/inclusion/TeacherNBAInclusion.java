@@ -22,7 +22,7 @@ import mainfiles.RABIT;
 import roll.automata.FDFA;
 import roll.automata.NBA;
 import roll.automata.operations.FDFAOperations;
-import roll.automata.operations.NBAIntersectCheck;
+import roll.automata.operations.NBAIntersectionCheck;
 import roll.automata.operations.NBAOperations;
 import roll.main.Options;
 import roll.oracle.Teacher;
@@ -117,7 +117,7 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
         ++ this.numInterBandBF;
         options.log.println("Checking the intersection of BF (" + BF.getStateSize() + ") and B ("+ B.getStateSize() + ")...");
         long t = timer.getCurrentTime();
-        NBAIntersectCheck interCheck = new NBAIntersectCheck(BF, B, true);
+        NBAIntersectionCheck interCheck = new NBAIntersectionCheck(BF, B, true);
         boolean isEmpty = interCheck.isEmpty();
         t = timer.getCurrentTime() - t;
         this.timeInterBandBF += t;
@@ -141,7 +141,7 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
             ++ this.numInterAandBF;
             options.log.println("Checking the intersection of A (" + A.getStateSize() + ") and B(F) ("+ BF.getStateSize() + ")...");
             t = timer.getCurrentTime();
-            interCheck = new NBAIntersectCheck(A, BF, true);
+            interCheck = new NBAIntersectionCheck(A, BF, true);
             isEmpty = interCheck.isEmpty();
             t = timer.getCurrentTime() - t;
             this.timeInterAandBF += t;
@@ -162,7 +162,7 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
                 options.log.println("Checking the intersection for B(F) (" + BF.getStateSize() + ") and B(F^c) ("+ BFC.getStateSize() + ")...");
                 ++ this.numInterBFCandBF;
                 t = timer.getCurrentTime();
-                interCheck = new NBAIntersectCheck(BFC, BF, true);
+                interCheck = new NBAIntersectionCheck(BFC, BF, true);
                 isEmpty = interCheck.isEmpty();
                 t = timer.getCurrentTime() - t;
                 this.timeInterBFCandBF += t;

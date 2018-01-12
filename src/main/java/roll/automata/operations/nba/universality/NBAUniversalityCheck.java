@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import roll.automata.NBA;
+import roll.automata.operations.NBAOperations;
 import roll.util.sets.ISet;
 
 /**
@@ -39,16 +40,17 @@ public class NBAUniversalityCheck {
     private final ISet acc;
     private final LevelRanking emptyRank;
     private final LevelRanking wholeRank;
-    private final KVMHState finalStates;
+    private final StateSetKVMH finalStates;
     
     public NBAUniversalityCheck(NBA nba) {
+        nba = NBAOperations.removeDeadStates(nba);
         this.nba = nba;
         this.acc = nba.getFinalStates();
         this.k = 2 * (nba.getStateSize() - acc.cardinality());
         this.infinity = k + 2;
         this.wholeRank = new LevelRankingUniversal(nba.getStateSize(), infinity);
         this.emptyRank = new LevelRankingEmpty(nba.getStateSize(), infinity);
-        this.finalStates = new KVMHState(wholeRank, emptyRank);
+        this.finalStates = new StateSetKVMH(wholeRank, emptyRank);
     }
     
     /**
@@ -57,23 +59,23 @@ public class NBAUniversalityCheck {
      * */
     public boolean isUniversal() {
         // now we use fixed point computation to check whether given Buchi is universal
-        KVMHState initUniv = new KVMHState(wholeRank, wholeRank);
-        KVMHState initEmpty = new KVMHState(emptyRank, emptyRank);
+        StateSetKVMH initUniv = new StateSetKVMH(wholeRank, wholeRank);
+        StateSetKVMH initEmpty = new StateSetKVMH(emptyRank, emptyRank);
         // vY. uX (Pre(X) \/ (Pre(Y) /\ F))
-        Set<KVMHState> y = new TreeSet<>();
-        Set<KVMHState> F = new TreeSet<>();
+        Set<StateSetKVMH> y = new TreeSet<>();
+        Set<StateSetKVMH> F = new TreeSet<>();
         F.add(finalStates);
         y.add(initUniv);
         //outer loop for Y
         while(true) {
-            Set<KVMHState> preY = y;
+            Set<StateSetKVMH> preY = y;
             // do a inner loop
-            Set<KVMHState> x = new TreeSet<>();
+            Set<StateSetKVMH> x = new TreeSet<>();
             x.add(initEmpty);
             while(true) {
-                Set<KVMHState> preX = x;
-                Set<KVMHState> pX = preKVMH(x);
-                Set<KVMHState> pY = preKVMH(y);
+                Set<StateSetKVMH> preX = x;
+                Set<StateSetKVMH> pX = preKVMH(x);
+                Set<StateSetKVMH> pY = preKVMH(y);
                 pY = intersect(pY, F);
                 x = union(pX, pY);
                 if(preX.equals(x)) {
@@ -88,60 +90,38 @@ public class NBAUniversalityCheck {
         }
         LevelRanking lvlRank = new LevelRankingFunction(nba.getStateSize(), infinity);
         lvlRank.addRank(nba.getInitialState(), k);
-        KVMHState init = new KVMHState(lvlRank, emptyRank);
-        for(KVMHState s : y) {
+        StateSetKVMH init = new StateSetKVMH(lvlRank, emptyRank);
+        for(StateSetKVMH s : y) {
             if(s.lessThan(init))
                 return false;
         }
         
         return true;
     }
-        
-    private int getLeastEven(int b) {
-        if(b > k) {
-            return b;
-        }
-        if(b % 2 == 0) {
-            return b;
-        }else {
-            return b + 1;
-        }
-    }
-    
-    private int getLeastOdd(int b) {
-        if(b > k) {
-            return b;
-        }
-        if(b % 2 == 0) {
-            return b + 1;
-        }else {
-            return b;
-        }
-    }
     
     // L1 /\ L2 = { maximal characteristic functions }
-    private Set<KVMHState> intersect(Set<KVMHState> L1, Set<KVMHState> L2) {
-        Set<KVMHState> result = new TreeSet<>();
-        Set<KVMHState> temp = new TreeSet<>();
-        for(KVMHState f1 : L1) {
-            for(KVMHState f2 : L2) {
+    private Set<StateSetKVMH> intersect(Set<StateSetKVMH> L1, Set<StateSetKVMH> L2) {
+        Set<StateSetKVMH> result = new TreeSet<>();
+        Set<StateSetKVMH> temp = new TreeSet<>();
+        for(StateSetKVMH f1 : L1) {
+            for(StateSetKVMH f2 : L2) {
                 // first compute f1O f2O
                 LevelRanking f1O = f1.o;
                 LevelRanking f2O = f2.o;
                 LevelRanking fOMax = f1O.max(f1O, f2O);
                 LevelRanking fSMax = f1.s.max(f1.s, f2.s);
                 if(! fOMax.isEmpty()) {
-                    temp.add(new KVMHState(fSMax, fOMax));
+                    temp.add(new StateSetKVMH(fSMax, fOMax));
                 }else if(f1O.isEmpty() && f2O.isEmpty()){
-                    temp.add(new KVMHState(fSMax, fOMax));
+                    temp.add(new StateSetKVMH(fSMax, fOMax));
                 }
             }
         }
         // 
         // get Max(L2)
-        for(KVMHState f : temp) {
+        for(StateSetKVMH f : temp) {
             boolean hasCovered = false;
-            for(KVMHState s : result) {
+            for(StateSetKVMH s : result) {
                 if(s.lessThan(f)) {
                     hasCovered = true;
                     break;
@@ -155,13 +135,13 @@ public class NBAUniversalityCheck {
     }
     
     // L1 \/ L2 = Max{Max{L1} \/ Max{L2}}
-    private Set<KVMHState> union(Set<KVMHState> L1, Set<KVMHState> L2) {
-        Set<KVMHState> result = new TreeSet<>();
-        Set<KVMHState> temp = new TreeSet<>();
+    private Set<StateSetKVMH> union(Set<StateSetKVMH> L1, Set<StateSetKVMH> L2) {
+        Set<StateSetKVMH> result = new TreeSet<>();
+        Set<StateSetKVMH> temp = new TreeSet<>();
         // get Max(L1)
-        for(KVMHState f1 : L1) {
+        for(StateSetKVMH f1 : L1) {
             boolean hasCovered = false;
-            for(KVMHState s : temp) {
+            for(StateSetKVMH s : temp) {
                 if(s.lessThan(f1)) {
                     hasCovered = true;
                     break;
@@ -172,9 +152,9 @@ public class NBAUniversalityCheck {
             }
         }
         // get Max(L2)
-        for(KVMHState f2 : L2) {
+        for(StateSetKVMH f2 : L2) {
             boolean hasCovered = false;
-            for(KVMHState s : temp) {
+            for(StateSetKVMH s : temp) {
                 if(s.lessThan(f2)) {
                     hasCovered = true;
                     break;
@@ -186,9 +166,9 @@ public class NBAUniversalityCheck {
         }
         
         // get Max(Max(L1) \/ Max(L2))
-        for(KVMHState f : temp) {
+        for(StateSetKVMH f : temp) {
             boolean hasCovered = false;
-            for(KVMHState s : result) {
+            for(StateSetKVMH s : result) {
                 if(s.lessThan(f)) {
                     hasCovered = true;
                     break;
@@ -202,19 +182,19 @@ public class NBAUniversalityCheck {
     }
     
     
-    private Set<KVMHState> preKVMH(Set<KVMHState> succs) {
-        Set<KVMHState> lPre = new TreeSet<>();
+    private Set<StateSetKVMH> preKVMH(Set<StateSetKVMH> succs) {
+        Set<StateSetKVMH> lPre = new TreeSet<>();
         for(int c = 0; c < nba.getAlphabetSize(); c ++) {
-            for(KVMHState succ : succs) {
-                Set<KVMHState> pre = preUniv(succ, c);
+            for(StateSetKVMH succ : succs) {
+                Set<StateSetKVMH> pre = preUniv(succ, c);
                 lPre.addAll(pre);
             }
         }
         return lPre;
     }
     
-    private Set<KVMHState> preUniv(KVMHState succ, int c) {
-        Set<KVMHState> lPre = new TreeSet<>();
+    private Set<StateSetKVMH> preUniv(StateSetKVMH succ, int c) {
+        Set<StateSetKVMH> lPre = new TreeSet<>();
         LevelRanking fOp = succ.o;
         LevelRanking fSp = succ.s;
         int stateSize = nba.getStateSize();
@@ -227,12 +207,11 @@ public class NBAUniversalityCheck {
                     fO.addRank(l, Integer.max(fO.getRank(l), fOp.getRank(lp)));
                 }else {
                     fO.addRank(l, Integer.max(fO.getRank(l)
-                            , Integer.min(fOp.getRank(lp), getLeastOdd(fSp.getRank(lp)
-                                    ))));
+                            , Integer.min(fOp.getRank(lp), UtilLevelRanking.getLeastOdd(fSp.getRank(lp), k))));
                 }
             }
             if(nba.isFinal(l)) {
-                fO.addRank(l, getLeastEven(fO.getRank(l)));
+                fO.addRank(l, UtilLevelRanking.getLeastEven(fO.getRank(l), k));
             }
             if(fO.getRank(l) < fO.getInfinityValue()) {
                 isEmptyO = false;
@@ -242,7 +221,7 @@ public class NBAUniversalityCheck {
         if(isEmptyO) {
             fO = emptyRank;
         }
-        lPre.add(new KVMHState(fO, emptyRank));
+        lPre.add(new StateSetKVMH(fO, emptyRank));
         if(!isEmptyO) {
             LevelRanking fS = new LevelRankingFunction(stateSize, infinity);
             for(int l = 0; l < nba.getStateSize(); l ++) {
@@ -252,51 +231,12 @@ public class NBAUniversalityCheck {
                 }
                 fS.addRank(l, max);
                 if(nba.isFinal(l)) {
-                    fS.addRank(l, getLeastEven(fS.getRank(l)));
+                    fS.addRank(l, UtilLevelRanking.getLeastEven(fS.getRank(l), k));
                 }
             }
-            lPre.add(new KVMHState(fS, fO));
+            lPre.add(new StateSetKVMH(fS, fO));
         }
         return lPre;
-    }
-
-    private class KVMHState implements Comparable<KVMHState> {
-        LevelRanking s;
-        LevelRanking o;
-        public KVMHState(LevelRanking s, LevelRanking o) {
-            this.s = s;
-            this.o = o;
-        }
-        
-        @Override
-        public boolean equals(Object obj) {
-            if(this == obj) return true;
-            if(obj == null) return false;
-            if(obj instanceof KVMHState) {
-                KVMHState other = (KVMHState)obj;
-                return s.equals(other.s)
-                    && o.equals(other.o);
-            }
-            return false;
-        }
-        
-        public boolean lessThan(KVMHState other) {
-            return s.rankLessThan(other.s)
-                && o.rankLessThan(other.o);   
-        }
-
-        @Override
-        public int compareTo(KVMHState other) {
-            int f = s.compareTo(other.s);
-            if(f != 0) return f;
-            return o.compareTo(other.o);
-        }
-        
-        @Override
-        public String toString() {
-            return "<" + s.toString() + "," + o.toString() + ">";
-        }
-        
     }
 
 }

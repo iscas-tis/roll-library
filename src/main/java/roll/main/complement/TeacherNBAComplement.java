@@ -22,7 +22,7 @@ import mainfiles.RABIT;
 import roll.automata.FDFA;
 import roll.automata.NBA;
 import roll.automata.operations.FDFAOperations;
-import roll.automata.operations.NBAIntersectCheck;
+import roll.automata.operations.NBAIntersectionCheck;
 import roll.automata.operations.NBAOperations;
 import roll.main.Options;
 import roll.main.inclusion.UtilInclusion;
@@ -107,7 +107,7 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
         ++ this.numInterBandBF;
         options.log.println("Checking the intersection of BF (" + BF.getStateSize() + ") and B ("+ B.getStateSize() + ")...");
         long t = timer.getCurrentTime();
-        NBAIntersectCheck interCheck = new NBAIntersectCheck(BF, B, true);
+        NBAIntersectionCheck interCheck = new NBAIntersectionCheck(BF, B, true);
         boolean isEmpty = interCheck.isEmpty();
         t = timer.getCurrentTime() - t;
         this.timeInterBandBF += t;
@@ -133,7 +133,7 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
                     + BFC.getStateSize() + ")...");
             ++this.numInterBFCandBF;
             t = timer.getCurrentTime();
-            interCheck = new NBAIntersectCheck(BFC, BF, true);
+            interCheck = new NBAIntersectionCheck(BFC, BF, true);
             isEmpty = interCheck.isEmpty();
             t = timer.getCurrentTime() - t;
             this.timeInterBFCandBF += t;

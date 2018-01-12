@@ -20,7 +20,9 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import algorithms.Minimization;
+import algorithms.Options;
 import algorithms.Simulation;
+import automata.AutomatonPreprocessingResult;
 import automata.FAState;
 import automata.FiniteAutomaton;
 import gnu.trove.map.TIntObjectMap;
@@ -100,7 +102,24 @@ public class UtilInclusion {
     }
     
     public static Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>>
-          prepocess(FiniteAutomaton system, FiniteAutomaton spec) {
+          lightPrepocess(FiniteAutomaton system, FiniteAutomaton spec) {
+        Options.debug = false;
+        Options.fast=true;
+        Options.backward=true;
+        Options.rd=true;
+        Options.fplus=true;
+        Options.SFS=true;
+        Options.qr=true;
+        Options.C1=true;
+        Options.EB=false; // difference to fast. EB must be false to report counterexamples
+        Options.CPT=true;
+        Options.superpruning=true;
+        Options.delayed=true;
+        Options.blamin=true;
+        Options.blasub=true;
+        Options.transient_pruning=true;
+        Options.jumpsim_quotienting=true;
+        Options.verbose=false; // set verbose to true to report counterexample
         Minimization minimizer = new Minimization();
         Simulation simulation = new Simulation();
         Set<datastructure.Pair<FAState, FAState>> frel, drel;
@@ -116,4 +135,35 @@ public class UtilInclusion {
         spec = minimizer.quotient(spec, drel);
         return new Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>>(false, new Pair<>(system, spec));
     }
+
+    public static Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>> prepocess(FiniteAutomaton system,
+            FiniteAutomaton spec) {
+        Options.debug = false;
+        Options.fast=true;
+        Options.backward=true;
+        Options.rd=true;
+        Options.fplus=true;
+        Options.SFS=true;
+        Options.qr=true;
+        Options.C1=true;
+        Options.EB=false; // difference to fast. EB must be false to report counterexamples
+        Options.CPT=true;
+        Options.superpruning=true;
+        Options.delayed=true;
+        Options.blamin=true;
+        Options.blasub=true;
+        Options.transient_pruning=true;
+        Options.jumpsim_quotienting=true;
+        Options.verbose=false; // set verbose to true to report counterexample
+        Minimization minimizer = new Minimization();
+        AutomatonPreprocessingResult x = minimizer.Preprocess_Buchi(system, spec);
+        system = x.system;
+        spec = x.spec;
+        if (x.result) {
+            return new Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>>(true, null);
+        }
+        return new Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>>(false, new Pair<>(system, spec));
+    }
+    
+    
 }

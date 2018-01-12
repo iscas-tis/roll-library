@@ -18,9 +18,11 @@ package test.learner.nba;
 
 import org.junit.Test;
 
+import algorithms.InclusionOptBVLayered;
 import automata.FiniteAutomaton;
 import roll.automata.NBA;
 import roll.automata.operations.NBAGenerator;
+import roll.automata.operations.nba.universality.NBAInclusionCheckRank;
 import roll.automata.operations.nba.universality.NBAUniversalityCheck;
 import roll.oracle.nba.rabit.UtilRABIT;
 import roll.util.Timer;
@@ -40,6 +42,56 @@ public class NBAUnivTest {
     }
     
     @Test
+    public void isIncluded() {
+        NBA B = NBAStore.getNBA5();
+        NBA A = NBAStore.getNBA8();
+
+        NBAInclusionCheckRank checker = new NBAInclusionCheckRank(A, B);
+        assert checker.isIncluded(): "Wrong, should be universal";
+    }
+    
+    @Test
+    public void isNotIncluded() {
+        NBA B = NBAStore.getNBA6();
+        NBA A = NBAStore.getNBA8();
+
+        NBAInclusionCheckRank checker = new NBAInclusionCheckRank(A, B);
+        assert !checker.isIncluded(): "Wrong, should be universal";
+    }
+    
+    @Test
+    public void testRandomIncluded() {
+        final int test = 20;
+        final int state = 15;
+        for(int i = 0; i < test; i ++) {
+            NBA nba = NBAGenerator.getRandomNBA(state, 2);
+            NBA univ = NBAStore.getNBA5();
+            System.out.println("Model: \n" + nba.toString());
+            Timer timer = new Timer();
+            FiniteAutomaton rA = UtilRABIT.toRABITNBA(univ);
+            FiniteAutomaton rB = UtilRABIT.toRABITNBA(nba);
+            timer.start();
+            algorithms.Options.debug = false;
+            InclusionOptBVLayered inclusion = new InclusionOptBVLayered(rA, rB, 0);
+            inclusion.run();
+            boolean isUniv2 = inclusion.isIncluded();
+            timer.stop();
+            System.out.println("RABIT checking: " + timer.getTimeElapsed());
+            timer.start();
+            NBAInclusionCheckRank checker = new NBAInclusionCheckRank(univ, nba);
+            boolean isUniv1 = checker.isIncluded();
+            timer.stop();
+            System.out.println("Rank-based checking: " + timer.getTimeElapsed());
+            System.out.println("Result: " + isUniv1 + ", " + isUniv2);
+            if(isUniv1) {
+                System.out.println(nba.toBA());
+            }
+            assert isUniv1 == isUniv2: "Wrong answer";
+        }
+
+    }
+    
+    @Test
     public void isNonUniversal() {
         NBA nba = NBAStore.getNBA6();
         System.out.println("Model: \n" + nba.toString());
@@ -50,8 +102,9 @@ public class NBAUnivTest {
     @Test
     public void testRandom() {
         final int test = 20;
+        final int state = 25;
         for(int i = 0; i < test; i ++) {
-            NBA nba = NBAGenerator.getRandomNBA(20, 2);
+            NBA nba = NBAGenerator.getRandomNBA(state, 2);
             NBA univ = NBAStore.getNBA5();
             System.out.println("Model: \n" + nba.toString());
             Timer timer = new Timer();

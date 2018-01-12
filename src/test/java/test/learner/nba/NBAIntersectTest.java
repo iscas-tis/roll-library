@@ -17,7 +17,7 @@
 package test.learner.nba;
 
 import roll.automata.NBA;
-import roll.automata.operations.NBAIntersectCheck;
+import roll.automata.operations.NBAIntersectionCheck;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -30,7 +30,7 @@ public class NBAIntersectTest {
         NBA B = NBAStore.getNBA2();
         System.out.println(A.toString());
         System.out.println(B.toString());
-        NBAIntersectCheck checker = new NBAIntersectCheck(A, B, true);
+        NBAIntersectionCheck checker = new NBAIntersectionCheck(A, B, true);
         if(! checker.isEmpty()) {
             checker.computePath();
             System.out.println(checker.getCounterexample());

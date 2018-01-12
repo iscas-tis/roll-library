@@ -33,7 +33,7 @@ import roll.words.Word;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class NBAIntersectCheck {
+public class NBAIntersectionCheck {
     
     private NBA fstOp;
     private NBA sndOp;
@@ -45,11 +45,11 @@ public class NBAIntersectCheck {
     private int numStates;
     private NBAEmptinessCheck checker;
     
-    public NBAIntersectCheck(NBA fstOp, NBA sndOp) {
+    public NBAIntersectionCheck(NBA fstOp, NBA sndOp) {
         this(fstOp, sndOp, false);
     }
     
-    public NBAIntersectCheck(NBA fstOp, NBA sndOp, boolean needCE) {
+    public NBAIntersectionCheck(NBA fstOp, NBA sndOp, boolean needCE) {
         assert fstOp != null && sndOp != null;
         this.needCE = needCE;
         this.fstOp = fstOp;
