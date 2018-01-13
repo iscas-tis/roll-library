@@ -49,7 +49,7 @@ public class NBAInclusionCheckRank {
         ISet acc = B.getFinalStates();
         boolean isSemiDet = NBAOperations.isSemideterministic(B);
         if(isSemiDet) {
-            this.k = 4;  // for semideterministic, 4 (3) is enough 
+            this.k = 3;  // for semideterministic, 4 (3) is enough 
         }else {
             this.k = 2 * (B.getStateSize() - acc.cardinality());
         }

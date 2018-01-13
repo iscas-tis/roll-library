@@ -120,7 +120,7 @@ public class NBAInclusionCheckSDBA {
             boolean empty = checker.isEmpty();
             if (!empty) {
                 checker.findpath();
-                options.log.println("Not Included");
+                options.log.println("Not included");
                 options.log.println("prefix: " + checker.getWordFinder().getWordPrefix());
                 options.log.println("suffix: " + checker.getWordFinder().getWordSuffix());
                 timer.stop();
@@ -219,6 +219,8 @@ public class NBAInclusionCheckSDBA {
         options.log.println("Start using SDBA algorithm to prove inclusion...");
         IBuchi iA = UtilInclusion.toBuchiNBA(A);
         IBuchi iB = UtilInclusion.toBuchiNBA(B); 
+        main.Options.mLazyS = true;
+        main.Options.mLazyB = true;
         IsIncludedExplore checker = new IsIncludedExplore(iA, iB);
         boolean isIncluded = checker.isIncluded();
         if(isIncluded) {
