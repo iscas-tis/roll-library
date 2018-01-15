@@ -216,6 +216,8 @@ public class NBAInclusionCheckSDBA {
         
         A = symbol.toNBA(aut1);
         B = symbol.toNBA(aut2);
+        A = NBAOperations.removeDeadStates(A);
+        B = NBAOperations.removeDeadStates(B);
         options.log.println("Start using SDBA algorithm to prove inclusion...");
         IBuchi iA = UtilInclusion.toBuchiNBA(A);
         IBuchi iB = UtilInclusion.toBuchiNBA(B); 
