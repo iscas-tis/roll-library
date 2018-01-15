@@ -84,7 +84,7 @@ public class Executor {
             options.log.verbose("Table is both closed and consistent\n" + learner.toString());
             hypothesis = learner.getHypothesis();
             // along with ce
-            options.log.println("Resolving equivalence query...");
+            options.log.println("Resolving equivalence query for hypothesis (#Q=" + hypothesis.getStateSize() + ")...  ");
             Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(hypothesis);
             boolean isEq = ceQuery.getQueryAnswer().get();
             if(isEq) {

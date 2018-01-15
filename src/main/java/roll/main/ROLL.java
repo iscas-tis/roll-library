@@ -54,6 +54,7 @@ public final class ROLL {
             break;
         case SAMPLING:
             runAutomaticMode(options, true);
+            break;
         default :
                 options.log.err("Incorrect running mode.");
         }
