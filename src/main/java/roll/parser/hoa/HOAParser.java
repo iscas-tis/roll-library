@@ -123,6 +123,7 @@ public class HOAParser implements Parser, HOAConsumer{
 		if(options.dot) {
 		    TIntObjectMap<String> map = new TIntObjectHashMap<>();
 		    for(int letter = 0; letter < nba.getAlphabetSize(); letter ++) {
+		        if(nba.getAlphabet().indexOf(Alphabet.DOLLAR) == letter) continue;
 		        BDD labelDD = getBDDFromLabel(nba.getAlphabet().getLetter(letter));
 		        map.put(letter, bdd.toString(labelDD));
 		        labelDD.free();

@@ -102,6 +102,7 @@ public class BAParser implements Parser {
 			// transitions
 			for(int stateNr = 0; stateNr < nba.getStateSize(); stateNr ++) {
 			    for(int letter = 0; letter < nba.getAlphabetSize(); letter ++) {
+			        if(nba.getAlphabet().indexOf(Alphabet.DOLLAR) == letter) continue;
                     for(int succNr : nba.getSuccessors(stateNr, letter)) {
                         printer.print(charStrMap.get(nba.getAlphabet().getLetter(letter))
                                 + "," + "[" + stateNr + "]->[" + succNr + "]\n");
