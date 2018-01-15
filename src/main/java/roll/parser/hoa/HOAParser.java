@@ -150,6 +150,7 @@ public class HOAParser implements Parser, HOAConsumer{
 	            if(nba.isFinal(stateNr)) out.print(" {0}");
 	            out.println();
 	            for (int letter = 0; letter < nba.getAlphabetSize(); letter ++) {
+	                if(nba.getAlphabet().indexOf(Alphabet.DOLLAR) == letter) continue;
 	                BDD labelDD = getBDDFromLabel(nba.getAlphabet().getLetter(letter));
 	            	for(int succNr : nba.getSuccessors(stateNr, letter)) {
 	                    out.println("[" + bdd.toString(labelDD) + "]  " + succNr);

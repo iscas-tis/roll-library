@@ -117,6 +117,7 @@ public class LearnerNBALDollar extends LearnerBase<NBA>{
     public void refineHypothesis(Query<HashableValue> query) {
         Word prefix = query.getPrefix();
         Word suffix = query.getSuffix();
+        options.log.println("Analyzing counterexample for DFA learner...");
         Automaton result = FDFAOperations.buildDDollar(prefix, suffix);
         // System.out.println(result.toString());
         String counterexample = null;

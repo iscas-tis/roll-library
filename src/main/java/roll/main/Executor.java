@@ -74,7 +74,7 @@ public class Executor {
             TeacherNBA teacher) {
         LearnerBase<NBA> learner = getLearner(options, target, teacher);
         Timer timer = new Timer();
-        options.log.println("Starting learning...");
+        options.log.println("Initializing learner...");
         timer.start();
         learner.startLearning();
         timer.stop();
@@ -93,8 +93,9 @@ public class Executor {
                 break;
             }
             ceQuery.answerQuery(null);
-            options.log.println("Counterexample is: " + ceQuery.toString());
+            options.log.verbose("Counterexample is: " + ceQuery.toString());
             timer.start();
+            options.log.println("Refining current hypothesis...");
             learner.refineHypothesis(ceQuery);
             timer.stop();
             options.stats.timeOfLearner += timer.getTimeElapsed();

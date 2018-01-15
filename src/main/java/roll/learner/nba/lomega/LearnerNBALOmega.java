@@ -79,6 +79,7 @@ public class LearnerNBALOmega extends LearnerBase<NBA>{
         if(options.verbose) {
             options.log.println(fdfaLearner.getHypothesis().toString());
         }
+        options.log.println("Analyzing counterexample for FDFA learner...");
         Timer timer = new Timer();
         timer.start();
         TranslatorFDFA translator = UtilLOmega.getTranslator(options, fdfaLearner, membershipOracle);

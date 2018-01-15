@@ -91,7 +91,7 @@ public final class ROLL {
         NBA target = parser.parse();
         options.stats.numOfLetters = target.getAlphabetSize();
         options.stats.numOfStatesInTraget = target.getStateSize();
-        parser.print(target, System.out);
+//        parser.print(target, System.out);
         // learn the target automaton
         
         if(sampling) {
