@@ -6,7 +6,6 @@ import roll.automata.operations.FDFAOperations;
 import roll.learner.fdfa.LearnerFDFA;
 import roll.query.Query;
 import roll.table.HashableValue;
-import roll.util.Timer;
 
 public class TranslatorFDFAUnder extends TranslatorFDFA {
 	
@@ -18,17 +17,13 @@ public class TranslatorFDFAUnder extends TranslatorFDFA {
 	public Query<HashableValue> translate() {
 	    // every time we initialize fdfa, in case it is modified
 	    fdfa = fdfaLearner.getHypothesis();
-		Timer timer = new Timer();
-		timer.start();
 		String counterexample = translateLower();
-		timer.stop();
-		options.stats.timeOfTranslator += timer.getTimeElapsed();
 		return getQuery(counterexample, ceQuery.getQueryAnswer());
 	}
 	
 	// -------- this is for lower BA construction ----------------
 	private String translateLower() {
-		if(options.verbose) System.out.println(autUVOmega.toDot());
+		if(options.verbose) options.log.println(autUVOmega.toDot());
 		boolean isCeInTarget = ceQuery.getQueryAnswer().get();
 		
 		String ceStr = null;
@@ -43,7 +38,7 @@ public class TranslatorFDFAUnder extends TranslatorFDFA {
 			Automaton autInter = autUVOmega.intersection(dollarFDFA);
 			assert autInter != null;
 			ceStr = autInter.getShortestExample(true);
-			if(options.verbose) System.out.println("Not in target: " + ceStr);
+			if(options.verbose) options.log.println("Not in target: " + ceStr);
 		}
 		
 		return ceStr;

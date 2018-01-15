@@ -146,7 +146,7 @@ public class NBAUnivTest {
     @Test
     public void testRandomNBA() {
         final int test = 20;
-        final int state = 6;
+        final int state = 8;
         for(int i = 0; i < test; i ++) {
             NBA nba1 = NBAGenerator.getRandomNBA(state, 2);
             NBA nba2 = NBAGenerator.getRandomNBA(state, 2);

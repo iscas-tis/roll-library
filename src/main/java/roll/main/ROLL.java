@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 
 import roll.automata.NBA;
 import roll.automata.operations.NBAGenerator;
+import roll.automata.operations.NBAOperations;
 import roll.parser.Parser;
 import roll.parser.UtilParser;
 import roll.util.Timer;
@@ -88,6 +89,8 @@ public final class ROLL {
         // prepare the parser
         Parser parser = UtilParser.prepare(options, options.inputFile, options.format);
         NBA target = parser.parse();
+        options.stats.numOfLetters = target.getAlphabetSize();
+        options.stats.numOfStatesInTraget = target.getStateSize();
         parser.print(target, System.out);
         // learn the target automaton
         
@@ -106,13 +109,15 @@ public final class ROLL {
                 e.printStackTrace();
             }
         }else {
-            options.log.println("target automaton:");
+            options.log.println("\ntarget automaton:");
             parser.print(target, options.log.getOutputStream());
-            options.log.println("hypothesis automaton:");
+            options.log.println("\nhypothesis automaton:");
             parser.print(options.stats.hypothesis, options.log.getOutputStream());
         }
         parser.close();
         // output statistics
+        options.stats.numOfTransInTraget = NBAOperations.getNumberOfTransitions(target);
+        options.stats.numOfTransInHypothesis = NBAOperations.getNumberOfTransitions(options.stats.hypothesis);
         options.stats.print();
         
     }

@@ -42,6 +42,10 @@ public class Symbol {
         return getCharFromString(symb);
     }
     
+    public int getSymbolIndex(String symb) {
+        return alphabet.indexOf(strCharMap.get(symb));
+    }
+    
     // we reserve '$' sign for L dollar automaton
     private char getCharFromString(String label) {
         char ch = 0;

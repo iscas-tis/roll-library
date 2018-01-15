@@ -14,7 +14,6 @@ import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
-import roll.util.Timer;
 import roll.util.sets.ISet;
 import roll.words.Alphabet;
 import roll.words.Word;
@@ -35,11 +34,7 @@ public class TranslatorFDFAOver extends TranslatorFDFA {
 	@Override
 	public Query<HashableValue> translate() {
 	    fdfa = fdfaLearner.getHypothesis();
-		Timer timer = new Timer();
-		timer.start();
 		String counterexample = translateUpper();
-		timer.stop();
-		options.stats.timeOfTranslator += timer.getTimeElapsed();
 		return getQuery(counterexample, new HashableValueBoolean(result));
 	}
 	

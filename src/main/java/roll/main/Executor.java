@@ -29,6 +29,7 @@ import roll.oracle.nba.rabit.TeacherNBARABIT;
 import roll.oracle.nba.sampler.TeacherNBASampler;
 import roll.query.Query;
 import roll.table.HashableValue;
+import roll.util.Timer;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -72,8 +73,12 @@ public class Executor {
     private static void execute(Options options, NBA target,
             TeacherNBA teacher) {
         LearnerBase<NBA> learner = getLearner(options, target, teacher);
+        Timer timer = new Timer();
         options.log.println("Starting learning...");
+        timer.start();
         learner.startLearning();
+        timer.stop();
+        options.stats.timeOfLearner += timer.getTimeElapsed();
         NBA hypothesis = null;
         while(true) {
             options.log.verbose("Table is both closed and consistent\n" + learner.toString());
@@ -89,7 +94,10 @@ public class Executor {
             }
             ceQuery.answerQuery(null);
             options.log.println("Counterexample is: " + ceQuery.toString());
+            timer.start();
             learner.refineHypothesis(ceQuery);
+            timer.stop();
+            options.stats.timeOfLearner += timer.getTimeElapsed();
         }
         options.log.println("Learning completed...");
     }

@@ -11,7 +11,6 @@ import roll.main.Options;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.HashableValue;
-import roll.util.Timer;
 import roll.words.Alphabet;
 import roll.words.Word;
 
@@ -49,15 +48,11 @@ public abstract class TranslatorFDFA implements Translator {
 		this.ceQuery = query;
 		this.called = false;
 		// get deterministic automaton for (u,v)
-		Timer timer = new Timer();
-		timer.start();
 		Word prefix = query.getPrefix();
 		Word suffix = query.getSuffix();
 		assert prefix != null && suffix != null;
 		autUVOmega = FDFAOperations.buildDDollar(prefix, suffix);
 		autUVOmega.setDeterministic(true);
-		timer.stop();
-		options.stats.timeOfTranslator += timer.getTimeElapsed();
 	}
 	
 	
@@ -67,22 +62,17 @@ public abstract class TranslatorFDFA implements Translator {
 		Automaton autMinus = autDollar.intersection(dollarFDFAComplement);
 		assert autMinus != null;
 		String ceStr = autMinus.getShortestExample(true);
-		if(options.verbose) System.out.println("in target: " + ceStr);
+		if(options.verbose) options.log.println("in target: " + ceStr);
 		return ceStr;
 	}
 	
 	protected Query<HashableValue> getQuery(String counterexample, HashableValue result) {
-		Timer timer = new Timer();
-		timer.start();
-		if(options.verbose) System.out.println("final counterexample " + counterexample);
+		if(options.verbose) options.log.println("final counterexample " + counterexample);
 		int dollarNr = counterexample.indexOf(Alphabet.DOLLAR); //
 		Word prefix = alphabet.getWordFromString(counterexample.substring(0, dollarNr));
 		Word period = alphabet.getWordFromString(counterexample.substring(dollarNr + 1));
 		Query<HashableValue> query = new QuerySimple<>(prefix, period);
 		query.answerQuery(result);
-		
-		timer.stop();
-		options.stats.timeOfTranslator += timer.getTimeElapsed();
 		return query;
 	}
 	
@@ -93,9 +83,6 @@ public abstract class TranslatorFDFA implements Translator {
 			return true;
 		}
 	    // else it must be using optimization treating eq test as the last resort
-        Timer timer = new Timer();
-        timer.start();
-        
         // check whether we can still use current counter example 
         assert ceQuery != null && autUVOmega != null;
         // construct lower/upper Buechi automaton
@@ -111,9 +98,6 @@ public abstract class TranslatorFDFA implements Translator {
         else {
             result = accepted;
         }
-        
-        timer.stop();
-        options.stats.timeOfTranslator += timer.getTimeElapsed();
         
         return result;
 		

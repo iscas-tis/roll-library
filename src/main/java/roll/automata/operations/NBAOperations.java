@@ -28,6 +28,7 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import roll.automata.NBA;
+import roll.automata.NFA;
 import roll.automata.StateFA;
 import roll.automata.StateNFA;
 import roll.util.sets.ISet;
@@ -224,5 +225,16 @@ public class NBAOperations {
         
         return result;
     }
+    
+    public static int getNumberOfTransitions(NFA nfa) {
+        int result = 0;
+        for(int i = 0; i < nfa.getStateSize(); i ++) {
+            for(int c = 0; c < nfa.getAlphabetSize(); c ++) {
+                result += nfa.getSuccessors(i, c).cardinality();
+            }
+        }
+        return result;
+    }
+    
 
 }

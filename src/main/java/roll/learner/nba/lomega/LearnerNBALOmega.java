@@ -26,6 +26,7 @@ import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
 import roll.table.HashableValue;
+import roll.util.Timer;
 import roll.words.Alphabet;
 
 /**
@@ -76,8 +77,10 @@ public class LearnerNBALOmega extends LearnerBase<NBA>{
     @Override
     public void refineHypothesis(Query<HashableValue> query) {
         if(options.verbose) {
-            System.out.println(fdfaLearner.getHypothesis().toString());
+            options.log.println(fdfaLearner.getHypothesis().toString());
         }
+        Timer timer = new Timer();
+        timer.start();
         TranslatorFDFA translator = UtilLOmega.getTranslator(options, fdfaLearner, membershipOracle);
         // lazy equivalence check is implemented here
         HashableValue mqResult = query.getQueryAnswer();
@@ -86,12 +89,18 @@ public class LearnerNBALOmega extends LearnerBase<NBA>{
         }
         query.answerQuery(mqResult);
         translator.setQuery(query);
+        timer.stop();
+        options.stats.timeOfTranslator += timer.getTimeElapsed();
         while(translator.canRefine()) {
+            timer.start();
             Query<HashableValue> ceQuery = translator.translate();
+            timer.stop();
+            options.stats.timeOfTranslator += timer.getTimeElapsed();
             fdfaLearner.refineHypothesis(ceQuery);
             // usually lazyeq is not very useful
             if(options.optimization != Options.Optimization.LAZY_EQ) break;
         }
+        
         constructHypothesis();
     }
     

@@ -184,6 +184,7 @@ public class NBAInclusionCheck {
 //        int fstS = aut1.states.size(), sndS = aut2.states.size();
 //        while(true) {
         options.log.println("Start using simulation algorithm to prove inclusion...");
+//        aut1.saveAutomaton("/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/A4-1.ba");
         Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>> pair = UtilInclusion.lightPrepocess(aut1, aut2);
         if (pair.getLeft()) {
             options.log.println("Included");
@@ -193,6 +194,7 @@ public class NBAInclusionCheck {
         }
         aut1 = pair.getRight().getLeft();
         aut2 = pair.getRight().getRight();
+//        aut1.saveAutomaton("/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/A4-2.ba");
         options.log.println(
                 "Aut A (after similation) : # of Trans. " + aut1.trans + ", # of States " + aut1.states.size() + ".");
         options.log.println(
@@ -221,7 +223,12 @@ public class NBAInclusionCheck {
         
         A = symbol.toNBA(aut1);
         B = symbol.toNBA(aut2);
-        
+//        int letter = symbol.getSymbolIndex("a1");
+//        Word ep = symbol.getAlphabet().getEmptyWord();
+//        Word lp = symbol.getAlphabet().getEmptyWord().append(letter);
+//        boolean ac = NBAOperations.accepts(A, ep, lp);
+//        System.out.println("Accepted: " + ac);
+//        aut1.saveAutomaton("/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/A4-3.ba");
 //        options.log.println("Start using Rank-based algorithm to prove inclusion...");
 //        A = NBAOperations.removeDeadStates(A);
 //        B = NBAOperations.removeDeadStates(B);    

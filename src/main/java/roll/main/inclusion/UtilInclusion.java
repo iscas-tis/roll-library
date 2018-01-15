@@ -159,11 +159,15 @@ public class UtilInclusion {
         Minimization minimizer = new Minimization();
         Simulation simulation = new Simulation();
         Set<datastructure.Pair<FAState, FAState>> frel, drel;
+//        system.saveAutomaton("/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/A4-2-1-o.ba");
+//        spec.saveAutomaton("/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/A4-2-2-o.ba");
         frel = simulation.ForwardSimRelNBW(system, spec);
         if(frel.contains(new datastructure.Pair<FAState, FAState>(system.getInitialState(), spec.getInitialState())))
             return new Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>>(true, null);
         system = minimizer.quotient(system, frel);
         spec = minimizer.quotient(spec, frel);
+//        system.saveAutomaton("/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/A4-2-1.ba");
+//        spec.saveAutomaton("/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/A4-2-2.ba");
         drel = simulation.DelayedSimRelNBW(system, spec);
         if(drel.contains(new datastructure.Pair<FAState, FAState>(system.getInitialState(), spec.getInitialState())))
             return new Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>>(true, null);

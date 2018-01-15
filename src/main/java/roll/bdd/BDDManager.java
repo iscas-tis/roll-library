@@ -44,7 +44,7 @@ public final class BDDManager {
     private final static int NUM_NODES = 125000;
     private final static int NUM_CACHE = 100000;
     private final static int NUM_INC = 10000;
-    private final static String LIB = "jdd";
+    private final static String LIB = "javabdd";
 
     private TIntObjectMap<String> varsMap = new TIntObjectHashMap<>();
 
