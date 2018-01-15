@@ -60,13 +60,17 @@ public class TeacherNBASampler extends TeacherNBA {
         
         if(!isEmptyNBA(A)) {
             sampler.K = B.getStateSize();
+            NBAInclusionSampler.numTried = 0;
             ceQuery = NBAInclusionSampler.isIncluded(A, B, sampler);
+            options.stats.numOfSamplingTried += NBAInclusionSampler.numTried;
         }
         if(ceQuery != null) return ceQuery;
         
         if(!isEmptyNBA(B)) {
             sampler.K = A.getStateSize();
+            NBAInclusionSampler.numTried = 0;
             ceQuery = NBAInclusionSampler.isIncluded(B, A, sampler);
+            options.stats.numOfSamplingTried += NBAInclusionSampler.numTried;
         }
         if(ceQuery != null) return ceQuery;
         

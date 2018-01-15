@@ -30,7 +30,7 @@ import roll.words.Word;
  * */
 
 public class NBAInclusionSampler {
-    
+    public static int numTried = 0;
     private NBAInclusionSampler() {
         
     }
@@ -38,6 +38,7 @@ public class NBAInclusionSampler {
     public static Query<HashableValue> isIncluded(NBA A, NBA B, Sampler sampler) {
         sampler.setNBA(A);
         for (int i = 0; i < sampler.getSampleSize(); i++) {
+            numTried ++;
             Pair<Pair<Word, Word>, Boolean> result = sampler.getRandomLasso();
             Pair<Word, Word> word = result.getLeft();
             boolean needCheck = false;
@@ -59,6 +60,7 @@ public class NBAInclusionSampler {
         }
         sampler.setNBA(B);
         for (int i = 0; i < sampler.getSampleSize(); i++) {
+            numTried ++;
             Pair<Pair<Word, Word>, Boolean> result = sampler.getRandomLasso();
             Pair<Word, Word> word = result.getLeft();
             boolean needCheck = false;

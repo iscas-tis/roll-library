@@ -51,10 +51,10 @@ public class Statistics {
     public long timeOfLearnerLeading; // milliseconds used in FDFA learner for leading automaton
     public long timeOfLearnerProgress; // milliseconds used in FDFA learner for progress automata
     
-    public long timeOfSampling; //milliseconds used in sampling
-    public int numOfMembershipSampling; // number of membership queries in sampling
-    public int numOfSamplingSucceeded; // number of sampling succeeded
-    public int numOfSamplingTried; // number of sampling we tried
+//    public long timeOfSampling; //milliseconds used in sampling
+//    public int numOfMembershipSampling; // number of membership queries in sampling
+//    public int numOfSamplingSucceeded; // number of sampling succeeded
+    public long numOfSamplingTried; // number of sampling we tried
     
     // sampling as the teacher
     public long numOfSamplingOmegaWords;
@@ -110,11 +110,11 @@ public class Statistics {
         log.println("#TLRP = " + timeOfLearnerProgress + " (ms)" , indent , "    // time for the learning progress automata" );
         
         if(options.runningMode == Options.RunningMode.SAMPLING) {
-            log.println("#SW = " + numOfSamplingOmegaWords, indent, "    // #number of sample omega words");
-            log.println("#SMQ = " + numOfMembershipSampling, indent, "    // #number of sample membership queries");
+//            log.println("#SW = " + numOfSamplingOmegaWords, indent, "    // #number of sample omega words");
+//            log.println("#SMQ = " + numOfMembershipSampling, indent, "    // #number of sample membership queries");
             log.println("#ST = " + numOfSamplingTried, indent, "    // #number of sample have been tried");
-            log.println("#SSD = " + numOfSamplingSucceeded, indent, "    // #number of sample succeeded");
-            log.println("#TSA = " + timeOfSampling, indent, "    // time of sampling");
+//            log.println("#SSD = " + numOfSamplingSucceeded, indent, "    // #number of sample succeeded");
+//            log.println("#TSA = " + timeOfSampling, indent, "    // time of sampling");
         }
                 
         log.println("#TTO = " + timeInTotal + " (ms)" , indent , "    // total time for learning Buechi automata");
