@@ -17,11 +17,10 @@
 package roll.main.inclusion;
 
 import automata.FiniteAutomaton;
-import automata.IBuchi;
-import operation.isincluded.IsIncludedExplore;
 import oracle.EmptinessChecker;
 import roll.automata.NBA;
 import roll.automata.operations.NBAOperations;
+import roll.automata.operations.nba.inclusion.NBAInclusionCheckSpot;
 import roll.main.Options;
 import roll.oracle.nba.sampler.SamplerIndexedMonteCarlo;
 import roll.util.Pair;
@@ -207,30 +206,25 @@ public class NBAInclusionCheckSDBA {
                 "Aut A (after minimization) : # of Trans. " + aut1.trans + ", # of States " + aut1.states.size() + ".");
         options.log.println(
                 "Aut B (after minimization) : # of Trans. " + aut2.trans + ", # of States " + aut2.states.size() + ".");
-//            if(fstS == aut1.states.size() && sndS == aut2.states.size()) {
-//                break;
-//            }
-//            fstS = aut1.states.size();
-//            sndS = aut2.states.size();
-//        }
         
         A = symbol.toNBA(aut1);
         B = symbol.toNBA(aut2);
         A = NBAOperations.removeDeadStates(A);
         B = NBAOperations.removeDeadStates(B);
         options.log.println("Start using SDBA algorithm to prove inclusion...");
-        IBuchi iA = UtilInclusion.toBuchiNBA(A);
-        IBuchi iB = UtilInclusion.toBuchiNBA(B); 
-        main.Options.mLazyS = true;
-        main.Options.mLazyB = true;
-        IsIncludedExplore checker = new IsIncludedExplore(iA, iB);
-        boolean isIncluded = checker.isIncluded();
-        if(isIncluded) {
+//        IBuchi iA = UtilInclusion.toBuchiNBA(A);
+//        IBuchi iB = UtilInclusion.toBuchiNBA(B); 
+//        main.Options.mLazyS = true;
+//        main.Options.mLazyB = true;
+//        IsIncludedExplore checker = new IsIncludedExplore(iA, iB);
+//        boolean isIncluded = checker.isIncluded();
+
+        boolean isIncluded = NBAInclusionCheckSpot.isIncludedSpot(A, B);
+        if (isIncluded) {
             options.log.println("Included");
-        }else {
+        } else {
             options.log.println("Not included");
         }
-
         timer.stop();
         options.log.println("Total checking time: " + timer.getTimeElapsed() / 1000.0 + " secs");
     }
