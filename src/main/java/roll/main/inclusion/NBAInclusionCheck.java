@@ -133,7 +133,9 @@ public class NBAInclusionCheck {
                 System.exit(0);
             }
         }
-        
+        // restructure the automata
+        aut1 = UtilInclusion.copyAutomaton(aut1);
+        aut2 = UtilInclusion.copyAutomaton(aut2);
         // now we have to first collect the symbols
         Symbol symbol = new Symbol();
         for(String symb : aut1.alphabet) {
@@ -181,10 +183,8 @@ public class NBAInclusionCheck {
                 }
             }
         }
-//        int fstS = aut1.states.size(), sndS = aut2.states.size();
-//        while(true) {
+
         options.log.println("Start using simulation algorithm to prove inclusion...");
-//        aut1.saveAutomaton("/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/A4-1.ba");
         Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>> pair = UtilInclusion.lightPrepocess(aut1, aut2);
         if (pair.getLeft()) {
             options.log.println("Included");
@@ -194,7 +194,7 @@ public class NBAInclusionCheck {
         }
         aut1 = pair.getRight().getLeft();
         aut2 = pair.getRight().getRight();
-//        aut1.saveAutomaton("/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/A4-2.ba");
+
         options.log.println(
                 "Aut A (after similation) : # of Trans. " + aut1.trans + ", # of States " + aut1.states.size() + ".");
         options.log.println(
@@ -214,33 +214,9 @@ public class NBAInclusionCheck {
                 "Aut A (after minimization) : # of Trans. " + aut1.trans + ", # of States " + aut1.states.size() + ".");
         options.log.println(
                 "Aut B (after minimization) : # of Trans. " + aut2.trans + ", # of States " + aut2.states.size() + ".");
-//            if(fstS == aut1.states.size() && sndS == aut2.states.size()) {
-//                break;
-//            }
-//            fstS = aut1.states.size();
-//            sndS = aut2.states.size();
-//        }
         
         A = symbol.toNBA(aut1);
         B = symbol.toNBA(aut2);
-//        int letter = symbol.getSymbolIndex("a1");
-//        Word ep = symbol.getAlphabet().getEmptyWord();
-//        Word lp = symbol.getAlphabet().getEmptyWord().append(letter);
-//        boolean ac = NBAOperations.accepts(A, ep, lp);
-//        System.out.println("Accepted: " + ac);
-//        aut1.saveAutomaton("/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/A4-3.ba");
-//        options.log.println("Start using Rank-based algorithm to prove inclusion...");
-//        A = NBAOperations.removeDeadStates(A);
-//        B = NBAOperations.removeDeadStates(B);    
-//        NBAInclusionCheckRank checker = new NBAInclusionCheckRank(A, B);
-//        boolean isIncluded = checker.isIncluded();
-//        if(isIncluded) {
-//            options.log.println("Included");
-//        }else {
-//            options.log.println("Not included");
-//        }
-//        timer.stop();
-//        options.log.println("Total checking time: " + timer.getTimeElapsed()/ 1000.0 + " secs");
 
         options.log.println("Start using learning algorithm to prove inclusion...");
         // learning algorithm

@@ -144,7 +144,7 @@ public class NBAUnivTest {
     @Test
     public void testRandomNBA() {
         final int test = 20;
-        final int state = 20;
+        final int state = 30;
         for(int i = 0; i < test; i ++) {
             NBA nba1 = NBAGenerator.getRandomNBA(state, 2);
             NBA nba2 = NBAGenerator.getRandomNBA(state, 2);
@@ -161,7 +161,10 @@ public class NBAUnivTest {
             timer.stop();
             System.out.println("Spot checking: " + timer.getTimeElapsed());
             System.out.println("Result: " + isUniv1 + ", " + isUniv2);
-
+            if(isUniv1 != isUniv2) {
+                System.out.println("A:\n" + nba1.toBA());
+                System.out.println("B:\n" + nba2.toBA());
+            }
             assert isUniv1 == isUniv2: "Wrong answer";
         }
 

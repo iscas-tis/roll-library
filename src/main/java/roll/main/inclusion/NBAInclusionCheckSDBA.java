@@ -127,7 +127,8 @@ public class NBAInclusionCheckSDBA {
                 System.exit(0);
             }
         }
-        
+        aut1 = UtilInclusion.copyAutomaton(aut1);
+        aut2 = UtilInclusion.copyAutomaton(aut2);
         // now we have to first collect the symbols
         Symbol symbol = new Symbol();
         for(String symb : aut1.alphabet) {
@@ -136,7 +137,7 @@ public class NBAInclusionCheckSDBA {
         for(String symb : aut2.alphabet) {
             symbol.addSymbol(symb);
         }
-        
+       
         // now we are ready to replace the symbols on the transitions
         NBA A = symbol.toNBA(aut1);
         NBA B = symbol.toNBA(aut2);
@@ -175,6 +176,7 @@ public class NBAInclusionCheckSDBA {
                 }
             }
         }
+
 //        int fstS = aut1.states.size(), sndS = aut2.states.size();
 //        while(true) {
         options.log.println("Start using simulation algorithm to prove inclusion...");
@@ -211,7 +213,7 @@ public class NBAInclusionCheckSDBA {
         B = symbol.toNBA(aut2);
         A = NBAOperations.removeDeadStates(A);
         B = NBAOperations.removeDeadStates(B);
-        options.log.println("Start using SDBA algorithm to prove inclusion...");
+        options.log.println("Start using SPOT to prove inclusion...");
 //        IBuchi iA = UtilInclusion.toBuchiNBA(A);
 //        IBuchi iB = UtilInclusion.toBuchiNBA(B); 
 //        main.Options.mLazyS = true;

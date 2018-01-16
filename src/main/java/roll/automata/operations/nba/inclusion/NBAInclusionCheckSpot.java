@@ -31,7 +31,8 @@ import roll.words.Alphabet;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * 
- * only can prove inclusion
+ * only can prove inclusion, NOTE that SPOT may report WRONG answer
+ *
  * */
 
 public class NBAInclusionCheckSpot {

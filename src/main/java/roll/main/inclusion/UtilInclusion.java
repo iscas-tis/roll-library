@@ -16,6 +16,9 @@
 
 package roll.main.inclusion;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -135,6 +138,45 @@ public class UtilInclusion {
         return false;
     }
     
+    public static FiniteAutomaton copyAutomaton(FiniteAutomaton aut) {
+        FiniteAutomaton result = new FiniteAutomaton();
+        FAState init = aut.getInitialState();
+        TIntObjectMap<FAState> stMap = new TIntObjectHashMap<>();
+        FAState rInit = result.createState();
+        result.setInitialState(rInit);
+        stMap.put(init.id, rInit);
+        if(aut.F.contains(init)) {
+            result.F.add(rInit);
+        }
+        
+        Queue<FAState> queue = new LinkedList<>();
+        queue.add(init);
+        while(! queue.isEmpty()) {
+            FAState state = queue.poll();
+            FAState rState = stMap.get(state.id);
+            Iterator<String> strIt = state.nextIt();
+            while(strIt.hasNext()) {
+                String label = strIt.next();
+                Set<FAState> succs = state.getNext(label);
+                for(FAState succ : succs) {
+                    FAState rSucc = stMap.get(succ.id);
+                    if(rSucc == null) {
+                        rSucc = result.createState();
+                        stMap.put(succ.id, rSucc);
+                        queue.add(succ);
+                    }
+                    result.addTransition(rState, rSucc, label);
+                    if(aut.F.contains(succ)) {
+                        result.F.add(rSucc);
+                    }
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    
     public static Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>>
           lightPrepocess(FiniteAutomaton system, FiniteAutomaton spec) {
         Options.debug = false;
@@ -157,15 +199,11 @@ public class UtilInclusion {
         Minimization minimizer = new Minimization();
         Simulation simulation = new Simulation();
         Set<datastructure.Pair<FAState, FAState>> frel, drel;
-//        system.saveAutomaton("/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/A4-2-1-o.ba");
-//        spec.saveAutomaton("/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/A4-2-2-o.ba");
         frel = simulation.ForwardSimRelNBW(system, spec);
         if(frel.contains(new datastructure.Pair<FAState, FAState>(system.getInitialState(), spec.getInitialState())))
             return new Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>>(true, null);
         system = minimizer.quotient(system, frel);
         spec = minimizer.quotient(spec, frel);
-//        system.saveAutomaton("/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/A4-2-1.ba");
-//        spec.saveAutomaton("/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/A4-2-2.ba");
         drel = simulation.DelayedSimRelNBW(system, spec);
         if(drel.contains(new datastructure.Pair<FAState, FAState>(system.getInitialState(), spec.getInitialState())))
             return new Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>>(true, null);
@@ -202,6 +240,5 @@ public class UtilInclusion {
         }
         return new Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>>(false, new Pair<>(system, spec));
     }
-    
     
 }
