@@ -26,7 +26,6 @@ import java.io.PrintStream;
 import java.util.function.Function;
 
 import roll.automata.NBA;
-import roll.util.Timer;
 import roll.words.Alphabet;
 
 /**
@@ -63,16 +62,12 @@ public class NBAInclusionCheckSpot {
             e1.printStackTrace();
         }
         System.out.println(command);
-        
-        Timer timer = new Timer();
-        timer.start();
         while(true) {
             if(! proc.isAlive()) {
                 break;
             }
         }
-        timer.stop();
-        System.out.println("Time elapsed for inclusion checking: " + timer.getTimeElapsed());
+
         final BufferedReader reader = new  BufferedReader(new InputStreamReader(proc.getInputStream()));
         String line = null;
         boolean result = false;

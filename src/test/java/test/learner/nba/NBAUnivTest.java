@@ -20,18 +20,16 @@ import org.junit.Test;
 
 import algorithms.InclusionOptBVLayered;
 import automata.FiniteAutomaton;
-import automata.IBuchi;
 import dk.brics.automaton.Automaton;
-import operation.isincluded.IsIncludedExplore;
 import roll.automata.DFA;
 import roll.automata.NBA;
 import roll.automata.operations.DFAGenerator;
 import roll.automata.operations.DFAOperations;
 import roll.automata.operations.NBAGenerator;
 import roll.automata.operations.NBAOperations;
+import roll.automata.operations.nba.inclusion.NBAInclusionCheckSpot;
 import roll.automata.operations.nba.universality.NBAInclusionCheckRank;
 import roll.automata.operations.nba.universality.NBAUniversalityCheck;
-import roll.main.inclusion.UtilInclusion;
 import roll.oracle.nba.rabit.UtilRABIT;
 import roll.util.Timer;
 import roll.words.Alphabet;
@@ -146,7 +144,7 @@ public class NBAUnivTest {
     @Test
     public void testRandomNBA() {
         final int test = 20;
-        final int state = 8;
+        final int state = 20;
         for(int i = 0; i < test; i ++) {
             NBA nba1 = NBAGenerator.getRandomNBA(state, 2);
             NBA nba2 = NBAGenerator.getRandomNBA(state, 2);
@@ -159,15 +157,9 @@ public class NBAUnivTest {
             timer.stop();
             System.out.println("RABIT checking: " + timer.getTimeElapsed());
             timer.start();
-            IBuchi iA = UtilInclusion.toBuchiNBA(nba1);
-            nba2 = NBAOperations.removeDeadStates(nba2);
-            IBuchi iB = UtilInclusion.toBuchiNBA(nba2);
-            main.Options.mLazyS = true;
-            main.Options.mLazyB = true;
-            IsIncludedExplore checker = new IsIncludedExplore(iA, iB);
-            boolean isUniv1 = checker.isIncluded();
+            boolean isUniv1 = NBAInclusionCheckSpot.isIncludedSpot(nba1, nba2);
             timer.stop();
-            System.out.println("SDBA checking: " + timer.getTimeElapsed());
+            System.out.println("Spot checking: " + timer.getTimeElapsed());
             System.out.println("Result: " + isUniv1 + ", " + isUniv2);
 
             assert isUniv1 == isUniv2: "Wrong answer";
