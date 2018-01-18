@@ -95,12 +95,12 @@ public final class ROLL {
         }
     }
     
-    private static void runPlayingMode(Options options) {
+    public static void runPlayingMode(Options options) {
         throw new UnsupportedOperationException("Not yet implmenented");
 //        PlayExecution.execute();
     }
     
-    private static void runLearningMode(Options options, boolean sampling) {
+    public static void runLearningMode(Options options, boolean sampling) {
 
         Timer timer = new Timer();
         timer.start();
@@ -109,7 +109,6 @@ public final class ROLL {
         NBA target = parser.parse();
         options.stats.numOfLetters = target.getAlphabetSize();
         options.stats.numOfStatesInTraget = target.getStateSize();
-//        parser.print(target, System.out);
         // learn the target automaton
         
         if(sampling) {
@@ -139,9 +138,8 @@ public final class ROLL {
         options.stats.print();
         
     }
-    
 
-    private static void runComplementingMode(Options options) {
+    public static void runComplementingMode(Options options) {
         
         Timer timer = new Timer();
         timer.start();
@@ -217,7 +215,8 @@ public final class ROLL {
     }
     
     
-    private static void runIncludingMode(Options options) {
+    public static void runIncludingMode(Options options) {
+        
         
         
     }
