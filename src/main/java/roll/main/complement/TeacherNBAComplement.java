@@ -86,9 +86,6 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
     public int numInterBandBF;
     public long timeInterBandBF;
     
-    public int numInterAandBF;
-    public long timeInterAandBF;
-    
     public int numInterBFCandBF;
     public long timeInterBFCandBF;
     
@@ -215,6 +212,16 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
         
         if(options.verbose) System.out.println("counter example = " + query);
         return query;
+    }
+    
+    public void print() {
+        final int indent = 30;
+        options.log.println("#B(F)&B = " + numInterBandBF, indent, "    // #number of B(F) intersection with B");
+        options.log.println("#B(F^c)&BF = " + numInterBFCandBF, indent, "    // #number of B(F^c) intersection with B(F)");
+        options.log.println("#B(F^c)<=B = " + numBFCLessB, indent, "    // #number of B(F^c) inclusioned in B");
+        options.log.println("#TB(F)&B = " + timeInterBandBF, indent, "    // time for B(F) intersection with B");
+        options.log.println("#TB(F^c)&BF = " + timeInterBFCandBF, indent, "    // time for B(F^c) intersection with B(F)");
+        options.log.println("#TB(F^c)<=B = " + timeBFCLessB, indent, "    // time for B(F^c) inclusioned in B");
     }
 
 }

@@ -204,6 +204,7 @@ public final class ROLL {
         options.stats.numOfTransInTraget = NBAOperations.getNumberOfTransitions(input);
         options.stats.numOfTransInHypothesis = NBAOperations.getNumberOfTransitions(options.stats.hypothesis);
         options.stats.print();
+        teacher.print();
     }
     
     
