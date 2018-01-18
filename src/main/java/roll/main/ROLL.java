@@ -179,13 +179,16 @@ public final class ROLL {
             ceQuery.answerQuery(new HashableValueBoolean(ceQuery.getQueryAnswer().getRight()));
             TranslatorFDFA translator = new TranslatorFDFAUnder(learner);
             translator.setQuery(ceQuery);
-            ceQuery = translator.translate();
-            options.log.verbose("Counterexample is: " + ceQuery.toString());
-            t = timer.getCurrentTime();
-            options.log.println("Refining current hypothesis...");
-            learner.refineHypothesis(ceQuery);
-            t = timer.getCurrentTime() - t;
-            options.stats.timeOfLearner += t;
+            while(translator.canRefine()) {
+                ceQuery = translator.translate();
+                options.log.verbose("Counterexample is: " + ceQuery.toString());
+                t = timer.getCurrentTime();
+                options.log.println("Refining current hypothesis...");
+                learner.refineHypothesis(ceQuery);
+                t = timer.getCurrentTime() - t;
+                options.stats.timeOfLearner += t;
+                if(options.optimization != Options.Optimization.LAZY_EQ) break;
+            }            
         }
         options.log.println("Learning completed...");
         // output target automaton

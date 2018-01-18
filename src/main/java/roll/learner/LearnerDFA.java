@@ -30,87 +30,87 @@ import roll.words.Word;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 public abstract class LearnerDFA extends LearnerBase<DFA> {
-	
-	private boolean alreadyStarted = false;
-	protected DFA dfa;
-	
-	public LearnerDFA(Options options, Alphabet alphabet
-	        , MembershipOracle<HashableValue> membershipOracle) {
-		super(options, alphabet, membershipOracle);
-	}
-	
-	@Override
-	public void startLearning() {
-		if(alreadyStarted)
-			try {
-				throw new Exception("Learner should not be started twice");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		alreadyStarted = true;
-		initialize();
-	}
-	
+    
+    private boolean alreadyStarted = false;
+    protected DFA dfa;
+    
+    public LearnerDFA(Options options, Alphabet alphabet
+            , MembershipOracle<HashableValue> membershipOracle) {
+        super(options, alphabet, membershipOracle);
+    }
+    
+    @Override
+    public void startLearning() {
+        if(alreadyStarted)
+            try {
+                throw new Exception("Learner should not be started twice");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        alreadyStarted = true;
+        initialize();
+    }
+    
     protected ExprValue getInitialColumnExprValue() {
         Word wordEmpty = alphabet.getEmptyWord();
         ExprValue exprValue = getExprValueWord(wordEmpty);
         return exprValue;
     }
-	
-	protected abstract void initialize();
+    
+    protected abstract void initialize();
 
-	@Override
-	public DFA getHypothesis() {
-		return dfa;
-	}
-	
-	@Override
-	public Options getOptions() {
-	    return options;
-	}
-	
-	public abstract Word getStateLabel(int state);
-	
-	protected abstract CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result);
-	
-	protected HashableValue processMembershipQuery(Word prefix, Word suffix) {
-		Query<HashableValue> query = new QuerySimple<>(null, prefix, suffix, -1);
-		return membershipOracle.answerMembershipQuery(query);
-	}
-	
-	protected HashableValue processMembershipQuery(Query<HashableValue> query) {
-		return membershipOracle.answerMembershipQuery(query);
-	}
-	
-	public abstract class CeAnalyzer {
+    @Override
+    public DFA getHypothesis() {
+        return dfa;
+    }
+    
+    @Override
+    public Options getOptions() {
+        return options;
+    }
+    
+    public abstract Word getStateLabel(int state);
+    
+    protected abstract CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result);
+    
+    protected HashableValue processMembershipQuery(Word prefix, Word suffix) {
+        Query<HashableValue> query = new QuerySimple<>(null, prefix, suffix, -1);
+        return membershipOracle.answerMembershipQuery(query);
+    }
+    
+    protected HashableValue processMembershipQuery(Query<HashableValue> query) {
+        return membershipOracle.answerMembershipQuery(query);
+    }
+    
+    public abstract class CeAnalyzer {
 
-	    protected ExprValue wordExpr;
-	    protected final ExprValue exprValue; 
-	    protected final HashableValue result;
-	    
-	    public CeAnalyzer(ExprValue exprValue, HashableValue result) {
-	        this.exprValue = exprValue;
-	        this.result = result;
-	    }
-	    
-	    // only for table-based algorithms
-	    public ExprValue getNewExpriment() {
-	        return wordExpr;
-	    }
-	    
-	    protected abstract void update(CeAnalysisResult result);
-	    	    
-	    public void analyze() {
-	        CeAnalysisResult result = findBreakIndex();
-	        update(result);
-	    }
-	    
-	    protected Word getWordExperiment() {
-	        return this.exprValue.get();
-	    }
-	    
-	    protected CeAnalysisResult findBreakIndex() {
-	        Word wordCE = getWordExperiment();
+        protected ExprValue wordExpr;
+        protected final ExprValue exprValue; 
+        protected final HashableValue result;
+        
+        public CeAnalyzer(ExprValue exprValue, HashableValue result) {
+            this.exprValue = exprValue;
+            this.result = result;
+        }
+        
+        // only for table-based algorithms
+        public ExprValue getNewExpriment() {
+            return wordExpr;
+        }
+        
+        protected abstract void update(CeAnalysisResult result);
+                
+        public void analyze() {
+            CeAnalysisResult result = findBreakIndex();
+            update(result);
+        }
+        
+        protected Word getWordExperiment() {
+            return this.exprValue.get();
+        }
+        
+        protected CeAnalysisResult findBreakIndex() {
+            Word wordCE = getWordExperiment();
             // get the initial state from automaton
             int letterNr = 0, currState = -1, prevState = dfa.getInitialState();
             if(! options.binarySearch) {
@@ -157,13 +157,13 @@ public abstract class LearnerDFA extends LearnerBase<DFA> {
             result.prevState = prevState;
             result.currState = currState;
             return result;
-	    }
+        }
 
-	}
-	// only valid for column based algorithms
-	protected static class CeAnalysisResult {
-	    public int prevState;
-	    public int currState;
-	    public int breakIndex;
-	}
+    }
+    // only valid for column based algorithms
+    protected static class CeAnalysisResult {
+        public int prevState;
+        public int currState;
+        public int breakIndex;
+    }
 }
