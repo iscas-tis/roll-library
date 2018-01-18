@@ -117,7 +117,7 @@ public class Statistics {
 //            log.println("#TSA = " + timeOfSampling, indent, "    // time of sampling");
         }
                 
-        log.println("#TTO = " + timeInTotal + " (ms)" , indent , "    // total time for learning Buechi automata");
+        log.println("#TTO = " + timeInTotal + " (ms)" , indent , "    // total time for learning Buchi automata");
                 
     }
 

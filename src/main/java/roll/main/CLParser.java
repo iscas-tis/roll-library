@@ -196,18 +196,19 @@ public class CLParser {
         
         options.log.println(
                 "Usage: java -jar ROLL.jar [aut.ba, aut.hoa] [options]");
-        final int indent = 12;
-        options.log.println("Recommended use", indent, "java -jar ROLL.jar -int -lstar");
-        options.log.println("             or", indent, "java -jar ROLL.jar aut.ba -aut -table -periodic -under");
-        options.log.println("             or", indent, "java -jar ROLL.jar aut.hoa -aut -table -periodic -under");
-        options.log.println("             or", indent, "java -jar ROLL.jar -test 3 3 -table -periodic -under");
+        final int indent = 20;
+        options.log.println("Recommended use", indent, "java -jar ROLL.jar -play -lstar");
+        options.log.println("             or", indent, "java -jar ROLL.jar -test 3 3 -table -syntactic -under");
+        options.log.println("             or", indent, "java -jar ROLL.jar -learn B.ba -table -periodic -under");
+        options.log.println("             or", indent, "java -jar ROLL.jar -complement B.hoa -table -syntactic");
+        options.log.println("             or", indent, "java -jar ROLL.jar -include A.ba B.ba -table -syntactic");
         options.log.println("\noptions:");
         
         options.log.println("-h", indent, "Show this page");
         options.log.println("-v", indent, "Verbose mode");
         options.log.println("-out <file>", indent, "Output learned automaton in <file>");
         options.log.println("-dot", indent, "Output automaton in DOT format");
-        options.log.println("-test k n", indent, "Test ROLL with k randomly generated Buechi automata of n states");
+        options.log.println("-test k n", indent, "Test ROLL with k randomly generated BAs of n states");
         options.log.println("-play", indent, "You play the role as a teacher");
         options.log.println("-learn", indent, "Use RABIT or DK package tool as the teacher to learn the input BA");
         options.log.println("-complement", indent, "Use learning algorithm to complement the input BA");
@@ -215,16 +216,16 @@ public class CLParser {
         options.log.println("-sameq e d", indent, "Sampling as the teacher to check equivalence of two BAs");
         options.log.println("", indent + 4, "e - the probability that equivalence check is not correct");
         options.log.println("", indent + 4, "d - the probability of the confidence for equivalence check");
-        options.log.println("-tree", indent, "Use tree-based data structure in learning (Default)");
-        options.log.println("-table", indent, "Use table-based data structure in learning");
+        options.log.println("-tree", indent, "Use tree-based data structure in learning");
+        options.log.println("-table", indent, "Use table-based data structure in learning (Default)");
         options.log.println("-lstar", indent, "Use classic L* algorithm");
         options.log.println("-dfa", indent, "Use column based DFA learning algorithm");
         options.log.println("-ldollar", indent, "Use L$ automata to learn Omega regular language");
         options.log.println("-periodic", indent, "Use peridoc FDFA to learn Omega regular language");
         options.log.println("-recurrent", indent, "Use recurrent FDFA to learn Omega regular language");
         options.log.println("-syntactic", indent, "Use syntactic FDFA to learn Omega regular language");
-        options.log.println("-over", indent, "Use over-approximation in Buechi automaton construction for FDFA (Default)");
-        options.log.println("-under", indent, "Use under-approximation in Buechi automaton construction for FDFA");
+        options.log.println("-over", indent, "Use over-approximation in Buechi automaton construction for FDFA");
+        options.log.println("-under", indent, "Use under-approximation in Buechi automaton construction for FDFA (Default)");
         options.log.println("-bs", indent, "Use binary search to find counterexample");
         options.log.println("-lazyeq", indent, "Equivalence check as the last resort");
         options.log.println("-ldba", indent, "Learning target is a limit deterministic Buchi automaton");
