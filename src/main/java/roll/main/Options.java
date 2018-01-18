@@ -27,10 +27,10 @@ import roll.parser.Format;
 public class Options {
     
     // running mode
-    public RunningMode runningMode; 
+    public RunningMode runningMode = RunningMode.LEARNING; 
     
     // learning data structure
-    public Structure structure = Structure.TREE;
+    public Structure structure = Structure.TABLE;
     
     // learning algorithm
     public Algorithm algorithm;
@@ -42,7 +42,7 @@ public class Options {
     public Optimization optimization = Optimization.NONE;
     
     // the type of learned buchi
-    public TargetAutomaton automaton = TargetAutomaton.DFA;
+    public TargetAutomaton automaton = TargetAutomaton.NBA;
     
     // sampling precision
     public double epsilon;
@@ -62,6 +62,10 @@ public class Options {
     public String outputFile = null;
     // input file
     public String inputFile = null;
+    
+    // input A and B for inclusion testing
+    public String inputA = null;
+    public String inputB = null;
     
     public boolean dot = false;
     
@@ -85,13 +89,15 @@ public class Options {
     }
     
     public static enum RunningMode {
-        TEST,
-        INTERACTIVE,
-        AUTOMATIC,
-        SAMPLING;
+        TESTING,
+        PLAYING,
+        LEARNING,     // learning automata
+        SAMPLING,
+        COMPLEMENTING, // complement input BA
+        INCLUDING;     // inclusion testing for input BAs
         
         boolean isTestMode() {
-            return this == TEST;
+            return this == TESTING;
         }
     }
     
@@ -114,7 +120,11 @@ public class Options {
         
         boolean isTargetDFA() {
             return this == DFA_LSTAR || this == DFA_COLUMN|| this == DFA_KV;
-        }        
+        }
+        
+        boolean isTargetFDFA() {
+            return this == PERIODIC || this == SYNTACTIC|| this == RECURRENT;
+        }
     }
     
     public static enum Approximation {
@@ -166,7 +176,7 @@ public class Options {
         if(runningMode == RunningMode.SAMPLING) {
             builder.append("e=" + epsilon + "," + "d=" + delta + ",");
         }
-        if(runningMode == RunningMode.TEST) {
+        if(runningMode == RunningMode.TESTING) {
             builder.append("k=" + numOfTests + "," + "n=" + numOfStatesForTest + ",");
         }
         builder.append("verbose=" + verbose + ",");
@@ -186,6 +196,10 @@ public class Options {
         if(runningMode.isTestMode() 
           && (numOfTests == 0 || numOfStatesForTest == 0)) {
             throw new UnsupportedOperationException("arguments for test mode are illegal");
+        }
+        if(runningMode == RunningMode.COMPLEMENTING
+                && (!algorithm.isTargetFDFA())) {
+                  throw new UnsupportedOperationException("arguments for test mode are illegal");
         }
         
     }

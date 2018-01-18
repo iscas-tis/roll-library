@@ -20,11 +20,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
+import roll.automata.FDFA;
 import roll.automata.NBA;
 import roll.automata.operations.NBAGenerator;
 import roll.automata.operations.NBAOperations;
+import roll.learner.fdfa.LearnerFDFA;
+import roll.learner.nba.lomega.UtilLOmega;
+import roll.main.complement.TeacherNBAComplement;
 import roll.parser.Parser;
 import roll.parser.UtilParser;
+import roll.query.Query;
+import roll.table.HashableValue;
+import roll.table.HashableValueBoolean;
 import roll.util.Timer;
 
 /**
@@ -43,24 +50,31 @@ public final class ROLL {
         Options options = clParser.getOptions();
         options.log.println("\n" + options.toString());
         switch(options.runningMode) {
-        case TEST:
-            runTestMode(options);
+        case TESTING:
+            runTestingMode(options);
             break;
-        case INTERACTIVE:
-            runInteractiveMode(options);
+        case PLAYING:
+            runPlayingMode(options);
             break;
-        case AUTOMATIC:
-            runAutomaticMode(options, false);
+        case COMPLEMENTING:
+            runComplementingMode(options);
+            break;
+        case INCLUDING:
+            runIncludingMode(options);
+            break;
+        case LEARNING:
+            runLearningMode(options, false);
             break;
         case SAMPLING:
-            runAutomaticMode(options, true);
+            runLearningMode(options, true);
             break;
         default :
                 options.log.err("Incorrect running mode.");
         }
     }
-    
-    private static void runTestMode(Options options) {
+
+
+    private static void runTestingMode(Options options) {
         final int numLetter = 2;
         for(int n = 0; n < options.numOfTests; n ++) {
             options.log.println("Testing case " + (n + 1) + " ...");
@@ -79,11 +93,12 @@ public final class ROLL {
         }
     }
     
-    private static void runInteractiveMode(Options options) {
+    private static void runPlayingMode(Options options) {
+        throw new UnsupportedOperationException("Not yet implmenented");
 //        PlayExecution.execute();
     }
     
-    private static void runAutomaticMode(Options options, boolean sampling) {
+    private static void runLearningMode(Options options, boolean sampling) {
 
         Timer timer = new Timer();
         timer.start();
@@ -120,6 +135,80 @@ public final class ROLL {
         options.stats.numOfTransInTraget = NBAOperations.getNumberOfTransitions(target);
         options.stats.numOfTransInHypothesis = NBAOperations.getNumberOfTransitions(options.stats.hypothesis);
         options.stats.print();
+        
+    }
+    
+
+    private static void runComplementingMode(Options options) {
+        
+        Timer timerIntotal = new Timer();
+        timerIntotal.start();
+        // prepare the parser
+        Parser parser = UtilParser.prepare(options, options.inputFile, options.format);
+        NBA input = parser.parse();
+        options.stats.numOfLetters = input.getAlphabetSize();
+        options.stats.numOfStatesInTraget = input.getStateSize();
+        
+        TeacherNBAComplement teacher = new TeacherNBAComplement(options, input);
+        LearnerFDFA learner = UtilLOmega.getLearnerFDFA(options, input.getAlphabet(), teacher);
+        options.log.println("Initializing learner...");
+        
+        Timer timer = new Timer();
+        timer.start();
+        learner.startLearning();
+        timer.stop();
+        options.stats.timeOfLearner += timer.getTimeElapsed();
+        FDFA hypothesis = null;
+        while(true) {
+            options.log.verbose("Table/Tree is both closed and consistent\n" + learner.toString());
+            hypothesis = learner.getHypothesis();
+            // along with ce
+            options.log.println("Resolving equivalence query for hypothesis...  ");
+            Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(hypothesis);
+            boolean isEq = ceQuery.getQueryAnswer().getLeft();
+            if(isEq) {
+                // store statistics
+                options.stats.numOfStatesInLeading = hypothesis.getLeadingDFA().getStateSize();
+                for(int state = 0; state < hypothesis.getLeadingDFA().getStateSize(); state ++) {
+                    options.stats.numOfStatesInProgress.add(hypothesis.getProgressDFA(state).getStateSize());
+                }
+                break;
+            }
+            ceQuery.answerQuery(new HashableValueBoolean(ceQuery.getQueryAnswer().getRight()));
+            options.log.verbose("Counterexample is: " + ceQuery.toString());
+            timer.start();
+            options.log.println("Refining current hypothesis...");
+            learner.refineHypothesis(ceQuery);
+            timer.stop();
+            options.stats.timeOfLearner += timer.getTimeElapsed();
+        }
+        options.log.println("Learning completed...");
+        timerIntotal.stop();
+        options.stats.timeInTotal = timerIntotal.getTimeElapsed();
+        // output target automaton
+        if(options.outputFile != null) {
+            try {
+                parser.print(options.stats.hypothesis, new FileOutputStream(new File(options.outputFile)));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }else {
+            options.log.println("\ntarget automaton:");
+            parser.print(input, options.log.getOutputStream());
+            options.log.println("\nhypothesis automaton:");
+            parser.print(options.stats.hypothesis, options.log.getOutputStream());
+        }
+        parser.close();
+        // output statistics
+        options.stats.numOfStatesInHypothesis = options.stats.hypothesis.getStateSize();
+        options.stats.numOfTransInTraget = NBAOperations.getNumberOfTransitions(input);
+        options.stats.numOfTransInHypothesis = NBAOperations.getNumberOfTransitions(options.stats.hypothesis);
+        options.stats.print();
+    }
+    
+    
+    private static void runIncludingMode(Options options) {
+        
         
     }
 

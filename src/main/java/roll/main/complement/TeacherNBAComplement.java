@@ -104,6 +104,8 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
         options.log.println("Translating FDFA to Under Buechi automaton ...");
         Automaton dkBF = FDFAOperations.buildUnderNBA(hypothesis);
         NBA BF = NBAOperations.fromDkNBA(dkBF, alphabet);
+        // record the constructed Buchi automaton
+        options.stats.hypothesis = BF;
         ++ this.numInterBandBF;
         options.log.println("Checking the intersection of BF (" + BF.getStateSize() + ") and B ("+ B.getStateSize() + ")...");
         long t = timer.getCurrentTime();
@@ -166,7 +168,7 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
                         prefix = ceQuery.getPrefix();
                         suffix = ceQuery.getSuffix();
                         isInTarget = false;
-                        isEq = true;
+                        isEq = false;
                         hasCE = true;
                     }
                 }
@@ -188,7 +190,7 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
                         // check whether it is in A
                         prefix = alphabet.getWordFromString(prefixStr);
                         suffix = alphabet.getWordFromString(suffixStr);
-                        isEq = true;
+                        isEq = false;
                     }
                 }
             }

@@ -81,7 +81,7 @@ public class Executor {
         options.stats.timeOfLearner += timer.getTimeElapsed();
         NBA hypothesis = null;
         while(true) {
-            options.log.verbose("Table is both closed and consistent\n" + learner.toString());
+            options.log.verbose("Table/Tree is both closed and consistent\n" + learner.toString());
             hypothesis = learner.getHypothesis();
             // along with ce
             options.log.println("Resolving equivalence query for hypothesis (#Q=" + hypothesis.getStateSize() + ")...  ");

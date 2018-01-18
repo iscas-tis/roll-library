@@ -57,16 +57,34 @@ public class CLParser {
 
         // for learning;
         for(int i = 0; i < args.length; i ++) {
-            if(args[i].compareTo("-aut") == 0) {
-                options.runningMode = Options.RunningMode.AUTOMATIC;
+            if(args[i].compareTo("-learn") == 0) {
+                options.runningMode = Options.RunningMode.LEARNING;
                 continue;
             }
-            if(args[i].compareTo("-int") == 0) {
-                options.runningMode = Options.RunningMode.INTERACTIVE;
+            if(args[i].compareTo("-play") == 0) {
+                options.runningMode = Options.RunningMode.PLAYING;
+                continue;
+            }
+            if(args[i].compareTo("-complement") == 0) {
+                options.runningMode = Options.RunningMode.COMPLEMENTING;
+                continue;
+            }
+            if(args[i].compareTo("-include") == 0) {
+                options.runningMode = Options.RunningMode.INCLUDING;
+                options.inputA = args[i + 1];
+                options.inputB = args[i + 2];
+                if(args[i + 1].endsWith(".ba") && args[i +2].endsWith(".ba")) {
+                    options.format = Format.BA;
+                }else if(args[i + 1].endsWith(".hoa") && args[i +2].endsWith(".hoa")){
+                    options.format = Format.HOA;
+                }else {
+                    throw new UnsupportedOperationException("Unsupported input format");
+                }
+                i += 2;
                 continue;
             }
             if(args[i].compareTo("-test") == 0) {
-                options.runningMode = Options.RunningMode.TEST;
+                options.runningMode = Options.RunningMode.TESTING;
                 options.numOfTests = Integer.parseInt(args[i+1]);
                 options.numOfStatesForTest = Integer.parseInt(args[i + 2]);
                 i += 2;
@@ -190,9 +208,11 @@ public class CLParser {
         options.log.println("-out <file>", indent, "Output learned automaton in <file>");
         options.log.println("-dot", indent, "Output automaton in DOT format");
         options.log.println("-test k n", indent, "Test ROLL with k randomly generated Buechi automata of n states");
-        options.log.println("-int", indent, "You play the role as a teacher");
-        options.log.println("-aut", indent, "Use RABIT or DK package tool as the teacher");
-        options.log.println("-sameq e d", indent, "Sampling as the teacher to check equivalence of two BA automata");
+        options.log.println("-play", indent, "You play the role as a teacher");
+        options.log.println("-learn", indent, "Use RABIT or DK package tool as the teacher to learn the input BA");
+        options.log.println("-complement", indent, "Use learning algorithm to complement the input BA");
+        options.log.println("-include [A] [B]", indent, "Use learning algorithm to test the inclusion between A and B");
+        options.log.println("-sameq e d", indent, "Sampling as the teacher to check equivalence of two BAs");
         options.log.println("", indent + 4, "e - the probability that equivalence check is not correct");
         options.log.println("", indent + 4, "d - the probability of the confidence for equivalence check");
         options.log.println("-tree", indent, "Use tree-based data structure in learning (Default)");
@@ -207,7 +227,7 @@ public class CLParser {
         options.log.println("-under", indent, "Use under-approximation in Buechi automaton construction for FDFA");
         options.log.println("-bs", indent, "Use binary search to find counterexample");
         options.log.println("-lazyeq", indent, "Equivalence check as the last resort");
-        options.log.println("-ldba", indent, "Learning target is a limit deterministic Buechi automaton");
+        options.log.println("-ldba", indent, "Learning target is a limit deterministic Buchi automaton");
         options.log.println("-fdfa", indent, "Learning target is an FDFA");
         options.log.println("-nba", indent, "Learning target is a BA");
         System.exit(0);
