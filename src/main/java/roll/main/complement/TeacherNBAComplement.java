@@ -98,7 +98,7 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
     public Query<HashableValue> answerEquivalenceQuery(FDFA hypothesis) {
         Timer timer = new Timer();
         timer.start();
-        options.log.println("Translating FDFA to Under Buechi automaton ...");
+        options.log.println("Translating FDFA to under Buchi automaton ...");
         Automaton dkBF = FDFAOperations.buildUnderNBA(hypothesis);
         NBA BF = NBAOperations.fromDkNBA(dkBF, alphabet);
         // record the constructed Buchi automaton

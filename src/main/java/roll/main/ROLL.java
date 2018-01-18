@@ -26,6 +26,8 @@ import roll.automata.operations.NBAGenerator;
 import roll.automata.operations.NBAOperations;
 import roll.learner.fdfa.LearnerFDFA;
 import roll.learner.nba.lomega.UtilLOmega;
+import roll.learner.nba.lomega.translator.TranslatorFDFA;
+import roll.learner.nba.lomega.translator.TranslatorFDFAUnder;
 import roll.main.complement.TeacherNBAComplement;
 import roll.parser.Parser;
 import roll.parser.UtilParser;
@@ -173,7 +175,11 @@ public final class ROLL {
                 }
                 break;
             }
+            // counterexample analysis
             ceQuery.answerQuery(new HashableValueBoolean(ceQuery.getQueryAnswer().getRight()));
+            TranslatorFDFA translator = new TranslatorFDFAUnder(learner);
+            translator.setQuery(ceQuery);
+            ceQuery = translator.translate();
             options.log.verbose("Counterexample is: " + ceQuery.toString());
             t = timer.getCurrentTime();
             options.log.println("Refining current hypothesis...");
