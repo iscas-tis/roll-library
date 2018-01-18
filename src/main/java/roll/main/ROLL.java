@@ -141,8 +141,8 @@ public final class ROLL {
 
     private static void runComplementingMode(Options options) {
         
-        Timer timerIntotal = new Timer();
-        timerIntotal.start();
+        Timer timer = new Timer();
+        timer.start();
         // prepare the parser
         Parser parser = UtilParser.prepare(options, options.inputFile, options.format);
         NBA input = parser.parse();
@@ -153,11 +153,10 @@ public final class ROLL {
         LearnerFDFA learner = UtilLOmega.getLearnerFDFA(options, input.getAlphabet(), teacher);
         options.log.println("Initializing learner...");
         
-        Timer timer = new Timer();
-        timer.start();
+        long t = timer.getCurrentTime();
         learner.startLearning();
-        timer.stop();
-        options.stats.timeOfLearner += timer.getTimeElapsed();
+        t = timer.getCurrentTime() - t;
+        options.stats.timeOfLearner += t;
         FDFA hypothesis = null;
         while(true) {
             options.log.verbose("Table/Tree is both closed and consistent\n" + learner.toString());
@@ -176,15 +175,13 @@ public final class ROLL {
             }
             ceQuery.answerQuery(new HashableValueBoolean(ceQuery.getQueryAnswer().getRight()));
             options.log.verbose("Counterexample is: " + ceQuery.toString());
-            timer.start();
+            t = timer.getCurrentTime();
             options.log.println("Refining current hypothesis...");
             learner.refineHypothesis(ceQuery);
-            timer.stop();
-            options.stats.timeOfLearner += timer.getTimeElapsed();
+            t = timer.getCurrentTime() - t;
+            options.stats.timeOfLearner += t;
         }
         options.log.println("Learning completed...");
-        timerIntotal.stop();
-        options.stats.timeInTotal = timerIntotal.getTimeElapsed();
         // output target automaton
         if(options.outputFile != null) {
             try {
@@ -203,6 +200,9 @@ public final class ROLL {
         options.stats.numOfStatesInHypothesis = options.stats.hypothesis.getStateSize();
         options.stats.numOfTransInTraget = NBAOperations.getNumberOfTransitions(input);
         options.stats.numOfTransInHypothesis = NBAOperations.getNumberOfTransitions(options.stats.hypothesis);
+        timer.stop();
+        options.stats.timeInTotal = timer.getTimeElapsed();
+        
         options.stats.print();
         teacher.print();
     }
