@@ -30,7 +30,7 @@ import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
- * 
+ * Not published yet but with big enough K (2^|A|), this can be used as PAC-learning teacher
  *
  * */
 
