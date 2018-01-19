@@ -52,7 +52,7 @@ public class TreePrinterBoolean {
 			int child = id + 1;
 			
 			for(Node<?> nodeChild : node.getChildren()) {
-				out.println(" " + id + " -> " + child + " [ style = solid ];");
+				out.println(" " + id + " -> " + child + " [ style = solid, label=\"" + nodeChild.fromBranch() + "\" ];");
 				child = export(nodeChild, out, child);
 			}
 			

@@ -44,7 +44,7 @@ public class NBARemoveStates {
         final int test = 100;
         final int state = 100;
         for(int i = 0; i < test; i ++) {
-            NBA A = NBAGenerator.getRandomNBA(state, 3);
+            NBA A = NBAGenerator.getRandomNBA(state, 4);
 //            System.out.println("A:\n" + A);
             NBA B = NBAOperations.removeDeadStates(A);
 //            System.out.println("B:\n" + B);

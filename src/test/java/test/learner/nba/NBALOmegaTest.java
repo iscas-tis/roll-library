@@ -84,14 +84,14 @@ public class NBALOmegaTest {
     
     @Test
     public void testRABIT() {
-        NBA target = NBAStore.getNBA3();
+        NBA target = NBAStore.getNBA1();
         
         System.out.println(target.toString());
         
         Options options = new Options();
-        options.structure = Options.Structure.TABLE;
+        options.structure = Options.Structure.TREE;
         options.approximation = Options.Approximation.UNDER;
-        options.algorithm = Options.Algorithm.RECURRENT;
+        options.algorithm = Options.Algorithm.SYNTACTIC;
         options.verbose = false;
         Timer timer = new Timer();
         timer.start();

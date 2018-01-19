@@ -25,6 +25,7 @@ import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.table.ExprValue;
 import roll.table.HashableValue;
+import roll.table.HashableValueIntEnum.RValue;
 import roll.tree.Node;
 import roll.tree.TreePrinterBoolean;
 import roll.util.sets.ISet;
@@ -35,7 +36,7 @@ import roll.words.Word;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * 
- * NOT FINISHED
+ * TODO FINISH IMPLEMENTATION
  * */
 
 public class LearnerProgressTreeSyntactic extends LearnerProgressTree implements LearnerProgressSyntactic {
@@ -43,7 +44,6 @@ public class LearnerProgressTreeSyntactic extends LearnerProgressTree implements
     public LearnerProgressTreeSyntactic(Options options, Alphabet alphabet,
             MembershipOracle<HashableValue> membershipOracle, LearnerLeading learnerLeading, int state) {
         super(options, alphabet, membershipOracle, learnerLeading, state);
-        throw new UnsupportedOperationException("TREE SYNTACTIC NOT FINISHED");
     }
 
     @Override
@@ -62,20 +62,41 @@ public class LearnerProgressTreeSyntactic extends LearnerProgressTree implements
             super(exprValue, result);
         }
         
+        /**
+         * Note that for the label on tree edges, they have to be (M(ux), RValue)
+         * while we use (-1, RValue)  for counterexample analysis
+         * */
         @Override
         public void analyze() {
-            this.leafBranch = result;
-            this.nodePrevBranch = getHashableValueBoolean(!result.isAccepting());
             // only has one leaf
             if(tree.getRoot().isLeaf()) {
                 this.wordExpr = getExprValueWord(alphabet.getEmptyWord());
                 this.nodePrev = tree.getRoot();
                 this.wordLeaf = getExprValueWord(getWordExperiment());
+                this.nodePrevBranch = prepareRowHashableValue(false, alphabet.getEmptyWord(), alphabet.getEmptyWord());
+                this.leafBranch = prepareRowHashableValue(true, getWordExperiment(), alphabet.getEmptyWord());
                 return ;
             }
             // when root is not a terminal node
             CeAnalysisResult result = findBreakIndex();
             update(result);
+        }
+        
+        @Override
+        protected void update(CeAnalysisResult result) {
+            Word wordCE = getWordExperiment();
+            Word wordPrev = getStateLabel(result.prevState);         // S(j-1)
+            Word expr = wordCE.getSuffix(result.breakIndex + 1);  // y[j+1..n]
+            this.wordExpr = getExprValueWord(expr);  // y[j+1..n]
+            Word leaf = wordPrev.append(wordCE.getLetter(result.breakIndex)); // S(j-1)y[j]
+            this.wordLeaf = getExprValueWord(leaf); // S(j-1)y[j]
+            this.nodePrev = states.get(result.currState).node;          // S(j)
+            // update the leaf, from result we know the membership
+            // (recur, mq) and by default recur = true
+            boolean prevMq = result.prevValue.getRight() == RValue.A;
+            boolean currMq = result.currValue.getRight() == RValue.A;
+            this.nodePrevBranch = prepareRowHashableValue(prevMq, getStateLabel(result.currState), expr);
+            this.leafBranch = prepareRowHashableValue(currMq, leaf, expr);
         }
     }
     

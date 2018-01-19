@@ -111,15 +111,19 @@ public abstract class LearnerDFA extends LearnerBase<DFA> {
         
         protected CeAnalysisResult findBreakIndex() {
             Word wordCE = getWordExperiment();
+            CeAnalysisResult ceResult = new CeAnalysisResult();
             // get the initial state from automaton
             int letterNr = 0, currState = -1, prevState = dfa.getInitialState();
+            
             if(! options.binarySearch) {
                 for (letterNr = 0; letterNr < wordCE.length(); letterNr++) {
                     currState = dfa.getSuccessor(prevState, wordCE.getLetter(letterNr));
                     Word prefix = getStateLabel(currState);
                     Word suffix = wordCE.getSuffix(letterNr + 1);
                     HashableValue memMq = processMembershipQuery(prefix, suffix);
-                    if (!result.valueEqual(memMq)) {
+                    if (! result.valueEqual(memMq)) {
+                        ceResult.prevValue = result;
+                        ceResult.currValue = memMq;
                         break;
                     }
                     prevState = currState;
@@ -142,6 +146,8 @@ public abstract class LearnerDFA extends LearnerBase<DFA> {
                         prevState = fst;
                         letterNr = mid;
                         currState = snd;
+                        ceResult.prevValue = fstMq;
+                        ceResult.currValue = sndMq;
                         break;
                     }
 
@@ -152,11 +158,11 @@ public abstract class LearnerDFA extends LearnerBase<DFA> {
                     }
                 }
             }
-            CeAnalysisResult result = new CeAnalysisResult();
-            result.breakIndex = letterNr;
-            result.prevState = prevState;
-            result.currState = currState;
-            return result;
+            
+            ceResult.breakIndex = letterNr;
+            ceResult.prevState = prevState;
+            ceResult.currState = currState;
+            return ceResult;
         }
 
     }
@@ -165,5 +171,7 @@ public abstract class LearnerDFA extends LearnerBase<DFA> {
         public int prevState;
         public int currState;
         public int breakIndex;
+        public HashableValue prevValue;
+        public HashableValue currValue;
     }
 }
