@@ -6,9 +6,9 @@ package roll.parser.ba;
  * */
 
 public class JBAParser implements JBAParserConstants {
-  private BAParser parser ;
+  private ParserBA parser ;
 
-  public void parse(BAParser parser)
+  public void parse(ParserBA parser)
   {
     this.parser = parser;
     try

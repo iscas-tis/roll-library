@@ -16,33 +16,39 @@
 
 package test.parser;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+
 import org.junit.Test;
 
 import roll.automata.NBA;
 import roll.main.Options;
-import roll.parser.hoa.PairParserHOA;
-import roll.parser.hoa.ParserHOA;
+import roll.parser.ba.PairParserBA;
+import roll.parser.ba.ParserBA;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class HoaParserTest {
-    
+public class BAParserTest {
     @Test
-    public void testHOAParser() {
+    public void testBAParser() throws FileNotFoundException {
         Options options = new Options();
-        final String dir = "/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/";
-        ParserHOA parser = new ParserHOA(options, dir + "A.hoa");
+        final String dir = "/home/liyong/Downloads/RABIT244/Examples/";
+        ParserBA parser = new ParserBA(options, dir + "mcsA.ba");
         NBA nba = parser.parse();
-        parser.print(nba, System.out);
-//        HOAParser parser2 = new HOAParser(options, "/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/A.hoa", parser);
-//        parser2.parse();
-        PairParserHOA pairParser = new PairParserHOA(options, dir + "A.hoa", dir + "B.hoa");
-        NBA A = pairParser.getA();
-        parser.print(A, System.out);
-        NBA B = pairParser.getB();
-        parser.print(B, System.out);
+        File file = new File(dir + "mcsA1.ba");
+        parser.print(nba, new PrintStream(new FileOutputStream(file)));
+        
+        PairParserBA pp = new PairParserBA(options, dir + "mcsA.ba", dir + "mcsB.ba");
+        NBA A = pp.getA();
+        file = new File(dir + "mcsA1.ba");
+        parser.print(A, new PrintStream(new FileOutputStream(file)));
+        NBA B = pp.getB();
+        file = new File(dir + "mcsB1.ba");
+        parser.print(B, new PrintStream(new FileOutputStream(file)));
+        System.out.println("states: " + B.getStateSize());
     }
-
 }

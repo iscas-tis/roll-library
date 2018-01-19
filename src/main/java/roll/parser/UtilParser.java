@@ -22,8 +22,8 @@ import java.util.function.Function;
 
 import roll.automata.NBA;
 import roll.main.Options;
-import roll.parser.ba.BAParser;
-import roll.parser.hoa.HOAParser;
+import roll.parser.ba.ParserBA;
+import roll.parser.hoa.ParserHOA;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -57,9 +57,9 @@ public class UtilParser {
     
     public static Parser prepare(Options options, String file, Format format) {
         if(format == Format.BA) {
-            return new BAParser(options, file);
+            return new ParserBA(options, file);
         }else if(format == Format.HOA) {
-            return new HOAParser(options, file);
+            return new ParserHOA(options, file);
         }
         
         return null;

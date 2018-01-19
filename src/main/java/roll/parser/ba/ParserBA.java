@@ -43,18 +43,18 @@ import roll.words.Alphabet;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
  
-public class BAParser implements Parser {
+public class ParserBA implements Parser {
 	
-	private TCharObjectMap<String> charStrMap ; // char -> str
-	private TObjectCharMap<String> strCharMap ; // str -> char
-	private Map<String, State> strStateMap = new HashMap<>();
-	private final Alphabet alphabet;
+	protected TCharObjectMap<String> charStrMap ; // char -> str
+	protected TObjectCharMap<String> strCharMap ; // str -> char
+	protected Map<String, State> strStateMap = new HashMap<>();
+	protected final Alphabet alphabet;
 	// this class only allow the characters
-	private Automaton automaton;
-	private final Options options;
-	private NBA nba;
+	protected Automaton automaton;
+	protected final Options options;
+	protected NBA nba;
 	
-	public BAParser(Options options, String file) {
+	public ParserBA(Options options, String file) {
 	    this.options = options;
 		this.strCharMap = new TObjectCharHashMap<>();
 		this.charStrMap = new TCharObjectHashMap<>();
@@ -69,8 +69,15 @@ public class BAParser implements Parser {
 		}
 	}
 	
+	protected ParserBA(Options options) {
+	    this.options = options;
+	    this.alphabet = new Alphabet();
+	    this.strCharMap = new TObjectCharHashMap<>();
+        this.charStrMap = new TCharObjectHashMap<>();
+	}
+	
 	// share alphabet with other parser
-	public BAParser(Options options, String file, BAParser otherParser) {
+	public ParserBA(Options options, String file, ParserBA otherParser) {
 	    this.options = options;
 		this.charStrMap = otherParser.charStrMap;
 		this.strCharMap = otherParser.strCharMap;
@@ -147,7 +154,7 @@ public class BAParser implements Parser {
 	}
 	
 	// we reserve '$' sign for L dollar automaton
-	private char getCharFromString(String label) {
+	protected char getCharFromString(String label) {
 		char ch = 0;
 		if(strCharMap.containsKey(label)) {
 			return strCharMap.get(label);
@@ -161,7 +168,7 @@ public class BAParser implements Parser {
 		return ch;
 	}
 	
-	private State getState(String str) {
+	protected State getState(String str) {
 	    State state = strStateMap.get(str);
 		if(state == null) {
 			state = new State();

@@ -14,35 +14,17 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package test.parser;
-
-import org.junit.Test;
+package roll.parser;
 
 import roll.automata.NBA;
-import roll.main.Options;
-import roll.parser.hoa.PairParserHOA;
-import roll.parser.hoa.ParserHOA;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class HoaParserTest {
+public interface PairParser extends Parser {
     
-    @Test
-    public void testHOAParser() {
-        Options options = new Options();
-        final String dir = "/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/";
-        ParserHOA parser = new ParserHOA(options, dir + "A.hoa");
-        NBA nba = parser.parse();
-        parser.print(nba, System.out);
-//        HOAParser parser2 = new HOAParser(options, "/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/A.hoa", parser);
-//        parser2.parse();
-        PairParserHOA pairParser = new PairParserHOA(options, dir + "A.hoa", dir + "B.hoa");
-        NBA A = pairParser.getA();
-        parser.print(A, System.out);
-        NBA B = pairParser.getB();
-        parser.print(B, System.out);
-    }
+    NBA getA();
+    NBA getB();
 
 }
