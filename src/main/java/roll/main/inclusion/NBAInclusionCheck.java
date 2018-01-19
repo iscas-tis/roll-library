@@ -19,6 +19,8 @@ package roll.main.inclusion;
 import automata.FiniteAutomaton;
 import oracle.EmptinessChecker;
 import roll.automata.NBA;
+import roll.automata.operations.NBAEmptinessCheck;
+import roll.automata.operations.NBALasso;
 import roll.automata.operations.NBAOperations;
 import roll.learner.fdfa.LearnerFDFA;
 import roll.learner.nba.lomega.UtilLOmega;
@@ -26,11 +28,16 @@ import roll.learner.nba.lomega.translator.Translator;
 import roll.learner.nba.lomega.translator.TranslatorFDFAUnder;
 import roll.main.Options;
 import roll.oracle.nba.sampler.SamplerIndexedMonteCarlo;
+import roll.parser.PairParser;
+import roll.parser.UtilParser;
 import roll.query.Query;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
 import roll.util.Pair;
 import roll.util.Timer;
+import roll.util.sets.ISet;
+import roll.util.sets.UtilISet;
+import roll.words.Alphabet;
 import roll.words.Word;
 
 /**
@@ -42,6 +49,164 @@ import roll.words.Word;
  * */
 
 public class NBAInclusionCheck {
+    
+    protected static void printCounterexample(Options options, PairParser parser, Pair<Word, Word> pair) {
+        options.log.println("Not Included");
+        options.log.println("counterexample: ");
+        NBALasso lasso = new NBALasso(pair.getLeft(), pair.getRight());
+        parser.print(lasso.getNBA(), options.log.getOutputStream());
+    }
+    
+    public static void execute(Options options) {
+        options.epsilon = 0.0018;
+        options.delta = 0.0001;
+        
+        if(options.inputA == null || options.inputB == null) {
+            throw new UnsupportedOperationException("No input files");
+        }
+        Timer timer = new Timer();
+        timer.start();
+        PairParser parser = UtilParser.prepare(options, options.inputA, options.inputB, options.format);
+        NBA A = parser.getA();
+        NBA B = parser.getB();
+        int transA = NBAOperations.getNumberOfTransitions(A);
+        int transB = NBAOperations.getNumberOfTransitions(B);
+        options.log.println("Aut A : # of Trans. "+ transA +", # of States "+ A.getStateSize() + ".");
+        options.log.println("Aut B : # of Trans. "+ transB +", # of States "+ B.getStateSize() +".");
+        A = NBAOperations.removeDeadStates(A);
+        if (A.getFinalStates().isEmpty()) {
+            options.log.println("Included");
+            timer.stop();
+            options.log.println("Total checking time: " + timer.getTimeElapsed()/ 1000.0 + " secs");
+            System.exit(0);
+        }
+        B = NBAOperations.removeDeadStates(B);
+        if (B.getFinalStates().isEmpty()) {
+            ISet allStates = UtilISet.newISet();
+            for(int i = 0; i < A.getStateSize(); i ++) {
+                allStates.set(i);
+            }
+            NBAEmptinessCheck checker = new NBAEmptinessCheck(A, A.getFinalStates(), allStates);
+            boolean empty = checker.isEmpty();
+            if (!empty) {
+                checker.findpath();
+                Pair<Word, Word> pair = checker.getCounterexample();
+                printCounterexample(options, parser, pair);
+                parser.close();
+                timer.stop();
+                options.log.println("Total checking time: " + timer.getTimeElapsed()/ 1000.0 + " secs");
+                System.exit(0);
+            }
+        }
+        
+        // now we are ready to replace the symbols on the transitions
+        transA = NBAOperations.getNumberOfTransitions(A);
+        transB = NBAOperations.getNumberOfTransitions(B);
+        options.log.println("Aut A (after preprocessing): # of Trans. "+ transA +", # of States "+ A.getStateSize() + ".");
+        options.log.println("Aut B (after preprocessing): # of Trans. "+ transB +", # of States "+ B.getStateSize() +".");
+        options.log.println("Start to prove inclusion via sampling...");
+        SamplerIndexedMonteCarlo sampler = new SamplerIndexedMonteCarlo(options.epsilon, options.delta);
+        long num = sampler.getSampleSize();
+        sampler.setNBA(A);
+        options.log.println("Trying " + num + " samples from A automaton...");
+        for (int i = 0; i < num; i++) {
+            Pair<Pair<Word, Word>, Boolean> result = sampler.getRandomLasso();
+            Pair<Word, Word> word = result.getLeft();
+            boolean needCheck = false;
+            if (result.getRight()) {
+                needCheck = true;
+            } else {
+                needCheck = NBAOperations.accepts(A, word.getLeft(), word.getRight());
+            }
+            if (needCheck) {
+                boolean acc = NBAOperations.accepts(B, word.getLeft(), word.getRight());
+                if (!acc) {
+                    printCounterexample(options, parser, word);
+                    parser.close();
+                    timer.stop();
+                    options.log.println("Total checking time: " + timer.getTimeElapsed()/ 1000.0 + " secs");
+                    System.exit(0);
+                }
+            }
+        }
+
+        options.log.println("Start using simulation algorithm to prove inclusion...");
+        FiniteAutomaton aut1 = UtilInclusion.toRABITNBA(A);
+        FiniteAutomaton aut2 = UtilInclusion.toRABITNBA(B);
+        Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>> pair = UtilInclusion.lightPrepocess(aut1, aut2);
+        if (pair.getLeft()) {
+            options.log.println("Included");
+            parser.close();
+            timer.stop();
+            options.log.println("Total checking time: " + timer.getTimeElapsed() / 1000.0 + " secs");
+            System.exit(0);
+        }
+        aut1 = pair.getRight().getLeft();
+        aut2 = pair.getRight().getRight();
+        options.log.println(
+                "Aut A (after similation) : # of Trans. " + aut1.trans + ", # of States " + aut1.states.size() + ".");
+        options.log.println(
+                "Aut B (after similation) : # of Trans. " + aut2.trans + ", # of States " + aut2.states.size() + ".");
+        // now we use minimization
+        options.log.println("Start using minimization algorithm to prove inclusion...");
+        pair = UtilInclusion.prepocess(aut1, aut2);
+        if (pair.getLeft()) {
+            options.log.println("Included");
+            timer.stop();
+            options.log.println("Total checking time: " + timer.getTimeElapsed() / 1000.0 + " secs");
+            System.exit(0);
+        }
+        aut1 = pair.getRight().getLeft();
+        aut2 = pair.getRight().getRight();
+        options.log.println(
+                "Aut A (after minimization) : # of Trans. " + aut1.trans + ", # of States " + aut1.states.size() + ".");
+        options.log.println(
+                "Aut B (after minimization) : # of Trans. " + aut2.trans + ", # of States " + aut2.states.size() + ".");
+        Alphabet alphabet = A.getAlphabet();
+        A = UtilInclusion.toNBA(aut1, alphabet);
+        B = UtilInclusion.toNBA(aut2, alphabet);
+
+        options.log.println("Start using learning algorithm to prove inclusion...");
+        // learning algorithm
+        TeacherNBAInclusion teacher = new TeacherNBAInclusion(options, parser, A, B);
+        LearnerFDFA learner = UtilLOmega.getLearnerFDFA(options, alphabet, teacher);
+        // learning loop
+        Timer timerTemp = new Timer();
+        options.log.println("Start learning...");
+        timerTemp.start();
+        learner.startLearning();
+        timerTemp.stop();
+        options.stats.timeOfLearner += timerTemp.getTimeElapsed();
+        boolean result = false;
+        while(! result ) {
+            if(options.verbose) options.log.println("learner output: " + learner.toString());
+            Query<HashableValue> query = teacher.answerEquivalenceQuery(learner.getHypothesis());
+            // get out of the loop
+            HashableValue answer = query.getQueryAnswer();
+            if(answer.getLeft().equals(true)) {
+                break;
+            }
+            // lazy equivalence check is implemented here
+            Translator translator = new TranslatorFDFAUnder(learner);
+            query.answerQuery(new HashableValueBoolean(answer.getRight()));
+            translator.setQuery(query);
+            while(translator.canRefine()) {
+                Query<HashableValue> ceQuery = translator.translate();
+                timerTemp.start();
+                learner.refineHypothesis(ceQuery);
+                timerTemp.stop();
+                options.stats.timeOfLearner += timerTemp.getTimeElapsed();
+                if(options.verbose) options.log.println("learner output: " + learner.toString());
+                // if do not set lazy eq check or it is learnerBuechi
+                if(options.optimization != Options.Optimization.LAZY_EQ) break;
+            }
+        }
+        parser.close();
+        timer.stop();
+        options.log.println("Learning completed...");
+        teacher.print();
+        options.log.println(timer.getTimeElapsed()+ " ms elapsed...");
+    }
     
     public static void main(String[] args) {
         
@@ -218,44 +383,8 @@ public class NBAInclusionCheck {
         A = symbol.toNBA(aut1);
         B = symbol.toNBA(aut2);
 
-        options.log.println("Start using learning algorithm to prove inclusion...");
-        // learning algorithm
-        TeacherNBAInclusion teacher = new TeacherNBAInclusion(options, symbol, A, B);
-        LearnerFDFA learner = UtilLOmega.getLearnerFDFA(options, symbol.getAlphabet(), teacher);
-        // learning loop
-        Timer timerTemp = new Timer();
-        options.log.println("Start learning...");
-        timerTemp.start();
-        learner.startLearning();
-        timerTemp.stop();
-        options.stats.timeOfLearner += timerTemp.getTimeElapsed();
-        boolean result = false;
-        while(! result ) {
-            if(options.verbose) options.log.println("learner output: " + learner.toString());
-            Query<HashableValue> query = teacher.answerEquivalenceQuery(learner.getHypothesis());
-            // get out of the loop
-            HashableValue answer = query.getQueryAnswer();
-            if(answer.getLeft().equals(true)) {
-                break;
-            }
-            // lazy equivalence check is implemented here
-            Translator translator = new TranslatorFDFAUnder(learner);
-            query.answerQuery(new HashableValueBoolean(answer.getRight()));
-            translator.setQuery(query);
-            while(translator.canRefine()) {
-                Query<HashableValue> ceQuery = translator.translate();
-                timerTemp.start();
-                learner.refineHypothesis(ceQuery);
-                timerTemp.stop();
-                options.stats.timeOfLearner += timerTemp.getTimeElapsed();
-                if(options.verbose) options.log.println("learner output: " + learner.toString());
-                // if do not set lazy eq check or it is learnerBuechi
-                if(options.optimization != Options.Optimization.LAZY_EQ) break;
-            }
-        }
+        options.log.println("Not able to prove inlusion...");
         timer.stop();
-        options.log.println("Learning completed...");
-        teacher.print();
         options.log.println(timer.getTimeElapsed()+ " ms elapsed...");
     }
 

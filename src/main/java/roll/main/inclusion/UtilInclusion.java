@@ -28,9 +28,12 @@ import algorithms.Simulation;
 import automata.AutomatonPreprocessingResult;
 import automata.FAState;
 import automata.FiniteAutomaton;
+import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import roll.automata.NBA;
+import roll.automata.StateFA;
 import roll.util.Pair;
 import roll.util.sets.ISet;
 import roll.words.Alphabet;
@@ -40,6 +43,46 @@ import roll.words.Alphabet;
  * */
 
 public class UtilInclusion {
+    
+    private static int getOrAddState(NBA nba, FAState left, TIntIntMap map) {
+        int right = -1;
+        if(map.containsKey(left.id)) {
+            right = map.get(left.id);
+        }
+        if(right == -1) {
+            StateFA rtSt = nba.createState();
+            right = rtSt.getId();
+            map.put(left.id, right);
+        }
+        return right;
+    }
+    
+    public static NBA toNBA(FiniteAutomaton aut, Alphabet alphabet) {
+        NBA result = new NBA(alphabet);
+        TIntIntMap map = new TIntIntHashMap();
+        for(FAState st : aut.states) {
+            int rSt = getOrAddState(result, st, map);
+            // all successors
+            Iterator<String> nextIt = st.nextIt();
+            while(nextIt.hasNext()) {
+                String symb = nextIt.next();
+                Set<FAState> succs = st.getNext(symb);
+                int ch = alphabet.getLetter(symb.charAt(0));
+                if(succs == null) continue;
+                for(FAState succ : succs) {
+                    int rSucc = getOrAddState(result, succ, map);
+                    result.getState(rSt).addTransition(ch, rSucc);
+                }
+            }
+            if(st.id == aut.getInitialState().id) {
+                result.setInitial(rSt);
+            }
+            if(aut.F.contains(st)) {
+                result.setFinal(rSt);
+            }
+        }
+        return result;
+    }
 
     private static FAState getOrAddState(FiniteAutomaton result,TIntObjectMap<FAState> map, int state) {
         FAState rState = map.get(state);

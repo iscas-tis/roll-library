@@ -28,6 +28,7 @@ import roll.main.Options;
 import roll.oracle.Teacher;
 import roll.oracle.nba.sampler.NBAInclusionSampler;
 import roll.oracle.nba.sampler.SamplerIndexedMonteCarlo;
+import roll.parser.PairParser;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.HashableValue;
@@ -48,15 +49,15 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
     private final Alphabet alphabet;
     private final NBA A;
     private final NBA B;
-    private final Symbol symbol;
     private final FiniteAutomaton rB;
+    private final PairParser parser;
     
-    public TeacherNBAInclusion(Options options, Symbol symbol, NBA A, NBA B) {
-        assert options != null && symbol!= null && A != null && B != null;
+    public TeacherNBAInclusion(Options options, PairParser parser, NBA A, NBA B) {
+        assert options != null && parser != null && A != null && B != null;
         this.options = options;
-        this.symbol = symbol;
         this.A = A;
         this.B = B;
+        this.parser = parser;
         this.alphabet = A.getAlphabet();
         this.rB = UtilInclusion.toRABITNBA(B);
     }
@@ -86,9 +87,7 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
         options.stats.timeOfMembershipQuery += timer.getTimeElapsed();
         ++ options.stats.numOfMembershipQuery; 
         if(terminate) {
-            options.log.println("Not included");
-            options.log.println("prefix: " + symbol.translate(prefix));
-            options.log.println("loop: " + symbol.translate(suffix));
+            NBAInclusionCheck.printCounterexample(options, parser, new Pair<>(prefix, suffix));
             options.log.println("Learning completed...");
             System.exit(0);
         }
@@ -153,9 +152,8 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
                 prefix = pair.getLeft();
                 suffix = pair.getRight();
                 isEq = true;
-                options.log.println("Not included");
-                options.log.println("prefix: " + symbol.translate(prefix));
-                options.log.println("loop: " + symbol.translate(suffix));
+                NBAInclusionCheck.printCounterexample(options, parser, new Pair<>(prefix, suffix));
+
             }else {
                 Automaton dkBFC = FDFAOperations.buildNegNBA(hypothesis);
                 NBA BFC = NBAOperations.fromDkNBA(dkBFC, alphabet);
@@ -195,9 +193,7 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
                         isInTarget = false;
                         boolean isAStr = NBAOperations.accepts(A, prefix, suffix);
                         if(isAStr) {
-                            options.log.println("Not included");
-                            options.log.println("prefix: " + symbol.translate(prefix));
-                            options.log.println("loop: " + symbol.translate(suffix));
+                            NBAInclusionCheck.printCounterexample(options, parser, new Pair<>(prefix, suffix));
                             isEq = true;
                         }
                     }else {
@@ -221,9 +217,7 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
                             boolean isAStr = NBAOperations.accepts(A, prefix, suffix);
                             
                             if(isAStr) {
-                                System.out.println("Not included");
-                                System.out.println("prefix: " + symbol.translate(prefix));
-                                System.out.println("loop: " + symbol.translate(suffix));
+                                NBAInclusionCheck.printCounterexample(options, parser, new Pair<>(prefix, suffix));
                                 isEq = true;
                             }
                         }

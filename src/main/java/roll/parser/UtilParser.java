@@ -22,7 +22,9 @@ import java.util.function.Function;
 
 import roll.automata.NBA;
 import roll.main.Options;
+import roll.parser.ba.PairParserBA;
 import roll.parser.ba.ParserBA;
+import roll.parser.hoa.PairParserHOA;
 import roll.parser.hoa.ParserHOA;
 
 /**
@@ -60,6 +62,16 @@ public class UtilParser {
             return new ParserBA(options, file);
         }else if(format == Format.HOA) {
             return new ParserHOA(options, file);
+        }
+        
+        return null;
+    }
+    
+    public static PairParser prepare(Options options, String fileA, String fileB, Format format) {
+        if(format == Format.BA) {
+            return new PairParserBA(options, fileA, fileB);
+        }else if(format == Format.HOA) {
+            return new PairParserHOA(options, fileA, fileB);
         }
         
         return null;

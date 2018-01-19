@@ -29,6 +29,7 @@ import roll.learner.nba.lomega.UtilLOmega;
 import roll.learner.nba.lomega.translator.TranslatorFDFA;
 import roll.learner.nba.lomega.translator.TranslatorFDFAUnder;
 import roll.main.complement.TeacherNBAComplement;
+import roll.main.inclusion.NBAInclusionCheck;
 import roll.parser.Parser;
 import roll.parser.UtilParser;
 import roll.query.Query;
@@ -217,7 +218,8 @@ public final class ROLL {
     
     public static void runIncludingMode(Options options) {
         
-        
+        // a bit complicated so move the code to another file
+        NBAInclusionCheck.execute(options);
         
     }
 
