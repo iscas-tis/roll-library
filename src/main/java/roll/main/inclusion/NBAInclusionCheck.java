@@ -130,7 +130,7 @@ public class NBAInclusionCheck {
             }
         }
 
-        options.log.println("Start using simulation algorithm to prove inclusion...");
+        options.log.println("Start using Forward/Delayed simulation algorithm to prove inclusion...");
         FiniteAutomaton aut1 = UtilInclusion.toRABITNBA(A);
         FiniteAutomaton aut2 = UtilInclusion.toRABITNBA(B);
         Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>> pair = UtilInclusion.lightPrepocess(aut1, aut2);
