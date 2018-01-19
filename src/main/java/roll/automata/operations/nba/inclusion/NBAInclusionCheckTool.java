@@ -32,6 +32,7 @@ import roll.words.Alphabet;
  * @author Yong Li (liyong@ios.ac.cn)
  * 
  * only can prove inclusion, NOTE that SPOT may report WRONG answer
+ * and GOAL tends to be very slow
  *
  * */
 
