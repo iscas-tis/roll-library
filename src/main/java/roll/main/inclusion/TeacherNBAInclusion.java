@@ -248,14 +248,15 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
     }
     
     public void print() {
-        options.log.println("#B(F)/\\B = " + numInterBandBF);
-        options.log.println("t#B(F)/\\B = " + timeInterBandBF + " ms");
-        options.log.println("#A/\\B(F) = " + numInterAandBF);
-        options.log.println("t#A/\\B(F) = " + timeInterAandBF + " ms");
-        options.log.println("#B(F^c)/\\B(F) = " + numInterBFCandBF);
-        options.log.println("t#B(F^c)/\\B(F) = " + timeInterBFCandBF + " ms");
-        options.log.println("#!A<B = " + numBFCLessB );
-        options.log.println("#t!A<B = " + timeBFCLessB + " ms");
+        final int indent = 30;
+        options.log.println("#B(F)&B = " + numInterBandBF, indent, "    // #number of B(F) intersection with B");
+        options.log.println("#TB(F)&B = " + timeInterBandBF + " ms", indent, "    // time for B(F) intersection with B");
+        options.log.println("#A&B(F) = " + numInterAandBF, indent, "    // #number of A intersection with B(F)");
+        options.log.println("#TA&B(F) = " + timeInterAandBF + " ms", indent, "    // time for A intersection with B(F)");
+        options.log.println("#B(F^c)&B(F) = " + numInterBFCandBF, indent, "    // #number of B(F^c) intersection with B(F)");
+        options.log.println("#TB(F^c)/\\B(F) = " + timeInterBFCandBF + " ms", indent, "    // time for B(F^c) intersection with B(F)");
+        options.log.println("#B(F^c)<=B = " + numBFCLessB, indent, "    // #number of B(F^c) included in B" );
+        options.log.println("#TB(F^c)<=B = " + timeBFCLessB + " ms", indent, "    // time for B(F^c) included in B" );
     }
 
 }

@@ -33,7 +33,7 @@ public class Options {
     public Structure structure = Structure.TABLE;
     
     // learning algorithm
-    public Algorithm algorithm;
+    public Algorithm algorithm = Algorithm.SYNTACTIC;
     
     // approximation method for the ultimately periodic words of FDFA
     public Approximation approximation = Approximation.UNDER;

@@ -171,12 +171,11 @@ public class NBAInclusionCheck {
         TeacherNBAInclusion teacher = new TeacherNBAInclusion(options, parser, A, B);
         LearnerFDFA learner = UtilLOmega.getLearnerFDFA(options, alphabet, teacher);
         // learning loop
-        Timer timerTemp = new Timer();
         options.log.println("Start learning...");
-        timerTemp.start();
+        long t = timer.getCurrentTime();
         learner.startLearning();
-        timerTemp.stop();
-        options.stats.timeOfLearner += timerTemp.getTimeElapsed();
+        t = timer.getCurrentTime() - t;
+        options.stats.timeOfLearner += t;
         boolean result = false;
         while(! result ) {
             if(options.verbose) options.log.println("learner output: " + learner.toString());
@@ -192,10 +191,10 @@ public class NBAInclusionCheck {
             translator.setQuery(query);
             while(translator.canRefine()) {
                 Query<HashableValue> ceQuery = translator.translate();
-                timerTemp.start();
+                t = timer.getCurrentTime();
                 learner.refineHypothesis(ceQuery);
-                timerTemp.stop();
-                options.stats.timeOfLearner += timerTemp.getTimeElapsed();
+                t = timer.getCurrentTime() - t;
+                options.stats.timeOfLearner += t;
                 if(options.verbose) options.log.println("learner output: " + learner.toString());
                 // if do not set lazy eq check or it is learnerBuechi
                 if(options.optimization != Options.Optimization.LAZY_EQ) break;
@@ -203,9 +202,10 @@ public class NBAInclusionCheck {
         }
         parser.close();
         timer.stop();
+        options.stats.timeInTotal = timer.getTimeElapsed();
         options.log.println("Learning completed...");
         teacher.print();
-        options.log.println(timer.getTimeElapsed()+ " ms elapsed...");
+        options.stats.print();
     }
     
     public static void main(String[] args) {
