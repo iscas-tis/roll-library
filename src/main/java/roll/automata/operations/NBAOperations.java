@@ -90,17 +90,7 @@ public class NBAOperations {
         return !checker.isEmpty();
     }
     
-    private static int getState(NBA result, NBA input, int state, TIntIntMap map) {
-        if(map.containsKey(state)) {
-            return map.get(state);
-        }
-        StateFA nbaState = result.createState();
-        map.put(state, nbaState.getId());
-        if(input.isFinal(state)) {
-            result.setFinal(nbaState.getId());
-        }
-        return nbaState.getId();
-    }
+
     
     public static boolean isSemideterministic(NBA result) {
 //        NBA result = removeDeadStates(input);
@@ -131,11 +121,24 @@ public class NBAOperations {
         return true;
     }
     
+    private static int getState(NBA result, NBA input, int state, TIntIntMap map) {
+        if(map.containsKey(state)) {
+            return map.get(state);
+        }
+        StateFA nbaState = result.createState();
+        map.put(state, nbaState.getId());
+        if(input.isFinal(state)) {
+            result.setFinal(nbaState.getId());
+        }
+        return nbaState.getId();
+    }
     
     public static NBA removeDeadStates(NBA input) {
         NBA reach = new NBA(input.getAlphabet());
+        // -----------------------------------------
+        // first collect all reachable states from the initial state
         TIntIntMap map = new TIntIntHashMap();
-        TIntObjectMap<StateContainer> mapSC = new TIntObjectHashMap<>();
+        TIntObjectMap<StateContainer> mapReach = new TIntObjectHashMap<>();
         int init = input.getInitialState();
         int rInit = getState(reach, input, init, map);
         reach.setInitial(rInit);
@@ -143,21 +146,23 @@ public class NBAOperations {
         queue.add(init);
         ISet visited = UtilISet.newISet();
         visited.set(init);
+        ISet used = UtilISet.newISet();
         while(! queue.isEmpty()) {
             int lState = queue.remove();
             int rState = getState(reach, input, lState, map);
+            used.set(rState);
             for(int c = 0; c < input.getAlphabetSize(); c ++) {
                 for(int lSucc : input.getSuccessors(lState, c)) {
                     int rSucc = getState(reach, input, lSucc, map);
                     // record outgoing transitions
                     reach.getState(rState).addTransition(c, rSucc);
-                    StateContainer scSucc = mapSC.get(rSucc);
+                    StateContainer scSucc = mapReach.get(rSucc);
                     if(scSucc == null) {
                         scSucc = new StateContainer(rSucc, reach);
                     }
                     // record incoming transitions
                     scSucc.addPredecessors(c, rState);
-                    mapSC.put(rSucc, scSucc);
+                    mapReach.put(rSucc, scSucc);
                     if(! visited.get(lSucc)) {
                         queue.add(lSucc);
                         visited.set(lSucc);
@@ -165,15 +170,49 @@ public class NBAOperations {
                 }
             }
         }
-        // now we have all reachable states, we need to remove those reachable states
-        // which cannot reach final states
-        ISet used = reach.getFinalStates();
-        ISet backReached = UtilISet.newISet();
+        
+        ISet unused = UtilISet.newISet();
+        // ---------------------------------------------------------
+        // secondly remove all reachable states which are dead states
         while(true) {
-            backReached.or(used);
-            ISet prevs = UtilISet.newISet();
+            boolean changed = false;
+            // find one state which is dead
+            ISet temp = UtilISet.newISet();
             for(final int s : used) {
-                StateContainer sC = mapSC.get(s);
+                StateNFA st = reach.getState(s);
+                boolean hasSucc = false;
+                for(int c = 0; c < reach.getAlphabetSize(); c ++) {
+                    for(int succ : st.getSuccessors(c)) {
+                        if(unused.get(succ)) continue;
+                        hasSucc = true;
+                    }
+                }
+                if(! hasSucc) {
+                    unused.set(s);
+                    temp.set(s);
+                    changed = true;
+                }
+            }
+            if(! changed) {
+                break;
+            }else {
+                used.andNot(temp);
+            }
+        }
+        ISet reachedFinals = reach.getFinalStates();
+        reachedFinals.and(used);
+        if(reachedFinals.isEmpty()) {
+            return new NBA(input.getAlphabet());
+        }
+        // ---------------------------------------------------------
+        // thirdly collect all reachable states which can reach final states
+        ISet backReached = UtilISet.newISet();
+        
+        while(true) {
+            backReached.or(reachedFinals);
+            ISet prevs = UtilISet.newISet();
+            for(final int s : reachedFinals) {
+                StateContainer sC = mapReach.get(s);
                 if( sC == null && s == reach.getInitialState()) {
                     continue;
                 }else if(sC == null){
@@ -192,10 +231,11 @@ public class NBAOperations {
                 // no more predecessors
                 break;
             }
-            used = prevs;
+            reachedFinals = prevs;
         }
         map.clear();
-        
+        // ---------------------------------------------------------
+        // finally construct the new automaton
         NBA result = new NBA(input.getAlphabet());
         init = reach.getInitialState();
         rInit = getState(result, reach, init, map);
