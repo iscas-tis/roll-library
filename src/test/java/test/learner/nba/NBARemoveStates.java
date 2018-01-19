@@ -41,13 +41,13 @@ public class NBARemoveStates {
     
     @Test
     public void testRandom() {
-        final int test = 20;
-        final int state = 5;
+        final int test = 100;
+        final int state = 100;
         for(int i = 0; i < test; i ++) {
-            NBA A = NBAGenerator.getRandomNBA(state, 2);
-            System.out.println("A:\n" + A);
+            NBA A = NBAGenerator.getRandomNBA(state, 3);
+//            System.out.println("A:\n" + A);
             NBA B = NBAOperations.removeDeadStates(A);
-            System.out.println("B:\n" + B);
+//            System.out.println("B:\n" + B);
             Timer timer = new Timer();
             FiniteAutomaton rA = UtilRABIT.toRABITNBA(A);
             FiniteAutomaton rB = UtilRABIT.toRABITNBA(B);

@@ -202,7 +202,7 @@ public class NBAOperations {
         ISet reachedFinals = reach.getFinalStates();
         reachedFinals.and(used);
         if(reachedFinals.isEmpty()) {
-            return new NBA(input.getAlphabet());
+            return getEmptyNBA(reach.getAlphabet());
         }
         // ---------------------------------------------------------
         // thirdly collect all reachable states which can reach final states
@@ -261,7 +261,13 @@ public class NBAOperations {
                 }
             }
         }
-        
+        return result;
+    }
+    
+    private static NBA getEmptyNBA(Alphabet alphabet) {
+        NBA result = new NBA(alphabet);
+        result.createState();
+        result.setInitial(0);
         return result;
     }
     
