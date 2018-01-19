@@ -27,10 +27,13 @@ import roll.automata.operations.DFAGenerator;
 import roll.automata.operations.DFAOperations;
 import roll.automata.operations.NBAGenerator;
 import roll.automata.operations.NBAOperations;
-import roll.automata.operations.nba.inclusion.NBAInclusionCheckSpot;
+import roll.automata.operations.nba.inclusion.NBAInclusionCheckTool;
 import roll.automata.operations.nba.universality.NBAInclusionCheckRank;
 import roll.automata.operations.nba.universality.NBAUniversalityCheck;
+import roll.main.Options;
+import roll.main.inclusion.NBAInclusionCheck;
 import roll.oracle.nba.rabit.UtilRABIT;
+import roll.parser.Format;
 import roll.util.Timer;
 import roll.words.Alphabet;
 
@@ -141,6 +144,7 @@ public class NBAUnivTest {
     }
     
     
+    
     @Test
     public void testRandomNBA() {
         final int test = 20;
@@ -148,7 +152,7 @@ public class NBAUnivTest {
         for(int i = 0; i < test; i ++) {
             NBA nba1 = NBAGenerator.getRandomNBA(state, 2);
             NBA nba2 = NBAGenerator.getRandomNBA(state, 2);
-            System.out.println("Model: \n" + nba1.toString());
+            //System.out.println("Model: \n" + nba1.toString());
             Timer timer = new Timer();
             FiniteAutomaton rA = UtilRABIT.toRABITNBA(nba1);
             FiniteAutomaton rB = UtilRABIT.toRABITNBA(nba2);
@@ -157,17 +161,67 @@ public class NBAUnivTest {
             timer.stop();
             System.out.println("RABIT checking: " + timer.getTimeElapsed());
             timer.start();
-            boolean isUniv1 = NBAInclusionCheckSpot.isIncludedSpot(nba1, nba2);
+            boolean isUniv1 = NBAInclusionCheckTool.isIncludedSpot(nba1, nba2);
             timer.stop();
             System.out.println("Spot checking: " + timer.getTimeElapsed());
-            System.out.println("Result: " + isUniv1 + ", " + isUniv2);
+            timer.start();
+            boolean isUniv3 = NBAInclusionCheckTool.isIncludedGoal("/home/liyong/tools/GOAL-20151018/gc", nba1, nba2);
+            timer.stop();
+            System.out.println("GOAL checking: " + timer.getTimeElapsed());
+            
+            Options options = new Options();
+            options.inputA = "/tmp/A.hoa";
+            options.inputB = "/tmp/B.hoa";
+            options.format = Format.HOA;
+            System.out.println("Result: " + isUniv1 + ", " + isUniv2 + ", " + isUniv3);
+            NBAInclusionCheck.execute(options);
+            
             if(isUniv1 != isUniv2) {
                 System.out.println("A:\n" + nba1.toBA());
                 System.out.println("B:\n" + nba2.toBA());
             }
-            assert isUniv1 == isUniv2: "Wrong answer";
+            
+            assert isUniv1 == isUniv2 && isUniv3: "Wrong answer";
         }
 
+    }
+    
+    @Test
+    public void testInclusion() {
+        final int state = 4;
+        NBA nba1 = NBAGenerator.getRandomNBA(state, 3);
+        NBA nba2 = NBAGenerator.getRandomNBA(state, 3);
+        //System.out.println("Model: \n" + nba1.toString());
+        Timer timer = new Timer();
+        FiniteAutomaton rA = UtilRABIT.toRABITNBA(nba1);
+        FiniteAutomaton rB = UtilRABIT.toRABITNBA(nba2);
+        timer.start();
+        boolean isUniv2 = UtilRABIT.isIncluded(nba1.getAlphabet(), rA, rB) == null;
+        timer.stop();
+        System.out.println("RABIT checking: " + timer.getTimeElapsed());
+        timer.start();
+        boolean isUniv1 = NBAInclusionCheckTool.isIncludedSpot(nba1, nba2);
+        timer.stop();
+        System.out.println("Spot checking: " + timer.getTimeElapsed());
+//        timer.start();
+//        boolean isUniv3 = NBAInclusionCheckTool.isIncludedGoal("/home/liyong/tools/GOAL-20151018/gc", nba1, nba2);
+//        timer.stop();
+//        System.out.println("GOAL checking: " + timer.getTimeElapsed());
+        
+        Options options = new Options();
+        options.inputA = "/tmp/A.hoa";
+        options.inputB = "/tmp/B.hoa";
+        options.format = Format.HOA;
+        System.out.println("Result: " + isUniv1 + ", " + isUniv2 + ", " + null);
+        
+        if(isUniv1 != isUniv2) {
+            System.out.println("A:\n" + nba1.toBA());
+            System.out.println("B:\n" + nba2.toBA());
+        }
+        
+        NBAInclusionCheck.execute(options);
+
+        
     }
 
 }

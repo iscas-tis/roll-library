@@ -20,7 +20,7 @@ import automata.FiniteAutomaton;
 import oracle.EmptinessChecker;
 import roll.automata.NBA;
 import roll.automata.operations.NBAOperations;
-import roll.automata.operations.nba.inclusion.NBAInclusionCheckSpot;
+import roll.automata.operations.nba.inclusion.NBAInclusionCheckTool;
 import roll.main.Options;
 import roll.oracle.nba.sampler.SamplerIndexedMonteCarlo;
 import roll.util.Pair;
@@ -221,7 +221,7 @@ public class NBAInclusionCheckSDBA {
 //        IsIncludedExplore checker = new IsIncludedExplore(iA, iB);
 //        boolean isIncluded = checker.isIncluded();
 
-        boolean isIncluded = NBAInclusionCheckSpot.isIncludedSpot(A, B);
+        boolean isIncluded = NBAInclusionCheckTool.isIncludedSpot(A, B);
         if (isIncluded) {
             options.log.println("Included");
         } else {

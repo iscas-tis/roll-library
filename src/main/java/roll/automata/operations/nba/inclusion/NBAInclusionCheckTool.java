@@ -35,10 +35,22 @@ import roll.words.Alphabet;
  *
  * */
 
-public class NBAInclusionCheckSpot {
+public class NBAInclusionCheckTool {
     
     // use spot to check whether A is included by B
     public static boolean isIncludedSpot(NBA A, NBA B) {
+         String command = "autfilt --included-in=";
+        boolean result = executeTool(command, true, "HOA", A, B);
+        return result;
+    }
+    
+    public static boolean isIncludedGoal(String goal, NBA A, NBA B) {
+        String command = goal + " containment ";
+       boolean result = executeTool(command, false, "(true", A, B);
+       return result;
+   }
+    
+    private static boolean executeTool(String cmd, boolean reverse, String pattern,  NBA A, NBA B) {
         File fileA = new File("/tmp/A.hoa");
         File fileB = new File("/tmp/B.hoa");
         int numBits = Integer.highestOneBit(A.getAlphabetSize());
@@ -51,11 +63,13 @@ public class NBAInclusionCheckSpot {
             e.printStackTrace();
         }
         final Runtime rt = Runtime.getRuntime();
-        String command = "autfilt";
-        // add B file
-        command += " --included-in=" + fileB.getAbsolutePath();
-        // add A file
-        command += " " + fileA.getAbsolutePath();
+        String command = null;
+        // add files
+        if(reverse) {
+            command = cmd + fileB.getAbsolutePath() + " " + fileA.getAbsolutePath();
+        }else {
+            command = cmd + fileA.getAbsolutePath() + " " + fileB.getAbsolutePath();
+        }
         Process proc = null;
         try {
             proc = rt.exec(command);
@@ -74,7 +88,7 @@ public class NBAInclusionCheckSpot {
         boolean result = false;
         try {
             while((line = reader.readLine()) != null) {
-                if(line.contains("HOA")) {
+                if(line.contains(pattern)) {
                     result = true;
                 }
             }
@@ -159,11 +173,11 @@ public class NBAInclusionCheckSpot {
         int numBits = Integer.highestOneBit(nba.getAlphabetSize());
         Function<Integer, String> labelFunc = x -> translateInteger(x, numBits);
         Function<Integer, String> apList = x -> "a" + x;
-        NBAInclusionCheckSpot.outputHOAStream(nba, System.out, numBits, apList, labelFunc);
+        NBAInclusionCheckTool.outputHOAStream(nba, System.out, numBits, apList, labelFunc);
         
-        System.out.println("result : " + NBAInclusionCheckSpot.isIncludedSpot(nba, nba));
+        System.out.println("result : " + NBAInclusionCheckTool.isIncludedSpot(nba, nba));
         
-        System.out.println("result : " + NBAInclusionCheckSpot.isIncludedSpot(nba, nba1));
+        System.out.println("result : " + NBAInclusionCheckTool.isIncludedSpot(nba, nba1));
     }
 
 }
