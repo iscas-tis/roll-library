@@ -207,7 +207,6 @@ public class NBAOperations {
         // ---------------------------------------------------------
         // thirdly collect all reachable states which can reach final states
         ISet backReached = UtilISet.newISet();
-        
         while(true) {
             backReached.or(reachedFinals);
             ISet prevs = UtilISet.newISet();
