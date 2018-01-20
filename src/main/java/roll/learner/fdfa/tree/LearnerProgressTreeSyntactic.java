@@ -68,7 +68,7 @@ public class LearnerProgressTreeSyntactic extends LearnerProgressTree implements
          * */
         @Override
         public void analyze() {
-            // only has one leaf
+            // only has one leaf labelled with empty word
             if(tree.getRoot().isLeaf()) {
                 this.wordExpr = getExprValueWord(alphabet.getEmptyWord());
                 this.nodePrev = tree.getRoot();
@@ -95,8 +95,8 @@ public class LearnerProgressTreeSyntactic extends LearnerProgressTree implements
             // (recur, mq) and by default recur = true
             boolean prevMq = result.prevValue.getRight() == RValue.A;
             boolean currMq = result.currValue.getRight() == RValue.A;
-            this.nodePrevBranch = prepareRowHashableValue(prevMq, getStateLabel(result.currState), expr);
-            this.leafBranch = prepareRowHashableValue(currMq, leaf, expr);
+            this.nodePrevBranch = prepareRowHashableValue(currMq, getStateLabel(result.currState), expr);
+            this.leafBranch = prepareRowHashableValue(prevMq, leaf, expr);
         }
     }
     
