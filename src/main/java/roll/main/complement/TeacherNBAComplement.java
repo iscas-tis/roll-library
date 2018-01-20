@@ -192,7 +192,7 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
                     // by rabit
                     options.log.println("RABIT for a counterexample to the inclusion...");
                     t = timer.getCurrentTime();
-                    boolean isIncluded = RABIT.isIncluded(rBFC, rB);
+                    boolean isIncluded = RABIT.isIncludedPar(rBFC, rB);
                     t = timer.getCurrentTime() - t;
                     this.timeBFCLessB += t;
                     String prefixStr = RABIT.getPrefix();
