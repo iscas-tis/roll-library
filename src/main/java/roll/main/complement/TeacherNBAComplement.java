@@ -16,13 +16,15 @@
 
 package roll.main.complement;
 
+import java.util.List;
+
 import automata.FiniteAutomaton;
 import dk.brics.automaton.Automaton;
 import mainfiles.RABIT;
+import oracle.IntersectionCheck;
 import roll.automata.FDFA;
 import roll.automata.NBA;
 import roll.automata.operations.FDFAOperations;
-import roll.automata.operations.NBAIntersectionCheck;
 import roll.automata.operations.NBAOperations;
 import roll.main.Options;
 import roll.main.inclusion.UtilInclusion;
@@ -93,6 +95,18 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
     public long timeBFCLessB;
     
     public boolean sampling = false;
+    
+    private Pair<Word, Word> getCounterexample(List<String> prefix, List<String> suffix) {
+        int[] pre = new int[prefix.size()];
+        for(int i = 0; i < pre.length; i ++) {
+            pre[i] = alphabet.indexOf(prefix.get(i).charAt(0));
+        }
+        int[] suf = new int[suffix.size()];
+        for(int i = 0; i < suf.length; i ++) {
+            suf[i] = alphabet.indexOf(suffix.get(i).charAt(0));
+        }
+        return new Pair<>(alphabet.getArrayWord(pre), alphabet.getArrayWord(suf));
+    }
 
     @Override
     public Query<HashableValue> answerEquivalenceQuery(FDFA hypothesis) {
@@ -106,8 +120,11 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
         ++ this.numInterBandBF;
         options.log.println("Checking the intersection of BF (" + BF.getStateSize() + ") and B ("+ B.getStateSize() + ")...");
         long t = timer.getCurrentTime();
-        NBAIntersectionCheck interCheck = new NBAIntersectionCheck(BF, B, true);
-        boolean isEmpty = interCheck.isEmpty();
+        FiniteAutomaton rBF = UtilInclusion.toRABITNBA(BF);
+        IntersectionCheck checker = new IntersectionCheck(rBF, rB);
+//        NBAIntersectionCheck interCheck = new NBAIntersectionCheck(BF, B, true);
+//        boolean isEmpty = interCheck.isEmpty();
+        boolean isEmpty = checker.checkEmptiness();
         t = timer.getCurrentTime() - t;
         this.timeInterBandBF += t;
         if(options.verbose) {
@@ -119,8 +136,8 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
         boolean isEq = false, isInTarget = false;
         if(! isEmpty) {
             // we have omega word in FDFA which should not be there
-            interCheck.computePath();
-            Pair<Word, Word> pair = interCheck.getCounterexample();
+            checker.computePath();
+            Pair<Word, Word> pair = getCounterexample(checker.getPrefix(), checker.getSuffix());
             prefix = pair.getLeft();
             suffix = pair.getRight();
             isEq = false;
@@ -132,15 +149,16 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
                     + BFC.getStateSize() + ")...");
             ++this.numInterBFCandBF;
             t = timer.getCurrentTime();
-            interCheck = new NBAIntersectionCheck(BFC, BF, true);
-            isEmpty = interCheck.isEmpty();
+            FiniteAutomaton rBFC = UtilInclusion.toRABITNBA(BFC);
+            checker = new IntersectionCheck(rBFC, rBF);
+            isEmpty = checker.checkEmptiness();
             t = timer.getCurrentTime() - t;
             this.timeInterBFCandBF += t;
 
             if (!isEmpty) {
                 // we have found counterexample now
-                interCheck.computePath();
-                Pair<Word, Word> pair = interCheck.getCounterexample();
+                checker.computePath();
+                Pair<Word, Word> pair = getCounterexample(checker.getPrefix(), checker.getSuffix());
                 prefix = pair.getLeft();
                 suffix = pair.getRight();
                 isEq = false;
@@ -174,7 +192,6 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
                     // by rabit
                     options.log.println("RABIT for a counterexample to the inclusion...");
                     t = timer.getCurrentTime();
-                    FiniteAutomaton rBFC = UtilInclusion.toRABITNBA(BFC);
                     boolean isIncluded = RABIT.isIncluded(rBFC, rB);
                     t = timer.getCurrentTime() - t;
                     this.timeBFCLessB += t;
