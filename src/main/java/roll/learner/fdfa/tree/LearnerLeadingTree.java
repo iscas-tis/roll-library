@@ -27,6 +27,7 @@ import roll.query.QuerySimple;
 import roll.table.ExprValue;
 import roll.table.ExprValueWordPair;
 import roll.table.HashableValue;
+import roll.tree.Node;
 import roll.words.Alphabet;
 import roll.words.Word;
 
@@ -65,6 +66,13 @@ public class LearnerLeadingTree extends LearnerOmegaTree implements LearnerLeadi
     @Override
     protected boolean isAccepting(ValueNode state) {
         return false;
+    }
+    
+    // no accepting node in leading tree
+    @Override
+    protected void setAcceptingNodes(Node<ValueNode> nodePrev, Node<ValueNode> nodePrevNew
+            , Node<ValueNode> nodeLeaf, boolean rootChanged) {
+        
     }
     
     // remember the loop of current counterexample

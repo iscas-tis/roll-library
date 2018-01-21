@@ -74,6 +74,7 @@ public class LearnerProgressTreeSyntactic extends LearnerProgressTree implements
                 this.nodePrev = tree.getRoot();
                 this.wordLeaf = getExprValueWord(getWordExperiment());
                 this.nodePrevBranch = prepareRowHashableValue(false, alphabet.getEmptyWord(), alphabet.getEmptyWord());
+                // it is guaranteed to be (M(ux), A) branch from root for the new leaf node
                 this.leafBranch = prepareRowHashableValue(true, getWordExperiment(), alphabet.getEmptyWord());
                 return ;
             }
@@ -147,7 +148,8 @@ public class LearnerProgressTreeSyntactic extends LearnerProgressTree implements
             // since we do not care new added states, they are correct
             for(final int stateNr : statePrevs) {
                 ValueNode statePrev = states.get(stateNr);
-                Partition partition = findNodePartition(statePrev.label.append(letter), parent);
+                Word wa = statePrev.label.append(letter);
+                Partition partition = findNodePartition(wa, parent);
                 if(partition.found) {
                     if (partition.node != nodeToSplit) {
                         updateTransition(stateNr, letter, partition.node.getValue().id);
@@ -155,7 +157,7 @@ public class LearnerProgressTreeSyntactic extends LearnerProgressTree implements
                     } // change to other leaf node
                 }else {
                     Node<ValueNode> node = addNode(partition.node, partition.branch
-                            , getExprValueWord(statePrev.label.append(letter)));
+                            , getExprValueWord(wa));
                     updateTransition(stateNr, letter, node.getValue().id);
                     stateRemoved.set(stateNr);  // remove this predecessor
                 }
@@ -176,7 +178,7 @@ public class LearnerProgressTreeSyntactic extends LearnerProgressTree implements
     }
 
     
-    private class Partition {
+    class Partition {
         boolean found ;
         Node<ValueNode> node;
         HashableValue branch;

@@ -226,15 +226,7 @@ public abstract class LearnerDFATree extends LearnerDFA {
 		updatePredecessors(stateLeaf.id, 0, alphabet.getLetterSize() - 1);
 				
 		// needs to be changed
-		if(rootChanged) {
-			if(! nodePrev.isAccepting()) nodeLeaf.setAcceting();
-			else nodePrevNew.setAcceting();
-		}else {
-			if(nodePrev.isAccepting()) {
-				nodeLeaf.setAcceting();
-				nodePrevNew.setAcceting();
-			}
-		}
+		setAcceptingNodes(nodePrev, nodePrevNew, nodeLeaf, rootChanged);
 
 		
 		Word wordNodePrev = nodePrevNew.getLabel().get();
@@ -243,6 +235,19 @@ public abstract class LearnerDFATree extends LearnerDFA {
 		}
 		
 		return nodePrevNew;
+	}
+	
+	protected void setAcceptingNodes(Node<ValueNode> nodePrev, Node<ValueNode> nodePrevNew
+	        , Node<ValueNode> nodeLeaf, boolean rootChanged) {
+	    if(rootChanged) {
+            if(! nodePrev.isAccepting()) nodeLeaf.setAcceting();
+            else nodePrevNew.setAcceting();
+        }else {
+            if(nodePrev.isAccepting()) {
+                nodeLeaf.setAcceting();
+                nodePrevNew.setAcceting();
+            }
+        }
 	}
 	
 	// update the information
