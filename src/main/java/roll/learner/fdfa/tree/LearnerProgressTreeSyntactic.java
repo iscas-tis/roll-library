@@ -36,7 +36,6 @@ import roll.words.Word;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * 
- * TODO FINISH IMPLEMENTATION
  * */
 
 public class LearnerProgressTreeSyntactic extends LearnerProgressTree implements LearnerProgressSyntactic {
