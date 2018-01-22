@@ -164,24 +164,24 @@ public class NBAUnivTest {
             boolean isUniv1 = NBAInclusionCheckTool.isIncludedSpot(nba1, nba2);
             timer.stop();
             System.out.println("Spot checking: " + timer.getTimeElapsed());
-            timer.start();
-            boolean isUniv3 = NBAInclusionCheckTool.isIncludedGoal("/home/liyong/tools/GOAL-20151018/gc", nba1, nba2);
-            timer.stop();
-            System.out.println("GOAL checking: " + timer.getTimeElapsed());
+//            timer.start();
+//            boolean isUniv3 = NBAInclusionCheckTool.isIncludedGoal("/home/liyong/tools/GOAL-20151018/gc", nba1, nba2);
+//            timer.stop();
+//            System.out.println("GOAL checking: " + timer.getTimeElapsed());
             
-            Options options = new Options();
-            options.inputA = "/tmp/A.hoa";
-            options.inputB = "/tmp/B.hoa";
-            options.format = Format.HOA;
-            System.out.println("Result: " + isUniv1 + ", " + isUniv2 + ", " + isUniv3);
-            NBAInclusionCheck.execute(options);
+//            Options options = new Options();
+//            options.inputA = "/tmp/A.hoa";
+//            options.inputB = "/tmp/B.hoa";
+//            options.format = Format.HOA;
+            System.out.println("Result: " + isUniv1 + ", " + isUniv2 );
+//            NBAInclusionCheck.execute(options);
             
             if(isUniv1 != isUniv2) {
                 System.out.println("A:\n" + nba1.toBA());
                 System.out.println("B:\n" + nba2.toBA());
             }
             
-            assert isUniv1 == isUniv2 && isUniv3: "Wrong answer";
+            assert isUniv1 == isUniv2 : "Wrong answer";
         }
 
     }

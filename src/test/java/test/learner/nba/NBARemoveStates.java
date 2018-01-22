@@ -65,5 +65,24 @@ public class NBARemoveStates {
         }
 
     }
+    
+    @Test
+    public void testRandomLDBA() {
+        final int test = 1;
+        final int state = 30;
+        final int det = state / 4;
+        final int acc = (int) (state * 0.2);
+        final double density = 1.2;
+        for (int i = 0; i < test; i++) {
+            NBA A = NBAGenerator.getRandomLDBA(state, det, 3, acc, density);
+            NBA B = NBAOperations.removeDeadStates(A);
+            // System.out.println("B:\n" + B);
+            boolean isSemiDet1 = NBAOperations.isSemideterministic(A);
+            boolean isSemiDet2 = NBAOperations.isSemideterministic(B);
+            System.out.println(B.toString());
+            assert isSemiDet1 && isSemiDet2 : "Wrong answer";
+        }
+
+    }
 
 }

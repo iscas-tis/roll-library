@@ -75,11 +75,11 @@ public class NBAComplementTest {
     @Test
     public void testComplement() {
         Options options = new Options();
-        options.structure = Options.Structure.TABLE;
+        options.structure = Options.Structure.TREE;
         options.approximation = Options.Approximation.UNDER;
         options.algorithm = Options.Algorithm.SYNTACTIC;
-        final int numTests = 20;
-        final int numStates = 4;
+        final int numTests = 40;
+        final int numStates = 3;
         for(int i = 0; i < numTests; i ++) {
             NBA input = NBAGenerator.getRandomNBA(numStates, 2);
             if(runComplement(options, input)) {
@@ -92,9 +92,9 @@ public class NBAComplementTest {
     @Test
     public void testNBA1Complement() {
         Options options = new Options();
-        options.structure = Options.Structure.TABLE;
+        options.structure = Options.Structure.TREE;
         options.approximation = Options.Approximation.UNDER;
-        options.algorithm = Options.Algorithm.RECURRENT;
+        options.algorithm = Options.Algorithm.SYNTACTIC;
         Alphabet alphabet = new Alphabet();
         alphabet.addLetter('a');
         alphabet.addLetter('b');

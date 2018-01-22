@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import automata.FiniteAutomaton;
 import roll.automata.NBA;
+import roll.automata.operations.NBAGenerator;
 import roll.learner.nba.lomega.LearnerNBALOmega;
 import roll.main.Options;
 import roll.oracle.nba.rabit.TeacherNBARABIT;
@@ -81,13 +82,26 @@ public class NBALOmegaTest {
         System.out.println("L(H) <= L(B): " + isIncluded(model, target));
         System.out.println("L(B) <= L(H): " + isIncluded(target, model));
     }
+
+    @Test
+    public void testLearining() {
+       testNBA(NBAStore.getNBA1());
+    }
     
     @Test
     public void testRABIT() {
-        NBA target = NBAStore.getNBA1();
+       final int numTests = 40;
+       final int numStates = 3;
+       
+       for(int i = 0; i < numTests; i ++) {
+           NBA nba = NBAGenerator.getRandomNBA(numStates, 3);
+           testNBA(nba);
+           System.out.println("Done for case " + (i + 1));
+       }
         
-        System.out.println(target.toString());
-        
+    }
+    
+    private void testNBA(NBA target) {
         Options options = new Options();
         options.structure = Options.Structure.TREE;
         options.approximation = Options.Approximation.UNDER;
@@ -103,7 +117,9 @@ public class NBALOmegaTest {
             System.out.println("Table is both closed and consistent\n" + learner.toString());
             NBA model = learner.getHypothesis();
             System.out.println("Hypothesis:\n" + model.toString());
+            System.out.println("FDFA:\n" + learner.getLearnerFDFA().getHypothesis());
             // along with ce
+            System.out.println("Resolving equivalence query...");
             Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(model);
             boolean isEq = ceQuery.getQueryAnswer().get();
             if(isEq) {
@@ -112,12 +128,14 @@ public class NBALOmegaTest {
             }
             ceQuery.answerQuery(null);
             System.out.println(ceQuery.toString());
+            System.out.println("Refining current hypothesis...");
             learner.refineHypothesis(ceQuery);
         }
         timer.stop();
         System.out.println("Totoal used time " + timer.getTimeElapsed() + " ms");
         options.stats.print();
-        
     }
+    
+    
 
 }
