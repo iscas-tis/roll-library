@@ -224,11 +224,11 @@ public class CLParser {
         options.log.println("-periodic", indent, "Use peridoc FDFA to learn Omega regular language");
         options.log.println("-recurrent", indent, "Use recurrent FDFA to learn Omega regular language");
         options.log.println("-syntactic", indent, "Use syntactic FDFA to learn Omega regular language");
-        options.log.println("-over", indent, "Use over-approximation in Buechi automaton construction for FDFA");
-        options.log.println("-under", indent, "Use under-approximation in Buechi automaton construction for FDFA (Default)");
+        options.log.println("-over", indent, "Use over-approximation in BA construction for FDFA");
+        options.log.println("-under", indent, "Use under-approximation in BA construction for FDFA (Default)");
         options.log.println("-bs", indent, "Use binary search to find counterexample");
         options.log.println("-lazyeq", indent, "Equivalence check as the last resort");
-        options.log.println("-ldba", indent, "Learning target is a limit deterministic Buchi automaton");
+        options.log.println("-ldba", indent, "Learning target is a limit deterministic BA");
         options.log.println("-fdfa", indent, "Learning target is an FDFA");
         options.log.println("-nba", indent, "Learning target is a BA");
         System.exit(0);
