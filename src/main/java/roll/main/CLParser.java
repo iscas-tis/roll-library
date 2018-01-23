@@ -217,8 +217,8 @@ public class CLParser {
         options.log.println(
                 "Usage: java -jar ROLL.jar [aut.ba, aut.hoa] [options]");
         final int indent = 20;
-        options.log.println("Recommended use", indent, "java -jar ROLL.jar -play -lstar");
-        options.log.println("             or", indent, "java -jar ROLL.jar -test 3 3 -table -syntactic -under");
+//        options.log.println("Recommended use", indent, "java -jar ROLL.jar -play -lstar");
+        options.log.println("Recommended use", indent, "java -jar ROLL.jar -test 3 3 -table -syntactic -under");
         options.log.println("             or", indent, "java -jar ROLL.jar -learn B.ba -table -periodic -under");
         options.log.println("             or", indent, "java -jar ROLL.jar -complement B.hoa -table -syntactic");
         options.log.println("             or", indent, "java -jar ROLL.jar -include A.ba B.ba -table -syntactic");
@@ -231,7 +231,7 @@ public class CLParser {
         options.log.println("-out2 <A> <B>", indent, "Output two automata in files <A> and <B>");
         options.log.println("-dot", indent, "Output automaton in DOT format");
         options.log.println("-test k n", indent, "Test ROLL with k randomly generated BAs of n states");
-        options.log.println("-play", indent, "You play the role as a teacher");
+//        options.log.println("-play", indent, "You play the role as a teacher");
         options.log.println("-convert [A] [B]", indent, "Convert two input automata to the other format");
         options.log.println("-learn", indent, "Use RABIT or DK package tool as the teacher to learn the input BA");
         options.log.println("-complement", indent, "Use learning algorithm to complement the input BA");
@@ -241,19 +241,19 @@ public class CLParser {
         options.log.println("", indent + 4, "d - the probability of the confidence for equivalence check");
         options.log.println("-tree", indent, "Use tree-based data structure in learning");
         options.log.println("-table", indent, "Use table-based data structure in learning (Default)");
-        options.log.println("-lstar", indent, "Use classic L* algorithm");
-        options.log.println("-dfa", indent, "Use column based DFA learning algorithm");
+//        options.log.println("-lstar", indent, "Use classic L* algorithm");
+//        options.log.println("-dfa", indent, "Use column based DFA learning algorithm");
         options.log.println("-ldollar", indent, "Use L$ automata to learn Omega regular language");
         options.log.println("-periodic", indent, "Use peridoc FDFA to learn Omega regular language");
         options.log.println("-recurrent", indent, "Use recurrent FDFA to learn Omega regular language");
         options.log.println("-syntactic", indent, "Use syntactic FDFA to learn Omega regular language");
         options.log.println("-over", indent, "Use over-approximation in BA construction for FDFA");
         options.log.println("-under", indent, "Use under-approximation in BA construction for FDFA (Default)");
-        options.log.println("-bs", indent, "Use binary search to find counterexample");
-        options.log.println("-lazyeq", indent, "Equivalence check as the last resort");
+//        options.log.println("-bs", indent, "Use binary search to find counterexample");
+//        options.log.println("-lazyeq", indent, "Equivalence check as the last resort");
         options.log.println("-ldba", indent, "Learning target is a limit deterministic BA");
-        options.log.println("-fdfa", indent, "Learning target is an FDFA");
-        options.log.println("-nba", indent, "Learning target is a BA");
+//        options.log.println("-fdfa", indent, "Learning target is an FDFA");
+//        options.log.println("-nba", indent, "Learning target is a BA");
         System.exit(0);
     }
     
