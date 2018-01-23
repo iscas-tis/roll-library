@@ -67,6 +67,10 @@ public class Options {
     public String inputA = null;
     public String inputB = null;
     
+    // output A and B for format conversion
+    public String outputA = null;
+    public String outputB = null;
+    
     public boolean dot = false;
     
     //  format
@@ -184,7 +188,9 @@ public class Options {
         builder.append("bs=" + binarySearch + ",");
         builder.append("dot=" + dot + ",");
         builder.append("inputfile=" + inputFile + ",");
-        builder.append("outputfile=" + outputFile + "\n");
+        builder.append("outputfile=" + outputFile + ",");
+        builder.append("outputA=" + outputA + ",");
+        builder.append("outputB=" + outputB + "\n");
         return builder.toString();
     }
     

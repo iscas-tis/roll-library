@@ -33,6 +33,7 @@ import roll.learner.nba.lomega.translator.TranslatorFDFA;
 import roll.learner.nba.lomega.translator.TranslatorFDFAUnder;
 import roll.main.complement.TeacherNBAComplement;
 import roll.main.inclusion.NBAInclusionCheck;
+import roll.parser.PairParser;
 import roll.parser.Parser;
 import roll.parser.UtilParser;
 import roll.query.Query;
@@ -104,29 +105,48 @@ public final class ROLL {
     
     private static void runConvertingMode(Options options) {
         // prepare the parser
-        Parser parser = UtilParser.prepare(options, options.inputFile, options.format);
-        NBA target = parser.parse();
+        PairParser parser = UtilParser.prepare(options, options.inputA, options.inputB, options.format);
+        NBA A = parser.getA();
+        NBA B = parser.getB();
         OutputStream stream = options.log.getOutputStream();
-        if (options.outputFile != null) {
+        PrintStream out = new PrintStream(stream);
+        options.log.println("\nA input automaton:");
+        parser.print(A, options.log.getOutputStream());
+        options.log.println("\nB input automaton:");
+        parser.print(B, options.log.getOutputStream());
+        options.log.println("\noutput automata:");
+        PrintStream outA = null, outB = null;
+        if(options.outputA != null && options.outputB != null) {
             try {
-                stream = new FileOutputStream(new File(options.outputFile));
+                outA = new PrintStream(new FileOutputStream(options.outputA));
+                outB = new PrintStream(new FileOutputStream(options.outputB));
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
+        }else {
+            outA = out;
+            outB = out;
         }
-        PrintStream out = new PrintStream(stream);
-        options.log.println("\ninput automaton:");
-        parser.print(target, options.log.getOutputStream());
-        options.log.println("\noutput automaton:");
         switch (options.format) {
         case BA:
-            NBAInclusionCheckTool.outputHOAStream(target, out); // BA to HOA
+            NBAInclusionCheckTool.outputHOAStream(A, outA); // BA to HOA
+            out.println("\n");
+            NBAInclusionCheckTool.outputHOAStream(B, outB); // BA to HOA
             break;
         case HOA:
-            out.println(target.toBA());
+            outA.println(A.toBA());
+            out.println("\n");
+            outB.println(B.toBA());
             break;
         default:
             throw new UnsupportedOperationException("Unknow input format");
+        }
+        if(options.outputA != null && options.outputB != null) {
+            outA.close();
+            outB.close();
+            out.close();
+        }else {
+            out.close();
         }
     }
     

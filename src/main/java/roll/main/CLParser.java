@@ -63,7 +63,16 @@ public class CLParser {
             }
             if(args[i].compareTo("-convert") == 0) {
                 options.runningMode = Options.RunningMode.CONVERTING;
-                continue;
+                options.inputA = args[i + 1];
+                options.inputB = args[i + 2];
+                if(args[i + 1].endsWith(".ba") && args[i +2].endsWith(".ba")) {
+                    options.format = Format.BA;
+                }else if(args[i + 1].endsWith(".hoa") && args[i +2].endsWith(".hoa")){
+                    options.format = Format.HOA;
+                }else {
+                    throw new UnsupportedOperationException("Unsupported input format");
+                }
+                i += 2;
             }
             if(args[i].compareTo("-play") == 0) {
                 options.runningMode = Options.RunningMode.PLAYING;
@@ -113,6 +122,12 @@ public class CLParser {
             if(args[i].compareTo("-out")==0){
                 options.outputFile = args[i+1];
                 i += 1;
+                continue;
+            }
+            if(args[i].compareTo("-out2")==0){
+                options.outputA = args[i+1];
+                options.outputB = args[i+2];
+                i += 2;
                 continue;
             }
             if(args[i].compareTo("-table") == 0) {
@@ -211,11 +226,12 @@ public class CLParser {
         
         options.log.println("-h", indent, "Show this page");
         options.log.println("-v", indent, "Verbose mode");
-        options.log.println("-out <file>", indent, "Output learned automaton in <file>");
+        options.log.println("-out <A>", indent, "Output learned automaton in file <A>");
+        options.log.println("-out2 <A> <B>", indent, "Output two automata in files <A> and <B>");
         options.log.println("-dot", indent, "Output automaton in DOT format");
         options.log.println("-test k n", indent, "Test ROLL with k randomly generated BAs of n states");
         options.log.println("-play", indent, "You play the role as a teacher");
-        options.log.println("-convert", indent, "Convert the input file to the other format (automaton may change)");
+        options.log.println("-convert [A] [B]", indent, "Convert two input automata to the other format");
         options.log.println("-learn", indent, "Use RABIT or DK package tool as the teacher to learn the input BA");
         options.log.println("-complement", indent, "Use learning algorithm to complement the input BA");
         options.log.println("-include [A] [B]", indent, "Use learning algorithm to test the inclusion between A and B");
