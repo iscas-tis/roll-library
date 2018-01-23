@@ -215,7 +215,7 @@ public class CLParser {
         options.log.println("-dot", indent, "Output automaton in DOT format");
         options.log.println("-test k n", indent, "Test ROLL with k randomly generated BAs of n states");
         options.log.println("-play", indent, "You play the role as a teacher");
-        options.log.println("-convert", indent, "Convert the input file to the other format");
+        options.log.println("-convert", indent, "Convert the input file to the other format (automaton may change)");
         options.log.println("-learn", indent, "Use RABIT or DK package tool as the teacher to learn the input BA");
         options.log.println("-complement", indent, "Use learning algorithm to complement the input BA");
         options.log.println("-include [A] [B]", indent, "Use learning algorithm to test the inclusion between A and B");
