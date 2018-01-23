@@ -58,24 +58,31 @@ public final class ROLL {
         options.log.println("\n" + options.toString());
         switch(options.runningMode) {
         case TESTING:
+            options.log.info("Testing ROLL...");
             runTestingMode(options);
             break;
         case PLAYING:
+            options.log.info("ROLL for interactive play...");
             runPlayingMode(options);
             break;
         case CONVERTING:
+            options.log.info("ROLL for format conversion...");
             runConvertingMode(options);
             break;
         case COMPLEMENTING:
+            options.log.info("ROLL for BA complementation...");
             runComplementingMode(options);
             break;
         case INCLUDING:
+            options.log.info("ROLL for BA inclusion testing...");
             runIncludingMode(options);
             break;
         case LEARNING:
+            options.log.info("ROLL for BA learning via rabit...");
             runLearningMode(options, false);
             break;
         case SAMPLING:
+            options.log.info("ROLL for BA learning via sampling...");
             runLearningMode(options, true);
             break;
         default :
