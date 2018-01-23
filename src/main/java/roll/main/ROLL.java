@@ -19,11 +19,14 @@ package roll.main;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 
 import roll.automata.FDFA;
 import roll.automata.NBA;
 import roll.automata.operations.NBAGenerator;
 import roll.automata.operations.NBAOperations;
+import roll.automata.operations.nba.inclusion.NBAInclusionCheckTool;
 import roll.learner.fdfa.LearnerFDFA;
 import roll.learner.nba.lomega.UtilLOmega;
 import roll.learner.nba.lomega.translator.TranslatorFDFA;
@@ -58,6 +61,9 @@ public final class ROLL {
             break;
         case PLAYING:
             runPlayingMode(options);
+            break;
+        case CONVERTING:
+            runConvertingMode(options);
             break;
         case COMPLEMENTING:
             runComplementingMode(options);
@@ -94,6 +100,36 @@ public final class ROLL {
             }
             options.log.info("Done for case " + (n + 1));
         }
+    }
+    
+    private static void runConvertingMode(Options options) {
+        Timer timer = new Timer();
+        timer.start();
+        // prepare the parser
+        Parser parser = UtilParser.prepare(options, options.inputFile, options.format);
+        NBA target = parser.parse();
+        OutputStream stream = options.log.getOutputStream();
+        if(options.outputFile != null) {
+            try {
+                stream = new FileOutputStream(new File(options.outputFile));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        PrintStream out = new PrintStream(stream);
+        options.log.println("\ninput automaton:");
+        parser.print(target, options.log.getOutputStream());
+        options.log.println("\noutput automaton:");
+        switch(options.format) {
+        case BA:
+            NBAInclusionCheckTool.outputHOAStream(target, out); // BA to HOA
+            break;
+        case HOA:
+            out.println(target.toBA());
+            break;
+        }
+        options.stats.numOfLetters = target.getAlphabetSize();
+        options.stats.numOfStatesInTraget = target.getStateSize();
     }
     
     public static void runPlayingMode(Options options) {

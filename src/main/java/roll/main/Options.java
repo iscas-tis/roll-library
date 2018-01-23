@@ -91,7 +91,8 @@ public class Options {
     public static enum RunningMode {
         TESTING,
         PLAYING,
-        LEARNING,     // learning automata
+        CONVERTING,    // convert BA to Hanoi format or vice versa
+        LEARNING,      // learning automata
         SAMPLING,
         COMPLEMENTING, // complement input BA
         INCLUDING;     // inclusion testing for input BAs

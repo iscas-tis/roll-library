@@ -54,12 +54,9 @@ public class NBAInclusionCheckTool {
     private static boolean executeTool(String cmd, boolean reverse, String pattern,  NBA A, NBA B) {
         File fileA = new File("/tmp/A.hoa");
         File fileB = new File("/tmp/B.hoa");
-        int numBits = Integer.highestOneBit(A.getAlphabetSize());
-        Function<Integer, String> labelFunc = x -> translateInteger(x, numBits);
-        Function<Integer, String> apList = x -> "a" + x;
         try {
-            outputHOAStream(A, new PrintStream(new FileOutputStream(fileA)), numBits, apList, labelFunc);
-            outputHOAStream(B, new PrintStream(new FileOutputStream(fileB)), numBits, apList, labelFunc);
+            outputHOAStream(A, new PrintStream(new FileOutputStream(fileA)));
+            outputHOAStream(B, new PrintStream(new FileOutputStream(fileB)));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -97,6 +94,13 @@ public class NBAInclusionCheckTool {
             e.printStackTrace();
         }
         return result;
+    }
+    
+    public static void outputHOAStream(NBA nba, PrintStream out) {
+        int numBits = Integer.highestOneBit(nba.getAlphabetSize());
+        Function<Integer, String> labelFunc = x -> translateInteger(x, numBits);
+        Function<Integer, String> apList = x -> "a" + x;
+        outputHOAStream(nba, out, numBits, apList, labelFunc);
     }
     
     public static void outputHOAStream(NBA nba, PrintStream out, int numAp, Function<Integer, String> apList,
