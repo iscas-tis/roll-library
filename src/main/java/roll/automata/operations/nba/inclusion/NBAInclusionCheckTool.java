@@ -31,27 +31,40 @@ import roll.words.Alphabet;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * 
- * only can prove inclusion, NOTE that SPOT may report WRONG answer
- * and GOAL tends to be very slow
+ * only can prove inclusion, and GOAL tends to be very slow
  *
+ * Not responsible to provide the witness for noninclusion and inequivalence
+ * 
  * */
 
 public class NBAInclusionCheckTool {
     
     // use spot to check whether A is included by B
     public static boolean isIncludedSpot(NBA A, NBA B) {
-         String command = "autfilt --included-in=";
+        String command = "autfilt --included-in=";
         boolean result = executeTool(command, true, "HOA", A, B);
         return result;
     }
-    
+
+    public static boolean isEquivalentSpot(NBA A, NBA B) {
+        String command = "autfilt --equivalent-to=";
+        boolean result = executeTool(command, true, "HOA", A, B);
+        return result;
+    }
+
     public static boolean isIncludedGoal(String goal, NBA A, NBA B) {
         String command = goal + " containment ";
-       boolean result = executeTool(command, false, "(true", A, B);
-       return result;
-   }
-    
-    private static boolean executeTool(String cmd, boolean reverse, String pattern,  NBA A, NBA B) {
+        boolean result = executeTool(command, false, "(true", A, B);
+        return result;
+    }
+
+    public static boolean isEquivalentGoal(String goal, NBA A, NBA B) {
+        String command = goal + " equivalence ";
+        boolean result = executeTool(command, false, "true", A, B);
+        return result;
+    }
+
+    private static boolean executeTool(String cmd, boolean reverse, String pattern, NBA A, NBA B) {
         File fileA = new File("/tmp/A.hoa");
         File fileB = new File("/tmp/B.hoa");
         try {
@@ -63,9 +76,9 @@ public class NBAInclusionCheckTool {
         final Runtime rt = Runtime.getRuntime();
         String command = null;
         // add files
-        if(reverse) {
+        if (reverse) {
             command = cmd + fileB.getAbsolutePath() + " " + fileA.getAbsolutePath();
-        }else {
+        } else {
             command = cmd + fileA.getAbsolutePath() + " " + fileB.getAbsolutePath();
         }
         Process proc = null;
@@ -75,18 +88,18 @@ public class NBAInclusionCheckTool {
             e1.printStackTrace();
         }
         System.out.println(command);
-        while(true) {
-            if(! proc.isAlive()) {
+        while (true) {
+            if (!proc.isAlive()) {
                 break;
             }
         }
 
-        final BufferedReader reader = new  BufferedReader(new InputStreamReader(proc.getInputStream()));
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
         String line = null;
         boolean result = false;
         try {
-            while((line = reader.readLine()) != null) {
-                if(line.contains(pattern)) {
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(pattern)) {
                     result = true;
                 }
             }
@@ -95,93 +108,95 @@ public class NBAInclusionCheckTool {
         }
         return result;
     }
-    
+
     public static void outputHOAStream(NBA nba, PrintStream out) {
         int numBits = Integer.highestOneBit(nba.getAlphabetSize());
         Function<Integer, String> labelFunc = x -> translateInteger(x, numBits);
         Function<Integer, String> apList = x -> "a" + x;
         outputHOAStream(nba, out, numBits, apList, labelFunc);
     }
-    
+
     public static void outputHOAStream(NBA nba, PrintStream out, int numAp, Function<Integer, String> apList,
             Function<Integer, String> labelFunc) {
         out.println("HOA: v1");
         out.println("tool: \"ROLL\"");
         out.println("properties: explicit-labels state-acc trans-labels ");
-        
+
         out.println("States: " + nba.getStateSize());
         out.println("Start: " + nba.getInitialState());
         out.println("acc-name: Buchi");
         out.println("Acceptance: 1 Inf(0)");
         out.print("AP: " + numAp);
-        for(int index = 0; index < numAp; index ++) {
+        for (int index = 0; index < numAp; index++) {
             out.print(" \"" + apList.apply(index) + "\"");
         }
         out.println();
         out.println("--BODY--");
-        
-        for (int stateNr = 0; stateNr < nba.getStateSize(); stateNr ++) {
+
+        for (int stateNr = 0; stateNr < nba.getStateSize(); stateNr++) {
             out.print("State: " + stateNr);
-            if(nba.isFinal(stateNr)) out.print(" {0}");
+            if (nba.isFinal(stateNr))
+                out.print(" {0}");
             out.println();
-            for (int letter = 0; letter < nba.getAlphabetSize(); letter ++) {
-                if(nba.getAlphabet().indexOf(Alphabet.DOLLAR) == letter) continue;
-                for(int succNr : nba.getSuccessors(stateNr, letter)) {
+            for (int letter = 0; letter < nba.getAlphabetSize(); letter++) {
+                if (nba.getAlphabet().indexOf(Alphabet.DOLLAR) == letter)
+                    continue;
+                for (int succNr : nba.getSuccessors(stateNr, letter)) {
                     out.println("[" + labelFunc.apply(letter) + "]  " + succNr);
                 }
             }
-        }   
+        }
         out.println("--END--");
     }
-    
+
     private static String translateInteger(int value, int numBits) {
         StringBuilder builder = new StringBuilder();
         int bit = 1;
-        for(int index = 0; index < numBits; index ++) {
-            if((bit & value) == 0) {
+        for (int index = 0; index < numBits; index++) {
+            if ((bit & value) == 0) {
                 builder.append("!");
             }
             builder.append("" + index);
-            if(index != numBits - 1) {
+            if (index != numBits - 1) {
                 builder.append("&");
             }
             bit <<= 1;
         }
         return builder.toString();
-    }  
-    
-    public static void main(String []args) {
+    }
+
+    public static void main(String[] args) {
         Alphabet alphabet = new Alphabet();
         alphabet.addLetter('a');
         alphabet.addLetter('b');
         NBA nba = new NBA(alphabet);
         nba.createState();
         nba.createState();
-        
+
         nba.getState(0).addTransition(0, 0);
         nba.getState(0).addTransition(1, 0);
         nba.getState(0).addTransition(1, 1);
         nba.getState(1).addTransition(1, 1);
         nba.setInitial(0);
         nba.setFinal(1);
-        
+
         NBA nba1 = new NBA(alphabet);
         nba1.createState();
         nba1.createState();
-        
+
         nba1.getState(0).addTransition(0, 0);
         nba1.getState(0).addTransition(1, 1);
         nba1.getState(1).addTransition(1, 1);
         nba1.setInitial(0);
         nba1.setFinal(1);
-        
+
         int numBits = Integer.highestOneBit(nba.getAlphabetSize());
         Function<Integer, String> labelFunc = x -> translateInteger(x, numBits);
         Function<Integer, String> apList = x -> "a" + x;
         NBAInclusionCheckTool.outputHOAStream(nba, System.out, numBits, apList, labelFunc);
-        
+
         System.out.println("result : " + NBAInclusionCheckTool.isIncludedSpot(nba, nba));
-        
+
         System.out.println("result : " + NBAInclusionCheckTool.isIncludedSpot(nba, nba1));
     }
 
