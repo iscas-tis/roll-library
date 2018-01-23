@@ -211,7 +211,7 @@ public class CLParser {
     
     private void printUsage() {
         options.log.println(
-                "ROLL (Regular Omega Language Learning) library\n");
+                "ROLL (Regular Omega Language Learning)\n");
         
         options.log.println(
                 "Usage: java -jar ROLL.jar [aut.ba, aut.hoa] [options]");
