@@ -29,6 +29,7 @@ import roll.parser.Format;
 public class CLParser {
     
     private final Options options;
+    private final String version = "1.0";
     
     public CLParser(OutputStream out) {
         options = new Options(out);
@@ -211,7 +212,7 @@ public class CLParser {
     
     private void printUsage() {
         options.log.println(
-                "ROLL (Regular Omega Language Learning)\n");
+                "ROLL (Regular Omega Language Learning) v" + version + "\n");
         
         options.log.println(
                 "Usage: java -jar ROLL.jar [aut.ba, aut.hoa] [options]");
