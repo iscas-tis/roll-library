@@ -107,7 +107,7 @@ public final class ROLL {
         Parser parser = UtilParser.prepare(options, options.inputFile, options.format);
         NBA target = parser.parse();
         OutputStream stream = options.log.getOutputStream();
-        if(options.outputFile != null) {
+        if (options.outputFile != null) {
             try {
                 stream = new FileOutputStream(new File(options.outputFile));
             } catch (FileNotFoundException e) {
@@ -118,13 +118,15 @@ public final class ROLL {
         options.log.println("\ninput automaton:");
         parser.print(target, options.log.getOutputStream());
         options.log.println("\noutput automaton:");
-        switch(options.format) {
+        switch (options.format) {
         case BA:
             NBAInclusionCheckTool.outputHOAStream(target, out); // BA to HOA
             break;
         case HOA:
             out.println(target.toBA());
             break;
+        default:
+            throw new UnsupportedOperationException("Unknow input format");
         }
     }
     
