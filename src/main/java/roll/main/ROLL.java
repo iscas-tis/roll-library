@@ -103,8 +103,6 @@ public final class ROLL {
     }
     
     private static void runConvertingMode(Options options) {
-        Timer timer = new Timer();
-        timer.start();
         // prepare the parser
         Parser parser = UtilParser.prepare(options, options.inputFile, options.format);
         NBA target = parser.parse();
@@ -128,8 +126,6 @@ public final class ROLL {
             out.println(target.toBA());
             break;
         }
-        options.stats.numOfLetters = target.getAlphabetSize();
-        options.stats.numOfStatesInTraget = target.getStateSize();
     }
     
     public static void runPlayingMode(Options options) {
