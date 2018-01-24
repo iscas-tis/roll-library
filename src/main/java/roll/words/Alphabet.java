@@ -29,7 +29,9 @@ import roll.util.Pair;
  * (https://github.com/LearnLib/learnlib)
  * 
  * In this package, every letter in the alphabet will
- * be denoted by an integer
+ * be denoted by an integer just like libalf
+ * (http://libalf.informatik.rwth-aachen.de/)
+ * 
  * */
 public final class Alphabet {
 	
