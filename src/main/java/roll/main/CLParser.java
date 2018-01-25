@@ -231,7 +231,7 @@ public class CLParser {
         options.log.println("-out2 <A> <B>", indent, "Output two automata in files <A> and <B>");
         options.log.println("-dot", indent, "Output automaton in DOT format");
         options.log.println("-test k n", indent, "Test ROLL with k randomly generated BAs of n states");
-//        options.log.println("-play", indent, "You play the role as a teacher");
+        options.log.println("-play", indent, "You play the role as a teacher");
         options.log.println("-convert [A] [B]", indent, "Convert two input automata to the other format");
         options.log.println("-learn", indent, "Use RABIT or DK package tool as the teacher to learn the input BA");
         options.log.println("-complement", indent, "Use learning algorithm to complement the input BA");
@@ -250,7 +250,7 @@ public class CLParser {
         options.log.println("-over", indent, "Use over-approximation in BA construction for FDFA");
         options.log.println("-under", indent, "Use under-approximation in BA construction for FDFA (Default)");
 //        options.log.println("-bs", indent, "Use binary search to find counterexample");
-//        options.log.println("-lazyeq", indent, "Equivalence check as the last resort");
+        options.log.println("-lazyeq", indent, "Equivalence check as the last resort");
         options.log.println("-ldba", indent, "Learning target is a limit deterministic BA");
 //        options.log.println("-fdfa", indent, "Learning target is an FDFA");
 //        options.log.println("-nba", indent, "Learning target is a BA");

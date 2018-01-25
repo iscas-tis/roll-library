@@ -16,7 +16,9 @@
 
 package roll.automata;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -54,6 +56,15 @@ public class StateDFA extends StateFA {
     
     @Override
     public String toString() {
+        List<String> apList = new ArrayList<>();
+        for(int i = 0; i < dfa.getAlphabetSize(); i ++) {
+            apList.add("" + i);
+        }
+        return toString(apList);
+    }
+    
+    @Override
+    public String toString(List<String> apList) {
         StringBuilder builder = new StringBuilder();
         builder.append("  " + getId() + " [label=\"" + getId() + "\"");
         if(dfa.isFinal(getId())) builder.append(", shape = doublecircle");
@@ -62,7 +73,7 @@ public class StateDFA extends StateFA {
         // transitions
         for(int i = 0; i < successors.length; i ++) {
             builder.append("  " + getId() + " -> " + successors[i]
-                    + " [label=\"" + i + "\"];\n");
+                    + " [label=\"" + apList.get(i) + "\"];\n");
         }
         return builder.toString();
     }

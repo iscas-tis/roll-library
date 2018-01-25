@@ -16,6 +16,9 @@
 
 package roll.automata;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
@@ -84,6 +87,15 @@ public class StateNFA extends StateFA {
     
     @Override
     public String toString() {
+        List<String> apList = new ArrayList<>();
+        for(int i = 0; i < nfa.getAlphabetSize(); i ++) {
+            apList.add("" + i);
+        }
+        return toString(apList);
+    }
+    
+    @Override
+    public String toString(List<String> apList) {
         StringBuilder builder = new StringBuilder();
         builder.append("  " + getId() + " [label=\"" + getId() + "\"");
         if(nfa.isFinal(getId())) builder.append(", shape = doublecircle");
@@ -95,7 +107,7 @@ public class StateNFA extends StateFA {
             public boolean execute(int letter, ISet succs) {
                 for(int succ : succs) {
                     builder.append("  " + getId() + " -> " + succ
-                            + " [label=\"" + letter + "\"];\n");
+                            + " [label=\"" + apList.get(letter) + "\"];\n");
                 }
                 return true;
             }

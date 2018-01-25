@@ -17,6 +17,7 @@
 package roll.automata;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
@@ -115,6 +116,19 @@ abstract class FASimple implements FA {
         int startNode = this.getStateSize();
         for (int node = 0; node < this.getStateSize(); node++) {
             builder.append(this.getState(node).toString());
+        }   
+        builder.append("  " + startNode + " [label=\"\", shape = plaintext];\n");
+        builder.append("  " + startNode + " -> " + this.getInitialState() + " [label=\"\"];\n");
+        builder.append("}\n");
+        return builder.toString();
+    }
+    
+    public String toString(List<String> apList) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("digraph {\n");
+        int startNode = this.getStateSize();
+        for (int node = 0; node < this.getStateSize(); node++) {
+            builder.append(this.getState(node).toString(apList));
         }   
         builder.append("  " + startNode + " [label=\"\", shape = plaintext];\n");
         builder.append("  " + startNode + " -> " + this.getInitialState() + " [label=\"\"];\n");

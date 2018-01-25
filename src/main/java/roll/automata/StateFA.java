@@ -16,6 +16,8 @@
 
 package roll.automata;
 
+import java.util.List;
+
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
@@ -41,6 +43,8 @@ public abstract class StateFA implements State {
     public String toString() {
         return "" + id;
     }
+    
+    public abstract String toString(List<String> apList);
     
     //
     public abstract String toBA();

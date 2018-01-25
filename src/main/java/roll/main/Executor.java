@@ -30,6 +30,7 @@ import roll.oracle.nba.sampler.TeacherNBASampler;
 import roll.query.Query;
 import roll.table.HashableValue;
 import roll.util.Timer;
+import roll.words.Alphabet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -72,7 +73,7 @@ public class Executor {
     
     private static void execute(Options options, NBA target,
             TeacherNBA teacher) {
-        LearnerBase<NBA> learner = getLearner(options, target, teacher);
+        LearnerBase<NBA> learner = getLearner(options, target.getAlphabet(), teacher);
         Timer timer = new Timer();
         options.log.println("Initializing learner...");
         timer.start();
@@ -103,15 +104,15 @@ public class Executor {
         options.log.println("Learning completed...");
     }
 
-    private static LearnerBase<NBA> getLearner(Options options, NBA nba,
+    public static LearnerBase<NBA> getLearner(Options options, Alphabet alphabet,
             Teacher<NBA, Query<HashableValue>, HashableValue> teacher) {
         LearnerBase<NBA> learner = null;
         if(options.algorithm == Options.Algorithm.NBA_LDOLLAR) {
-            learner = new LearnerNBALDollar(options, nba.getAlphabet(), teacher);
+            learner = new LearnerNBALDollar(options, alphabet, teacher);
         }else if(options.algorithm == Options.Algorithm.PERIODIC
              || options.algorithm == Options.Algorithm.SYNTACTIC
              || options.algorithm == Options.Algorithm.RECURRENT) {
-            learner = new LearnerNBALOmega(options, nba.getAlphabet(), teacher);
+            learner = new LearnerNBALOmega(options, alphabet, teacher);
         }else {
             throw new UnsupportedOperationException("Unsupported BA Learner");
         }

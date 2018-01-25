@@ -158,8 +158,7 @@ public final class ROLL {
     }
     
     public static void runPlayingMode(Options options) {
-        throw new UnsupportedOperationException("Not yet implmenented");
-//        PlayExecution.execute();
+        InteractiveMode.interact(options);
     }
     
     public static void runLearningMode(Options options, boolean sampling) {
