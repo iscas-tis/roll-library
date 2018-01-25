@@ -65,17 +65,21 @@ public class InteractiveMode {
     
     private static Alphabet prepareAlphabet(Options options) {
         Alphabet alphabet = new Alphabet();
-        System.out.println("Please input the number of letters (a-z): ");
-        int numLetters = getInterger();
+        System.out.println("Please input the number of letters ('a'-'z'): ");
+        int numLetters = getInteger();
+        while(numLetters < 1 || numLetters > 26) {
+            System.out.println("Illegal input, it should in [1..26], try again!");
+            numLetters = getInteger();
+        }
         for(int letterNr = 0; letterNr < numLetters; letterNr ++) {
             System.out.println("Please input the " + (letterNr + 1) + "th letter: ");
-            char letter = getLetter();
+            char letter = getLetter(alphabet);
             alphabet.addLetter(letter);
         }
         return alphabet;
     }
     
-    private static char getLetter() {
+    private static char getLetter(Alphabet alphabet) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         char letter = 0;
         do {
@@ -85,9 +89,11 @@ public class InteractiveMode {
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
-            if (letter < 'a' && letter > 'z')
+            if (letter < 'a' || letter > 'z')
                 System.out.println("Illegal input, try again!");
-            else {
+            else if(alphabet.indexOf(letter) >= 0){
+                System.out.println("Duplicate input letter, try again!");
+            }else {
                 break;
             }
         } while (true);
@@ -135,7 +141,7 @@ public class InteractiveMode {
 //        return new QuerySimple<HashableValue>(word, alphabet.getEmptyWord());
 //    }
     
-    private static int getInterger() {
+    private static int getInteger() {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         int numLetters = -1;
         
@@ -148,6 +154,9 @@ public class InteractiveMode {
                 }
                 try {
                     numLetters = Integer.parseInt(input);
+                    if(numLetters < 0) {
+                        numLetters = -1;
+                    }
                 } catch (Exception e) {
                     numLetters = -1;
                 }
