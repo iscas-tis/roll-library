@@ -78,7 +78,7 @@ public class NBAComplementTest {
         options.structure = Options.Structure.TREE;
         options.approximation = Options.Approximation.UNDER;
         options.algorithm = Options.Algorithm.SYNTACTIC;
-        final int numTests = 40;
+        final int numTests = 5;
         final int numStates = 3;
         for(int i = 0; i < numTests; i ++) {
             NBA input = NBAGenerator.getRandomNBA(numStates, 2);

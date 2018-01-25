@@ -32,7 +32,7 @@ public class HoaParserTest {
     @Test
     public void testHOAParser() {
         Options options = new Options();
-        final String dir = "/home/liyong/workspace-neon/roll-library/src/main/resources/inclusion/";
+        final String dir = "src/main/resources/inclusion/";
         ParserHOA parser = new ParserHOA(options, dir + "A.hoa");
         NBA nba = parser.parse();
         parser.print(nba, System.out);

@@ -41,8 +41,8 @@ public class NBARemoveStates {
     
     @Test
     public void testRandom() {
-        final int test = 100;
-        final int state = 100;
+        final int test = 5;
+        final int state = 3;
         for(int i = 0; i < test; i ++) {
             NBA A = NBAGenerator.getRandomNBA(state, 4);
 //            System.out.println("A:\n" + A);

@@ -90,7 +90,7 @@ public class NBALOmegaTest {
     
     @Test
     public void testRABIT() {
-       final int numTests = 40;
+       final int numTests = 5;
        final int numStates = 3;
        
        for(int i = 0; i < numTests; i ++) {

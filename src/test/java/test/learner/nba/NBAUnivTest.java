@@ -71,8 +71,8 @@ public class NBAUnivTest {
     
     @Test
     public void testRandomIncluded() {
-        final int test = 20;
-        final int state = 100;
+        final int test = 5;
+        final int state = 5;
         Alphabet alphabet = new Alphabet();
         alphabet.addLetter('a');
         alphabet.addLetter('b');
@@ -116,8 +116,8 @@ public class NBAUnivTest {
     
     @Test
     public void testRandom() {
-        final int test = 20;
-        final int state = 25;
+        final int test = 5;
+        final int state = 5;
         for(int i = 0; i < test; i ++) {
             NBA nba = NBAGenerator.getRandomNBA(state, 2);
             NBA univ = NBAStore.getNBA5();
@@ -147,8 +147,8 @@ public class NBAUnivTest {
     
     @Test
     public void testRandomNBA() {
-        final int test = 20;
-        final int state = 30;
+        final int test = 5;
+        final int state = 5;
         for(int i = 0; i < test; i ++) {
             NBA nba1 = NBAGenerator.getRandomNBA(state, 2);
             NBA nba2 = NBAGenerator.getRandomNBA(state, 2);

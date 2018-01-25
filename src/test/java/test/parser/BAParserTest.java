@@ -89,8 +89,8 @@ public class BAParserTest {
     
     @Test
     public void testRandomNBA() throws FileNotFoundException {
-        final int test = 30;
-        final int state = 10;
+        final int test = 5;
+        final int state = 5;
         for(int i = 0; i < test; i ++) {
             NBA nba1 = NBAGenerator.getRandomNBA(state, 2);
             nba1 = NBAOperations.removeDeadStates(nba1);
@@ -117,8 +117,8 @@ public class BAParserTest {
     
     @Test
     public void testRandomNBAPair() throws FileNotFoundException {
-        final int test = 30;
-        final int state = 10;
+        final int test = 5;
+        final int state = 5;
         for(int i = 0; i < test; i ++) {
             NBA nba1 = NBAGenerator.getRandomNBA(state, 2);
             NBA nba2 = NBAGenerator.getRandomNBA(state, 2);
