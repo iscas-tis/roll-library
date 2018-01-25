@@ -223,6 +223,7 @@ public class CLParser {
         options.log.println("             or", indent, "java -jar ROLL.jar -complement B.hoa -table -syntactic");
         options.log.println("             or", indent, "java -jar ROLL.jar -include A.ba B.ba -table -syntactic");
         options.log.println("             or", indent, "java -jar ROLL.jar -convert A.ba B.ba -out A.hoa B.hoa");
+        options.log.println("             or", indent, "java -jar ROLL.jar -play -table -syntatic");
         options.log.println("\noptions:");
         
         options.log.println("-h", indent, "Show this page");
