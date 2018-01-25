@@ -19,14 +19,20 @@ package test.parser;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 
 import org.junit.Test;
 
+import automata.FiniteAutomaton;
 import roll.automata.NBA;
+import roll.automata.operations.NBAGenerator;
+import roll.automata.operations.NBAOperations;
 import roll.main.Options;
+import roll.oracle.nba.rabit.UtilRABIT;
 import roll.parser.ba.PairParserBA;
 import roll.parser.ba.ParserBA;
+import roll.words.Alphabet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -36,19 +42,89 @@ public class BAParserTest {
     @Test
     public void testBAParser() throws FileNotFoundException {
         Options options = new Options();
-        final String dir = "/home/liyong/Downloads/RABIT244/Examples/";
-        ParserBA parser = new ParserBA(options, dir + "mcsA.ba");
+        final String dir = "/home/liyong/workspace-neon/roll-library/src/main/resources/ba/";
+        ParserBA parser = new ParserBA(options, dir + "A4.ba");
         NBA nba = parser.parse();
-        File file = new File(dir + "mcsA1.ba");
+        File file = new File(dir + "A4-1.ba");
         parser.print(nba, new PrintStream(new FileOutputStream(file)));
         
-        PairParserBA pp = new PairParserBA(options, dir + "mcsA.ba", dir + "mcsB.ba");
+        PairParserBA pp = new PairParserBA(options, dir + "A3.ba", dir + "B3.ba");
         NBA A = pp.getA();
-        file = new File(dir + "mcsA1.ba");
+        file = new File(dir + "A3-1.ba");
         parser.print(A, new PrintStream(new FileOutputStream(file)));
         NBA B = pp.getB();
-        file = new File(dir + "mcsB1.ba");
+        file = new File(dir + "B3-1.ba");
         parser.print(B, new PrintStream(new FileOutputStream(file)));
+        System.out.println(B.toString());
         System.out.println("states: " + B.getStateSize());
+    }
+    
+    private void print(NBA nba, OutputStream out) {
+        PrintStream printer = new PrintStream(out);
+        printer.print("[" + nba.getInitialState() + "]\n");
+        if(nba.getFinalStates().isEmpty()) {
+            int dead = nba.getInitialState() + 1;
+            for(int letter = 0; letter < nba.getAlphabetSize(); letter ++) {
+                if(nba.getAlphabet().indexOf(Alphabet.DOLLAR) == letter) continue;
+                printer.print(nba.getAlphabet().getLetter(letter)
+                        + "," + "[" + dead + "]->[" + dead + "]\n");
+            }
+            printer.print("[" + dead + "]\n");
+            return ;
+        }
+        // transitions
+        for(int stateNr = 0; stateNr < nba.getStateSize(); stateNr ++) {
+            for(int letter = 0; letter < nba.getAlphabetSize(); letter ++) {
+                if(nba.getAlphabet().indexOf(Alphabet.DOLLAR) == letter) continue;
+                for(int succNr : nba.getSuccessors(stateNr, letter)) {
+                    printer.print(nba.getAlphabet().getLetter(letter)
+                            + "," + "[" + stateNr + "]->[" + succNr + "]\n");
+                }
+            }
+        }
+        for(final int finalNr : nba.getFinalStates()) {
+            printer.print("[" + finalNr + "]\n");
+        }
+    }
+    
+    @Test
+    public void testRandomNBA() throws FileNotFoundException {
+        final int test = 20;
+        final int state = 10;
+        for(int i = 0; i < test; i ++) {
+            NBA nba1 = NBAGenerator.getRandomNBA(state, 2);
+            NBA nba2 = NBAGenerator.getRandomNBA(state, 2);
+            nba1 = NBAOperations.removeDeadStates(nba1);
+            nba2 = NBAOperations.removeDeadStates(nba2);
+            System.out.println("A: \n" + nba1.toString());
+            System.out.println("B: \n" + nba2.toString());
+            Options options = new Options();
+            options.inputA = "/tmp/A.ba";
+            options.inputB = "/tmp/B.ba";
+            print(nba1, new FileOutputStream(options.inputA));
+            print(nba2, new FileOutputStream(options.inputB));
+            
+            FiniteAutomaton rA = new FiniteAutomaton(options.inputA);
+            FiniteAutomaton rB = new FiniteAutomaton(options.inputB);
+            
+            PairParserBA pp = new PairParserBA(options, options.inputA, options.inputB);
+            NBA A = pp.getA();
+            NBA B = pp.getB();
+            options.outputA = "/tmp/A1.ba";
+            options.outputB = "/tmp/A2.ba";
+            pp.print(A, new FileOutputStream(options.outputA));
+            pp.print(B, new FileOutputStream(options.outputB));
+            
+            FiniteAutomaton lA = new FiniteAutomaton(options.outputA);
+            FiniteAutomaton lB = new FiniteAutomaton(options.outputB);
+            
+            boolean isEq1 = UtilRABIT.isIncluded(nba1.getAlphabet(), lA, rA) == null;
+            isEq1 = isEq1 && (UtilRABIT.isIncluded(nba1.getAlphabet(), rA, lA) == null);
+            assert isEq1 : "Wrong A";
+            boolean isEq2 = UtilRABIT.isIncluded(nba1.getAlphabet(), lB, rB) == null;
+            isEq2 = isEq2 && (UtilRABIT.isIncluded(nba1.getAlphabet(), rB, lB) == null);
+            assert isEq2 : "Wrong B";
+        }
+
     }
 }

@@ -45,6 +45,7 @@ public class PairParserBA extends ParserBA implements PairParser {
             this.automaton = new Automaton();
             this.strStateMap.clear();
             inputStream = new FileInputStream(new File(fileB));
+            this.calledAcc = false;
             parser = new JBAParser(inputStream);
             parser.parse(this);
             this.B = nba;

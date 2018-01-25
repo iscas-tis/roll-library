@@ -106,6 +106,16 @@ public class ParserBA implements Parser {
 		}else {
 			// first output initial state
 			printer.print("[" + nba.getInitialState() + "]\n");
+			if(nba.getFinalStates().isEmpty()) {
+			    int dead = nba.getInitialState() + 1;
+			    for(int letter = 0; letter < nba.getAlphabetSize(); letter ++) {
+                    if(nba.getAlphabet().indexOf(Alphabet.DOLLAR) == letter) continue;
+                    printer.print(charStrMap.get(nba.getAlphabet().getLetter(letter))
+                            + "," + "[" + dead + "]->[" + dead + "]\n");
+			    }
+			    printer.print("[" + dead + "]\n");
+			    return ;
+			}
 			// transitions
 			for(int stateNr = 0; stateNr < nba.getStateSize(); stateNr ++) {
 			    for(int letter = 0; letter < nba.getAlphabetSize(); letter ++) {
@@ -116,7 +126,6 @@ public class ParserBA implements Parser {
                     }
 			    }
 			}
-			
 			for(final int finalNr : nba.getFinalStates()) {
 				printer.print("[" + finalNr + "]\n");
 			}
@@ -139,9 +148,12 @@ public class ParserBA implements Parser {
 		st.addTransition(new Transition(ch, tg));
 	}
 	
+	protected boolean calledAcc = false;
+	
 	protected void setAccepting(String state) {
 		State fin = getState(state);
 		fin.setAccept(true);
+		calledAcc = true;
 	}
 	
 	protected void parseBegin() {
@@ -149,7 +161,13 @@ public class ParserBA implements Parser {
 	}
 	
 	protected void parseEnd() {
+	    // check whether there is accepting states 
 		nba = NBAOperations.fromDkNBA(automaton, alphabet);
+		if(! calledAcc) {
+		    for(int i = 0; i < nba.getStateSize(); i ++) {
+		        nba.setFinal(i);
+		    }
+		}
 		automaton = null; // empty this automaton
 	}
 	
