@@ -42,13 +42,13 @@ public class BAParserTest {
     @Test
     public void testBAParser() throws FileNotFoundException {
         Options options = new Options();
-        final String dir = "/home/liyong/workspace-neon/roll-library/src/main/resources/ba/";
+        final String dir = "src/main/resources/ba/";
         ParserBA parser = new ParserBA(options, dir + "A4.ba");
         NBA nba = parser.parse();
         File file = new File(dir + "A4-1.ba");
         parser.print(nba, new PrintStream(new FileOutputStream(file)));
         
-        PairParserBA pp = new PairParserBA(options, dir + "A3.ba", dir + "B3.ba");
+        PairParserBA pp = new PairParserBA(options, dir + "A4.ba", dir + "B4.ba");
         NBA A = pp.getA();
         file = new File(dir + "A3-1.ba");
         parser.print(A, new PrintStream(new FileOutputStream(file)));
@@ -89,7 +89,35 @@ public class BAParserTest {
     
     @Test
     public void testRandomNBA() throws FileNotFoundException {
-        final int test = 20;
+        final int test = 30;
+        final int state = 10;
+        for(int i = 0; i < test; i ++) {
+            NBA nba1 = NBAGenerator.getRandomNBA(state, 2);
+            nba1 = NBAOperations.removeDeadStates(nba1);
+            System.out.println("A: \n" + nba1.toString());
+            Options options = new Options();
+            options.inputA = "/tmp/A.ba";
+            print(nba1, new FileOutputStream(options.inputA));
+            
+            FiniteAutomaton rA = new FiniteAutomaton(options.inputA);
+            
+            ParserBA pp = new ParserBA(options, options.inputA);
+            NBA A = pp.parse();
+            options.outputA = "/tmp/A1.ba";
+            pp.print(A, new FileOutputStream(options.outputA));
+            
+            FiniteAutomaton lA = new FiniteAutomaton(options.outputA);
+            
+            boolean isEq1 = UtilRABIT.isIncluded(nba1.getAlphabet(), lA, rA) == null;
+            isEq1 = isEq1 && (UtilRABIT.isIncluded(nba1.getAlphabet(), rA, lA) == null);
+            assert isEq1 : "Wrong A";
+        }
+
+    }
+    
+    @Test
+    public void testRandomNBAPair() throws FileNotFoundException {
+        final int test = 30;
         final int state = 10;
         for(int i = 0; i < test; i ++) {
             NBA nba1 = NBAGenerator.getRandomNBA(state, 2);
