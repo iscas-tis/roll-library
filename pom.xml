@@ -4,10 +4,23 @@
   <artifactId>roll-library</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <dependencies>
-  	<dependency>
-  		<groupId>net.sf.trove4j</groupId>
-  		<artifactId>trove4j</artifactId>
-  		<version>3.0.3</version>
-  	</dependency>
+    <dependency>
+        <groupId>net.sf.trove4j</groupId>
+        <artifactId>trove4j</artifactId>
+        <version>3.0.3</version>
+    </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+           <source>1.8</source>
+           <target>1.8</target>
+           <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
