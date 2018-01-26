@@ -3,24 +3,125 @@
   <groupId>roll</groupId>
   <artifactId>roll-library</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <dependencies>
-    <dependency>
-        <groupId>net.sf.trove4j</groupId>
-        <artifactId>trove4j</artifactId>
-        <version>3.0.3</version>
-    </dependency>
-  </dependencies>
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.3</version>
         <configuration>
            <source>1.8</source>
            <target>1.8</target>
            <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>javacc-maven-plugin</artifactId>
+        <version>2.6</version>
+        <executions>
+          <execution>
+            <id>javacc</id>
+            <goals>
+              <goal>javacc</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.12.4</version>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>false</overWriteSnapshots>
+              <overWriteIfNewer>true</overWriteIfNewer>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.0.2</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>roll.main.ROLL</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.trove4j</groupId>
+      <artifactId>trove4j</artifactId>
+      <version>3.0.3</version>
+    </dependency>
+    <dependency>
+      <groupId>automaton</groupId>
+      <artifactId>automaton</artifactId>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/automaton.jar</systemPath>
+      <version>0.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>buchi</groupId>
+      <artifactId>buchi</artifactId>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/buchi.jar</systemPath>
+      <version>0.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>javabdd</groupId>
+      <artifactId>javabdd</artifactId>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/javabdd-1.0b2.jar</systemPath>
+      <version>1.0b2</version>
+    </dependency>
+    <dependency>
+      <groupId>jdd</groupId>
+      <artifactId>jdd</artifactId>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/jdd_105.jar</systemPath>
+      <version>105</version>
+    </dependency>
+    <dependency>
+      <groupId>jhoafparser</groupId>
+      <artifactId>jhoafparser</artifactId>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/jhoafparser-1.1.1.jar</systemPath>
+      <version>1.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>rabit</groupId>
+      <artifactId>rabit</artifactId>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/rabit.jar</systemPath>
+      <version>0.0.1</version>
+    </dependency>
+  </dependencies>
 </project>
