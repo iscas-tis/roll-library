@@ -30,7 +30,7 @@ import roll.words.Word;
  * */
 
 public abstract class TeacherNBA extends TeacherAbstract<NBA> {
-    protected final NBA target;
+    protected NBA target;
     
     public TeacherNBA(Options options, NBA target) {
         super(options);

@@ -17,6 +17,7 @@
 package roll.oracle.nba.sampler;
 
 import roll.automata.NBA;
+import roll.automata.operations.NBAOperations;
 import roll.main.Options;
 import roll.oracle.nba.TeacherNBA;
 import roll.query.Query;
@@ -35,10 +36,15 @@ public class TeacherNBASampler extends TeacherNBA {
     
     public TeacherNBASampler(Options options, NBA target) {
         super(options, target);
+        // remember to remove dead states
+        this.target = NBAOperations.removeDeadStates(target);
         this.sampler = new SamplerIndexedMonteCarlo(options.epsilon, options.delta);
     }
     
     private boolean isEmptyNBA(NBA nba) {
+        if(nba.getFinalStates().isEmpty()) {
+            return true;
+        }
         if(nba.getStateSize() > 1) {
             return false;
         }
