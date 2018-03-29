@@ -81,5 +81,10 @@ public class QuerySimple<O> implements Query<O> {
 	public String toString() {
 		return prefix.toStringWithAlphabet() + ":" + suffix.toStringWithAlphabet();
 	}
+	
+	@Override
+	public Query<O> clone() {
+        return new QuerySimple<>(row, prefix, suffix, columnIndex);
+	}
 
 }

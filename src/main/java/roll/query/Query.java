@@ -46,5 +46,7 @@ public interface Query<O> {
 	ObservationRow getPrefixRow();
 	
 	int getSuffixColumn();
+	
+	Query<O> clone();
 
 }
