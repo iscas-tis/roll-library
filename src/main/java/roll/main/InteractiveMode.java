@@ -116,7 +116,7 @@ public class InteractiveMode {
             }
         }else if(options.algorithm == Options.Algorithm.DFA_LSTAR) {
             learner = new LearnerDFATableLStar(options, alphabet, teacher);
-        }if(options.algorithm == Options.Algorithm.DFA_KV) {
+        }else if(options.algorithm == Options.Algorithm.DFA_KV) {
             learner = new LearnerDFATreeKV(options, alphabet, teacher);
         }else {
             throw new UnsupportedOperationException("Unsupported BA Learner");

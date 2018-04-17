@@ -242,8 +242,8 @@ public class CLParser {
         options.log.println("", indent + 4, "d - the probability of the confidence for equivalence check");
         options.log.println("-tree", indent, "Use tree-based data structure in learning");
         options.log.println("-table", indent, "Use table-based data structure in learning (Default)");
-//        options.log.println("-lstar", indent, "Use classic L* algorithm");
-//        options.log.println("-dfa", indent, "Use column based DFA learning algorithm");
+        options.log.println("-lstar", indent, "Use classic L* algorithm");
+        options.log.println("-dfa", indent, "Use column based DFA learning algorithm");
         options.log.println("-ldollar", indent, "Use L$ automata to learn Omega regular language");
         options.log.println("-periodic", indent, "Use peridoc FDFA to learn Omega regular language");
         options.log.println("-recurrent", indent, "Use recurrent FDFA to learn Omega regular language");
