@@ -223,6 +223,9 @@ public class InteractiveMode {
         public HashableValue answerMembershipQuery(Query<HashableValue> query) {
             Word prefix = query.getPrefix();
             Word suffix = query.getSuffix();
+            if(suffix.isEmpty()) {
+                return new HashableValueBoolean(false);
+            }
             System.out.println("Is w-word (" + prefix.toStringWithAlphabet() + ", " + suffix.toStringWithAlphabet()  + ") in the unknown languge: 1/0");
             boolean answer = getInputAnswer();
             HashableValue result = new HashableValueBoolean(answer);
