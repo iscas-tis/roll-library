@@ -22,9 +22,15 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import roll.automata.NBA;
+import roll.automata.FASimple;
 import roll.learner.LearnerBase;
-import roll.oracle.Teacher;
+import roll.learner.dfa.table.LearnerDFATableColumn;
+import roll.learner.dfa.table.LearnerDFATableLStar;
+import roll.learner.dfa.tree.LearnerDFATreeColumn;
+import roll.learner.dfa.tree.LearnerDFATreeKV;
+import roll.learner.nba.ldollar.LearnerNBALDollar;
+import roll.learner.nba.lomega.LearnerNBALOmega;
+import roll.oracle.MembershipOracle;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.HashableValue;
@@ -41,26 +47,82 @@ public class InteractiveMode {
     public static void interact(Options options) {
         // prepare the alphabet
         Alphabet alphabet = prepareAlphabet(options);
-        TeacherNBAInteractive teacher = new TeacherNBAInteractive();
-        LearnerBase<NBA> learner = Executor.getLearner(options, alphabet, teacher);
+        MembershipOracle<HashableValue> teacher = getMembershipOracle(options);
+        LearnerBase<? extends FASimple> learner = getLearner(options, alphabet, teacher);
         
         options.log.println("Initializing learning...");
         learner.startLearning();
         boolean result = false;
         while(! result ) {
             options.log.verbose("Table/Tree is both closed and consistent\n" + learner.toString());
-            NBA hypothesis = learner.getHypothesis();
+            FASimple hypothesis = learner.getHypothesis();
             // along with ce
             System.out.println("Resolving equivalence query for hypothesis (#Q=" + hypothesis.getStateSize() + ")...  ");
-            Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(hypothesis);
+            Query<HashableValue> ceQuery = answerEquivalenceQuery(hypothesis);
             boolean isEq = ceQuery.getQueryAnswer().get();
             if(isEq == true) break;
-            ceQuery = getOmegaCeWord(alphabet);
+            ceQuery = getCounterexample(options, alphabet);
             ceQuery.answerQuery(null);
             learner.refineHypothesis(ceQuery);
         }
         
         System.out.println("Congratulations! Learning completed...");
+    }
+    
+    public static MembershipOracle<HashableValue> getMembershipOracle(Options options) {
+        if(options.algorithm == Options.Algorithm.NBA_LDOLLAR
+             || options.algorithm == Options.Algorithm.PERIODIC
+             || options.algorithm == Options.Algorithm.SYNTACTIC
+             || options.algorithm == Options.Algorithm.RECURRENT) {
+            return new MQNBAInteractive();
+        }else if(options.algorithm == Options.Algorithm.DFA_COLUMN
+             || options.algorithm == Options.Algorithm.DFA_LSTAR
+             || options.algorithm == Options.Algorithm.DFA_KV) {
+            return new MQDFAInteractive();
+        }else {
+            throw new UnsupportedOperationException("Unsupported Learner");
+        }
+    }
+    
+    public static Query<HashableValue> getCounterexample(Options options, Alphabet alphabet) {
+        if(options.algorithm == Options.Algorithm.NBA_LDOLLAR
+                || options.algorithm == Options.Algorithm.PERIODIC
+                || options.algorithm == Options.Algorithm.SYNTACTIC
+                || options.algorithm == Options.Algorithm.RECURRENT) {
+               return getOmegaCeWord(alphabet);
+           }else if(options.algorithm == Options.Algorithm.DFA_COLUMN
+                || options.algorithm == Options.Algorithm.DFA_LSTAR
+                || options.algorithm == Options.Algorithm.DFA_KV) {
+               return getFiniteCeWord(alphabet);
+           }else {
+               throw new UnsupportedOperationException("Unsupported Learning Target");
+           }
+    }
+    
+    public static LearnerBase<? extends FASimple> getLearner(Options options, Alphabet alphabet,
+            MembershipOracle<HashableValue> teacher) {
+        LearnerBase<? extends FASimple> learner = null;
+        if(options.algorithm == Options.Algorithm.NBA_LDOLLAR) {
+            learner = (LearnerBase<? extends FASimple>)new LearnerNBALDollar(options, alphabet, teacher);
+        }else if(options.algorithm == Options.Algorithm.PERIODIC
+             || options.algorithm == Options.Algorithm.SYNTACTIC
+             || options.algorithm == Options.Algorithm.RECURRENT) {
+            learner = new LearnerNBALOmega(options, alphabet, teacher);
+        }else if(options.algorithm == Options.Algorithm.DFA_COLUMN) {
+            if(options.structure == Options.Structure.TABLE) {
+                learner = new LearnerDFATableColumn(options, alphabet, teacher);
+            }else {
+                learner = new LearnerDFATreeColumn(options, alphabet, teacher);
+            }
+        }else if(options.algorithm == Options.Algorithm.DFA_LSTAR) {
+            learner = new LearnerDFATableLStar(options, alphabet, teacher);
+        }if(options.algorithm == Options.Algorithm.DFA_KV) {
+            learner = new LearnerDFATreeKV(options, alphabet, teacher);
+        }else {
+            throw new UnsupportedOperationException("Unsupported BA Learner");
+        }
+        
+        return learner;
     }
     
     private static Alphabet prepareAlphabet(Options options) {
@@ -125,21 +187,33 @@ public class InteractiveMode {
         return answer;
     }
     
-//    private static Query<HashableValue> getCeWord(Alphabet alphabet) {
-//        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-//        Word word = null;
-//        try {
-//            do {
-//                String input = reader.readLine();
-//                word = alphabet.getWordFromString(input);
-//                if(word == null)    System.out.println("Illegal input, try again!");
-//            }while(word == null);
-//            
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return new QuerySimple<HashableValue>(word, alphabet.getEmptyWord());
-//    }
+    private static Query<HashableValue> getFiniteCeWord(Alphabet alphabet) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        Word word = null;
+        try {
+            do {
+                System.out.println("please input counterexample: ");
+                String input = reader.readLine();
+                input = input.trim();
+                boolean valid = true;
+                for(int i = 0; i < input.length(); i ++) {
+                    int letter = alphabet.indexOf(input.charAt(i));
+                    if(letter < 0) {
+                        valid = false;
+                        break;
+                    }
+                }
+                if(valid) {
+                    word = alphabet.getWordFromString(input);
+                }else  {
+                    System.out.println("Illegal input, try again!");
+                }
+            }while(word == null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new QuerySimple<HashableValue>(word, alphabet.getEmptyWord());
+    }
     
     private static int getInteger() {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -217,7 +291,7 @@ public class InteractiveMode {
         return new QuerySimple<HashableValue>(prefix, suffix);
     }
     
-    private static class TeacherNBAInteractive implements Teacher<NBA, Query<HashableValue>, HashableValue> {
+    private static class MQNBAInteractive implements MembershipOracle<HashableValue> {
 
         @Override
         public HashableValue answerMembershipQuery(Query<HashableValue> query) {
@@ -232,26 +306,36 @@ public class InteractiveMode {
             query.answerQuery(result);
             return result;
         }
-
+    }
+    
+    private static class MQDFAInteractive implements MembershipOracle<HashableValue> {
         @Override
-        public Query<HashableValue> answerEquivalenceQuery(NBA hypothesis) {
-            if(hypothesis != null) {
-                List<String> apList = new ArrayList<>();
-                for(int i = 0; i < hypothesis.getAlphabetSize(); i ++) {
-                    apList.add(hypothesis.getAlphabet().getLetter(i) + "");
-                }
-                System.out.println("Is following automaton the unknown automaton: 1/0?");
-                System.out.println(hypothesis.toString(apList));
-            }else {
-                System.out.println("Is above automaton the unknown automaton: 1/0?");
-            }
+        public HashableValue answerMembershipQuery(Query<HashableValue> query) {
+            Word word = query.getQueriedWord();
+            System.out.println("Is word " + word.toStringWithAlphabet() + " in the unknown languge: 1/0");
             boolean answer = getInputAnswer();
-            Word wordEmpty = hypothesis.getAlphabet().getEmptyWord();
-            Query<HashableValue> ceQuery = new QuerySimple<>(wordEmpty, wordEmpty);
-            ceQuery.answerQuery(new HashableValueBoolean(answer));
-            return ceQuery;
+            HashableValue result = new HashableValueBoolean(answer);
+            query.answerQuery(result);
+            return result;
         }
-        
+    }
+    
+    private static Query<HashableValue> answerEquivalenceQuery(FASimple hypothesis) {
+        if(hypothesis != null) {
+            List<String> apList = new ArrayList<>();
+            for(int i = 0; i < hypothesis.getAlphabetSize(); i ++) {
+                apList.add(hypothesis.getAlphabet().getLetter(i) + "");
+            }
+            System.out.println("Is following automaton the unknown automaton: 1/0?");
+            System.out.println(hypothesis.toString(apList));
+        }else {
+            System.out.println("Is above automaton the unknown automaton: 1/0?");
+        }
+        boolean answer = getInputAnswer();
+        Word wordEmpty = hypothesis.getAlphabet().getEmptyWord();
+        Query<HashableValue> ceQuery = new QuerySimple<>(wordEmpty, wordEmpty);
+        ceQuery.answerQuery(new HashableValueBoolean(answer));
+        return ceQuery;
     }
 
 }

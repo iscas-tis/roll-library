@@ -27,7 +27,7 @@ import roll.words.Alphabet;
  * simple FA like DFA, NFA and NBA
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-abstract class FASimple implements FA {
+public abstract class FASimple implements FA {
 
     protected final ArrayList<StateFA> states;
     protected final Alphabet alphabet;
