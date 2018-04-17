@@ -123,6 +123,7 @@ public abstract class FASimple implements FA {
         return builder.toString();
     }
     
+    @Override
     public String toString(List<String> apList) {
         StringBuilder builder = new StringBuilder();
         builder.append("digraph {\n");

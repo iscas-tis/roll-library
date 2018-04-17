@@ -70,6 +70,16 @@ public class FDFA implements Acceptor {
         }
         return builder.toString();
     }
+    
+    @Override
+    public String toString(List<String> apList) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("//FDFA-M: \n" + leadingDFA.toString(apList) + "\n");
+        for(int i = 0; i < progressDFAs.size(); i ++) {
+            builder.append("//FDFA-P" + i + ": \n" + progressDFAs.get(i).toString(apList));
+        }
+        return builder.toString();
+    }
 
     @Override
     public Acc getAcc() {

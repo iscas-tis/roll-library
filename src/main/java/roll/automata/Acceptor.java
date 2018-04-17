@@ -16,6 +16,8 @@
 
 package roll.automata;
 
+import java.util.List;
+
 import roll.words.Alphabet;
 
 /**
@@ -50,5 +52,5 @@ public interface Acceptor {
         return (NBA)this;
     }
 	// and so on
-
+	String toString(List<String> apList);
 }
