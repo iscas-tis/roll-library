@@ -149,6 +149,19 @@ public final class Alphabet {
         }
         return new Pair<>(stem, loop);
 	}
+	
+	@Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        if (letterList.isEmpty())
+            return "[]";
+        builder.append("[" + 0 + "->" + letterList.get(0));
+        for (int letterNr = 1; letterNr < letterList.size(); letterNr++) {
+            builder.append(", " + letterNr + "->" + letterList.get(letterNr));
+        }
+        builder.append("]");
+        return builder.toString();
+    }
 
 
 }
