@@ -137,6 +137,14 @@ public abstract class FASimple implements FA {
         return builder.toString();
     }
     
+    public String toDot() {
+        List<String> apList = new ArrayList<>();
+        for(int i = 0; i < alphabet.getLetterSize(); i ++) {
+            apList.add("" + alphabet.getLetter(i));
+        }
+        return toString(apList);
+    }
+    
     public String toBA() {
         StringBuilder builder = new StringBuilder();
         builder.append("[" + getInitialState() + "]\n");
