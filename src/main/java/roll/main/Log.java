@@ -50,8 +50,9 @@ public class Log {
     }
     
     public void println(String content) {
-        if(! options.silent()) 
+        if(! options.silent()) {
             log.println(content);
+        }
     }
     
     public void print(String content) {
@@ -79,6 +80,12 @@ public class Log {
     
     public void println(String arg, int indent, String description) {
         log.printf("  %-" + indent + "s %s\n", arg, description);
+    }
+    
+    public void println(String arg, int indent, String description, boolean opt) {
+        if(opt && ! options.silent()) {
+            log.printf("  %-" + indent + "s %s\n", arg, description);
+        }
     }
 
 }
