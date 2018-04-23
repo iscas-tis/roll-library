@@ -191,7 +191,7 @@ public class NBAInclusionCheck {
         options.stats.timeOfLearner += t;
         boolean result = false;
         while(! result ) {
-            if(options.verbose) options.log.println("learner output: " + learner.toString());
+            if(options.verbose()) options.log.println("learner output: " + learner.toString());
             Query<HashableValue> query = teacher.answerEquivalenceQuery(learner.getHypothesis());
             // get out of the loop
             HashableValue answer = query.getQueryAnswer();
@@ -208,7 +208,7 @@ public class NBAInclusionCheck {
                 learner.refineHypothesis(ceQuery);
                 t = timer.getCurrentTime() - t;
                 options.stats.timeOfLearner += t;
-                if(options.verbose) options.log.println("learner output: " + learner.toString());
+                if(options.verbose()) options.log.println("learner output: " + learner.toString());
                 // if do not set lazy eq check or it is learnerBuechi
                 if(options.optimization != Options.Optimization.LAZY_EQ) break;
             }
@@ -261,7 +261,7 @@ public class NBAInclusionCheck {
         for(int i = 0; i < args.length; i ++) {
             
             if(args[i].compareTo("-v") == 0){
-                options.verbose=true;
+                options.verbose = 2;
                 continue;
             }
             if(args[i].compareTo("-table") == 0) {

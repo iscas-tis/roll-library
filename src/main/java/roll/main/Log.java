@@ -44,13 +44,14 @@ public class Log {
     }
     
     public void verbose(String content) {
-        if(options.verbose) {
+        if(options.verbose()) {
             log.println(content);
         }
     }
     
     public void println(String content) {
-        log.println(content);
+        if(! options.silent()) 
+            log.println(content);
     }
     
     public void print(String content) {

@@ -116,9 +116,7 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
     public void refineHypothesis(Query<HashableValue> query) {
         // we assume that the counterexample returned are normalized w.r.t the leading DFA
         ExprValue expr = learnerLeading.getExprValueWord(query.getPrefix(), query.getSuffix());
-        if(options.verbose) {
-            System.out.println("normalized factorization: " + expr.toString());
-        }
+        options.log.verbose("normalized factorization: " + expr.toString());
         DFA leadDFA = learnerLeading.getHypothesis();
         int s = leadDFA.getSuccessor(expr.getLeft());
         Word label = learnerLeading.getStateLabel(s);

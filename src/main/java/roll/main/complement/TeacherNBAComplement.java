@@ -127,7 +127,7 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
         boolean isEmpty = checker.checkEmptiness();
         t = timer.getCurrentTime() - t;
         this.timeInterBandBF += t;
-        if(options.verbose) {
+        if(options.verbose()) {
             options.log.println("Hypothesis for complementation B");
             options.log.println(BF.toString());
         }
@@ -168,9 +168,7 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
                 ++this.numBFCLessB;
                 options.log.println("Checking the inclusion between B(F^c) (" + BFC.getStateSize() + ") and B ("
                         + B.getStateSize() + ")...");
-                if (options.verbose) {
-                    options.log.println("B(F^c): \n" + BFC.toString());
-                }
+                options.log.verbose("B(F^c): \n" + BFC.toString());
                 // by sampler
                 boolean hasCE = false;
                 
@@ -227,7 +225,7 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
         ++ options.stats.numOfEquivalenceQuery;
         options.stats.timeOfLastEquivalenceQuery = timer.getTimeElapsed();
         
-        if(options.verbose) System.out.println("counter example = " + query);
+        if(options.verbose()) System.out.println("counter example = " + query);
         return query;
     }
     

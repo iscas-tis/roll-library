@@ -101,7 +101,7 @@ public class TranslatorFDFAOver extends TranslatorFDFA {
 		
 		Word pre = null, suf = null;
 		// 1. first build dollar deterministic automaton for (u, v) 
-		if(options.verbose) options.log.println(autUVOmega.toDot());
+		options.log.verbose(autUVOmega.toDot());
 		
 		// 2. for every final state, we get normalized counterexample
 		DFA autL = fdfa.getLeadingDFA();
@@ -148,7 +148,7 @@ public class TranslatorFDFAOver extends TranslatorFDFA {
 //							+ "\nrun a$cbcbcbab, " + BasicOperations.run(dkNFA, "a$cbcbcbab"));
 					
 		    		String counterexample = dkNFA.getShortestExample(true);
-					if(options.verbose && counterexample != null) System.out.println(" found counterexample " + counterexample);
+					options.log.verbose(" found counterexample " + counterexample);
 		    		// remove duplicate dollar transition
 		    		if(counterexample == null) {
 		    			u.getTransitions().remove(transDollar);
@@ -157,16 +157,16 @@ public class TranslatorFDFAOver extends TranslatorFDFA {
 		    		
 		    		found = true;
 		    		// get decomposition (u, xyz...) which is not in L
-					if(options.verbose) System.out.println("normalized counterexample " + counterexample 
+					options.log.verbose("normalized counterexample " + counterexample 
 							+ ", " + BasicOperations.run(dkNFA, counterexample));
 					
 					int dollarNr = counterexample.indexOf(Alphabet.DOLLAR); //
 					pre = alphabet.getWordFromString(counterexample.substring(0, dollarNr));
 					// must be some x,y,z concatenation
 					String period = counterexample.substring(dollarNr + 1);
-					if(options.verbose) System.out.println("dkAutLPOther\n " + dkAutLOther.toDot());
-					if(options.verbose) System.out.println("dkAutP\n " + dkAutP.toDot());
-					if(options.verbose) System.out.println("dkNFA\n " + dkAutP.toDot());
+					options.log.verbose("dkAutLPOther\n " + dkAutLOther.toDot());
+					options.log.verbose("dkAutP\n " + dkAutP.toDot());
+					options.log.verbose("dkNFA\n " + dkAutP.toDot());
 					// build deterministic automaton 
 					Automaton dkAutCE = dkAutP.intersection(dkAutLOther);  
 //					Word p = learnerFDFA.getProgressStateLabel(stateNr, accNr);
@@ -194,9 +194,7 @@ public class TranslatorFDFAOver extends TranslatorFDFA {
 			int lastNr = getLastIndexAtFinal(dkAutCE, startNr, period);
 			// only one x left, and (u, x) not in L
 //			assert startNr <= lastNr + 1 && startNr >= 0 && lastNr + 1 <= period.length();
-			if(options.verbose) {
-			    options.log.println("startNr=" + startNr + " lastNr=" + lastNr + " |period|=" + period.length());
-			}
+			options.log.verbose("startNr=" + startNr + " lastNr=" + lastNr + " |period|=" + period.length());
 			if(lastNr < 0) break;       
 			Word x = alphabet.getWordFromString(period.substring(startNr, lastNr + 1));
 			if(lastNr == period.length() - 1) {
@@ -271,11 +269,9 @@ public class TranslatorFDFAOver extends TranslatorFDFA {
             		suf = yz.concat(yz); // y distinguish p and y since (u, py) is not in L
             	}else {
             		// there exists z... and yz... can not lead to that accepting state?
-            		System.err.println( "Unfortunately, we can not find a valid counterexample");
-            	    if(options.verbose) {
-            	    	System.out.println("period left: " + yz.toStringExact());
-            	    	System.out.println("progress automaton left: \n" + dkAutCE.toDot());
-            	    }
+            		options.log.err( "Unfortunately, we can not find a valid counterexample");
+            	    options.log.verbose("period left: " + yz.toStringExact());
+            	    options.log.verbose("progress automaton left: \n" + dkAutCE.toDot());
             	    System.exit(-1);
             		suf = yz;
             	}

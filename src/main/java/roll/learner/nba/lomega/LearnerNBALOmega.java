@@ -76,9 +76,8 @@ public class LearnerNBALOmega extends LearnerBase<NBA>{
 
     @Override
     public void refineHypothesis(Query<HashableValue> query) {
-        if(options.verbose) {
-            options.log.println(fdfaLearner.getHypothesis().toString());
-        }
+        
+        options.log.verbose(fdfaLearner.getHypothesis().toString());
         options.log.println("Analyzing counterexample for FDFA learner...");
         Timer timer = new Timer();
         timer.start();

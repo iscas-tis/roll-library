@@ -199,21 +199,16 @@ public final class ROLL {
         options.stats.print();
         
     }
-
-    public static void runComplementingMode(Options options) {
-        
-        Timer timer = new Timer();
-        timer.start();
-        // prepare the parser
-        Parser parser = UtilParser.prepare(options, options.inputFile, options.format);
-        NBA input = parser.parse();
+    
+    public static NBA complement(Options options, NBA input) {
+        // starting to complement
         options.stats.numOfLetters = input.getAlphabetSize();
         options.stats.numOfStatesInTraget = input.getStateSize();
         
         TeacherNBAComplement teacher = new TeacherNBAComplement(options, input);
         LearnerFDFA learner = UtilLOmega.getLearnerFDFA(options, input.getAlphabet(), teacher);
         options.log.println("Initializing learner...");
-        
+        Timer timer = new Timer();
         long t = timer.getCurrentTime();
         learner.startLearning();
         t = timer.getCurrentTime() - t;
@@ -250,10 +245,23 @@ public final class ROLL {
             }            
         }
         options.log.println("Learning completed...");
+        
+        teacher.print();
+        return options.stats.hypothesis;
+    }
+
+    public static void runComplementingMode(Options options) {
+        
+        Timer timer = new Timer();
+        timer.start();
+        // prepare the parser
+        Parser parser = UtilParser.prepare(options, options.inputFile, options.format);
+        NBA input = parser.parse();
+        NBA complement = complement(options, input);
         // output target automaton
         if(options.outputFile != null) {
             try {
-                parser.print(options.stats.hypothesis, new FileOutputStream(new File(options.outputFile)));
+                parser.print(complement, new FileOutputStream(new File(options.outputFile)));
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
@@ -261,7 +269,7 @@ public final class ROLL {
             options.log.println("\ntarget automaton:");
             parser.print(input, options.log.getOutputStream());
             options.log.println("\nhypothesis automaton:");
-            parser.print(options.stats.hypothesis, options.log.getOutputStream());
+            parser.print(complement, options.log.getOutputStream());
         }
         parser.close();
         // output statistics
@@ -272,7 +280,6 @@ public final class ROLL {
         options.stats.timeInTotal = timer.getTimeElapsed();
         
         options.stats.print();
-        teacher.print();
     }
     
     

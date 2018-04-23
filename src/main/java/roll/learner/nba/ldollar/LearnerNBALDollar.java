@@ -133,7 +133,7 @@ public class LearnerNBALDollar extends LearnerBase<NBA>{
         } else {
             counterexample = dkAut.intersection(result).getShortestExample(true);
         }
-        if(options.verbose) options.log.println("counterexample: " + counterexample);
+        options.log.verbose("counterexample: " + counterexample);
         Word word = alphabet.getWordFromString(counterexample);
         Query<HashableValue> ceQuery = new QuerySimple<>(word, alphabet.getEmptyWord());
         ceQuery.answerQuery(answer);

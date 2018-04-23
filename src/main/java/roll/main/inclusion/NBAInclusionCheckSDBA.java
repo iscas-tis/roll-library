@@ -64,7 +64,7 @@ public class NBAInclusionCheckSDBA {
         for(int i = 0; i < args.length; i ++) {
             
             if(args[i].compareTo("-v") == 0){
-                options.verbose=true;
+                options.verbose = 2;
                 continue;
             }
             if(args[i].compareTo("-table") == 0) {

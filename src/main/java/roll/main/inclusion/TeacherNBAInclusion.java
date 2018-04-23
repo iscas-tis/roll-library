@@ -120,7 +120,7 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
         boolean isEmpty = interCheck.isEmpty();
         t = timer.getCurrentTime() - t;
         this.timeInterBandBF += t;
-        if(options.verbose) {
+        if(options.verbose()) {
             options.log.println("Hypothesis for complementation B");
             options.log.println(BF.toString());
         }
@@ -178,7 +178,7 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
                     // we have to resort to the equivalence check for hypothesisNotA
                     ++this.numBFCLessB;
                     options.log.println("Checking the inclusion between B(F^c) (" + BFC.getStateSize() + ") and B ("+ B.getStateSize() + ")...");
-                    if(options.verbose) {
+                    if(options.verbose()) {
                         options.log.println("B(F^c): \n" + BFC.toString());
                     }
                     // by sampler
@@ -243,7 +243,7 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
         ++ options.stats.numOfEquivalenceQuery;
         options.stats.timeOfLastEquivalenceQuery = timer.getTimeElapsed();
         
-        if(options.verbose) System.out.println("counter example = " + query);
+        if(options.verbose()) System.out.println("counter example = " + query);
         return query;
     }
     

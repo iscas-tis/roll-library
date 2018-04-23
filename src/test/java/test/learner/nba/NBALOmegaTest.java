@@ -106,7 +106,7 @@ public class NBALOmegaTest {
         options.structure = Options.Structure.TREE;
         options.approximation = Options.Approximation.UNDER;
         options.algorithm = Options.Algorithm.SYNTACTIC;
-        options.verbose = false;
+        options.verbose = 1;
         Timer timer = new Timer();
         timer.start();
         TeacherNBARABIT teacher = new TeacherNBARABIT(options, target);

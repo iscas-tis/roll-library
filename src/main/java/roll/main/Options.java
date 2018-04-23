@@ -53,7 +53,10 @@ public class Options {
     public int numOfStatesForTest;
     
     // output mode
-    public boolean verbose = false;
+    public int verbose = 0; // 0 for silent, 1 for normal and 2 for verbose
+    
+    // output mode
+    public boolean silent = false;
     
     // search method for counterexample
     public boolean binarySearch = false;
@@ -165,6 +168,14 @@ public class Options {
         boolean isLDBA() {
             return this == LDBA;
         }
+    }
+    
+    public boolean verbose() {
+        return verbose == 2;
+    }
+    
+    public boolean silent() {
+        return verbose == 0;
     }
     
     public String toString() {

@@ -112,7 +112,8 @@ public class CLParser {
                 continue;
             }
             if(args[i].compareTo("-v")==0){
-                options.verbose=true;
+                options.verbose = Integer.parseInt(args[i+1]);
+                i += 1;
                 continue;
             }
             
@@ -227,7 +228,7 @@ public class CLParser {
         options.log.println("\noptions:");
         
         options.log.println("-h", indent, "Show this page");
-        options.log.println("-v", indent, "Verbose mode");
+        options.log.println("-v i", indent, "0 for silent, 1 for normal and 2 for verbose");
         options.log.println("-out <A>", indent, "Output learned automaton in file <A>");
         options.log.println("-out2 <A> <B>", indent, "Output two automata in files <A> and <B>");
         options.log.println("-dot", indent, "Output automaton in DOT format");
