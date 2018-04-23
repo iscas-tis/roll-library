@@ -273,9 +273,9 @@ public final class ROLL {
         }
         parser.close();
         // output statistics
-        options.stats.numOfStatesInHypothesis = options.stats.hypothesis.getStateSize();
+        options.stats.numOfStatesInHypothesis = complement.getStateSize();
         options.stats.numOfTransInTraget = NBAOperations.getNumberOfTransitions(input);
-        options.stats.numOfTransInHypothesis = NBAOperations.getNumberOfTransitions(options.stats.hypothesis);
+        options.stats.numOfTransInHypothesis = NBAOperations.getNumberOfTransitions(complement);
         timer.stop();
         options.stats.timeInTotal = timer.getTimeElapsed();
         
