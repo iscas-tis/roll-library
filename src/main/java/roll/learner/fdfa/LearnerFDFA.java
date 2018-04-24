@@ -176,10 +176,10 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("T: \n" + learnerLeading.toString() + "\n");
+        builder.append("Leading MQ for M: \n" + learnerLeading.toString() + "\n");
         
         for(LearnerProgress learner : learnerProgress) {
-            builder.append(learner.getLeadingLabel().toStringWithAlphabet() + ": \n");
+            builder.append("Progress MQ for A(" + learner.getLeadingLabel().toStringWithAlphabet() + "): \n");
             builder.append(learner.toString());
         }
         return builder.toString();
