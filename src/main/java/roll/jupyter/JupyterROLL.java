@@ -64,10 +64,6 @@ public class JupyterROLL {
         register();
     }
     
-    private static String dotToSVG(String dot) {
-        return NativeTool.dot2SVG(dot);
-    }
-    
     private static void register(){
         Displayers.register(IHTML.class, new Displayer<IHTML>() {
             @Override
@@ -121,7 +117,7 @@ public class JupyterROLL {
             // along with ce
             FASimple hypothesis = learner.getHypothesis();
             Triple triple = null;
-            String learnerStr = learner.toHTML(); //.replaceAll("\n", "<br>").replaceAll(" ", "&nbsp;") + "</text>"; //.replaceAll(" ", "&nbsp;").replaceAll("" + (char)(9), "&#9;");
+            String learnerStr = learner.toHTML();
             triple = new Triple(learnerStr,
                     hypothesis.toHTML(), ceQuery);
             if(hypothesis instanceof NBA) {
