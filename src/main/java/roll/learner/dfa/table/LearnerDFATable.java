@@ -232,6 +232,11 @@ public abstract class LearnerDFATable extends LearnerDFA {
             wordExpr = getExprValueWord(wordCE.getSuffix(result.breakIndex + 1));  // y[j+1..n]
         }
     }
+    
+    @Override
+    public String toHTML() {
+        return "<pre>" + toString() + "</pre>";
+    }
 
     
 }

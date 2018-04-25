@@ -16,6 +16,7 @@
 
 package roll.query;
 
+import roll.main.IHTML;
 import roll.table.ObservationRow;
 import roll.words.Word;
 
@@ -24,7 +25,7 @@ import roll.words.Word;
  * 
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public class QuerySimple<O> implements Query<O> {
+public class QuerySimple<O> implements Query<O>, IHTML {
 
 	private final Word prefix;
 	private final Word suffix;
@@ -85,6 +86,15 @@ public class QuerySimple<O> implements Query<O> {
 	@Override
 	public Query<O> clone() {
         return new QuerySimple<>(row, prefix, suffix, columnIndex);
+	}
+	
+	@Override
+	public String toHTML() {
+	    String prefixStr = prefix.toStringWithAlphabet();
+	    if(suffix.isEmpty()) {
+	        return prefixStr;
+	    }
+        return prefixStr + "(" + suffix.toStringWithAlphabet() + ")^\\omega";
 	}
 
 }

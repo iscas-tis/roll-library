@@ -21,6 +21,7 @@ import java.util.List;
 
 import roll.automata.DFA;
 import roll.automata.FDFA;
+import roll.jupyter.NativeTool;
 import roll.learner.LearnerBase;
 import roll.learner.LearnerType;
 import roll.main.Options;
@@ -176,13 +177,29 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Leading MQ for M: \n" + learnerLeading.toString() + "\n");
+        builder.append("Leading Learner: \n" + learnerLeading.toString() + "\n");
         
         for(LearnerProgress learner : learnerProgress) {
-            builder.append("Progress MQ for A(" + learner.getLeadingLabel().toStringWithAlphabet() + "): \n");
+            builder.append("Progress Learner for " + learner.getLeadingLabel().toStringWithAlphabet() + ": \n");
             builder.append(learner.toString());
         }
         return builder.toString();
+    }
+    
+    @Override
+    public String toHTML() {
+        if (options.structure == Options.Structure.TREE) {
+               StringBuilder builder = new StringBuilder();
+               builder.append("<p> Leading Learner :  </p> <br> "    
+                            + NativeTool.dot2SVG(learnerLeading.toString()));
+               for(LearnerProgress learner : learnerProgress) {
+                   builder.append("<p> Progress Learner for " + learner.getLeadingLabel().toStringWithAlphabet() + ": </p> <br>"
+                           + NativeTool.dot2SVG(learner.toString()) + "<br>");
+               }
+               return builder.toString();
+        }else {
+            return "<pre> " + toString() + "</pre>";
+        }
     }
     
     // -------------- some helper function

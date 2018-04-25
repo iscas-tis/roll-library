@@ -149,5 +149,10 @@ public class LearnerNBALDollar extends LearnerBase<NBA>{
     public LearnerDFA getLearnerDFA() {
         return dfaLearner;
     }
+
+    @Override
+    public String toHTML() {
+        return dfaLearner.toHTML();
+    }
     
 }

@@ -69,6 +69,12 @@
       </plugin>
     </plugins>
   </build>
+  <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -122,6 +128,11 @@
       <scope>system</scope>
       <systemPath>${project.basedir}/lib/rabit.jar</systemPath>
       <version>0.0.1</version>
+    </dependency>
+    <dependency>
+    	<groupId>com.github.jupyter</groupId>
+    	<artifactId>jvm-repr</artifactId>
+    	<version>0.3.1</version>
     </dependency>
   </dependencies>
 </project>

@@ -113,4 +113,9 @@ public class LearnerNBALOmega extends LearnerBase<NBA>{
         return fdfaLearner.toString();
     }
 
+    @Override
+    public String toHTML() {
+        return fdfaLearner.toHTML();
+    }
+
 }

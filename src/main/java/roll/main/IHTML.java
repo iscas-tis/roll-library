@@ -14,57 +14,12 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.table;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import roll.words.Word;
+package roll.main;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-// can not be instantiated
-public abstract class ObservationRowAbstract implements ObservationRow {
 
-	protected final Word word;
-	protected List<HashableValue> values;
-	
-	protected ObservationRowAbstract(Word word) {
-		assert word != null;
-		this.word = word;
-		this.values = new ArrayList<>();
-	}
-	
-	@Override
-	public Word getWord() {
-		return word;
-	}
-
-    @Override
-    public List<HashableValue> getValues() {
-        return Collections.unmodifiableList(values);
-    }
-    
-    public String toString() {
-        return word.toString();
-    }
-    
-    public void add(HashableValue value) {
-        values.add(value);
-    }
-    
-    public void set(int index, HashableValue value) {
-        assert index >= 0;
-        while(values.size() <= index) {
-            values.add(null);
-        }
-        values.set(index, value);
-    }
-
-    public void clear() {
-        values.clear();
-    }
-
+public interface IHTML {
+    String toHTML();
 }

@@ -16,6 +16,7 @@
 
 package roll.learner;
 
+import roll.main.IHTML;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
@@ -29,7 +30,7 @@ import roll.words.Word;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public abstract class LearnerBase<M> implements Learner<M, HashableValue> {
+public abstract class LearnerBase<M> implements Learner<M, HashableValue>, IHTML {
     
     protected final Alphabet alphabet;
     protected final MembershipOracle<HashableValue> membershipOracle;

@@ -22,6 +22,7 @@ import java.util.List;
 import gnu.trove.iterator.TIntObjectIterator;
 import roll.automata.DFA;
 import roll.automata.StateDFA;
+import roll.jupyter.NativeTool;
 import roll.learner.LearnerDFA;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
@@ -346,5 +347,10 @@ public abstract class LearnerDFATree extends LearnerDFA {
 	public String toString() {
 		return tree.toString();
 	}
+	
+    @Override
+    public String toHTML() {
+        return NativeTool.dot2SVG(toString());
+    }
 
 }
