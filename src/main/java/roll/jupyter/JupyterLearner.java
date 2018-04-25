@@ -18,6 +18,5 @@ package roll.jupyter;
 
 public interface JupyterLearner<M> {
     M getHypothesis();
-    boolean isTable();
 }
 

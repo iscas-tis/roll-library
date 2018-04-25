@@ -79,8 +79,6 @@ public class JupyterROLL {
     }
     
     private static void register(){
-
-        
         Displayers.register(IHTML.class, new Displayer<IHTML>() {
             @Override
             public Map<String, String> display(IHTML html) {
@@ -92,103 +90,6 @@ public class JupyterROLL {
                 };
             }
         });
-        // for Learners
-//        Displayers.register(JupyterLearner.class, new Displayer<JupyterLearner>() {
-//            @Override
-//            public Map<String, String> display(JupyterLearner learner) {
-//                return new HashMap<String, String>() {
-//                    private static final long serialVersionUID = 1L;
-//
-//                    {
-//                        if (! learner.isTable()){
-//                            System.err.println("toString() \n" + learner.toString());
-//                            put(MIMETypes.HTML, dotToSVG(learner.toString()));
-//                        }
-//                        else {
-//                            put(MIMETypes.TEXT, learner.toString());
-//                        }
-//                    }
-//                };
-//            }
-//        });
-//        // for FASimple
-//        Displayers.register(FASimple.class, new Displayer<FASimple>() {
-//            @Override
-//            public Map<String, String> display(FASimple automaton) {
-//                return new HashMap<String, String>() {
-//                    private static final long serialVersionUID = 1L;
-//                    {
-//                        put(MIMETypes.HTML, dotToSVG(automaton.toDot()));
-//                    }
-//                };
-//            }
-//        });
-//        
-//        Displayers.register(DFALearner.class, new Displayer<DFALearner>() {
-//            @Override
-//            public Map<String, String> display(DFALearner learner) {
-//                return new HashMap<String, String>() {
-//                    private static final long serialVersionUID = 1L;
-//
-//                    {
-//                        if (! learner.isTable()){
-//                            System.err.println("toString() \n" + learner.toString());
-//                            put(MIMETypes.HTML, dotToSVG(learner.toString()));
-//                        }
-//                        else {
-//                            put(MIMETypes.TEXT, learner.toString());
-//                        }
-//                    }
-//                };
-//            }
-//        });
-//        
-//        Displayers.register(NBALearner.class, new Displayer<NBALearner>() {
-//            @Override
-//            public Map<String, String> display(NBALearner learner) {
-//                return new HashMap<String, String>() {
-//                    private static final long serialVersionUID = 1L;
-//
-//                    {
-//                        if (learner.isTable()){
-//                            put(MIMETypes.TEXT, learner.toString());
-//                        }
-//                        else {
-//                            put(MIMETypes.HTML, learner.toString());
-//                        }
-//                    }
-//                };
-//            }
-//        });
-//        
-//        Displayers.register(Triple.class, new Displayer<Triple>() {
-//            @Override
-//            public Map<String, String> display(Triple triple) {
-//                return new HashMap<String, String> () {/**
-//                     * 
-//                     */
-//                    private static final long serialVersionUID = 1L;
-//                {
-//                    String HTML =
-//                            "<table border=\"1\" cellspacing=\"0\" bordercolor=\"#000000\"  style=\"border-collapse:collapse;\">\n" +
-//                            "  <tr>\n" +
-//                            "    <th><center> Learner</center></th>\n" +
-//                            "    <th><center>  Hypothesis </center></th>\n" +
-//                            "    <th><center> Counterexample </center></th>\n" +
-//                            "  </tr>\n" +
-//                            "  <tr>\n"  +
-//                            "    <td>%s</td>\n" +
-//                            "    <td><center>%s</center></td>\n" +
-//                            "    <td><center>%s</center></td>\n" +
-//                            "  </tr>\n" +
-//                            "</table>";
-//                    String learner = triple.getLeft();
-//                    String hypothesis = triple.getMiddle();
-//                    QuerySimple<HashableValue> query = (QuerySimple<HashableValue>) triple.getRight();
-//                    put(MIMETypes.HTML,String.format(HTML, learner, hypothesis, query == null ? "" : "$" + query.toLaTex() + "$"));
-//                }};
-//            }
-//        }); 
     }
     
     public static Alphabet alphabet;

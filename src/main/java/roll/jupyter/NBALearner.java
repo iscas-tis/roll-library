@@ -19,7 +19,6 @@ package roll.jupyter;
 import roll.automata.NBA;
 import roll.learner.LearnerBase;
 import roll.main.IHTML;
-import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
 import roll.query.QuerySimple;
@@ -56,12 +55,7 @@ public class NBALearner implements JupyterLearner<NBA>, IHTML {
     
     @Override
     public String toString() {
-        if(isTable()) {
-            return learner.toString();
-        }else {
-            return null;
-//            return learner.toSVG();
-        }
+        return learner.toString();
     }
     
     public void refineHypothesis(String stem, String loop) {
@@ -84,11 +78,6 @@ public class NBALearner implements JupyterLearner<NBA>, IHTML {
         }
         ceQuery.answerQuery(null);
         learner.refineHypothesis(ceQuery);
-    }
-    
-    @Override
-    public boolean isTable() {
-        return learner.getOptions().structure == Options.Structure.TABLE;
     }
 
     @Override

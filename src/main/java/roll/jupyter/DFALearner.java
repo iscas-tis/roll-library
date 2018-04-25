@@ -19,7 +19,6 @@ package roll.jupyter;
 import roll.automata.DFA;
 import roll.learner.LearnerBase;
 import roll.main.IHTML;
-import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
 import roll.query.QuerySimple;
@@ -76,11 +75,6 @@ public class DFALearner implements JupyterLearner<DFA>, IHTML {
         }
         ceQuery.answerQuery(null);
         learner.refineHypothesis(ceQuery);
-    }
-
-    @Override
-    public boolean isTable() {
-        return learner.getOptions().structure == Options.Structure.TABLE;
     }
 
     @Override
