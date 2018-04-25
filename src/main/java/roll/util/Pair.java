@@ -16,7 +16,9 @@
 
 package roll.util;
 
-public class Pair<L, R> {
+import roll.main.IHTML;
+
+public class Pair<L, R> implements IHTML {
 	
 	private final L left;
 	private final R right;
@@ -51,5 +53,10 @@ public class Pair<L, R> {
 	public String toString() {
 		return "(" + left.toString() + ", " + right.toString() + ")";
 	}
+
+    @Override
+    public String toHTML() {
+        return "<pre>" + toString() + "</pre>";
+    }
 
 }

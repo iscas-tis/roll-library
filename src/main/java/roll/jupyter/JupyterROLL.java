@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2017                                               */
+/* Copyright (c) 2016, 2017, 2018                                         */
 /*       Institute of Software, Chinese Academy of Sciences               */
 /* This file is part of ROLL, a Regular Omega Language Learning library.  */
 /* ROLL is free software: you can redistribute it and/or modify           */
@@ -23,12 +23,16 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import automata.FiniteAutomaton;
+import dk.brics.automaton.Automaton;
 import jupyter.Displayer;
 import jupyter.Displayers;
 import jupyter.MIMETypes;
+import mainfiles.RABIT;
 import roll.automata.DFA;
 import roll.automata.FASimple;
 import roll.automata.NBA;
+import roll.automata.operations.DFAOperations;
 import roll.learner.LearnerBase;
 import roll.learner.dfa.table.LearnerDFATableColumn;
 import roll.learner.dfa.table.LearnerDFATableLStar;
@@ -40,29 +44,15 @@ import roll.main.IHTML;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.oracle.TeacherAbstract;
-/* Copyright (c) 2016, 2017, 2018                                         */
-/*       Institute of Software, Chinese Academy of Sciences               */
-/* This file is part of ROLL, a Regular Omega Language Learning library.  */
-/* ROLL is free software: you can redistribute it and/or modify           */
-/* it under the terms of the GNU General Public License as published by   */
-/* the Free Software Foundation, either version 3 of the License, or      */
-/* (at your option) any later version.                                    */
-
-/* This program is distributed in the hope that it will be useful,        */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of         */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          */
-/* GNU General Public License for more details.                           */
-
-/* You should have received a copy of the GNU General Public License      */
-/* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
-
 import roll.oracle.dfa.TeacherDFA;
 import roll.oracle.dfa.dk.TeacherDFADK;
 import roll.oracle.nba.TeacherNBA;
 import roll.oracle.nba.rabit.TeacherNBARABIT;
+import roll.oracle.nba.rabit.UtilRABIT;
 import roll.query.Query;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
+import roll.util.Pair;
 import roll.words.Alphabet;
 
 /**
@@ -311,5 +301,43 @@ public class JupyterROLL {
         }
         
         return roll.main.ROLL.complement(options, nba);
+    }
+    
+    // check equivalence
+    public static String checkEquivalence(DFA A, DFA B) {
+        Automaton dkA = DFAOperations.toDkDFA(A);
+        Automaton dkB = DFAOperations.toDkDFA(B);
+        Automaton result = dkA.clone().minus(dkB.clone());
+        String counterexample = result.getShortestExample(true);
+        if(A.getAlphabet() != B.getAlphabet()) {
+            System.err.println("A and B donot share the same alphabet");
+            return null;
+        }
+        
+        if(counterexample != null) {
+            return counterexample;
+        }
+        
+        result = dkB.clone().minus(dkA.clone());
+        counterexample = result.getShortestExample(true);
+        if(counterexample != null) {
+            return counterexample;
+        }
+        return null;
+    }
+    
+    // check equivalence
+    public static Pair<String, String> checkEquivalence(NBA A, NBA B) {
+        FiniteAutomaton rabitA = UtilRABIT.toRABITNBA(A);
+        FiniteAutomaton rabitB = UtilRABIT.toRABITNBA(B);
+        boolean inclusion = RABIT.isIncluded(rabitA, rabitB);
+        if(inclusion) {
+            inclusion = RABIT.isIncluded(rabitB, rabitA);
+            if(inclusion) return null;
+        }
+        String prefixStr = RABIT.getPrefix();
+        String suffixStr = RABIT.getSuffix();
+        
+        return new Pair<>(prefixStr, suffixStr);
     }
 }

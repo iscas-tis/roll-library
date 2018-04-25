@@ -16,6 +16,10 @@
 
 package roll.jupyter;
 
+/**
+ * @author Yong Li
+ * */
+
 public interface JupyterLearner<M> {
     M getHypothesis();
 }
