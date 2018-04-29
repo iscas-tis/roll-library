@@ -93,6 +93,7 @@ public class FDFALearner implements JupyterLearner<FDFA>, IHTML {
         int i, j = 0;
         int uState = M.getSuccessor(u);
         boolean flag = false;
+        // 0 <= i < j such that uv^i ~ uv^{i + j} and i + j < |M| + 1 
         for(i = 0; i <= num / 2; i ++) {
             int uvi = uState;
             int k = i;
@@ -116,7 +117,6 @@ public class FDFALearner implements JupyterLearner<FDFA>, IHTML {
         }
         // get i v
         Word prefix = u;
-//        System.out.println(i + ", " + j);
         while(i > 0) {
             prefix = prefix.concat(v);
             i --;
