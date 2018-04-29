@@ -38,6 +38,13 @@ import roll.learner.dfa.table.LearnerDFATableColumn;
 import roll.learner.dfa.table.LearnerDFATableLStar;
 import roll.learner.dfa.tree.LearnerDFATreeColumn;
 import roll.learner.dfa.tree.LearnerDFATreeKV;
+import roll.learner.fdfa.LearnerFDFA;
+import roll.learner.fdfa.table.LearnerFDFATablePeriodic;
+import roll.learner.fdfa.table.LearnerFDFATableRecurrent;
+import roll.learner.fdfa.table.LearnerFDFATableSyntactic;
+import roll.learner.fdfa.tree.LearnerFDFATreePeriodic;
+import roll.learner.fdfa.tree.LearnerFDFATreeRecurrent;
+import roll.learner.fdfa.tree.LearnerFDFATreeSyntactic;
 import roll.learner.nba.ldollar.LearnerNBALDollar;
 import roll.learner.nba.lomega.LearnerNBALOmega;
 import roll.main.IHTML;
@@ -257,20 +264,58 @@ public class JupyterROLL {
         return new DFALearner(alphabet, learner, mqOracle);
     }
     
+    public static FDFALearner createFDFALearner(String algo, String structure, BiFunction<String, String, Boolean> mqFunc) {
+        Options options = parseOptions(algo, structure);
+        verifyAlphabet();
+        MembershipOracle<HashableValue> mqOracle = new MQOracle(mqFunc);
+        LearnerFDFA fdfaLearner = null;
+        if(options.structure.isTable()) {
+            switch(options.algorithm) {
+            case PERIODIC:
+                fdfaLearner = new LearnerFDFATablePeriodic(options, alphabet, mqOracle);
+                break;
+            case SYNTACTIC:
+                fdfaLearner = new LearnerFDFATableSyntactic(options, alphabet, mqOracle);
+                break;
+            case RECURRENT:
+                fdfaLearner = new LearnerFDFATableRecurrent(options, alphabet, mqOracle);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown FDFA learner");
+            }
+        }else {
+            switch(options.algorithm) {
+            case PERIODIC:
+                fdfaLearner = new LearnerFDFATreePeriodic(options, alphabet, mqOracle);
+                break;
+            case SYNTACTIC:
+                fdfaLearner = new LearnerFDFATreeSyntactic(options, alphabet, mqOracle);
+                break;
+            case RECURRENT:
+                fdfaLearner = new LearnerFDFATreeRecurrent(options, alphabet, mqOracle);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown FDFA learner");
+            }
+        }
+        fdfaLearner.startLearning();
+        return new FDFALearner(alphabet, fdfaLearner, mqOracle);
+    }
+    
     private static class MQOracle implements MembershipOracle<HashableValue> {
         private Function<Query<HashableValue>,Boolean>  delegate;
 
         MQOracle(BiFunction<String, String, Boolean> f) {
             this.delegate = (query -> f.apply(
-                    query.getPrefix().toStringWithAlphabet(),
-                    query.getSuffix().toStringWithAlphabet()
+                    query.getPrefix().toStringExact(),
+                    query.getSuffix().toStringExact()
                 )
             );
         }
 
         MQOracle(Function<String, Boolean> f) {
             this.delegate = (query -> f.apply(
-                    query.getQueriedWord().toStringWithAlphabet()
+                    query.getQueriedWord().toStringExact()
                 )
             );
         }

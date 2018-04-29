@@ -16,9 +16,12 @@
 
 package roll.automata;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import roll.automata.operations.FDFAOperations;
+import roll.jupyter.NativeTool;
+import roll.main.IHTML;
 import roll.util.Pair;
 import roll.util.sets.ISet;
 import roll.words.Alphabet;
@@ -27,7 +30,7 @@ import roll.words.Word;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public class FDFA implements Acceptor {
+public class FDFA implements Acceptor, IHTML {
     
     private final DFA leadingDFA;
     private final List<DFA> progressDFAs;
@@ -77,6 +80,22 @@ public class FDFA implements Acceptor {
         builder.append("//FDFA-M: \n" + leadingDFA.toString(apList) + "\n");
         for(int i = 0; i < progressDFAs.size(); i ++) {
             builder.append("//FDFA-P" + i + ": \n" + progressDFAs.get(i).toString(apList));
+        }
+        return builder.toString();
+    }
+    
+    @Override
+    public String toHTML() {
+        StringBuilder builder = new StringBuilder();
+        List<String> apList = new ArrayList<>();
+        for(int i = 0; i < alphabet.getLetterSize(); i ++) {
+            apList.add("" + alphabet.getLetter(i));
+        }
+        builder.append("<p> Leading DFA M :  </p> <br> "    
+                     + NativeTool.dot2SVG(leadingDFA.toString(apList)));
+        for(int i = 0; i < progressDFAs.size(); i ++) {
+            builder.append("<p> Progress DFA for " + i + ": </p> <br>"
+                    + NativeTool.dot2SVG(progressDFAs.get(i).toString(apList)) + "<br>");
         }
         return builder.toString();
     }
