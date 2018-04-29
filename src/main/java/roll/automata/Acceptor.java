@@ -18,13 +18,14 @@ package roll.automata;
 
 import java.util.List;
 
+import roll.main.IHTML;
 import roll.words.Alphabet;
 
 /**
  * Acceptor for regular (omega) language 
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public interface Acceptor {
+public interface Acceptor extends IHTML {
     
     Alphabet getAlphabet();
 	

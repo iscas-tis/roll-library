@@ -21,7 +21,6 @@ import java.util.List;
 
 import roll.automata.operations.FDFAOperations;
 import roll.jupyter.NativeTool;
-import roll.main.IHTML;
 import roll.util.Pair;
 import roll.util.sets.ISet;
 import roll.words.Alphabet;
@@ -30,7 +29,7 @@ import roll.words.Word;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public class FDFA implements Acceptor, IHTML {
+public class FDFA implements Acceptor {
     
     private final DFA leadingDFA;
     private final List<DFA> progressDFAs;

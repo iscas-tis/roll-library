@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import roll.jupyter.NativeTool;
-import roll.main.IHTML;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
@@ -29,7 +28,7 @@ import roll.words.Alphabet;
  * simple FA like DFA, NFA and NBA
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public abstract class FASimple implements FA, IHTML {
+public abstract class FASimple implements FA {
 
     protected final ArrayList<StateFA> states;
     protected final Alphabet alphabet;
