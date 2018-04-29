@@ -29,8 +29,10 @@ import jupyter.Displayer;
 import jupyter.Displayers;
 import jupyter.MIMETypes;
 import mainfiles.RABIT;
+import roll.automata.Acceptor;
 import roll.automata.DFA;
 import roll.automata.FASimple;
+import roll.automata.FDFA;
 import roll.automata.NBA;
 import roll.automata.operations.DFAOperations;
 import roll.learner.LearnerBase;
@@ -53,6 +55,7 @@ import roll.oracle.MembershipOracle;
 import roll.oracle.TeacherAbstract;
 import roll.oracle.dfa.TeacherDFA;
 import roll.oracle.dfa.dk.TeacherDFADK;
+import roll.oracle.fdfa.dk.TeacherFDFADK;
 import roll.oracle.nba.TeacherNBA;
 import roll.oracle.nba.rabit.TeacherNBARABIT;
 import roll.oracle.nba.rabit.UtilRABIT;
@@ -108,21 +111,25 @@ public class JupyterROLL {
         return new DFA(alphabet);
     }
     
+    public static FDFA createFDFA(DFA M, List<DFA> Ps) {
+        return new FDFA(M, Ps);
+    }
+    
     // ==============================================================================================================
     
     public static List<Triple> learningSeq(
-            String algo, String structure, FASimple target) {
+            String algo, String structure, Acceptor target) {
         // first choose learning algorithm and teacher
         Options options = parseOptions(algo, structure);
-        TeacherAbstract<? extends FASimple> teacher = getTeacher(options, target);
-        LearnerBase<? extends FASimple> learner = getLearner(options, target.getAlphabet(), teacher);
+        TeacherAbstract<? extends Acceptor> teacher = getTeacher(options, target);
+        LearnerBase<? extends Acceptor> learner = getLearner(options, target.getAlphabet(), teacher);
         ArrayList<Triple> sequence = new ArrayList<>();
         // learning loop
         learner.startLearning();
         Query<HashableValue> ceQuery = null;
         while(true) {
             // along with ce
-            FASimple hypothesis = learner.getHypothesis();
+            Acceptor hypothesis = learner.getHypothesis();
             Triple triple = null;
             String learnerStr = learner.toHTML();
             triple = new Triple(learnerStr,
@@ -150,15 +157,12 @@ public class JupyterROLL {
         switch(algo) {
         case "periodic":
             options.algorithm = Options.Algorithm.PERIODIC;
-            options.automaton = Options.TargetAutomaton.NBA;
             break;
         case "syntactic":
             options.algorithm = Options.Algorithm.SYNTACTIC;
-            options.automaton = Options.TargetAutomaton.NBA;
             break;
         case "recurrent":
             options.algorithm = Options.Algorithm.RECURRENT;
-            options.automaton = Options.TargetAutomaton.NBA;
             break;
         case "ldollar":
             options.algorithm = Options.Algorithm.NBA_LDOLLAR;
@@ -190,34 +194,59 @@ public class JupyterROLL {
             throw new UnsupportedOperationException("Unknown data structure");
         }
         
+//        switch(aut) {
+//        case "nba":
+//            options.automaton = Options.TargetAutomaton.NBA;
+//            break;
+//        case "dfa":
+//            options.automaton = Options.TargetAutomaton.DFA;
+//            break;
+//        case "fdfa":
+//            options.automaton = Options.TargetAutomaton.FDFA;
+//            break;
+//        default:
+//            throw new UnsupportedOperationException("Unknown automaton");
+//        }
+        
         return options;
     }
     
-    private static TeacherAbstract<? extends FASimple> getTeacher(Options options, FASimple target) {
+    private static TeacherAbstract<? extends Acceptor> getTeacher(Options options, Acceptor target) {
         if((target instanceof NBA) && (options.algorithm == Options.Algorithm.NBA_LDOLLAR
                 || options.algorithm == Options.Algorithm.PERIODIC
                 || options.algorithm == Options.Algorithm.SYNTACTIC
                 || options.algorithm == Options.Algorithm.RECURRENT)
             ) {
+               options.automaton = Options.TargetAutomaton.NBA;
                return new TeacherNBARABIT(options, (NBA)target);
            }else if((target instanceof DFA) && (options.algorithm == Options.Algorithm.DFA_COLUMN
                 || options.algorithm == Options.Algorithm.DFA_LSTAR
                 || options.algorithm == Options.Algorithm.DFA_KV)) {
+               options.automaton = Options.TargetAutomaton.DFA;
                return new TeacherDFADK(options, (DFA)target);
+           }else if((target instanceof FDFA) && (options.algorithm == Options.Algorithm.PERIODIC
+                   || options.algorithm == Options.Algorithm.SYNTACTIC
+                   || options.algorithm == Options.Algorithm.RECURRENT)){
+               options.automaton = Options.TargetAutomaton.FDFA;
+               return new TeacherFDFADK(options, (FDFA)target);
            }else {
                throw new UnsupportedOperationException("Unsupported Learning Target");
            }
     }
     
-    private static LearnerBase<? extends FASimple> getLearner(Options options, Alphabet alphabet,
+    private static LearnerBase<? extends Acceptor> getLearner(Options options, Alphabet alphabet,
             MembershipOracle<HashableValue> teacher) {
-        LearnerBase<? extends FASimple> learner = null;
+        LearnerBase<? extends Acceptor> learner = null;
         if(options.algorithm == Options.Algorithm.NBA_LDOLLAR) {
             learner = (LearnerBase<? extends FASimple>)new LearnerNBALDollar(options, alphabet, teacher);
         }else if(options.algorithm == Options.Algorithm.PERIODIC
              || options.algorithm == Options.Algorithm.SYNTACTIC
              || options.algorithm == Options.Algorithm.RECURRENT) {
-            learner = new LearnerNBALOmega(options, alphabet, teacher);
+            if(options.automaton == Options.TargetAutomaton.FDFA) {
+                learner = getFDFALearner(options, alphabet, teacher);
+            }else {
+                learner = new LearnerNBALOmega(options, alphabet, teacher);
+            }
         }else if(options.algorithm == Options.Algorithm.DFA_COLUMN) {
             if(options.structure == Options.Structure.TABLE) {
                 learner = new LearnerDFATableColumn(options, alphabet, teacher);
@@ -233,6 +262,41 @@ public class JupyterROLL {
         }
         
         return learner;
+    }
+    
+    private static LearnerBase<FDFA> getFDFALearner(Options options, Alphabet alphabet,
+            MembershipOracle<HashableValue> teacher) {
+        LearnerFDFA fdfaLearner = null;
+        if(options.structure.isTable()) {
+            switch(options.algorithm) {
+            case PERIODIC:
+                fdfaLearner = new LearnerFDFATablePeriodic(options, alphabet, teacher);
+                break;
+            case SYNTACTIC:
+                fdfaLearner = new LearnerFDFATableSyntactic(options, alphabet, teacher);
+                break;
+            case RECURRENT:
+                fdfaLearner = new LearnerFDFATableRecurrent(options, alphabet, teacher);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown FDFA learner");
+            }
+        }else {
+            switch(options.algorithm) {
+            case PERIODIC:
+                fdfaLearner = new LearnerFDFATreePeriodic(options, alphabet, teacher);
+                break;
+            case SYNTACTIC:
+                fdfaLearner = new LearnerFDFATreeSyntactic(options, alphabet, teacher);
+                break;
+            case RECURRENT:
+                fdfaLearner = new LearnerFDFATreeRecurrent(options, alphabet, teacher);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown FDFA learner");
+            }
+        }
+        return fdfaLearner;
     }
     // ==============================================================================================================
     // interactive learning
@@ -268,38 +332,9 @@ public class JupyterROLL {
         Options options = parseOptions(algo, structure);
         verifyAlphabet();
         MembershipOracle<HashableValue> mqOracle = new MQOracle(mqFunc);
-        LearnerFDFA fdfaLearner = null;
-        if(options.structure.isTable()) {
-            switch(options.algorithm) {
-            case PERIODIC:
-                fdfaLearner = new LearnerFDFATablePeriodic(options, alphabet, mqOracle);
-                break;
-            case SYNTACTIC:
-                fdfaLearner = new LearnerFDFATableSyntactic(options, alphabet, mqOracle);
-                break;
-            case RECURRENT:
-                fdfaLearner = new LearnerFDFATableRecurrent(options, alphabet, mqOracle);
-                break;
-            default:
-                throw new UnsupportedOperationException("Unknown FDFA learner");
-            }
-        }else {
-            switch(options.algorithm) {
-            case PERIODIC:
-                fdfaLearner = new LearnerFDFATreePeriodic(options, alphabet, mqOracle);
-                break;
-            case SYNTACTIC:
-                fdfaLearner = new LearnerFDFATreeSyntactic(options, alphabet, mqOracle);
-                break;
-            case RECURRENT:
-                fdfaLearner = new LearnerFDFATreeRecurrent(options, alphabet, mqOracle);
-                break;
-            default:
-                throw new UnsupportedOperationException("Unknown FDFA learner");
-            }
-        }
-        fdfaLearner.startLearning();
-        return new FDFALearner(alphabet, fdfaLearner, mqOracle);
+        LearnerBase<FDFA> learner = getFDFALearner(options, alphabet, mqOracle);
+        learner.startLearning();
+        return new FDFALearner(alphabet, learner, mqOracle);
     }
     
     private static class MQOracle implements MembershipOracle<HashableValue> {
