@@ -15,8 +15,6 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 package roll.jupyter;
 
-import java.util.function.BiFunction;
-
 import roll.automata.DFA;
 import roll.automata.FDFA;
 import roll.learner.LearnerBase;
@@ -25,7 +23,6 @@ import roll.oracle.MembershipOracle;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.HashableValue;
-import roll.table.HashableValueBoolean;
 import roll.util.Pair;
 import roll.words.Alphabet;
 import roll.words.Word;
@@ -133,79 +130,4 @@ public class FDFALearner implements JupyterLearner<FDFA>, IHTML {
         
         return new Pair<>(prefix, suffix);
     }
-    
-    public static void main(String [] args) {
-        FDFALearner learner = new FDFALearner(null, null, null);
-        Alphabet alphabet = new Alphabet();
-        alphabet.addLetter('a');
-        alphabet.addLetter('b');
-        
-        DFA dfa = new DFA(alphabet);
-        dfa.createState();
-        dfa.createState();
-        dfa.createState();
-        dfa.createState();
-        int fst = 0, snd = 1, thd = 2, fur = 3;
-        dfa.getState(fst).addTransition(0, fst);
-        dfa.getState(fst).addTransition(1, snd);
-        dfa.getState(snd).addTransition(0, snd);
-        dfa.getState(snd).addTransition(1, thd);
-        dfa.getState(thd).addTransition(0, thd);
-        dfa.getState(thd).addTransition(1, fur);
-        dfa.getState(fur).addTransition(0, fur);
-        dfa.getState(fur).addTransition(1, fst);
-        dfa.setInitial(fst);
-        dfa.setFinal(fur);
-        
-        Word p = alphabet.getArrayWord(0,1);
-        Word s = alphabet.getArrayWord(0,1);
-        
-        System.out.println(learner.getNormalizedFactorization(dfa, p, s));
-        //
-        BiFunction<String, String, Boolean> mqOracle = (stem, loop) -> {
-                // a^w + ab^w
-                
-                if (loop.length() < 1) return false;     // this is a finite word
-                
-                // check whether it is a^w 
-                int numBInStem = 0, numBInLoop = 0;
-                // counter the number of b's in stem
-                for (int i = 0; i < stem.length(); i ++) {
-                    if(stem.charAt(i) == 'b') {
-                        numBInStem ++;
-                    }
-                }
-                // counter the number of b's in loop
-                for (int i = 0; i < loop.length(); i ++) {
-                    if(loop.charAt(i) == 'b') {
-                        numBInLoop ++;
-                    }
-                }
-                
-                if(numBInStem == 0 && numBInLoop == 0) return true;
-                // check whether it is ab^w
-                // check a's in loop
-                if(numBInLoop != loop.length()) {
-                    return false;
-                }
-                if(stem.length() < 1) return false;
-                if(stem.charAt(0) != 'a') return false;
-                if(stem.length() - 1 != numBInStem) return false;
-                return true;
-                
-            };
-            
-            MembershipOracle<HashableValue> mq = new MembershipOracle<HashableValue>() {
-
-                @Override
-                public HashableValue answerMembershipQuery(Query<HashableValue> query) {
-                    return new HashableValueBoolean(mqOracle.apply(query.getPrefix().toStringExact(),
-                            query.getSuffix().toStringExact()));
-                }
-            };
-            
-            System.out.println(mq.answerMembershipQueries(new QuerySimple<>(alphabet.getEmptyWord(), alphabet.getEmptyWord())));
-        
-    }
-
 }
