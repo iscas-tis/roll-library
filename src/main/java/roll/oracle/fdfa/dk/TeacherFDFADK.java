@@ -48,9 +48,9 @@ public class TeacherFDFADK extends TeacherAbstract<FDFA> {
     @Override
     protected Query<HashableValue> checkEquivalence(FDFA hypothesis) {
         Automaton hypo = FDFAOperations.buildDOne(hypothesis);
-        System.out.println("hypo:\n " + hypo.toDot());
+//        System.out.println("hypo:\n " + hypo.toDot());
         Automaton target = FDFAOperations.buildDTwo(fdfa);
-        System.out.println("target:\n " + target.toDot());
+//        System.out.println("target:\n " + target.toDot());
         Automaton temp = hypo.intersection(target);
         String ce = temp.getShortestExample(true);
 
@@ -62,9 +62,9 @@ public class TeacherFDFADK extends TeacherAbstract<FDFA> {
             return ceQuery;
         }
         hypo = FDFAOperations.buildDTwo(hypothesis);
-        System.out.println("hypo:\n " + hypo.toDot());
+//        System.out.println("hypo:\n " + hypo.toDot());
         target = FDFAOperations.buildDOne(fdfa);
-        System.out.println("target:\n " + target.toDot());
+//        System.out.println("target:\n " + target.toDot());
         temp = hypo.intersection(target);
         ce = temp.getShortestExample(true);
         if(ce != null) {
@@ -86,7 +86,7 @@ public class TeacherFDFADK extends TeacherAbstract<FDFA> {
         if(suffix.isEmpty()) {
             return new HashableValueBoolean(false);
         }
-        System.out.println(prefix + " : " + suffix);
+//        System.out.println(prefix + " : " + suffix);
         Pair<Word, Word> pair = FDFAOperations.normalize(fdfa, prefix, suffix);
         if(pair == null) {
             return new HashableValueBoolean(false);

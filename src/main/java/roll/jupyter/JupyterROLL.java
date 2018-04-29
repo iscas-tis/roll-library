@@ -137,9 +137,12 @@ public class JupyterROLL {
             if(hypothesis instanceof NBA) {
                 TeacherNBA teacherNBA = (TeacherNBA)teacher;
                 ceQuery = teacherNBA.answerEquivalenceQuery((NBA)hypothesis);
-            }else {
+            }else if(hypothesis instanceof DFA){
                 TeacherDFA teacherDFA = (TeacherDFA)teacher;
                 ceQuery = teacherDFA.answerEquivalenceQuery((DFA)hypothesis);
+            }else {
+                TeacherFDFADK teacherFDFA = (TeacherFDFADK)teacher;
+                ceQuery = teacherFDFA.answerEquivalenceQuery((FDFA)hypothesis);
             }
             sequence.add(triple);
             boolean isEq = ceQuery.getQueryAnswer().get();
