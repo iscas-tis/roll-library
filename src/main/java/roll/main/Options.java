@@ -121,6 +121,8 @@ public class Options {
         DFA_LSTAR,
         DFA_KV,
         DFA_COLUMN,
+        NFA_COLUMN,
+        NFA_RDSTAR,
         NBA_LDOLLAR,
         PERIODIC,
         SYNTACTIC,
@@ -128,6 +130,10 @@ public class Options {
         
         boolean isTargetDFA() {
             return this == DFA_LSTAR || this == DFA_COLUMN|| this == DFA_KV;
+        }
+        
+        boolean isTargetNFA() {
+            return this == NFA_COLUMN || this == NFA_RDSTAR;
         }
         
         boolean isTargetFDFA() {
@@ -149,6 +155,7 @@ public class Options {
     
     public static enum TargetAutomaton {
         DFA,
+        NFA,
         FDFA,
         NBA,
         LDBA;
@@ -160,6 +167,11 @@ public class Options {
         boolean isDFA() {
             return this == DFA;
         }
+        
+        boolean isNFA() {
+            return this == NFA;
+        }
+        
         
         boolean isFDFA() {
             return this == FDFA;
@@ -208,6 +220,7 @@ public class Options {
     protected void checkConsistency() {
         
         if((algorithm.isTargetDFA() && ! automaton.isDFA())
+          || (algorithm.isTargetNFA() && ! automaton.isNFA())
           || (!algorithm.isTargetDFA() && automaton.isDFA())) {
             throw new UnsupportedOperationException("algorithm and target automaton are not consistent");
         }

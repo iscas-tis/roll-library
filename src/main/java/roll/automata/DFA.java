@@ -16,6 +16,8 @@
 
 package roll.automata;
 
+import roll.util.sets.ISet;
+import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
 import roll.words.Word;
 
@@ -76,6 +78,14 @@ public class DFA extends FASimple {
             return isFinal(getSuccessor(word));
         }
         
+    }
+
+    @Override
+    public ISet getSuccessors(int state, int letter) {
+        int succ = getSuccessor(state, letter);
+        ISet set = UtilISet.newISet();
+        set.set(succ);
+        return set;
     }
 
 }

@@ -56,4 +56,17 @@ public interface ObservationRow {
 	
 	void clear();
 	
+	default boolean covers(ObservationRow other) {
+	    List<HashableValue> thisValues = getValues();
+        List<HashableValue> otherValues = other.getValues();
+        assert thisValues.size() == otherValues.size();
+        for(int valNr = 0; valNr < thisValues.size(); valNr ++) {
+            // there exists some e such that 
+            if(otherValues.get(valNr).isAccepting() && !thisValues.get(valNr).isAccepting()) {
+                return false;
+            }
+        }
+        return true;
+	}
+	
 }

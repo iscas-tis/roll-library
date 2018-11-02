@@ -98,6 +98,7 @@ abstract class WordAbstract implements Word {
 		return new WordArray(alphabet, data);
 	}
 	
+	@Override
 	public boolean equals(Object o) {
 		
 		if(! (o  instanceof Word)) {
@@ -120,6 +121,23 @@ abstract class WordAbstract implements Word {
 			hashCode = 31 * hashCode + getLetter(letterNr);
 		}
 		return hashCode;
+	}
+	
+	@Override
+	public int compareTo(Word other) {
+	    if(this.length() < other.length()) {
+	        return -1;
+	    }else if(this.length() > other.length()) {
+            return 1;
+        }
+	    for(int i = 0; i < this.length(); i ++) {
+	        if(getLetter(i) < other.getLetter(i)) {
+	            return -1;
+	        }else if(getLetter(i) > other.getLetter(i)) {
+	            return 1;
+	        }
+	    }
+        return 0;
 	}
 
 }

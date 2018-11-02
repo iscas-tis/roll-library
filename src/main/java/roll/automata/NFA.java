@@ -70,6 +70,7 @@ public class NFA extends FASimple {
         return getSuccessors(getInitialState(), word);
     }
 
+    @Override
     public ISet getSuccessors(int state, int letter) {
         return getState(state).getSuccessors(letter);
     }

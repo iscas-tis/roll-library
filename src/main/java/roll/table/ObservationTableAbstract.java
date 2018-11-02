@@ -113,6 +113,27 @@ public abstract class ObservationTableAbstract implements ObservationTable {
 		return addUpperTableValue(state, column, value) 
 			|| addLowerTableValue(state, column, value);
 	}
+	
+    public int getUpperTableRowIndex(Word word) {
+        for(int index = 0; index < getUpperTable().size(); index ++) {
+            ObservationRow upperRow = getUpperTable().get(index);
+            if(upperRow.getWord().equals(word)) {
+                return index;
+            }
+        }
+        // search in lower table
+        ObservationRow lowerRow = getLowerTableRow(word);
+        if(lowerRow == null) {
+            return -1;
+        }
+        for(int index = 0; index < getUpperTable().size(); index ++) {
+            ObservationRow upperRow = getUpperTable().get(index);
+            if(lowerRow.valuesEqual(upperRow)) {
+                return index;
+            }
+        }
+        return -1;
+    }
 
 	@Override
 	public void moveRowFromLowerToUpper(ObservationRow row) {

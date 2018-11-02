@@ -20,7 +20,7 @@ package roll.words;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public interface Word extends Iterable<Integer> {
+public interface Word extends Iterable<Integer>, Comparable<Word> {
 	
 	Alphabet getAlphabet();
 	
@@ -83,6 +83,16 @@ public interface Word extends Iterable<Integer> {
 			builder.append(getLetters().get(letter).toString());
 		}
 		return builder.toString();
+	}
+	
+	default Word reverse() {
+	    int length = length();
+        int [] revWord = new int[length];
+        for(int i = 1; i <= length; i ++) {
+            revWord[i - 1] = getLetter(length - i);
+        }
+        Word result = getAlphabet().getArrayWord(revWord);
+        return result;
 	}
 	
 

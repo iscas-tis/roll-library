@@ -18,6 +18,7 @@ package test.learner.dfa;
 
 import roll.automata.DFA;
 import roll.automata.operations.DFAGenerator;
+import roll.automata.operations.NFAOperations;
 import roll.learner.LearnerDFA;
 import roll.learner.LearnerType;
 import roll.learner.dfa.table.LearnerDFATableColumn;
@@ -58,7 +59,7 @@ public class DFARandomTest {
 		for(int i = 0; i < numCases; i ++) {
 			DFA dfa = DFAGenerator.getRandomDFA(input, numStates);
 			System.out.println("Case " + i );
-			if(testLearnerDFA(dfa, input, algo)) {
+			if(NFATest.testLearnerNFA(NFAOperations.fromDFA(dfa), input)) {
 				numOK ++;
 			}
 		}
@@ -103,5 +104,6 @@ public class DFARandomTest {
 		
 		return true;
 	}
+
 
 }

@@ -32,7 +32,7 @@ public abstract class FASimple implements FA {
 
     protected final ArrayList<StateFA> states;
     protected final Alphabet alphabet;
-    protected int initialState;
+    protected int initialState = -1; // no initial state available at first
     protected final ISet finalStates;
     protected Acc acceptance;
     
@@ -80,6 +80,8 @@ public abstract class FASimple implements FA {
     public int getInitialState() {
         return initialState;
     }
+    
+    public abstract ISet getSuccessors(int state, int letter);
     
     public void setFinal(int state) {
         assert checkValidState(state);
