@@ -14,38 +14,16 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner;
+package roll.learner.nba.mp;
+
+import roll.table.ObservationTableBase;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public enum LearnerType {
-	
-	DFA_LSTAR,
-	DFA_COLUMN_TREE,
-	DFA_COLUMN_TABLE,
-	DFA_KV,
-	NFA_NLSTAR,
-	NFA_RDSTAR,
-	NFA_RDFA,
-	WEIGHT,
-	NBA_FDFA,
-	NBA_LDOLLAR,
-	NBA_MP,
-	
-	// FDFA
-	
-	FDFA,
-	
-	FDFA_LEADING_TABLE,
-	FDFA_LEADING_TREE,
-	
-	FDFA_PERIODIC_TABLE,
-	FDFA_SYNTACTIC_TABLE,
-	FDFA_RECURRENT_TABLE,
-	
-	FDFA_PERIODIC_TREE,
-	FDFA_SYNTACTIC_TREE,
-	FDFA_RECURRENT_TREE,
-	
+
+public class ObservationTableNBAMP extends ObservationTableBase {
+    public ObservationTableNBAMP() {
+        super();
+    }
 }

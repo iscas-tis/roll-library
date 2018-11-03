@@ -21,7 +21,7 @@ import roll.automata.DFA;
 import roll.automata.NFA;
 import roll.automata.operations.DFAGenerator;
 import roll.automata.operations.NFAOperations;
-import roll.learner.nfa.LearnerNFAColumn;
+import roll.learner.nfa.nlstar.LearnerNFANLStar;
 import roll.learner.nfa.table.LearnerNFATable;
 import roll.main.Options;
 import roll.oracle.nfa.TeacherNFA;
@@ -104,7 +104,7 @@ public class NFATest {
         Alphabet input = new Alphabet();
         input.addLetter('a');
         input.addLetter('b');
-        input.addLetter('c');
+//        input.addLetter('c');
         
         int numCases = 20;
         int numStates = 10;
@@ -155,8 +155,8 @@ public class NFATest {
         options.structure = Options.Structure.TREE;
         options.binarySearch = true;
         TeacherNFA teacher = new TeacherNFA(options, machine);
-//        LearnerNFANLStar learner = new LearnerNFANLStar(options, alphabet, teacher);
-        LearnerNFAColumn learner = new LearnerNFAColumn(options, alphabet, teacher);
+        LearnerNFANLStar learner = new LearnerNFANLStar(options, alphabet, teacher);
+//        LearnerNFAColumn learner = new LearnerNFAColumn(options, alphabet, teacher);
 
         System.out.println("starting learning");
         learner.startLearning();
