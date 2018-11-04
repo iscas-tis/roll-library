@@ -103,8 +103,8 @@ public class NBAInclusionCheck {
         }
         
         // now we are ready to replace the symbols on the transitions
-        transA = NBAOperations.getNumberOfTransitions(A);
-        transB = NBAOperations.getNumberOfTransitions(B);
+        transA = NFAOperations.getNumberOfTransitions(A);
+        transB = NFAOperations.getNumberOfTransitions(B);
         options.log.println("Aut A (after preprocessing): # of Trans. "+ transA +", # of States "+ A.getStateSize() + ".");
         options.log.println("Aut B (after preprocessing): # of Trans. "+ transB +", # of States "+ B.getStateSize() +".");
         options.log.println("Start to prove inclusion via sampling...");
