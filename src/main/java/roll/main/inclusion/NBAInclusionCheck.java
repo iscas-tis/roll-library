@@ -24,6 +24,7 @@ import roll.automata.NBA;
 import roll.automata.operations.NBAEmptinessCheck;
 import roll.automata.operations.NBALasso;
 import roll.automata.operations.NBAOperations;
+import roll.automata.operations.NFAOperations;
 import roll.learner.fdfa.LearnerFDFA;
 import roll.learner.nba.lomega.UtilLOmega;
 import roll.learner.nba.lomega.translator.Translator;
@@ -71,8 +72,8 @@ public class NBAInclusionCheck {
         PairParser parser = UtilParser.prepare(options, options.inputA, options.inputB, options.format);
         NBA A = parser.getA();
         NBA B = parser.getB();
-        int transA = NBAOperations.getNumberOfTransitions(A);
-        int transB = NBAOperations.getNumberOfTransitions(B);
+        int transA = NFAOperations.getNumberOfTransitions(A);
+        int transB = NFAOperations.getNumberOfTransitions(B);
         options.log.println("Aut A : # of Trans. "+ transA +", # of States "+ A.getStateSize() + ".");
         options.log.println("Aut B : # of Trans. "+ transB +", # of States "+ B.getStateSize() +".");
         A = NBAOperations.removeDeadStates(A);
