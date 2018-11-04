@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2017                                               */
+/* Copyright (c) 2018 -                                                   */
 /*       Institute of Software, Chinese Academy of Sciences               */
 /* This file is part of ROLL, a Regular Omega Language Learning library.  */
 /* ROLL is free software: you can redistribute it and/or modify           */
@@ -16,37 +16,33 @@
 
 package roll.automata;
 
-import java.util.List;
+import roll.util.sets.ISet;
+import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-
-public abstract class StateFA implements State {
+public class AcceptNFA implements Accept {
     
-    private final int id;
-    StateFA(int id) {
-        this.id = id;
+    protected final NFA nfa;
+    
+    public AcceptNFA(NFA fa) {
+        this.nfa = fa;
     }
     
     @Override
-    public int getId() {
-        return id;
+    public boolean accept(ISet states) {
+        return states.overlap(nfa.finalStates);
     }
     
     @Override
-    public int hashCode() {
-        return id;
+    public boolean accept(Word word) {
+        return accept(nfa.getSuccessors(word));
     }
     
     @Override
-    public String toString() {
-        return "" + id;
+    public boolean accept(Word prefix, Word suffix) {
+        Word word = prefix.concat(suffix);
+        return accept(word);
     }
-    
-    public abstract String toString(List<String> apList);
-    
-    //
-    public abstract String toBA();
-
 }

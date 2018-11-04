@@ -64,7 +64,7 @@ public class NBALearner implements JupyterLearner<NBA>, IHTML {
         Word suffix = alphabet.getWordFromString(loop);
         // now verify counterexample
         NBA hypothesis = (NBA) learner.getHypothesis();
-        boolean isInHypo = hypothesis.getAcc().isAccepting(prefix, suffix);
+        boolean isInHypo = hypothesis.getAcc().accept(prefix, suffix);
         Query<HashableValue> ceQuery = new QuerySimple<>(prefix, suffix);
         HashableValue isInTarget = mqOracle.answerMembershipQuery(ceQuery);
         if(isInHypo && isInTarget.isAccepting()) {

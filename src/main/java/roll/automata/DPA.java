@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2017                                               */
+/* Copyright (c) 2018 -                                                   */
 /*       Institute of Software, Chinese Academy of Sciences               */
 /* This file is part of ROLL, a Regular Omega Language Learning library.  */
 /* ROLL is free software: you can redistribute it and/or modify           */
@@ -30,12 +30,12 @@ public class DPA extends DFA {
 
     public DPA(Alphabet alphabet) {
         super(alphabet);
-        this.acceptance = new AccDPA(this);
+        this.accept = new AcceptDPA(this);
     }
     
     @Override
-    public AccType getAccType() {
-        return AccType.PARITY;
+    public AutType getAccType() {
+        return AutType.PARITY;
     }
 
     public void setFinal(int state) {

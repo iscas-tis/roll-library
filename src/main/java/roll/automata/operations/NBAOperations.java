@@ -29,7 +29,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import roll.automata.NBA;
 import roll.automata.NFA;
-import roll.automata.StateFA;
 import roll.automata.StateNFA;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
@@ -46,7 +45,7 @@ public class NBAOperations {
         if(map.containsKey(state)) {
             return map.get(state);
         }
-        StateFA nbaState = nba.createState();
+        StateNFA nbaState = nba.createState();
         map.put(state, nbaState.getId());
         if(state.isAccept()) {
             nba.setFinal(nbaState.getId());
@@ -125,7 +124,7 @@ public class NBAOperations {
         if(map.containsKey(state)) {
             return map.get(state);
         }
-        StateFA nbaState = result.createState();
+        StateNFA nbaState = result.createState();
         map.put(state, nbaState.getId());
         if(input.isFinal(state)) {
             result.setFinal(nbaState.getId());

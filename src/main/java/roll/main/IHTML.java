@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2017                                               */
+/* Copyright (c) 2018-                                                    */
 /*       Institute of Software, Chinese Academy of Sciences               */
 /* This file is part of ROLL, a Regular Omega Language Learning library.  */
 /* ROLL is free software: you can redistribute it and/or modify           */
@@ -18,6 +18,8 @@ package roll.main;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ * printer for HTML output
  * */
 
 public interface IHTML {

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import roll.automata.DFA;
-import roll.automata.StateDFA;
+import roll.automata.StateNFA;
 import roll.learner.LearnerDFA;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
@@ -157,7 +157,7 @@ public abstract class LearnerDFATable extends LearnerDFA {
         }
         
         for(int rowNr = 0; rowNr < upperTable.size(); rowNr ++) {
-            StateDFA state = dfa.getState(rowNr);
+            StateNFA state = dfa.getState(rowNr);
             for(int letterNr = 0; letterNr < alphabet.getLetterSize(); letterNr ++) {
                 int succNr = getSuccessorRow(rowNr, letterNr);
                 state.addTransition(letterNr, succNr);

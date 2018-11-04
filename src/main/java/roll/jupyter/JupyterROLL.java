@@ -31,7 +31,6 @@ import jupyter.MIMETypes;
 import mainfiles.RABIT;
 import roll.automata.Acceptor;
 import roll.automata.DFA;
-import roll.automata.FASimple;
 import roll.automata.FDFA;
 import roll.automata.NBA;
 import roll.automata.operations.DFAOperations;
@@ -241,7 +240,7 @@ public class JupyterROLL {
             MembershipOracle<HashableValue> teacher) {
         LearnerBase<? extends Acceptor> learner = null;
         if(options.algorithm == Options.Algorithm.NBA_LDOLLAR) {
-            learner = (LearnerBase<? extends FASimple>)new LearnerNBALDollar(options, alphabet, teacher);
+            learner = (LearnerBase<? extends NBA>)new LearnerNBALDollar(options, alphabet, teacher);
         }else if(options.algorithm == Options.Algorithm.PERIODIC
              || options.algorithm == Options.Algorithm.SYNTACTIC
              || options.algorithm == Options.Algorithm.RECURRENT) {

@@ -108,7 +108,7 @@ public class NBAGenerator {
         final int numTrans = (int) (numState * density);
 
         result.setInitial(0);
-
+        
         // the deterministic states are all in the range 
         // [ numNondetState, numState)
         // so the accepting states should be all in this range 

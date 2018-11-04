@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2017                                               */
+/* Copyright (c) 2018 -                                                   */
 /*       Institute of Software, Chinese Academy of Sciences               */
 /* This file is part of ROLL, a Regular Omega Language Learning library.  */
 /* ROLL is free software: you can redistribute it and/or modify           */
@@ -16,23 +16,21 @@
 
 package roll.automata;
 
+import roll.util.sets.ISet;
+import roll.words.Word;
+
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public interface FA extends Acceptor {
-    
-    int getStateSize();
-    
-    int getAlphabetSize();
-    
-    State createState();
-    
-    void setInitial(int state);
-    
-    void setInitial(State state);
-    
-    State getState(int state);
-    
-    int getInitialState();
-    
+
+public interface Accept {
+    default boolean accept(ISet states) {
+        return false;
+    }
+    default boolean accept(Word prefix, Word period) {
+        return false;
+    }
+    default boolean accept(Word word) {
+        return false;
+    }
 }

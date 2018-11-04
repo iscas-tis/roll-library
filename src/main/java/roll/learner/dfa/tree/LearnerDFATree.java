@@ -21,7 +21,7 @@ import java.util.List;
 
 import gnu.trove.iterator.TIntObjectIterator;
 import roll.automata.DFA;
-import roll.automata.StateDFA;
+import roll.automata.StateNFA;
 import roll.jupyter.NativeTool;
 import roll.learner.LearnerDFA;
 import roll.main.Options;
@@ -99,7 +99,7 @@ public abstract class LearnerDFATree extends LearnerDFA {
 				ISet preds = state.predecessors.get(letter);
 				if(preds == null) continue;
 				for(final int predNr : preds) {
-					StateDFA s = dfa.getState(predNr);
+					StateNFA s = dfa.getState(predNr);
 					s.addTransition(letter, state.id);
 				}
 			}

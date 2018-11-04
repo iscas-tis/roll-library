@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2017                                               */
+/* Copyright (c) 2018 -                                                   */
 /*       Institute of Software, Chinese Academy of Sciences               */
 /* This file is part of ROLL, a Regular Omega Language Learning library.  */
 /* ROLL is free software: you can redistribute it and/or modify           */
@@ -18,6 +18,8 @@ package roll.automata;
 
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
+import roll.automata.operations.DFAOperations;
+import roll.util.UtilHelper;
 import roll.util.sets.ISet;
 import roll.words.Word;
 
@@ -25,34 +27,33 @@ import roll.words.Word;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class AccDPA implements Acc {
+public class AcceptDPA implements Accept {
 
     private final DPA dpa;
     private TIntIntMap colors;
     
-    
-    public AccDPA(DPA dpa) {
+    public AcceptDPA(DPA dpa) {
         this.dpa = dpa;
         this.colors = new TIntIntHashMap();
     }
     
     @Override
-    public boolean isAccepting(ISet states) {
+    public boolean accept(ISet states) {
         int minColor = Integer.MAX_VALUE;
         for(final int state : states) {
             int color = colors.get(state);
             minColor = Integer.min(minColor, color);
         }
-        if(minColor % 2 == 0) {
+        if(UtilHelper.isEven(minColor)) {
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean isAccepting(Word prefix, Word suffix) {
-        //TODO
-        return false;
+    public boolean accept(Word prefix, Word period) {
+        ISet infs = DFAOperations.getInfSet(dpa, prefix, period);
+        return accept(infs);
     }
     
     public void setColor(int state, int color) {

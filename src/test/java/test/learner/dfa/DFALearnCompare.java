@@ -57,7 +57,7 @@ public class DFALearnCompare {
 		         ceQuery.answerQuery(val);		         
 		         learner.refineHypothesis(ceQuery);
 		         model = learner.getHypothesis();
-		         boolean accepted = model.getAcc().isAccepting(word, word.getEmptyWord());
+		         boolean accepted = model.getAcc().accept(word, word.getEmptyWord());
 		         if(val.isAccepting() == accepted) {
                      System.out.println("Get out after " + i + " times");
                      break;

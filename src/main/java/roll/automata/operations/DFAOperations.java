@@ -31,6 +31,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import roll.automata.DFA;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
+import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -48,8 +49,7 @@ public class DFAOperations {
     }
     
     public static Automaton toDkDFA(DFA dfa) {
-        TIntObjectMap<State> map = new TIntObjectHashMap<>();
-        return toDkDFA(map, dfa);
+        return NFAOperations.toDkFA(dfa, true);
     }
     
     public static Automaton toDkDFA(TIntObjectMap<State> map, DFA dfa) {  
@@ -159,6 +159,45 @@ public class DFAOperations {
     public static Automaton toDBA(Automaton dfa) {
         DFA2DBA dfa2dba = new DFA2DBA(dfa);
         return dfa2dba.buildDBA();
+    }
+    
+    // --------------------------
+    // get the states infinitely occurs on the run of prefix . period .. 
+    // i + j < size + 1 and 0 <= i < j 
+    public static ISet getInfSet(DFA dfa, Word prefix, Word period) {
+        ISet inf = UtilISet.newISet();
+        int size = dfa.getStateSize();
+        int first = dfa.getSuccessor(prefix), last;
+        for(int i = 0; i < size / 2; i ++) {
+            last = first;
+            if(i > 0) {
+                first = dfa.getSuccessor(last, period);
+            }
+            int second = first;
+            for(int j = i + 1; j < size + 1 - i; j ++) {
+                for(int k = 1; k <= j; k ++) {
+                    second = dfa.getSuccessor(second, period);
+                }
+            }
+            // check whether u.v^i = u.v^{i + j}
+            if(first == second) {
+                break;
+            }
+        }
+        // collect all states in the loop
+        inf.set(first);
+        while(true) {
+            last = first;
+            for(int i = 0; i < period.length(); i ++) {
+                int letter = period.getLetter(i);
+                last = dfa.getSuccessor(last, letter);
+                inf.set(last);
+            }
+            if(last == first) {
+                break;
+            }
+        }
+        return inf;
     }
 
 }

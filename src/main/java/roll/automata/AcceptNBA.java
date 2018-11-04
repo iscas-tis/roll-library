@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2017                                               */
+/* Copyright (c) 2018 -                                                   */
 /*       Institute of Software, Chinese Academy of Sciences               */
 /* This file is part of ROLL, a Regular Omega Language Learning library.  */
 /* ROLL is free software: you can redistribute it and/or modify           */
@@ -16,14 +16,27 @@
 
 package roll.automata;
 
-import roll.util.sets.ISet;
+import roll.automata.operations.NBAOperations;
 import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public interface Acc {
-    boolean isAccepting(ISet states);
-    boolean isAccepting(Word prefix, Word suffix);
+public class AcceptNBA extends AcceptNFA {
+
+    public AcceptNBA(NFA nfa) {
+        super(nfa);
+    }
+    
+    @Override
+    public boolean accept(Word prefix, Word suffix) {
+        return NBAOperations.accepts((NBA)nfa, prefix, suffix);
+    }
+    
+    @Override
+    public boolean accept(Word word) {
+        throw new UnsupportedOperationException("The input word is a finite word");
+    }
+
 }

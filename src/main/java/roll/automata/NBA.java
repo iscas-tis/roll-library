@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2017                                               */
+/* Copyright (c) 2018 -                                                   */
 /*       Institute of Software, Chinese Academy of Sciences               */
 /* This file is part of ROLL, a Regular Omega Language Learning library.  */
 /* ROLL is free software: you can redistribute it and/or modify           */
@@ -16,9 +16,7 @@
 
 package roll.automata;
 
-import roll.automata.operations.NBAOperations;
 import roll.words.Alphabet;
-import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -27,24 +25,12 @@ public class NBA extends NFA {
 
     public NBA(final Alphabet alphabet) {
         super(alphabet);
-        this.acceptance = new AccNBA(this);
+        this.accept = new AcceptNBA(this);
     }
 
     @Override
-    public AccType getAccType() {
-        return AccType.NBA;
-    }
-    
-    private class AccNBA extends AccFA {
-
-        public AccNBA(FASimple fa) {
-            super(fa);
-        }
-
-        @Override
-        public boolean isAccepting(Word prefix, Word suffix) {
-            return NBAOperations.accepts((NBA)fa, prefix, suffix);
-        }
+    public AutType getAccType() {
+        return AutType.NBA;
     }
 
 }

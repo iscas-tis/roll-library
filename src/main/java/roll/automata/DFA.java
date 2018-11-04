@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2017                                               */
+/* Copyright (c) 2018 -                                                   */
 /*       Institute of Software, Chinese Academy of Sciences               */
 /* This file is part of ROLL, a Regular Omega Language Learning library.  */
 /* ROLL is free software: you can redistribute it and/or modify           */
@@ -16,8 +16,6 @@
 
 package roll.automata;
 
-import roll.util.sets.ISet;
-import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
 import roll.words.Word;
 
@@ -25,34 +23,24 @@ import roll.words.Word;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class DFA extends FASimple {
+public class DFA extends NFA {
     
     public DFA(final Alphabet alphabet) {
         super(alphabet);
-        this.acceptance = new AccDFA(this);
     }
 
     @Override
-    public AccType getAccType() {
-        return AccType.DFA;
-    }
-
-    @Override
-    public StateDFA makeState(int index) {
-        return new StateDFA(this, index);
+    public AutType getAccType() {
+        return AutType.DFA;
     }
     
-    @Override
-    public StateDFA getState(int state) {
-        return (StateDFA) super.getState(state);
+    // specialized for DFA
+    public int getSuccessor(Word word) {
+        return getSuccessor(getInitialState(), word);
     }
     
     public int getSuccessor(int state, int letter) {
         return getState(state).getSuccessor(letter);
-    }
-    
-    public int getSuccessor(Word word) {
-        return getSuccessor(getInitialState(), word);
     }
     
     public int getSuccessor(int state, Word word) {
@@ -63,29 +51,6 @@ public class DFA extends FASimple {
             ++ index;
         }
         return currState;
-    }
-    
-    
-    private class AccDFA extends AccFA {
-
-        public AccDFA(FASimple fa) {
-            super(fa);
-        }
-
-        @Override
-        public boolean isAccepting(Word prefix, Word suffix) {
-            Word word = prefix.concat(suffix);
-            return isFinal(getSuccessor(word));
-        }
-        
-    }
-
-    @Override
-    public ISet getSuccessors(int state, int letter) {
-        int succ = getSuccessor(state, letter);
-        ISet set = UtilISet.newISet();
-        set.set(succ);
-        return set;
     }
 
 }

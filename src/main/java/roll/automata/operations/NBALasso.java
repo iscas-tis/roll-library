@@ -17,7 +17,7 @@
 package roll.automata.operations;
 
 import roll.automata.NBA;
-import roll.automata.StateFA;
+import roll.automata.StateNFA;
 import roll.words.Word;
 
 /**
@@ -58,7 +58,7 @@ public class NBALasso {
     
     private void initialize() {
         for(int i = 0; i <= getSum(); i ++) {
-            StateFA state = result.createState();
+            StateNFA state = result.createState();
             assert state.getId() == i;
             result.getState(i).addTransition(getNextLetter(state.getId())
                     , getNextState(state.getId()));

@@ -71,7 +71,7 @@ public class FDFALearner implements JupyterLearner<FDFA>, IHTML {
         // now verify counterexample
         Word prefix = normForm.getLeft();
         Word suffix = normForm.getRight();
-        boolean isInHypo = hypothesis.getAcc().isAccepting(prefix, suffix);
+        boolean isInHypo = hypothesis.getAcc().accept(prefix, suffix);
         Query<HashableValue> ceQuery = new QuerySimple<>(prefix, suffix);
         HashableValue isInTarget = mqOracle.answerMembershipQuery(ceQuery);
         if(isInHypo && isInTarget.isAccepting()) {

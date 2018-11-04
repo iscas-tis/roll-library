@@ -61,7 +61,7 @@ public class DFALearner implements JupyterLearner<DFA>, IHTML {
         Word word = alphabet.getWordFromString(counterexample);
         // now verify counterexample
         DFA hypothesis = (DFA) learner.getHypothesis();
-        boolean isInHypo = hypothesis.getAcc().isAccepting(word, alphabet.getEmptyWord());
+        boolean isInHypo = hypothesis.getAcc().accept(word, alphabet.getEmptyWord());
         Query<HashableValue> ceQuery = new QuerySimple<>(word);
         HashableValue isInTarget = mqOracle.answerMembershipQuery(ceQuery);
         if(isInHypo && isInTarget.isAccepting()) {

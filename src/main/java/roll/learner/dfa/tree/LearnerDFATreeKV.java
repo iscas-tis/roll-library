@@ -17,7 +17,7 @@
 package roll.learner.dfa.tree;
 
 import roll.automata.DFA;
-import roll.automata.StateDFA;
+import roll.automata.StateNFA;
 import roll.learner.LearnerType;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
@@ -58,7 +58,7 @@ public class LearnerDFATreeKV extends LearnerDFATree {
             for(int letter = 0; letter < alphabet.getLetterSize(); letter ++) {
                 Word succWord = stateNode.label.append(letter);
                 Node<ValueNode> succNode = sift(succWord);
-                StateDFA state = dfa.getState(stateNode.id);
+                StateNFA state = dfa.getState(stateNode.id);
                 state.addTransition(letter, succNode.getValue().id);
             }
             if(stateNode.node.isAccepting()) {

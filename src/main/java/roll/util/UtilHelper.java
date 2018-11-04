@@ -14,65 +14,23 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.automata;
+package roll.util;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public enum AccType {
 
-	DFA,
-	NFA,
-	FDFA,
-	NBA,
-	RABIN,
-	STREET,
-	PARITY;
-	
-	public boolean isDFA() {
-		return this == DFA;
-	}
-	
-	public boolean isNFA() {
-		return this == NFA;
-	}
-	
-	public boolean isFDFA() {
-		return this == FDFA;
-	}
-	
-	public boolean isNBA() {
-		return this == NBA;
-	}
-	
-	public boolean isRabin() {
-		return this == RABIN;
-	}
-	
-	public boolean isStreet() {
-		return this == STREET;
-	}
-	
-	public boolean isParity() {
-		return this == PARITY;
-	}
-	
-	
-	public String toString() {
-		if(this == DFA) {
-			return "DFA";
-		}else if(this == NFA) {
-			return "NFA";
-		}else if(this == FDFA) {
-			return "FDFA";
-		}if(this == NBA) {
-			return "NBA";
-		}else if(this == RABIN) {
-			return "RABIN";
-		}else if(this == STREET) {
-				return "STREET";
-		}else {
-			return "PARITY";
-		}
-	}
+public class UtilHelper {
+    
+    public static int ONE = 1;
+    public static int ZERO = 0;
+    
+    public static boolean isEven(int num) {
+        return (num & UtilHelper.ONE) == 0;
+    }
+    
+    public static boolean isOdd(int num) {
+        return (num & UtilHelper.ONE) != 0;
+    }
+
 }

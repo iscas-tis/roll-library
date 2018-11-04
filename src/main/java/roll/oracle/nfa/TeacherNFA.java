@@ -43,7 +43,7 @@ public class TeacherNFA extends TeacherAbstract<NFA>{
         super(options);
         this.target = nfa;
         this.alphabet = nfa.getAlphabet();
-        this.automaton = NFAOperations.toDkFA(nfa);
+        this.automaton = NFAOperations.toDkNFA(nfa);
     }
     
     public TeacherNFA(Options options, DFA dfa) {
@@ -56,7 +56,7 @@ public class TeacherNFA extends TeacherAbstract<NFA>{
     @Override
     protected HashableValue checkMembership(Query<HashableValue> query) {
         Word word = query.getQueriedWord();
-        boolean answer = target.getAcc().isAccepting(target.getSuccessors(word));
+        boolean answer = target.getAcc().accept(target.getSuccessors(word));
         return new HashableValueBoolean(answer);
     }
     
@@ -66,7 +66,7 @@ public class TeacherNFA extends TeacherAbstract<NFA>{
 
     @Override
     protected Query<HashableValue> checkEquivalence(NFA hypothesis) {
-        Automaton conjecture = NFAOperations.toDkFA(hypothesis);
+        Automaton conjecture = NFAOperations.toDkNFA(hypothesis);
         Automaton result = conjecture.clone().minus(automaton.clone());
         String counterexample = result.getShortestExample(true);
         Word wordCE = alphabet.getEmptyWord();

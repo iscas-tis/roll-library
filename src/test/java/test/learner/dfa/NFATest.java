@@ -179,7 +179,7 @@ public class NFATest {
             System.out.println(machine);
             learner.refineHypothesis(ceQuery);
         }
-        Automaton dk = NFAOperations.toDkFA(hypo);
+        Automaton dk = NFAOperations.toDkNFA(hypo);
         dk.determinize();
         System.out.println(dk.toDot());
         

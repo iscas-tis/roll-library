@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2017                                               */
+/* Copyright (c) 2018 -                                                   */
 /*       Institute of Software, Chinese Academy of Sciences               */
 /* This file is part of ROLL, a Regular Omega Language Learning library.  */
 /* ROLL is free software: you can redistribute it and/or modify           */
@@ -28,27 +28,29 @@ import roll.util.sets.UtilISet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
- * 
- * NFA is allowed to be incomplete
  * */
 
-public class StateNFA extends StateFA {
+public class StateNFA {
+    
+    private final int id;
     private final NFA nfa;
     private final TIntObjectMap<ISet> successors; // Alphabet -> 2^Q
     
-    public StateNFA(final NFA nfa, final int id) {
-        super(id);
-        assert nfa != null;
-        this.nfa = nfa;
+    public StateNFA(final NFA fa, final int id) {
+        assert fa != null;
+        this.nfa = fa;
+        this.id = id;
         this.successors = new TIntObjectHashMap<>();
     }
 
-    @Override
     public NFA getFA() {
         return nfa;
     }
-
-    @Override
+    
+    public int getId() {
+        return id;
+    }
+    
     public void addTransition(int letter, int state) {
         assert nfa.checkValidLetter(letter);
         ISet succs = successors.get(letter);
@@ -66,6 +68,16 @@ public class StateNFA extends StateFA {
             return UtilISet.newISet();
         }
         return succs;
+    }
+    
+    // get first successor
+    public int getSuccessor(int letter) {
+        ISet succs = getSuccessors(letter);
+        if(succs.isEmpty()) {
+            return -1;
+        }else {
+            return succs.iterator().next();
+        }
     }
     
     public ISet getEnabledLetters() {
@@ -94,7 +106,7 @@ public class StateNFA extends StateFA {
         return toString(apList);
     }
     
-    @Override
+    
     public String toString(List<String> apList) {
         StringBuilder builder = new StringBuilder();
         builder.append("  " + getId() + " [label=\"" + getId() + "\"");
@@ -116,7 +128,6 @@ public class StateNFA extends StateFA {
         return builder.toString();
     }
     
-    @Override
     public String toBA() {
         StringBuilder builder = new StringBuilder();
         // transitions
@@ -144,5 +155,5 @@ public class StateNFA extends StateFA {
         }
         return false;
     }
-    
+
 }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2017                                               */
+/* Copyright (c) 2018 -                                                   */
 /*       Institute of Software, Chinese Academy of Sciences               */
 /* This file is part of ROLL, a Regular Omega Language Learning library.  */
 /* ROLL is free software: you can redistribute it and/or modify           */
@@ -28,12 +28,14 @@ import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ * Family of Deterministic Finite Automata (FDFA)
  * */
 public class FDFA implements Acceptor {
     
     private final DFA leadingDFA;
     private final List<DFA> progressDFAs;
-    private final Acc acceptance;
+    private final Accept acceptance;
     private final Alphabet alphabet;
     
     public FDFA(DFA m, List<DFA> ps) {
@@ -41,9 +43,10 @@ public class FDFA implements Acceptor {
         alphabet = m.getAlphabet();
         leadingDFA = m;
         progressDFAs = ps;
-        acceptance = new AccFDFA(this);
+        acceptance = new AcceptFDFA(this);
     }
     
+    // --------------------------------------------------
     public DFA getLeadingDFA() {
         return leadingDFA;
     }
@@ -59,10 +62,17 @@ public class FDFA implements Acceptor {
     }
 
     @Override
-    public AccType getAccType() {
-        return AccType.FDFA;
+    public AutType getAccType() {
+        return AutType.FDFA;
     }
     
+    @Override
+    public Accept getAcc() {
+        return acceptance;
+    }
+    
+ 
+    // --------------------------------------------------
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -99,35 +109,37 @@ public class FDFA implements Acceptor {
         return builder.toString();
     }
 
-    @Override
-    public Acc getAcc() {
-        return acceptance;
-    }
-    
-    private class AccFDFA implements Acc {
+    // --------------------------------------------------
+
+    private class AcceptFDFA implements Accept {
         final FDFA fdfa;
         
-        AccFDFA(FDFA fdfa) {
+        AcceptFDFA(FDFA fdfa) {
             this.fdfa = fdfa;
         }
 
         @Override
-        public boolean isAccepting(ISet states) {
+        public boolean accept(ISet states) {
             throw new UnsupportedOperationException("FDFA doesnot support isAccepting(ISet states)");
         }
 
         @Override
-        public boolean isAccepting(Word prefix, Word suffix) {
-            if(! isNormalized(prefix, suffix) ) {
-                Pair<Word, Word> pair = FDFAOperations.normalize(fdfa, prefix, suffix);
+        public boolean accept(Word prefix, Word period) {
+            if(! isNormalized(prefix, period) ) {
+                Pair<Word, Word> pair = FDFAOperations.normalize(fdfa, prefix, period);
                 if(pair == null) return false;
                 prefix = pair.getLeft();
-                suffix = pair.getRight();
+                period = pair.getRight();
             }
             int state = leadingDFA.getSuccessor(prefix);
             DFA proDFA = getProgressDFA(state);
-            int proState = proDFA.getSuccessor(suffix);
+            int proState = proDFA.getSuccessor(period);
             return proDFA.isFinal(proState);
+        }
+
+        @Override
+        public boolean accept(Word word) {
+            return false;
         }
         
     }

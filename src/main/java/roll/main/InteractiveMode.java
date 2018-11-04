@@ -22,7 +22,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import roll.automata.FASimple;
+import roll.automata.NFA;
 import roll.learner.LearnerBase;
 import roll.learner.dfa.table.LearnerDFATableColumn;
 import roll.learner.dfa.table.LearnerDFATableLStar;
@@ -48,14 +48,14 @@ public class InteractiveMode {
         // prepare the alphabet
         Alphabet alphabet = prepareAlphabet(options);
         MembershipOracle<HashableValue> teacher = getMembershipOracle(options);
-        LearnerBase<? extends FASimple> learner = getLearner(options, alphabet, teacher);
+        LearnerBase<? extends NFA> learner = getLearner(options, alphabet, teacher);
         
         options.log.println("Initializing learning...");
         learner.startLearning();
         boolean result = false;
         while(! result ) {
             options.log.verbose("Table/Tree is both closed and consistent\n" + learner.toString());
-            FASimple hypothesis = learner.getHypothesis();
+            NFA hypothesis = learner.getHypothesis();
             // along with ce
             System.out.println("Resolving equivalence query for hypothesis (#Q=" + hypothesis.getStateSize() + ")...  ");
             Query<HashableValue> ceQuery = answerEquivalenceQuery(hypothesis);
@@ -99,11 +99,11 @@ public class InteractiveMode {
            }
     }
     
-    public static LearnerBase<? extends FASimple> getLearner(Options options, Alphabet alphabet,
+    public static LearnerBase<? extends NFA> getLearner(Options options, Alphabet alphabet,
             MembershipOracle<HashableValue> teacher) {
-        LearnerBase<? extends FASimple> learner = null;
+        LearnerBase<? extends NFA> learner = null;
         if(options.algorithm == Options.Algorithm.NBA_LDOLLAR) {
-            learner = (LearnerBase<? extends FASimple>)new LearnerNBALDollar(options, alphabet, teacher);
+            learner = (LearnerBase<? extends NFA>)new LearnerNBALDollar(options, alphabet, teacher);
         }else if(options.algorithm == Options.Algorithm.PERIODIC
              || options.algorithm == Options.Algorithm.SYNTACTIC
              || options.algorithm == Options.Algorithm.RECURRENT) {
@@ -320,7 +320,7 @@ public class InteractiveMode {
         }
     }
     
-    private static Query<HashableValue> answerEquivalenceQuery(FASimple hypothesis) {
+    private static Query<HashableValue> answerEquivalenceQuery(NFA hypothesis) {
         if(hypothesis != null) {
             List<String> apList = new ArrayList<>();
             for(int i = 0; i < hypothesis.getAlphabetSize(); i ++) {

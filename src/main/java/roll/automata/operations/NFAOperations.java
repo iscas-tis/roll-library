@@ -22,7 +22,6 @@ import dk.brics.automaton.Transition;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import roll.automata.DFA;
-import roll.automata.FASimple;
 import roll.automata.NFA;
 
 /**
@@ -40,12 +39,16 @@ public class NFAOperations {
         return state;
     }
     
-    public static Automaton toDkFA(FASimple fa) {
-        TIntObjectMap<State> map = new TIntObjectHashMap<>();
-        return toDkFA(map, fa);
+    public static Automaton toDkNFA(NFA nfa) {
+        return toDkFA(nfa, false);
     }
     
-    public static Automaton toDkFA(TIntObjectMap<State> map, FASimple fa) {  
+    public static Automaton toDkFA(NFA fa, boolean isDet) {
+        TIntObjectMap<State> map = new TIntObjectHashMap<>();
+        return toDkFA(map, fa, isDet);
+    }
+    
+    public static Automaton toDkFA(TIntObjectMap<State> map, NFA fa, boolean isDet) {  
         Automaton dkAut = new Automaton();
         
         for(int stateNr = 0; stateNr < fa.getStateSize(); stateNr ++) {
@@ -67,7 +70,7 @@ public class NFAOperations {
             }
         }
         
-        dkAut.setDeterministic(false);
+        dkAut.setDeterministic(isDet);
         // should not restore invariant, it may contain no final states
         //dkAut.restoreInvariant();
         //automaton.minimize();

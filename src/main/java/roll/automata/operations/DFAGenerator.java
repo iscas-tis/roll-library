@@ -19,7 +19,7 @@ package roll.automata.operations;
 import java.util.Random;
 
 import roll.automata.DFA;
-import roll.automata.StateDFA;
+import roll.automata.StateNFA;
 import roll.words.Alphabet;
 
 /**
@@ -42,7 +42,7 @@ public class DFAGenerator {
 
         // add self loops for those transitions
         for(int i = 0; i < numState; i ++) {
-            StateDFA state = result.getState(i);
+            StateNFA state = result.getState(i);
             for(int k=0 ; k < apSize; k++){
                 state.addTransition(k, i);
             }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2017                                               */
+/* Copyright (c) 2018 -                                                   */
 /*       Institute of Software, Chinese Academy of Sciences               */
 /* This file is part of ROLL, a Regular Omega Language Learning library.  */
 /* ROLL is free software: you can redistribute it and/or modify           */
@@ -19,11 +19,67 @@ package roll.automata;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public interface State {
-    // getters 
-    FA getFA();
-    int getId();
-    // setters
-    void addTransition(int letter, int state);
+public enum AutType {
 
+	DFA,
+	NFA,
+	FDFA,
+	FRFSA,
+	NBA,
+	RABIN,
+	STREET,
+	PARITY;
+	
+	public boolean isDFA() {
+		return this == DFA;
+	}
+	
+	public boolean isNFA() {
+		return this == NFA;
+	}
+	
+	public boolean isFDFA() {
+		return this == FDFA;
+	}
+	
+	public boolean isFRFSA() {
+	    return this == FRFSA;
+	}
+	
+	public boolean isNBA() {
+		return this == NBA;
+	}
+	
+	public boolean isRabin() {
+		return this == RABIN;
+	}
+	
+	public boolean isStreet() {
+		return this == STREET;
+	}
+	
+	public boolean isParity() {
+		return this == PARITY;
+	}
+	
+	
+	public String toString() {
+		if(this == DFA) {
+			return "DFA";
+		}else if(this == NFA) {
+			return "NFA";
+		}else if(this == FDFA) {
+			return "FDFA";
+		}else if(this == FRFSA) {
+            return "FRFSA";
+        }if(this == NBA) {
+			return "NBA";
+		}else if(this == RABIN) {
+			return "RABIN";
+		}else if(this == STREET) {
+				return "STREET";
+		}else {
+			return "PARITY";
+		}
+	}
 }

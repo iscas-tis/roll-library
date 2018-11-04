@@ -14,7 +14,7 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectCharHashMap;
 import roll.automata.NBA;
-import roll.automata.StateFA;
+import roll.automata.StateNFA;
 import roll.words.Alphabet;
 import roll.words.Word;
 
@@ -117,7 +117,7 @@ public class Symbol {
             right = map.get(left.id);
         }
         if(right == -1) {
-            StateFA rtSt = nba.createState();
+            StateNFA rtSt = nba.createState();
             right = rtSt.getId();
             map.put(left.id, right);
         }

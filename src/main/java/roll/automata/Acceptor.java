@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2017                                               */
+/* Copyright (c) 2018 -                                                   */
 /*       Institute of Software, Chinese Academy of Sciences               */
 /* This file is part of ROLL, a Regular Omega Language Learning library.  */
 /* ROLL is free software: you can redistribute it and/or modify           */
@@ -29,14 +29,19 @@ public interface Acceptor extends IHTML {
     
     Alphabet getAlphabet();
 	
-	AccType getAccType();
+	AutType getAccType();
 	
-	Acc getAcc(); // acceptance condition
+	Accept getAcc(); // acceptance condition
 	
 	default FDFA asFDFA() {
 	    assert this instanceof FDFA;
 		return (FDFA)this;
 	}
+	
+	default FRFSA asFRFSA() {
+        assert this instanceof FRFSA;
+        return (FRFSA)this;
+    }
 	
 	default DFA asDFA() {
 	    assert this instanceof DFA;
@@ -52,6 +57,8 @@ public interface Acceptor extends IHTML {
 	    assert this instanceof NBA;
         return (NBA)this;
     }
+	
 	// and so on
+	
 	String toString(List<String> apList);
 }

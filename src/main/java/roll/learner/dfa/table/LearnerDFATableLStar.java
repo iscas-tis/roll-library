@@ -27,8 +27,7 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.procedure.TIntProcedure;
 import roll.automata.DFA;
-import roll.automata.StateDFA;
-import roll.automata.StateFA;
+import roll.automata.StateNFA;
 import roll.learner.LearnerType;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
@@ -80,7 +79,7 @@ public class LearnerDFATableLStar extends LearnerDFATable {
             List<HashableValue> values = upperTable.get(rowNr).getValues();
             if(valuesMap.containsKey(values)) continue;
             // new state now
-            StateFA state = dfa.createState();
+            StateNFA state = dfa.createState();
             stateIndexMap.put(rowNr, state.getId());
             valuesMap.put(values, rowNr);
         }
@@ -90,7 +89,7 @@ public class LearnerDFATableLStar extends LearnerDFATable {
             @Override
             public boolean execute(int rowNr) {
                 // we first get current state
-                StateDFA state = dfa.getState(stateIndexMap.get(rowNr));
+                StateNFA state = dfa.getState(stateIndexMap.get(rowNr));
                 for(int letter = 0; letter < alphabet.getLetterSize(); letter ++) {
                     List<HashableValue> succValues = getSuccessorRowValues(rowNr, letter);
                     assert succValues != null : "Didnot find successor in upper table";

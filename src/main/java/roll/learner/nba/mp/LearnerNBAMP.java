@@ -21,7 +21,7 @@ import java.util.List;
 
 import roll.automata.DFA;
 import roll.automata.NBA;
-import roll.automata.StateDFA;
+import roll.automata.StateNFA;
 import roll.learner.LearnerBase;
 import roll.learner.LearnerType;
 import roll.main.Options;
@@ -43,7 +43,6 @@ import roll.words.Word;
  * On the Learnability of Infinitary Regular Sets
  * by Oded Maler and Amir Pnueli
  * 
- * Still in construction
  * */
 
 public class LearnerNBAMP extends LearnerBase<NBA> {
@@ -163,7 +162,7 @@ public class LearnerNBAMP extends LearnerBase<NBA> {
         }
         // build transition system
         for(int currNr = 0; currNr < upperTable.size(); currNr ++) {
-            StateDFA state = dfa.getState(currNr);
+            StateNFA state = dfa.getState(currNr);
             Word currWord = upperTable.get(currNr).getWord();
             for(int letter = 0; letter < alphabet.getLetterSize(); letter ++) {
                 Word succWord = currWord.append(letter);
@@ -278,5 +277,6 @@ public class LearnerNBAMP extends LearnerBase<NBA> {
         }
         return inf;
     }
+    
 
 }
