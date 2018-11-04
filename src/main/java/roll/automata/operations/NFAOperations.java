@@ -101,5 +101,15 @@ public class NFAOperations {
         
         return nfa;
     }
+    
+    public static int getNumberOfTransitions(NFA nfa) {
+        int result = 0;
+        for(int i = 0; i < nfa.getStateSize(); i ++) {
+            for(int c = 0; c < nfa.getAlphabetSize(); c ++) {
+                result += nfa.getSuccessors(i, c).cardinality();
+            }
+        }
+        return result;
+    }
 
 }

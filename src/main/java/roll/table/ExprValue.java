@@ -17,7 +17,7 @@
 package roll.table;
 /**
  * Column value for observation table
- * Experiment value for distinguishing different row word
+ * Experiment value for distinguishing different row words
  * 
  * @author Yong Li (liyong@ios.ac.cn)
  * */

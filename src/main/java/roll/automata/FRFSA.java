@@ -41,7 +41,7 @@ public class FRFSA implements Acceptor {
         alphabet = m.getAlphabet();
         leadingNFA = m;
         progressNFAs = ps;
-        acceptance = new AcceptFNFA(this);
+        acceptance = new AcceptFRFSA(this);
     }
     
     // -------------------------------------------------------
@@ -107,10 +107,10 @@ public class FRFSA implements Acceptor {
     }
 
     // -------------------------------------------------------
-    private class AcceptFNFA implements Accept {
+    private class AcceptFRFSA implements Accept {
         final FRFSA fnfa;
         
-        AcceptFNFA(FRFSA fdfa) {
+        AcceptFRFSA(FRFSA fdfa) {
             this.fnfa = fdfa;
         }
 
@@ -120,15 +120,12 @@ public class FRFSA implements Acceptor {
         }
 
         @Override
-        public boolean accept(Word prefix, Word suffix) {
+        public boolean accept(Word prefix, Word period) {
             NFA nfa = fnfa.getLeadingDFA();
-            for(int state : nfa.getSuccessors(prefix)) {
+            for(int state : nfa.getSuccessors(period)) {
                 NFA proNFA = getProgressNFA(state);
-                boolean found = false;
-                for(int proState : proNFA.getSuccessors(suffix)) {
-                    found = proNFA.isFinal(proState);
-                    if(found) return true;
-                }
+                boolean found = proNFA.getAcc().accept(period);
+                if(found) return true;
             }
             return false;
         }

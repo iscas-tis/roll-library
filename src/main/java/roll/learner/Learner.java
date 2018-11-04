@@ -36,5 +36,4 @@ public interface Learner<M, O> {
 	void refineHypothesis(Query<O> query);
 	
 	Options getOptions();
-
 }

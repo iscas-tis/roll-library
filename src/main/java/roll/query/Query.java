@@ -20,8 +20,8 @@ import roll.table.ObservationRow;
 import roll.words.Word;
 
 /**
- * This is for interaction with membership query
- * and equivalence query, mainly for equivalence query
+ * This is for the interaction with the membership query oracle
+ * and equivalence query oracle
  * @O oracle return type 
  * */
 /**

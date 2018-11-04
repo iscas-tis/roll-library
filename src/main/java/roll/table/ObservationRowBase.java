@@ -27,6 +27,7 @@ public class ObservationRowBase extends ObservationRowAbstract {
 		super(word);
 	}
 	
+	@Override
 	public boolean equals(Object o) {
 		if(! (o instanceof ObservationRowBase)) {
 			return false;

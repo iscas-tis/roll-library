@@ -24,9 +24,11 @@ import roll.words.Word;
 
 public class ExprValueWord implements ExprValue {
 	private Word word;
+	
 	public ExprValueWord(Word col) {
 		word = col;
 	}
+	
 	@Override
 	public boolean valueEqual(ExprValue rvalue) {
 		return word.equals(rvalue.get());
@@ -38,6 +40,7 @@ public class ExprValueWord implements ExprValue {
 		return word;
 	}
 	
+	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof ExprValueWord) {
 			ExprValueWord col = (ExprValueWord)obj;
@@ -46,17 +49,21 @@ public class ExprValueWord implements ExprValue {
 		return false;
 	}
 	
+	@Override
 	public String toString() {
 		return word.toStringWithAlphabet();
 	}
+	
 	@Override
 	public boolean isPair() {
 		return false;
 	}
+	
 	@Override
 	public <T> T getLeft() {
 		return null;
 	}
+	
 	@Override
 	public <T> T getRight() {
 		return null;

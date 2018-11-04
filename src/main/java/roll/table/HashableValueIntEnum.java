@@ -18,6 +18,8 @@ package roll.table;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ * a data structure specialized for the syntactic FDFA learning
  * */
 
 public class HashableValueIntEnum implements HashableValue {

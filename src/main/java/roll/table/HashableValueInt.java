@@ -18,6 +18,8 @@ package roll.table;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ * for Mealy machine
  * */
 
 public class HashableValueInt implements HashableValue {

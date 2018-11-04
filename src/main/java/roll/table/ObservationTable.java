@@ -21,11 +21,11 @@ import java.util.List;
 import roll.words.Word;
 /**
  * An observation table consists of three components, namely: <BR/>
- * @upper upper part of observation table, each one represent a state 
+ * @upper the upper part of the observation table, each one represents a state 
  *        in the unknown automaton <BR/>
- * @lower lower part of observation table, each one can be mapped to 
- *        one state in upper table <BR/>
- * @column the set of experiments to distinguish the strings in upper table <BR/>
+ * @lower the lower part of the observation table, each one can be mapped to 
+ *        one state in the upper table <BR/>
+ * @column the set of experiments to distinguish the strings in the upper table <BR/>
  * 
  * @author Yong Li (liyong@ios.ac.cn)
  * */
@@ -38,7 +38,7 @@ public interface ObservationTable {
 	
 	List<ObservationRow> getLowerTable();
 	
-	// expose row may be modified,should we allow that?
+	// get the lower row which makes the table unclosed
 	ObservationRow getUnclosedLowerRow();
 	
 	// may not be used, should be removed later
@@ -51,6 +51,7 @@ public interface ObservationTable {
 		return getInconsistentColumn() == null;
 	}
 	
+	// get the column which witnesses the inconsistency
 	Word getInconsistentColumn();
 	
 	String toString();

@@ -39,10 +39,11 @@ public class HashableValueBoolean implements HashableValue {
 		return value;
 	}
 	
+	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof HashableValueBoolean) {
-			HashableValueBoolean row = (HashableValueBoolean)obj;
-			return valueEqual(row);
+			HashableValueBoolean value = (HashableValueBoolean)obj;
+			return valueEqual(value);
 		}
 		return false;
 	}

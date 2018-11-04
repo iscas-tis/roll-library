@@ -22,8 +22,7 @@ import roll.words.Word;
 
 
 /**
- * A row consists of its strings, namely its labels 
- * and corresponding row values
+ * A row of a label with values
  * 
  * @author Yong Li (liyong@ios.ac.cn)
 */
@@ -56,6 +55,7 @@ public interface ObservationRow {
 	
 	void clear();
 	
+	// used in the NFA learning
 	default boolean covers(ObservationRow other) {
 	    List<HashableValue> thisValues = getValues();
         List<HashableValue> otherValues = other.getValues();

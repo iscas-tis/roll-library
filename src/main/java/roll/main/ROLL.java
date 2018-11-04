@@ -25,7 +25,7 @@ import java.io.PrintStream;
 import roll.automata.FDFA;
 import roll.automata.NBA;
 import roll.automata.operations.NBAGenerator;
-import roll.automata.operations.NBAOperations;
+import roll.automata.operations.NFAOperations;
 import roll.automata.operations.nba.inclusion.NBAInclusionCheckTool;
 import roll.learner.fdfa.LearnerFDFA;
 import roll.learner.nba.lomega.UtilLOmega;
@@ -78,7 +78,7 @@ public final class ROLL {
             runIncludingMode(options);
             break;
         case LEARNING:
-            options.log.info("ROLL for BA learning via rabit...");
+            options.log.info("ROLL for automata learning ...");
             runLearningMode(options, false);
             break;
         case SAMPLING:
@@ -194,8 +194,8 @@ public final class ROLL {
         }
         parser.close();
         // output statistics
-        options.stats.numOfTransInTraget = NBAOperations.getNumberOfTransitions(target);
-        options.stats.numOfTransInHypothesis = NBAOperations.getNumberOfTransitions(options.stats.hypothesis);
+        options.stats.numOfTransInTraget = NFAOperations.getNumberOfTransitions(target);
+        options.stats.numOfTransInHypothesis = NFAOperations.getNumberOfTransitions(options.stats.hypothesis);
         options.stats.print();
         
     }
@@ -274,8 +274,8 @@ public final class ROLL {
         parser.close();
         // output statistics
         options.stats.numOfStatesInHypothesis = complement.getStateSize();
-        options.stats.numOfTransInTraget = NBAOperations.getNumberOfTransitions(input);
-        options.stats.numOfTransInHypothesis = NBAOperations.getNumberOfTransitions(complement);
+        options.stats.numOfTransInTraget = NFAOperations.getNumberOfTransitions(input);
+        options.stats.numOfTransInHypothesis = NFAOperations.getNumberOfTransitions(complement);
         timer.stop();
         options.stats.timeInTotal = timer.getTimeElapsed();
         

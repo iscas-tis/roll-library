@@ -21,6 +21,8 @@ import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ * specialized for the leading DFA learning 
  * */
 
 public class ExprValueWordPair implements ExprValue {
@@ -32,6 +34,7 @@ public class ExprValueWordPair implements ExprValue {
 		this.wordLeft = left;
 		this.wordRight = right;
 	}
+	
 	@Override
 	public boolean valueEqual(ExprValue rvalue) {
 		ExprValueWordPair pvalue = (ExprValueWordPair)rvalue;
@@ -45,6 +48,7 @@ public class ExprValueWordPair implements ExprValue {
 		return new Pair<Word, Word>(wordLeft, wordRight);
 	}
 	
+	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof ExprValueWordPair) {
 			ExprValueWordPair pair = (ExprValueWordPair)obj;
@@ -53,10 +57,12 @@ public class ExprValueWordPair implements ExprValue {
 		return false;
 	}
 	
+	@Override
 	public String toString() {
 		return "(" + wordLeft.toStringWithAlphabet() 
 		+ ", " + wordRight.toStringWithAlphabet() + ")";
 	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean isPair() {
