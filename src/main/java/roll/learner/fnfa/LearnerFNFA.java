@@ -14,14 +14,14 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.frfsa;
+package roll.learner.fnfa;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import roll.automata.DFA;
-import roll.automata.FDFA;
-import roll.automata.FRFSA;
+import roll.automata.FNFA;
+import roll.automata.NFA;
 import roll.jupyter.NativeTool;
 import roll.learner.LearnerBase;
 import roll.learner.LearnerType;
@@ -37,18 +37,18 @@ import roll.util.Timer;
 import roll.words.Alphabet;
 import roll.words.Word;
 
-public abstract class LearnerFRFSA extends LearnerBase<FRFSA> {
+public abstract class LearnerFNFA extends LearnerBase<FNFA> {
 
     protected LearnerLeading learnerLeading;
     protected List<LearnerProgress> learnerProgress;
     private boolean alreadyStarted;
-    protected FDFA fdfa;
-    public LearnerFRFSA(Options options, Alphabet alphabet
+    protected FNFA fnfa;
+    public LearnerFNFA(Options options, Alphabet alphabet
             , MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
         this.learnerProgress = new ArrayList<>();
     }
-    
+        
     @Override
     public void startLearning() {
         if(alreadyStarted)
@@ -78,18 +78,18 @@ public abstract class LearnerFRFSA extends LearnerBase<FRFSA> {
     }
     
     protected void constructHypothesis() {
-        DFA leadDFA = learnerLeading.getHypothesis();
-        List<DFA> proDFAs = new ArrayList<>();
+        NFA leadDFA = learnerLeading.getHypothesis();
+        List<NFA> proDFAs = new ArrayList<>();
         for(LearnerProgress learner : learnerProgress) {
             DFA progressDFA = (DFA)learner.getHypothesis();
             proDFAs.add(progressDFA);
         }
-        fdfa = new FDFA(leadDFA, proDFAs);
+        fnfa = new FNFA(leadDFA, proDFAs);
     }
 
     @Override
     public LearnerType getLearnerType() {
-        return LearnerType.FDFA;
+        return LearnerType.FNFA;
     }
     
     protected abstract LearnerLeading getLearnerLeading();
@@ -102,8 +102,8 @@ public abstract class LearnerFRFSA extends LearnerBase<FRFSA> {
  
 
     @Override
-    public FRFSA getHypothesis() {
-        return null;
+    public FNFA getHypothesis() {
+        return fnfa;
     }
 
     // refine FDFA by counterexample

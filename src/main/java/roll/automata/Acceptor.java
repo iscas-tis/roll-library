@@ -38,9 +38,9 @@ public interface Acceptor extends IHTML {
 		return (FDFA)this;
 	}
 	
-	default FRFSA asFRFSA() {
-        assert this instanceof FRFSA;
-        return (FRFSA)this;
+	default FNFA asFRFSA() {
+        assert this instanceof FNFA;
+        return (FNFA)this;
     }
 	
 	default DFA asDFA() {

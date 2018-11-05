@@ -52,7 +52,7 @@ public interface ObservationTable {
 	}
 	
 	// get the column which witnesses the inconsistency
-	Word getInconsistentColumn();
+	ExprValue getInconsistentColumn();
 	
 	String toString();
 	

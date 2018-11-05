@@ -17,9 +17,7 @@
 package roll.oracle.nfa;
 
 import dk.brics.automaton.Automaton;
-import roll.automata.DFA;
 import roll.automata.NFA;
-import roll.automata.operations.DFAOperations;
 import roll.automata.operations.NFAOperations;
 import roll.main.Options;
 import roll.oracle.TeacherAbstract;
@@ -44,13 +42,7 @@ public class TeacherNFA extends TeacherAbstract<NFA>{
         this.target = nfa;
         this.alphabet = nfa.getAlphabet();
         this.automaton = NFAOperations.toDkNFA(nfa);
-    }
-    
-    public TeacherNFA(Options options, DFA dfa) {
-        super(options);
-        this.target = NFAOperations.fromDFA(dfa);
-        this.alphabet = dfa.getAlphabet();
-        this.automaton = DFAOperations.toDkDFA(dfa);
+        System.out.println(automaton.toDot());
     }
     
     @Override

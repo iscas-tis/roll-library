@@ -50,7 +50,7 @@ public abstract class ObservationTableBase extends ObservationTableAbstract {
 
 	// row(s1) = row(s2) then it should be row(s1.a) = row(s2.a) for every a
 	@Override
-	public Word getInconsistentColumn() {
+	public ExprValue getInconsistentColumn() {
 		return null;
 	}
  

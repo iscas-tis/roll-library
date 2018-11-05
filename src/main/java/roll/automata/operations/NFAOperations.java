@@ -43,29 +43,29 @@ public class NFAOperations {
         return toDkFA(nfa, false);
     }
     
-    public static Automaton toDkFA(NFA fa, boolean isDet) {
+    public static Automaton toDkFA(NFA nfa, boolean isDet) {
         TIntObjectMap<State> map = new TIntObjectHashMap<>();
-        return toDkFA(map, fa, isDet);
+        return toDkFA(map, nfa, isDet);
     }
     
-    public static Automaton toDkFA(TIntObjectMap<State> map, NFA fa, boolean isDet) {  
+    public static Automaton toDkFA(TIntObjectMap<State> map, NFA nfa, boolean isDet) {  
         Automaton dkAut = new Automaton();
         
-        for(int stateNr = 0; stateNr < fa.getStateSize(); stateNr ++) {
+        for(int stateNr = 0; stateNr < nfa.getStateSize(); stateNr ++) {
             State state = getState(map, stateNr);
             // initial states
-            if(fa.isInitial(stateNr)) {
+            if(nfa.isInitial(stateNr)) {
                 dkAut.setInitialState(state);
             }
             // final states
-            if(fa.isFinal(stateNr)) {
+            if(nfa.isFinal(stateNr)) {
                 state.setAccept(true);
             }
 
-            for (int letter = 0; letter < fa.getAlphabetSize(); letter ++) {
-                for(int succNr : fa.getSuccessors(stateNr, letter)) {
+            for (int letter = 0; letter < nfa.getAlphabetSize(); letter ++) {
+                for(int succNr : nfa.getSuccessors(stateNr, letter)) {
                     State stateSucc = getState(map, succNr);
-                    state.addTransition(new Transition(fa.getAlphabet().getLetter(letter), stateSucc));
+                    state.addTransition(new Transition(nfa.getAlphabet().getLetter(letter), stateSucc));
                 }
             }
         }

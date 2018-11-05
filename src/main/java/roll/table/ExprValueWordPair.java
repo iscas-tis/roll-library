@@ -81,4 +81,15 @@ public class ExprValueWordPair implements ExprValue {
 		return wordRight;
 	}
 
+    @Override
+    public int compareTo(ExprValue arg) {
+        assert arg instanceof ExprValueWordPair;
+        ExprValueWordPair other = (ExprValueWordPair)arg;
+        int first = wordLeft.compareTo(other.wordLeft);
+        if(first != 0) {
+            return first;
+        }
+        return wordRight.compareTo(other.wordRight);
+    }
+
 }

@@ -36,6 +36,7 @@ public enum LearnerType {
 	// FDFA
 	
 	FDFA,
+	FNFA,
 	
 	FDFA_LEADING_TABLE,
 	FDFA_LEADING_TREE,

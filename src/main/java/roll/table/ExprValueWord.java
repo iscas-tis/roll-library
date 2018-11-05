@@ -73,4 +73,11 @@ public class ExprValueWord implements ExprValue {
 	public int hashCode() {
 		return word.hashCode();
 	}
+
+    @Override
+    public int compareTo(ExprValue arg) {
+        assert arg instanceof ExprValueWord;
+        ExprValueWord other = (ExprValueWord)arg;
+        return word.compareTo(other.word);
+    }
 }

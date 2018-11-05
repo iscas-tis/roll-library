@@ -27,25 +27,25 @@ import roll.words.Word;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * 
- * Family of Residual Finite State Automata
+ * Family of Nodeterministic Finite Automata
  * */
-public class FRFSA implements Acceptor {
+public class FNFA implements Acceptor {
     
     private final NFA leadingNFA;
     private final List<NFA> progressNFAs;
     private final Accept acceptance;
     private final Alphabet alphabet;
     
-    public FRFSA(NFA m, List<NFA> ps) {
+    public FNFA(NFA m, List<NFA> ps) {
         assert m != null && ps != null;
         alphabet = m.getAlphabet();
         leadingNFA = m;
         progressNFAs = ps;
-        acceptance = new AcceptFRFSA(this);
+        acceptance = new AcceptFNFA(this);
     }
     
     // -------------------------------------------------------
-    public NFA getLeadingDFA() {
+    public NFA getLeadingNFA() {
         return leadingNFA;
     }
     
@@ -61,7 +61,7 @@ public class FRFSA implements Acceptor {
 
     @Override
     public AutType getAccType() {
-        return AutType.FRFSA;
+        return AutType.FNFA;
     }
 
     @Override
@@ -73,9 +73,9 @@ public class FRFSA implements Acceptor {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("//FRFSA-M: \n" + leadingNFA.toString() + "\n");
+        builder.append("//FNFA-M: \n" + leadingNFA.toString() + "\n");
         for(int i = 0; i < progressNFAs.size(); i ++) {
-            builder.append("//FRFSA-P" + i + ": \n" + progressNFAs.get(i).toString());
+            builder.append("//FNFA-P" + i + ": \n" + progressNFAs.get(i).toString());
         }
         return builder.toString();
     }
@@ -83,9 +83,9 @@ public class FRFSA implements Acceptor {
     @Override
     public String toString(List<String> apList) {
         StringBuilder builder = new StringBuilder();
-        builder.append("//FRFSA-M: \n" + leadingNFA.toString(apList) + "\n");
+        builder.append("//FNFA-M: \n" + leadingNFA.toString(apList) + "\n");
         for(int i = 0; i < progressNFAs.size(); i ++) {
-            builder.append("//FRFSA-P" + i + ": \n" + progressNFAs.get(i).toString(apList));
+            builder.append("//FNFA-P" + i + ": \n" + progressNFAs.get(i).toString(apList));
         }
         return builder.toString();
     }
@@ -107,21 +107,21 @@ public class FRFSA implements Acceptor {
     }
 
     // -------------------------------------------------------
-    private class AcceptFRFSA implements Accept {
-        final FRFSA fnfa;
+    private class AcceptFNFA implements Accept {
+        final FNFA fnfa;
         
-        AcceptFRFSA(FRFSA fdfa) {
+        AcceptFNFA(FNFA fdfa) {
             this.fnfa = fdfa;
         }
 
         @Override
         public boolean accept(ISet states) {
-            throw new UnsupportedOperationException("FRFSA doesnot support isAccepting(ISet states)");
+            throw new UnsupportedOperationException("FNFA doesnot support isAccepting(ISet states)");
         }
 
         @Override
         public boolean accept(Word prefix, Word period) {
-            NFA nfa = fnfa.getLeadingDFA();
+            NFA nfa = fnfa.getLeadingNFA();
             for(int state : nfa.getSuccessors(period)) {
                 NFA proNFA = getProgressNFA(state);
                 boolean found = proNFA.getAcc().accept(period);

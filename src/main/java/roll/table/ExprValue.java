@@ -21,7 +21,7 @@ package roll.table;
  * 
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public interface ExprValue {
+public interface ExprValue extends Comparable<ExprValue> {
 	
 	boolean equals(Object obj);
 	

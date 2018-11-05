@@ -106,7 +106,7 @@ public class NFATest {
         input.addLetter('b');
 //        input.addLetter('c');
         
-        int numCases = 20;
+        int numCases = 30;
         int numStates = 10;
         int numOK = 0;
         
@@ -115,7 +115,7 @@ public class NFATest {
         for(int i = 0; i < numCases; i ++) {
             DFA dfa = DFAGenerator.getRandomDFA(input, numStates);
             System.out.println("Case " + i );
-            if(NFATest.testLearnerNFA2(NFAOperations.fromDFA(dfa), input)) {
+            if(NFATest.testLearnerNFA2(dfa, input)) {
                 numOK ++;
             }
         }
@@ -125,6 +125,7 @@ public class NFATest {
     }
     
     public static boolean testLearnerNFA(NFA machine, Alphabet alphabet) {
+        System.out.println("Target: \n" + machine.toDot());
         Options options = new Options();
         TeacherNFA teacher = new TeacherNFA(options, machine);
         LearnerNFATable learner = new LearnerNFATable(options, alphabet, teacher);
@@ -151,6 +152,7 @@ public class NFATest {
     }
     
     public static boolean testLearnerNFA2(NFA machine, Alphabet alphabet) {
+//        System.out.println("Target: \n" + machine.toDot());
         Options options = new Options();
         options.structure = Options.Structure.TREE;
         options.binarySearch = true;

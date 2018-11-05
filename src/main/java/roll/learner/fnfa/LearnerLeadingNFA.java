@@ -14,57 +14,52 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.nfa.nlstar;
+package roll.learner.fnfa;
 
 import java.util.List;
 
 import roll.learner.LearnerType;
+import roll.learner.nfa.nlstar.LearnerNFATable;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.ExprValue;
-import roll.table.ExprValueWord;
+import roll.table.ExprValueWordPair;
 import roll.table.HashableValue;
 import roll.table.ObservationRow;
+import roll.util.Pair;
 import roll.words.Alphabet;
 import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
- * 
- * Benedikt Bollig, Peter Habermehl, Carsten Kern, and Martin Leucker
- * "Angluin-Style Learning of NFA" in IJCAI 2009.
- * 
  * */
 
-public class LearnerNFANLStar extends LearnerNFATable {
-    
-    public LearnerNFANLStar(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
+public class LearnerLeadingNFA extends LearnerNFATable {
+
+    public LearnerLeadingNFA(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
     }
 
     @Override
     public LearnerType getLearnerType() {
-        return LearnerType.NFA_NLSTAR;
+        return LearnerType.FDFA_LEADING_TABLE;
     }
-    // -----------------------------------------------------------------------------------
-    // a state is accepting iff it accepts empty language
+
     @Override
     protected boolean isAccepting(List<ObservationRow> upperPrimes, int state) {
-        ObservationRow stateRow = upperPrimes.get(state);
-        int emptyNr = observationTable.getColumnIndex(getExprValueWord(alphabet.getEmptyWord()));
-        assert emptyNr != -1 : "index -> " + emptyNr;
-        return stateRow.getValues().get(emptyNr).isAccepting();
+        return false;
     }
 
     @Override
     protected int addNewColumnsToTable(Query<HashableValue> query) {
-        Word wordCE = query.getQueriedWord();
+        Word prefix = query.getPrefix();
+        Word period = query.getSuffix();
         int number = 0;
-        for(int offset = 0; offset < wordCE.length(); offset ++) {
-            Word suffix = wordCE.getSuffix(offset);
-            ExprValue exprValue = getExprValueWord(suffix);
+        for(int offset = 0; offset < prefix.length(); offset ++) {
+            Word suffix = prefix.getSuffix(offset);
+            ExprValue exprValue = new ExprValueWordPair(suffix, period);
             if(observationTable.isInColumn(exprValue)) {
                 continue;
             }
@@ -76,24 +71,33 @@ public class LearnerNFANLStar extends LearnerNFATable {
 
     @Override
     protected ExprValue makeInconsistencyColumn(ExprValue exprValue, int preletter) {
-        Word word = exprValue.get();
-        word = word.preappend(preletter);
-        return getExprValueWord(word);
+        Pair<Word, Word> pair = getOmegaWord(alphabet.getLetterWord(preletter), exprValue);
+        return new ExprValueWordPair(pair.getLeft(), pair.getRight());
     }
 
     @Override
     protected Query<HashableValue> makeMembershipQuery(ObservationRow row, int offset, ExprValue exprValue) {
-        return new QuerySimple<>(row, row.getWord(), exprValue.get(), offset);
+        Pair<Word, Word> pair = getOmegaWord(row.getWord(), exprValue);
+        return new QuerySimple<>(row, pair.getLeft(), pair.getRight(), offset);
     }
 
     @Override
     protected ExprValue getInitialColumnExprValue() {
-        return new ExprValueWord(alphabet.getEmptyWord());
+        Word wordEmpty = alphabet.getEmptyWord();
+        return new ExprValueWordPair(wordEmpty, wordEmpty);
     }
 
     @Override
     protected Query<HashableValue> makeMembershipQuery(Word prefix, ExprValue exprValue) {
-        throw new UnsupportedOperationException("NLStar does not support makeMembershipQuery(Word prefix, ExprValue exprValue)");
+        Pair<Word, Word> pair = getOmegaWord(prefix, exprValue);
+        return new QuerySimple<>(pair.getLeft(), pair.getRight());
+    }
+    
+    protected Pair<Word, Word> getOmegaWord(Word prefix, ExprValue exprValue) {
+        Word suffix = exprValue.getLeft();
+        prefix = prefix.concat(suffix);
+        Word period = exprValue.getRight();
+        return new Pair<>(prefix, period);
     }
 
 }

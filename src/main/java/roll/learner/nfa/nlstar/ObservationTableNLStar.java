@@ -30,7 +30,6 @@ import roll.table.ObservationRowAbstract;
 import roll.table.ObservationRowBase;
 import roll.table.ObservationTableBase;
 import roll.words.Alphabet;
-import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -39,34 +38,35 @@ import roll.words.Word;
 public class ObservationTableNLStar extends ObservationTableBase {
     
     private final Alphabet alphabet;
-    private final Set<Word> columnSet;
+    private final Set<ExprValue> columnSet;
     private final List<ObservationRow> upperPrimes;
+    private final LearnerNFATable learner;
     
-    public ObservationTableNLStar(Alphabet alphabet) {
+    public ObservationTableNLStar(LearnerNFATable learner, Alphabet alphabet) {
         super();
+        this.learner = learner;
         this.alphabet = alphabet;
         this.columnSet = new TreeSet<>();
         this.upperPrimes = new ArrayList<>();
     }
     
-    protected boolean isInColumn(Word word) {
-        return columnSet.contains(word); 
+    public boolean isInColumn(ExprValue exprValue) {
+        return columnSet.contains(exprValue); 
     }
     
     @Override
     public int addColumn(ExprValue column) {
-        Word word = column.get();
-        if(isInColumn(word)) {
+        if(isInColumn(column)) {
             return columns.indexOf(column);
         }
-        columnSet.add(word);
+        columnSet.add(column);
         int index = columns.size();
         columns.add(column);
         assert columns.get(index).equals(column);
         assert columns.indexOf(column) == index : "new column to be added: " + column;
         return index;
     }
-    
+        
     protected List<ObservationRow> getUpperPrimes() {
         return Collections.unmodifiableList(upperPrimes);
     }
@@ -104,7 +104,7 @@ public class ObservationTableNLStar extends ObservationTableBase {
         return !(merged && row.valuesEqual(rowOrs));
     }
     
-    
+    @Override
     public ObservationRow getUnclosedLowerRow() {
         
         // first we have to find out the prime rows in the upper row
@@ -134,7 +134,7 @@ public class ObservationTableNLStar extends ObservationTableBase {
         return null;
     }
     
-    
+    // only allow boolean results
     protected void rowOrOp(ObservationRowAbstract row1, ObservationRow row2) {
         List<HashableValue> row2Values = row2.getValues();
         List<HashableValue> row1Values = row1.getValues();
@@ -146,7 +146,7 @@ public class ObservationTableNLStar extends ObservationTableBase {
 
     // row(s1) covers row(s2) and for some a, v, row(s1.a.v) = - and row(s2.a.v) = +
     @Override
-    public Word getInconsistentColumn() {
+    public ExprValue getInconsistentColumn() {
         for(int letter = 0; letter < alphabet.getLetterSize(); letter ++) {
             for(int rowNr1 = 0; rowNr1 < upperTable.size(); rowNr1 ++) {
                 for(int rowNr2 = rowNr1 + 1; rowNr2 < upperTable.size(); rowNr2 ++) {
@@ -155,8 +155,8 @@ public class ObservationTableNLStar extends ObservationTableBase {
                     if(upperRow1.covers(upperRow2)) {
                         ObservationRow rowState1 = getTableRow(upperRow1.getWord().append(letter));
                         ObservationRow rowState2 = getTableRow(upperRow2.getWord().append(letter));
-                        Word columnExperiment = checkConsistency(rowState1, rowState2);
-                        if(columnExperiment != null) return columnExperiment.preappend(letter);
+                        ExprValue column = checkConsistency(rowState1, rowState2);
+                        if(column != null) return learner.makeInconsistencyColumn(column, letter);
                     }
                 }
             }
@@ -165,19 +165,17 @@ public class ObservationTableNLStar extends ObservationTableBase {
     }
     
     // if row(s1.a.v) = - and  row(s.a.v) = + return v
-    private Word checkConsistency(
-            ObservationRow row1
-          , ObservationRow row2) {
+    private ExprValue checkConsistency(ObservationRow row1, ObservationRow row2) {
         int index = 0;
-        Word columnExperiment = null;
+        ExprValue column = null;
         while(index < columns.size()) {
             if(!row1.getValues().get(index).isAccepting() && row2.getValues().get(index).isAccepting()) {
-                columnExperiment = columns.get(index).get();
+                column = columns.get(index);
                 break;
             }
             ++ index; 
         }
-        return columnExperiment;
+        return column;
     }
 
 }

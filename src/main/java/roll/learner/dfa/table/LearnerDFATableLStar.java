@@ -139,17 +139,17 @@ public class LearnerDFATableLStar extends LearnerDFATable {
     }
     
     private boolean makeTableConsistent() {
-        Word suffix = observationTable.getInconsistentColumn();
-        boolean isConsistent = suffix == null;
+        ExprValue exprValue = observationTable.getInconsistentColumn();
+        boolean isConsistent = exprValue == null;
         
-        while(suffix != null) {
+        while(exprValue != null) {
             // 1. add to columns
-            int columnIndex = observationTable.addColumn(getExprValueWord(suffix));
+            int columnIndex = observationTable.addColumn(exprValue);
             // 2. add result of new column to upper table
             processMembershipQueries(observationTable.getUpperTable(), columnIndex, 1);
             // 3. process membership queries
             processMembershipQueries(observationTable.getLowerTable(), columnIndex, 1);
-            suffix = observationTable.getInconsistentColumn();
+            exprValue = observationTable.getInconsistentColumn();
         }
         
         return isConsistent;

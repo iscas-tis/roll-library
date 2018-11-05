@@ -16,6 +16,8 @@
 
 package roll.learner.dfa.table;
 
+import roll.table.ExprValue;
+import roll.table.ExprValueWord;
 import roll.table.ObservationRow;
 import roll.table.ObservationTableBase;
 import roll.words.Alphabet;
@@ -36,7 +38,7 @@ class ObservationTableDFALStar extends ObservationTableBase {
 
     // row(s1) = row(s2) then it should be row(s1.a) = row(s2.a) for every a
     @Override
-    public Word getInconsistentColumn() {
+    public ExprValue getInconsistentColumn() {
         for(int letter = 0; letter < alphabet.getLetterSize(); letter ++) {
             for(int rowNr1 = 0; rowNr1 < upperTable.size(); rowNr1 ++) {
                 for(int rowNr2 = rowNr1 + 1; rowNr2 < upperTable.size(); rowNr2 ++) {
@@ -46,7 +48,7 @@ class ObservationTableDFALStar extends ObservationTableBase {
                         ObservationRow rowState1 = getTableRow(upperRow1.getWord().append(letter));
                         ObservationRow rowState2 = getTableRow(upperRow2.getWord().append(letter));
                         Word columnExperiment = checkConsistency(rowState1, rowState2);
-                        if(columnExperiment != null) return columnExperiment.preappend(letter);
+                        if(columnExperiment != null) return new ExprValueWord(columnExperiment.preappend(letter));
                     }
                 }
             }

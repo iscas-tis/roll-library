@@ -24,7 +24,7 @@ public enum AutType {
 	DFA,
 	NFA,
 	FDFA,
-	FRFSA,
+	FNFA,
 	NBA,
 	RABIN,
 	STREET,
@@ -43,7 +43,7 @@ public enum AutType {
 	}
 	
 	public boolean isFRFSA() {
-	    return this == FRFSA;
+	    return this == FNFA;
 	}
 	
 	public boolean isNBA() {
@@ -70,7 +70,7 @@ public enum AutType {
 			return "NFA";
 		}else if(this == FDFA) {
 			return "FDFA";
-		}else if(this == FRFSA) {
+		}else if(this == FNFA) {
             return "FRFSA";
         }if(this == NBA) {
 			return "NBA";

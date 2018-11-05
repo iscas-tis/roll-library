@@ -49,6 +49,7 @@ public abstract class LearnerBase<M> implements Learner<M, HashableValue>, IHTML
         return options;
     }
     
+    // ---------------------------------------------------------------------
     protected ExprValue getCounterExampleWord(Query<HashableValue> query) {
         assert query != null;
         Word word = query.getQueriedWord();
@@ -63,5 +64,8 @@ public abstract class LearnerBase<M> implements Learner<M, HashableValue>, IHTML
     protected HashableValue getHashableValueBoolean(boolean result) {
         return new HashableValueBoolean(result);
     }
+    
+    // ---------------------------------------------------------------------
+    
 
 }
