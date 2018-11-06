@@ -16,14 +16,11 @@
 
 package roll.automata;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import roll.automata.operations.FDFAOperations;
-import roll.jupyter.NativeTool;
 import roll.util.Pair;
 import roll.util.sets.ISet;
-import roll.words.Alphabet;
 import roll.words.Word;
 
 /**
@@ -31,82 +28,17 @@ import roll.words.Word;
  * 
  * Family of Deterministic Finite Automata (FDFA)
  * */
-public class FDFA implements Acceptor {
-    
-    private final DFA leadingDFA;
-    private final List<DFA> progressDFAs;
-    private final Accept acceptance;
-    private final Alphabet alphabet;
+public class FDFA extends FFA<DFA, DFA> {
     
     public FDFA(DFA m, List<DFA> ps) {
-        assert m != null && ps != null;
-        alphabet = m.getAlphabet();
-        leadingDFA = m;
-        progressDFAs = ps;
+        super(m, ps);
         acceptance = new AcceptFDFA(this);
     }
     
     // --------------------------------------------------
-    public DFA getLeadingDFA() {
-        return leadingDFA;
-    }
-    
-    public DFA getProgressDFA(int state) {
-        assert state >= 0 && state < progressDFAs.size(); 
-        return progressDFAs.get(state);
-    }
-
-    @Override
-    public Alphabet getAlphabet() {
-        return alphabet;
-    }
-
     @Override
     public AutType getAccType() {
         return AutType.FDFA;
-    }
-    
-    @Override
-    public Accept getAcc() {
-        return acceptance;
-    }
-    
- 
-    // --------------------------------------------------
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("//FDFA-M: \n" + leadingDFA.toString() + "\n");
-        for(int i = 0; i < progressDFAs.size(); i ++) {
-            builder.append("//FDFA-P" + i + ": \n" + progressDFAs.get(i).toString());
-        }
-        return builder.toString();
-    }
-    
-    @Override
-    public String toString(List<String> apList) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("//FDFA-M: \n" + leadingDFA.toString(apList) + "\n");
-        for(int i = 0; i < progressDFAs.size(); i ++) {
-            builder.append("//FDFA-P" + i + ": \n" + progressDFAs.get(i).toString(apList));
-        }
-        return builder.toString();
-    }
-    
-    @Override
-    public String toHTML() {
-        StringBuilder builder = new StringBuilder();
-        List<String> apList = new ArrayList<>();
-        for(int i = 0; i < alphabet.getLetterSize(); i ++) {
-            apList.add("" + alphabet.getLetter(i));
-        }
-        builder.append("<p> Leading DFA M :  </p> <br> "    
-                     + NativeTool.dot2SVG(leadingDFA.toString(apList)));
-        for(int i = 0; i < progressDFAs.size(); i ++) {
-            builder.append("<p> Progress DFA for " + i + ": </p> <br>"
-                    + NativeTool.dot2SVG(progressDFAs.get(i).toString(apList)) + "<br>");
-        }
-        return builder.toString();
     }
 
     // --------------------------------------------------
@@ -131,8 +63,8 @@ public class FDFA implements Acceptor {
                 prefix = pair.getLeft();
                 period = pair.getRight();
             }
-            int state = leadingDFA.getSuccessor(prefix);
-            DFA proDFA = getProgressDFA(state);
+            int state = leadingFA.getSuccessor(prefix);
+            DFA proDFA = getProgressFA(state);
             int proState = proDFA.getSuccessor(period);
             return proDFA.isFinal(proState);
         }
@@ -141,12 +73,12 @@ public class FDFA implements Acceptor {
         public boolean accept(Word word) {
             return false;
         }
-        
     }
     
-    public boolean isNormalized(Word stem, Word loop) {
-        int state = leadingDFA.getSuccessor(stem);
-        int nextState = leadingDFA.getSuccessor(state, loop);
+    @Override
+    public boolean isNormalized(Word prefix, Word period) {
+        int state = leadingFA.getSuccessor(prefix);
+        int nextState = leadingFA.getSuccessor(state, period);
         return state == nextState;
     }
 

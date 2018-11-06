@@ -67,7 +67,7 @@ public class FDFALearner implements JupyterLearner<FDFA>, IHTML {
         Word p = alphabet.getWordFromString(stem);
         Word s = alphabet.getWordFromString(loop);
         FDFA hypothesis = getHypothesis();
-        Pair<Word, Word> normForm = getNormalizedFactorization(hypothesis.getLeadingDFA(), p, s);
+        Pair<Word, Word> normForm = getNormalizedFactorization(hypothesis.getLeadingFA(), p, s);
         // now verify counterexample
         Word prefix = normForm.getLeft();
         Word suffix = normForm.getRight();

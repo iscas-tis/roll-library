@@ -53,9 +53,9 @@ public class Executor {
         if(learner instanceof LearnerNBALOmega) {
             LearnerNBALOmega learnerLOmega = (LearnerNBALOmega)learner;
             FDFA fdfa = learnerLOmega.getLearnerFDFA().getHypothesis();
-            options.stats.numOfStatesInLeading = fdfa.getLeadingDFA().getStateSize();
-            for(int state = 0; state < fdfa.getLeadingDFA().getStateSize(); state ++) {
-                options.stats.numOfStatesInProgress.add(fdfa.getProgressDFA(state).getStateSize());
+            options.stats.numOfStatesInLeading = fdfa.getLeadingFA().getStateSize();
+            for(int state = 0; state < fdfa.getLeadingFA().getStateSize(); state ++) {
+                options.stats.numOfStatesInProgress.add(fdfa.getProgressFA(state).getStateSize());
             }
             if(options.automaton.isLDBA()) {
                 hypothesis = UtilLOmega.constructLDBA(options, fdfa);

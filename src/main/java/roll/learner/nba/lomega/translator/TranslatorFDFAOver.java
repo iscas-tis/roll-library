@@ -104,12 +104,12 @@ public class TranslatorFDFAOver extends TranslatorFDFA {
 		options.log.verbose(autUVOmega.toDot());
 		
 		// 2. for every final state, we get normalized counterexample
-		DFA autL = fdfa.getLeadingDFA();
+		DFA autL = fdfa.getLeadingFA();
 		TIntObjectMap<State> map = new TIntObjectHashMap<>(); 
 		Automaton dkAutL = DFAOperations.toDkDFA(map, autL);
 		
 		for(int stateNr = 0; stateNr < autL.getStateSize(); stateNr ++) {
-		    DFA autP = fdfa.getProgressDFA(stateNr);
+		    DFA autP = fdfa.getProgressFA(stateNr);
 		    ISet finalStates = autP.getFinalStates();
 		    int stateInitP = autP.getInitialState();
 		    boolean found = false;

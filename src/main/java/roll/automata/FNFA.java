@@ -16,12 +16,11 @@
 
 package roll.automata;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import roll.jupyter.NativeTool;
+import roll.automata.operations.FNFAOperations;
+import roll.util.Pair;
 import roll.util.sets.ISet;
-import roll.words.Alphabet;
 import roll.words.Word;
 
 /**
@@ -29,84 +28,19 @@ import roll.words.Word;
  * 
  * Family of Nodeterministic Finite Automata
  * */
-public class FNFA implements Acceptor {
+public class FNFA extends FFA<NFA, DFA> {
     
-    private final NFA leadingNFA;
-    private final List<NFA> progressNFAs;
-    private final Accept acceptance;
-    private final Alphabet alphabet;
-    
-    public FNFA(NFA m, List<NFA> ps) {
-        assert m != null && ps != null;
-        alphabet = m.getAlphabet();
-        leadingNFA = m;
-        progressNFAs = ps;
+    public FNFA(NFA m, List<DFA> ps) {
+        super(m, ps);
         acceptance = new AcceptFNFA(this);
     }
     
     // -------------------------------------------------------
-    public NFA getLeadingNFA() {
-        return leadingNFA;
-    }
-    
-    public NFA getProgressNFA(int state) {
-        assert state >= 0 && state < progressNFAs.size(); 
-        return progressNFAs.get(state);
-    }
-
-    @Override
-    public Alphabet getAlphabet() {
-        return alphabet;
-    }
-
     @Override
     public AutType getAccType() {
         return AutType.FNFA;
     }
-
-    @Override
-    public Accept getAcc() {
-        return acceptance;
-    }
     
-    // -------------------------------------------------------
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("//FNFA-M: \n" + leadingNFA.toString() + "\n");
-        for(int i = 0; i < progressNFAs.size(); i ++) {
-            builder.append("//FNFA-P" + i + ": \n" + progressNFAs.get(i).toString());
-        }
-        return builder.toString();
-    }
-    
-    @Override
-    public String toString(List<String> apList) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("//FNFA-M: \n" + leadingNFA.toString(apList) + "\n");
-        for(int i = 0; i < progressNFAs.size(); i ++) {
-            builder.append("//FNFA-P" + i + ": \n" + progressNFAs.get(i).toString(apList));
-        }
-        return builder.toString();
-    }
-    
-    @Override
-    public String toHTML() {
-        StringBuilder builder = new StringBuilder();
-        List<String> apList = new ArrayList<>();
-        for(int i = 0; i < alphabet.getLetterSize(); i ++) {
-            apList.add("" + alphabet.getLetter(i));
-        }
-        builder.append("<p> Leading NFA M :  </p> <br> "    
-                     + NativeTool.dot2SVG(leadingNFA.toString(apList)));
-        for(int i = 0; i < progressNFAs.size(); i ++) {
-            builder.append("<p> Progress NFA for " + i + ": </p> <br>"
-                    + NativeTool.dot2SVG(progressNFAs.get(i).toString(apList)) + "<br>");
-        }
-        return builder.toString();
-    }
-
-    // -------------------------------------------------------
     private class AcceptFNFA implements Accept {
         final FNFA fnfa;
         
@@ -121,9 +55,14 @@ public class FNFA implements Acceptor {
 
         @Override
         public boolean accept(Word prefix, Word period) {
-            NFA nfa = fnfa.getLeadingNFA();
+            if(!isNormalized(prefix, period)) {
+                Pair<Word, Word> pair = FNFAOperations.normalize(fnfa, prefix, period);
+                prefix = pair.getLeft();
+                period = pair.getRight();
+            }
+            NFA nfa = fnfa.getLeadingFA();
             for(int state : nfa.getSuccessors(period)) {
-                NFA proNFA = getProgressNFA(state);
+                NFA proNFA = getProgressFA(state);
                 boolean found = proNFA.getAcc().accept(period);
                 if(found) return true;
             }

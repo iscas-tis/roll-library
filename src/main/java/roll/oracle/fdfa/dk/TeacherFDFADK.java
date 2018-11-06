@@ -91,9 +91,9 @@ public class TeacherFDFADK extends TeacherAbstract<FDFA> {
         if(pair == null) {
             return new HashableValueBoolean(false);
         }
-        DFA leadDFA = fdfa.getLeadingDFA();
+        DFA leadDFA = fdfa.getLeadingFA();
         int state = leadDFA.getSuccessor(pair.getLeft());
-        DFA proDFA = fdfa.getProgressDFA(state);
+        DFA proDFA = fdfa.getProgressFA(state);
         boolean result = proDFA.isFinal(proDFA.getSuccessor(pair.getRight()));  
         return new HashableValueBoolean(result);
     }

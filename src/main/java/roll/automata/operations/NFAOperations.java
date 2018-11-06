@@ -16,6 +16,9 @@
 
 package roll.automata.operations;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.State;
 import dk.brics.automaton.Transition;
@@ -23,6 +26,8 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import roll.automata.DFA;
 import roll.automata.NFA;
+import roll.util.sets.ISet;
+import roll.util.sets.UtilISet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -110,6 +115,42 @@ public class NFAOperations {
             }
         }
         return result;
+    }
+    
+    // Transfers a DFA into a dk.brics.automaton
+    // with specific initial and final state.
+    public static Automaton toDkNFA(NFA nfa, int init, int fin){
+        Automaton dkAut = new Automaton();
+        TIntObjectMap<State> map = new TIntObjectHashMap<>();
+        Queue<Integer> queue = new LinkedList<>();
+        State initState = getState(map, init);
+        dkAut.setInitialState(initState);
+        queue.add(init);
+        ISet visited = UtilISet.newISet();
+        
+        while(! queue.isEmpty()) {
+            int stateNr = queue.poll();
+            if(visited.get(stateNr)) continue;
+            visited.set(stateNr);
+            State state = getState(map, stateNr);
+            for (int letter = 0; letter < nfa.getAlphabetSize(); letter ++) {
+                for(int succNr :  nfa.getSuccessors(stateNr, letter)) {
+                    State stateSucc = getState(map, succNr);
+                    state.addTransition(
+                            new Transition(nfa.getAlphabet().getLetter(letter),
+                            stateSucc));
+                    if(! visited.get(succNr)) {
+                        queue.add(succNr);
+                    }
+                }
+            }
+        }
+        
+        getState(map, fin).setAccept(true);
+        dkAut.setDeterministic(false);
+//        dkAut.restoreInvariant();
+//        dkAut.minimize();
+        return dkAut;
     }
 
 }

@@ -26,6 +26,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import roll.automata.DFA;
 import roll.automata.FDFA;
+import roll.automata.FNFA;
 import roll.util.Pair;
 import roll.util.sets.ISet;
 import roll.words.Alphabet;
@@ -37,97 +38,27 @@ import roll.words.Word;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class FDFAOperations {
+public class FNFAOperations {
         
-    private FDFAOperations() {
+    private FNFAOperations() {
     }
     
-    public static Automaton buildRepeatAutomaton(Word suffix) {
-        assert suffix.length() >= 1;
-        Automaton result = new Automaton();
-        State fst = new State();
-        State snd = new State();
-        result.setInitialState(fst);
-        result.setDeterministic(true);
-        char letter = suffix.getAlphabet().getLetter(suffix.getFirstLetter());
-        fst.addTransition(new Transition(letter, snd));
-        State pre = snd;
-        for(int i = 1; i < suffix.length(); i ++) {
-            State curr = new State();
-            char ch = suffix.getAlphabet().getLetter(suffix.getLetter(i));
-            pre.addTransition(new Transition(ch, curr));
-            pre = curr;
-        }
-        pre.addTransition(new Transition(letter, snd));
-        pre.setAccept(true);
-        return result;
+    public static  Automaton buildDOne(FNFA fnfa) {
+        return buildNFAFromFNFA(fnfa, false);
     }
     
-    // Given word prefix and suffix, we do the shifting operation
-    // as well as return the corresponding dk.brics.automaton.
-    public static Automaton buildDDollar(Word prefix, Word suffix) {
-        // Finds the smallest period of suffix.
-        Pair<Word, Word> normalForm = Alphabet.getNormalForm(prefix, suffix);
-        prefix = normalForm.getLeft();
-        suffix = normalForm.getRight();
-//        System.out.println("Building Dollar automaton for counterexamples ("
-//                + prefix.length() + "," + suffix.length() +")...");
-        // System.out.println(prefix.toStringWithAlphabet() + ',' +
-        // suffix.toStringWithAlphabet());
-        Automaton result = new Automaton();
-        State fst = null, pre = null;
-        // first computer prefix automaton
-        for(int i = 0; i <= prefix.length(); i ++) {
-            State curr = new State();
-            if(i > 0) {
-                char letter = prefix.getAlphabet().getLetter(prefix.getLetter(i-1));
-                pre.addTransition(new Transition(letter, curr));
-            }else {
-                fst = curr;
-            }
-            pre = curr;
-        }
-        // set initial state
-        assert fst != null && pre != null;
-        result.setInitialState(fst);
-        State[] suffixStates = new State[suffix.length()];
-        suffixStates[0] = pre; // last state in the prefix
-        for(int j = 0; j < suffix.length() - 1; j ++) {
-            suffixStates[j + 1] = new State();
-            char letter = prefix.getAlphabet().getLetter(suffix.getLetter(j));
-            suffixStates[j].addTransition(new Transition(letter, suffixStates[j + 1]));
-        }
-        char letter = suffix.getAlphabet().getLetter(suffix.getLastLetter());
-        suffixStates[suffix.length() - 1].addTransition(new Transition(letter, pre));
-        int length = suffix.length();
-        for(int i = 0; i < length; i ++) {
-            Automaton suf = buildRepeatAutomaton(suffix);
-            State dollarState = suffixStates[i];
-            State init = suf.getInitialState();
-            dollarState.addTransition(new Transition(Alphabet.DOLLAR, init));
-            suffix = suffix.getSubWord(1, suffix.length() - 1).append(suffix.getFirstLetter());
-        }
-        result.setDeterministic(true);
-        return result;
+    public static  Automaton buildDTwo(FNFA fnfa) {
+        return buildNFAFromFNFA(fnfa, true);
     }
     
-    
-    public static  Automaton buildDOne(FDFA fdfa) {
-        return buildDFAFromFDFA(fdfa, false);
-    }
-    
-    public static  Automaton buildDTwo(FDFA fdfa) {
-        return buildDFAFromFDFA(fdfa, true);
-    }
-    
-    private static Automaton buildDFAFromFDFA(FDFA fdfa, boolean complement) {
+    private static Automaton buildNFAFromFNFA(FNFA fnfa, boolean complement) {
         TIntObjectMap<State> map = new TIntObjectHashMap<>(); 
-        Automaton dkAutL = DFAOperations.toDkDFA(map, fdfa.getLeadingFA());
-        for(int stateNr = 0; stateNr < fdfa.getLeadingFA().getStateSize(); stateNr ++) {
+        Automaton dkAutL = NFAOperations.toDkFA(map, fnfa.getLeadingFA(), false);
+        for(int stateNr = 0; stateNr < fnfa.getLeadingFA().getStateSize(); stateNr ++) {
             // M^a_a
-            Automaton dkAutLOther = DFAOperations.toDkDFA(fdfa.getLeadingFA(), stateNr, stateNr);
+            Automaton dkAutLOther = NFAOperations.toDkNFA(fnfa.getLeadingFA(), stateNr, stateNr);
             // A^a
-            Automaton dkAutP = DFAOperations.toDkDFA(fdfa.getProgressFA(stateNr));
+            Automaton dkAutP = DFAOperations.toDkDFA(fnfa.getProgressFA(stateNr));
             if(complement) {
                 // whether we need the complement of A^a
                 dkAutP = dkAutP.complement();
@@ -144,12 +75,12 @@ public class FDFAOperations {
     }
     
     // build NBA from FDFA
-    public static Automaton buildDollarNFA(FDFA fdfa) {
+    public static Automaton buildDollarNFA(FDFA fnfa) {
         // L means Leading and P means Progress
         TIntObjectMap<State> map = new TIntObjectHashMap<>(); 
-        Automaton dkAutL = DFAOperations.toDkDFA(map, fdfa.getLeadingFA());
-        for(int stateNr = 0; stateNr < fdfa.getLeadingFA().getStateSize(); stateNr ++) {
-            DFA autP = fdfa.getProgressFA(stateNr);
+        Automaton dkAutL = DFAOperations.toDkDFA(map, fnfa.getLeadingFA());
+        for(int stateNr = 0; stateNr < fnfa.getLeadingFA().getStateSize(); stateNr ++) {
+            DFA autP = fnfa.getProgressFA(stateNr);
             ISet finalStates = autP.getFinalStates();
             List<Automaton> autAccs = new ArrayList<>();
             int stateInitP = autP.getInitialState();
@@ -158,7 +89,7 @@ public class FDFAOperations {
                 Automaton dkAutP = DFAOperations.toDkDFA(autP, stateInitP, finalStateNr);
                 dkAutP.minimize();
                 // M^a_a
-                Automaton dkAutLOther = DFAOperations.toDkDFA(fdfa.getLeadingFA(), stateNr, stateNr);
+                Automaton dkAutLOther = DFAOperations.toDkDFA(fnfa.getLeadingFA(), stateNr, stateNr);
                 dkAutLOther.minimize();
                 // A^a_a * M^a_a
                 Automaton product = dkAutP.intersection(dkAutLOther);
@@ -180,20 +111,20 @@ public class FDFAOperations {
         return dkAutL;
     }
     
-    public static Automaton buildUnderNBA(FDFA fdfa) {
-        return buildNBA(fdfa, true, false);
+    public static Automaton buildUnderNBA(FNFA fnfa) {
+        return buildNBA(fnfa, true, false);
     }
     
-    public static Automaton buildOverNBA(FDFA fdfa) {
-        return buildNBA(fdfa, false, false);
+    public static Automaton buildOverNBA(FNFA fnfa) {
+        return buildNBA(fnfa, false, false);
     }
     
-    private static Automaton buildNBA(FDFA fdfa, boolean under, boolean dba) {
+    private static Automaton buildNBA(FNFA fnfa, boolean under, boolean dba) {
         // L means Leading and P means Progress
         TIntObjectMap<State> map = new TIntObjectHashMap<>();
-        Automaton dkAutL = DFAOperations.toDkDFA(map, fdfa.getLeadingFA());
-        for (int stateNr = 0; stateNr < fdfa.getLeadingFA().getStateSize(); stateNr++) {
-            DFA autP = fdfa.getProgressFA(stateNr);
+        Automaton dkAutL = NFAOperations.toDkFA(map, fnfa.getLeadingFA(), false);
+        for (int stateNr = 0; stateNr < fnfa.getLeadingFA().getStateSize(); stateNr++) {
+            DFA autP = fnfa.getProgressFA(stateNr);
             ISet finalStates = autP.getFinalStates();
             List<Automaton> finalAuts = new ArrayList<>();
             int initP = autP.getInitialState();
@@ -202,7 +133,7 @@ public class FDFAOperations {
                 Automaton dkAutP = DFAOperations.toDkDFA(autP, initP, finalStateNr);
                 dkAutP.minimize();
                 // M^a_a
-                Automaton dkAutLOther = DFAOperations.toDkDFA(fdfa.getLeadingFA(), stateNr, stateNr);
+                Automaton dkAutLOther = NFAOperations.toDkNFA(fnfa.getLeadingFA(), stateNr, stateNr);
                 dkAutLOther.minimize();
                 // M^a_a * A^a_f                
                 dk.brics.automaton.Automaton product = dkAutP.intersection(dkAutLOther);
@@ -242,43 +173,43 @@ public class FDFAOperations {
         return dkAutL;
     }
     
-    public static Automaton buildUnderLDBA(FDFA fdfa) {
-        Automaton result = buildNBA(fdfa, true, true);
+    public static Automaton buildUnderLDBA(FNFA fnfa) {
+        Automaton result = buildNBA(fnfa, true, true);
         result.removeDeadTransitions();
         return result;
     }
     
-    public static Automaton buildOverLDBA(FDFA fdfa) {
-        Automaton result = buildNBA(fdfa, false, true);
+    public static Automaton buildOverLDBA(FNFA fnfa) {
+        Automaton result = buildNBA(fnfa, false, true);
         result.removeDeadTransitions();
         return result;
     }
     
     
-    public static Pair<Word, Word> isEmpty(FDFA fdfa) {
-        Automaton d1 = buildDOne(fdfa);
+    public static Pair<Word, Word> isEmpty(FNFA fnfa) {
+        Automaton d1 = buildDOne(fnfa);
         String ce = d1.getShortestExample(true);
         if(ce == null) {
             return null;
         }
-        return fdfa.getAlphabet().getWordPairFromString(ce);
+        return fnfa.getAlphabet().getWordPairFromString(ce);
     }
     
-    public static Pair<Word, Word> normalize(FDFA fdfa, Word prefix, Word suffix) {
-        Automaton dDollar = buildDDollar(prefix, suffix);
-        Automaton dOne =  buildDOne(fdfa);
+    public static Pair<Word, Word> normalize(FNFA fnfa, Word prefix, Word suffix) {
+        Automaton dDollar = FDFAOperations.buildDDollar(prefix, suffix);
+        Automaton dOne =  buildDOne(fnfa);
         dOne = dOne.intersection(dDollar);
         String wordStr = dOne.getShortestExample(true);
         if(wordStr == null) return null;
-        return fdfa.getAlphabet().getWordPairFromString(wordStr);
+        return fnfa.getAlphabet().getWordPairFromString(wordStr);
     }
     
-    public static Automaton buildNegNBA(FDFA fdfa) {
-        DFA autL = fdfa.getLeadingFA();
+    public static Automaton buildNegNBA(FDFA fnfa) {
+        DFA autL = fnfa.getLeadingFA();
         TIntObjectMap<State> map = new TIntObjectHashMap<>();
         Automaton dkAutL = DFAOperations.toDkDFA(map, autL);
         for (int stateNr = 0; stateNr < autL.getStateSize(); stateNr++) {
-            DFA autP = fdfa.getProgressFA(stateNr);
+            DFA autP = fnfa.getProgressFA(stateNr);
             List<Automaton> accAuts = new ArrayList<>();
             int stateInitP = autP.getInitialState();
             for (int accNr = 0; accNr < autP.getStateSize(); accNr ++) {

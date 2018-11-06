@@ -79,7 +79,7 @@ public abstract class LearnerFNFA extends LearnerBase<FNFA> {
     
     protected void constructHypothesis() {
         NFA leadDFA = learnerLeading.getHypothesis();
-        List<NFA> proDFAs = new ArrayList<>();
+        List<DFA> proDFAs = new ArrayList<>();
         for(LearnerProgress learner : learnerProgress) {
             DFA progressDFA = (DFA)learner.getHypothesis();
             proDFAs.add(progressDFA);

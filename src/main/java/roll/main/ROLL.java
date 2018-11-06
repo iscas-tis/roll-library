@@ -223,9 +223,9 @@ public final class ROLL {
             boolean isEq = ceQuery.getQueryAnswer().getLeft();
             if(isEq) {
                 // store statistics
-                options.stats.numOfStatesInLeading = hypothesis.getLeadingDFA().getStateSize();
-                for(int state = 0; state < hypothesis.getLeadingDFA().getStateSize(); state ++) {
-                    options.stats.numOfStatesInProgress.add(hypothesis.getProgressDFA(state).getStateSize());
+                options.stats.numOfStatesInLeading = hypothesis.getLeadingFA().getStateSize();
+                for(int state = 0; state < hypothesis.getLeadingFA().getStateSize(); state ++) {
+                    options.stats.numOfStatesInProgress.add(hypothesis.getProgressFA(state).getStateSize());
                 }
                 break;
             }
