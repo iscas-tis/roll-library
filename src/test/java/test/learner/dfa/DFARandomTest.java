@@ -18,13 +18,9 @@ package test.learner.dfa;
 
 import roll.automata.DFA;
 import roll.automata.operations.DFAGenerator;
-import roll.automata.operations.NFAOperations;
-import roll.learner.LearnerDFA;
+import roll.learner.LearnerDFA2;
 import roll.learner.LearnerType;
-import roll.learner.dfa.table.LearnerDFATableColumn;
-import roll.learner.dfa.table.LearnerDFATableLStar;
-import roll.learner.dfa.tree.LearnerDFATreeColumn;
-import roll.learner.dfa.tree.LearnerDFATreeKV;
+import roll.learner.dfa.tree.LearnerDFATreeKV2;
 import roll.main.Options;
 import roll.oracle.dfa.dk.TeacherDFADK;
 import roll.query.Query;
@@ -59,7 +55,7 @@ public class DFARandomTest {
 		for(int i = 0; i < numCases; i ++) {
 			DFA dfa = DFAGenerator.getRandomDFA(input, numStates);
 			System.out.println("Case " + i );
-			if(NFATest.testLearnerNFA(NFAOperations.fromDFA(dfa), input)) {
+			if(testLearnerDFA2(dfa, input, algo)) {
 				numOK ++;
 			}
 		}
@@ -70,40 +66,68 @@ public class DFARandomTest {
 		
 	}
 	
-	private static boolean testLearnerDFA(DFA machine, Alphabet alphabet, LearnerType algo) {
-	    Options options = new Options();
-		TeacherDFADK teacher = new TeacherDFADK(options, machine);
-		LearnerDFA learner = null;
-		
-		if(algo == LearnerType.DFA_COLUMN_TABLE) learner = new LearnerDFATableColumn(options, alphabet, teacher);
-		else if(algo == LearnerType.DFA_KV) {
-		    learner = new LearnerDFATreeKV(options, alphabet, teacher); 
-		}else if(algo == LearnerType.DFA_COLUMN_TREE){
-		    learner = new LearnerDFATreeColumn(options, alphabet, teacher); 
-		}else {
-		    learner = new LearnerDFATableLStar(options, alphabet, teacher); 
-		}
-		System.out.println("starting learning");
-		learner.startLearning();
+//	private static boolean testLearnerDFA(DFA machine, Alphabet alphabet, LearnerType algo) {
+//	    Options options = new Options();
+//		TeacherDFADK teacher = new TeacherDFADK(options, machine);
+//		LearnerDFA learner = null;
+//		
+//		if(algo == LearnerType.DFA_COLUMN_TABLE) learner = new LearnerDFATableColumn(options, alphabet, teacher);
+//		else if(algo == LearnerType.DFA_KV) {
+//		    learner = new LearnerDFATreeKV(options, alphabet, teacher); 
+//		}else if(algo == LearnerType.DFA_COLUMN_TREE){
+//		    learner = new LearnerDFATreeColumn(options, alphabet, teacher); 
+//		}else {
+//		    learner = new LearnerDFATableLStar(options, alphabet, teacher); 
+//		}
+//		System.out.println("starting learning");
+//		learner.startLearning();
+//
+//		while(true) {
+//			System.out.println("Table is both closed and consistent\n" + learner.toString());
+//			DFA model = learner.getHypothesis();
+//			// along with ce
+//			Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(model);
+//			boolean isEq = ceQuery.getQueryAnswer().get();
+//			if(isEq) {
+//				System.out.println(model.toString());
+//				break;
+//			}
+//			ceQuery.answerQuery(null);
+////			HashableValue val = teacher.answerMembershipQuery(ceQuery);
+////			ceQuery.answerQuery(val);
+//			learner.refineHypothesis(ceQuery);
+//		}
+//		
+//		return true;
+//	}
+	
+	   private static boolean testLearnerDFA2(DFA machine, Alphabet alphabet, LearnerType algo) {
+	        Options options = new Options();
+	        TeacherDFADK teacher = new TeacherDFADK(options, machine);
+	        LearnerDFA2 learner = null;
+	        System.out.println("target:\n" + machine.toDot());
+	        learner = new LearnerDFATreeKV2(options, alphabet, teacher);
+	        System.out.println("starting learning");
+	        learner.startLearning();
 
-		while(true) {
-			System.out.println("Table is both closed and consistent\n" + learner.toString());
-			DFA model = learner.getHypothesis();
-			// along with ce
-			Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(model);
-			boolean isEq = ceQuery.getQueryAnswer().get();
-			if(isEq) {
-				System.out.println(model.toString());
-				break;
-			}
-			ceQuery.answerQuery(null);
-//			HashableValue val = teacher.answerMembershipQuery(ceQuery);
-//			ceQuery.answerQuery(val);
-			learner.refineHypothesis(ceQuery);
-		}
-		
-		return true;
-	}
+	        while(true) {
+	            System.out.println("Table is both closed and consistent\n" + learner.toString());
+	            DFA model = learner.getHypothesis();
+	            // along with ce
+	            Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(model);
+	            boolean isEq = ceQuery.getQueryAnswer().get();
+	            if(isEq) {
+	                System.out.println(model.toString());
+	                break;
+	            }
+	            ceQuery.answerQuery(null);
+//	          HashableValue val = teacher.answerMembershipQuery(ceQuery);
+//	          ceQuery.answerQuery(val);
+	            learner.refineHypothesis(ceQuery);
+	        }
+	        
+	        return true;
+	    }
 
 
 }

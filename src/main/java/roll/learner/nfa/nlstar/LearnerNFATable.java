@@ -21,7 +21,7 @@ import java.util.List;
 
 import roll.automata.NFA;
 import roll.automata.StateNFA;
-import roll.learner.LearnerBase2;
+import roll.learner.LearnerFA;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
@@ -39,7 +39,7 @@ import roll.words.Word;
  * uniform NL* learning framework for NFA
  * */
 
-public abstract class LearnerNFATable extends LearnerBase2<NFA> {
+public abstract class LearnerNFATable extends LearnerFA<NFA> {
 
     protected ObservationTableNLStar observationTable;
     
@@ -50,29 +50,9 @@ public abstract class LearnerNFATable extends LearnerBase2<NFA> {
     
     @Override
     protected void initialize() {
-        observationTable.clear();
-        Word wordEmpty = alphabet.getEmptyWord();
-        observationTable.addUpperRow(wordEmpty);
-        ExprValue exprValue = getInitialColumnExprValue();
-        
-        // add empty word column
-        observationTable.addColumn(exprValue);
-        // add every alphabet
-        for(int letterNr = 0; letterNr < alphabet.getLetterSize(); letterNr ++) {
-            observationTable.addLowerRow(alphabet.getLetterWord(letterNr));
-        }
-        
-        // ask initial queries for upper table
-        processMembershipQueries(observationTable, observationTable.getUpperTable()
-                , 0, observationTable.getColumns().size());
-        // ask initial queries for lower table
-        processMembershipQueries(observationTable, observationTable.getLowerTable()
-                , 0, observationTable.getColumns().size());
-        
+        initializeTable(observationTable);
         makeTableComplete();        
     }
-    
-
     
     // ----------------------- make table closed and consistent ---------------------
     protected void makeTableComplete() {
@@ -197,6 +177,19 @@ public abstract class LearnerNFATable extends LearnerBase2<NFA> {
         
         makeTableComplete();
     }
+
+    public int getPrimeNum() {
+        return observationTable.getUpperPrimes().size();
+    }
+    
+    @Override
+    public Word getLabelWord(int state) {
+        List<ObservationRow> primeRows = observationTable.getUpperPrimes();
+        if(state >= 0 && state < primeRows.size()) {
+            return primeRows.get(state).getWord();
+        }
+        return null;
+    }
     
     // ----------------------------------------------------------------------
     // we have e and a and make a. e for the new column
@@ -212,20 +205,5 @@ public abstract class LearnerNFATable extends LearnerBase2<NFA> {
     public String toString() {
         return observationTable.toString();
     }
-    
-
-    @Override
-    public Word getLabelWord(int state) {
-        List<ObservationRow> primeRows = observationTable.getUpperPrimes();
-        if(state >= 0 && state < primeRows.size()) {
-            return primeRows.get(state).getWord();
-        }
-        return null;
-    }
-    
-    public int getLabelNum() {
-        return observationTable.getUpperPrimes().size();
-    }
-
 
 }

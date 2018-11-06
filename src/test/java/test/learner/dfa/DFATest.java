@@ -19,8 +19,8 @@ package test.learner.dfa;
 import org.junit.Test;
 
 import roll.automata.DFA;
-import roll.learner.LearnerDFA;
-import roll.learner.dfa.table.LearnerDFATableColumn;
+import roll.learner.LearnerDFA2;
+import roll.learner.dfa.table.LearnerDFATableColumn2;
 import roll.main.Options;
 import roll.oracle.dfa.dk.TeacherDFADK;
 import roll.query.Query;
@@ -63,9 +63,9 @@ public class DFATest {
         DFA machine = getDFA();
         Alphabet alphabet = machine.getAlphabet();
         TeacherDFADK teacher = new TeacherDFADK(options, machine);
-        LearnerDFA learner = null;
+        LearnerDFA2 learner = null;
         
-        learner = new LearnerDFATableColumn(options, alphabet, teacher);
+        learner = new LearnerDFATableColumn2(options, alphabet, teacher);
 //        else if(algo == LearnerType.DFA_KV) {
 //            learner = new LearnerDFATreeKV(options, alphabet, teacher); 
 //        }else if(algo == LearnerType.DFA_COLUMN_TREE){

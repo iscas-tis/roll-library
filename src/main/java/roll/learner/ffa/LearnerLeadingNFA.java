@@ -14,16 +14,16 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.fnfa;
+package roll.learner.ffa;
 
 import java.util.List;
 
+import roll.automata.NFA;
 import roll.learner.LearnerType;
 import roll.learner.nfa.nlstar.LearnerNFATable;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
-import roll.query.QuerySimple;
 import roll.table.ExprValue;
 import roll.table.ExprValueWordPair;
 import roll.table.HashableValue;
@@ -34,9 +34,11 @@ import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ * Leading Learner for a residual finite state automaton
  * */
 
-public class LearnerLeadingNFA extends LearnerNFATable {
+public class LearnerLeadingNFA extends LearnerNFATable implements LearnerLeading<NFA> {
 
     public LearnerLeadingNFA(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
@@ -56,7 +58,7 @@ public class LearnerLeadingNFA extends LearnerNFATable {
     protected int addNewColumnsToTable(Query<HashableValue> query) {
         Word prefix = query.getPrefix();
         Word period = query.getSuffix();
-        int number = 0;
+        int num = 0;
         for(int offset = 0; offset < prefix.length(); offset ++) {
             Word suffix = prefix.getSuffix(offset);
             ExprValue exprValue = new ExprValueWordPair(suffix, period);
@@ -64,40 +66,40 @@ public class LearnerLeadingNFA extends LearnerNFATable {
                 continue;
             }
             observationTable.addColumn(exprValue); // add new experiment
-            number ++;
+            num ++;
         }        
-        return number;
+        return num;
     }
 
     @Override
     protected ExprValue makeInconsistencyColumn(ExprValue exprValue, int preletter) {
-        Pair<Word, Word> pair = getOmegaWord(alphabet.getLetterWord(preletter), exprValue);
+        Pair<Word, Word> pair = UtilFFA.getOmegaWord(alphabet.getLetterWord(preletter), exprValue);
         return new ExprValueWordPair(pair.getLeft(), pair.getRight());
     }
 
     @Override
+    protected Query<HashableValue> makeMembershipQuery(Word prefix, ExprValue exprValue) {
+        return UtilFFA.makeMembershipQuery(prefix, exprValue);
+    }
+    
+    @Override
     protected Query<HashableValue> makeMembershipQuery(ObservationRow row, int offset, ExprValue exprValue) {
-        Pair<Word, Word> pair = getOmegaWord(row.getWord(), exprValue);
-        return new QuerySimple<>(row, pair.getLeft(), pair.getRight(), offset);
+        return UtilFFA.makeMembershipQuery(row, offset, exprValue);
     }
 
     @Override
     protected ExprValue getInitialColumnExprValue() {
-        Word wordEmpty = alphabet.getEmptyWord();
-        return new ExprValueWordPair(wordEmpty, wordEmpty);
+        return UtilFFA.getInitialColumnExprValue(alphabet);
     }
 
     @Override
-    protected Query<HashableValue> makeMembershipQuery(Word prefix, ExprValue exprValue) {
-        Pair<Word, Word> pair = getOmegaWord(prefix, exprValue);
-        return new QuerySimple<>(pair.getLeft(), pair.getRight());
+    public int getStateSize() {
+        return super.getPrimeNum();
     }
-    
-    protected Pair<Word, Word> getOmegaWord(Word prefix, ExprValue exprValue) {
-        Word suffix = exprValue.getLeft();
-        prefix = prefix.concat(suffix);
-        Word period = exprValue.getRight();
-        return new Pair<>(prefix, period);
+
+    @Override
+    public Word getStateLabel(int state) {
+        return super.getLabelWord(state);
     }
 
 }

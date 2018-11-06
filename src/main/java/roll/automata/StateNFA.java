@@ -57,6 +57,10 @@ public class StateNFA {
         if(succs == null) {
             succs = UtilISet.newISet();
         }
+        if(nfa instanceof DFA) {
+            // remove all previous states
+            succs.clear(); 
+        }
         succs.set(state);
         successors.put(letter, succs);
     }

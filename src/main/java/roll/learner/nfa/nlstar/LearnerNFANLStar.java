@@ -22,9 +22,7 @@ import roll.learner.LearnerType;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
-import roll.query.QuerySimple;
 import roll.table.ExprValue;
-import roll.table.ExprValueWord;
 import roll.table.HashableValue;
 import roll.table.ObservationRow;
 import roll.words.Alphabet;
@@ -79,21 +77,6 @@ public class LearnerNFANLStar extends LearnerNFATable {
         Word word = exprValue.get();
         word = word.preappend(preletter);
         return getExprValueWord(word);
-    }
-
-    @Override
-    protected Query<HashableValue> makeMembershipQuery(ObservationRow row, int offset, ExprValue exprValue) {
-        return new QuerySimple<>(row, row.getWord(), exprValue.get(), offset);
-    }
-
-    @Override
-    protected ExprValue getInitialColumnExprValue() {
-        return new ExprValueWord(alphabet.getEmptyWord());
-    }
-
-    @Override
-    protected Query<HashableValue> makeMembershipQuery(Word prefix, ExprValue exprValue) {
-        throw new UnsupportedOperationException("NLStar does not support makeMembershipQuery(Word prefix, ExprValue exprValue)");
     }
 
 }

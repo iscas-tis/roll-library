@@ -14,19 +14,15 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner.fnfa;
+package roll.learner.ffa;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import roll.automata.DFA;
-import roll.automata.FNFA;
+import roll.automata.FFA;
 import roll.automata.NFA;
 import roll.jupyter.NativeTool;
-import roll.learner.LearnerBase;
-import roll.learner.LearnerType;
-import roll.learner.fdfa.LearnerLeading;
-import roll.learner.fdfa.LearnerProgress;
+import roll.learner.LearnerBase2;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
@@ -35,39 +31,29 @@ import roll.table.ExprValue;
 import roll.table.HashableValue;
 import roll.util.Timer;
 import roll.words.Alphabet;
-import roll.words.Word;
 
-public abstract class LearnerFNFA extends LearnerBase<FNFA> {
+public abstract class LearnerFFA<M extends NFA, A extends NFA> extends LearnerBase2<FFA<M, A>> {
 
-    protected LearnerLeading learnerLeading;
-    protected List<LearnerProgress> learnerProgress;
-    private boolean alreadyStarted;
-    protected FNFA fnfa;
-    public LearnerFNFA(Options options, Alphabet alphabet
+    protected LearnerLeading<M> learnerLeading;
+    protected List<LearnerProgress<A>> learnerProgress;
+    protected FFA<M, A> ffa;
+    
+    public LearnerFFA(Options options, Alphabet alphabet
             , MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
         this.learnerProgress = new ArrayList<>();
     }
-        
+    
     @Override
-    public void startLearning() {
-        if(alreadyStarted)
-            try {
-                throw new UnsupportedOperationException("Learner should not be started twice");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        alreadyStarted = true;
+    protected void initialize() {
         learnerLeading = getLearnerLeading();
         Timer timer = new Timer();
         timer.start();
         learnerLeading.startLearning();
         timer.stop();
         options.stats.timeOfLearnerLeading += timer.getTimeElapsed();
-        
-        DFA dfa = learnerLeading.getHypothesis();
-        for(int state = 0; state < dfa.getStateSize(); state ++ ) {
-            LearnerProgress learner = getLearnerProgress(state);
+        for(int state = 0; state < learnerLeading.getStateSize(); state ++ ) {
+            LearnerProgress<A> learner = getLearnerProgress(state);
             learnerProgress.add(learner);
             timer.start();
             learner.startLearning();
@@ -77,24 +63,26 @@ public abstract class LearnerFNFA extends LearnerBase<FNFA> {
         constructHypothesis();
     }
     
-    protected void constructHypothesis() {
-        NFA leadDFA = learnerLeading.getHypothesis();
-        List<DFA> proDFAs = new ArrayList<>();
-        for(LearnerProgress learner : learnerProgress) {
-            DFA progressDFA = (DFA)learner.getHypothesis();
-            proDFAs.add(progressDFA);
-        }
-        fnfa = new FNFA(leadDFA, proDFAs);
-    }
-
     @Override
-    public LearnerType getLearnerType() {
-        return LearnerType.FNFA;
+    protected void constructHypothesis() {
+        M leadingFA = learnerLeading.getHypothesis();
+        List<A> progressFAs = new ArrayList<>();
+        for(LearnerProgress<A> learner : learnerProgress) {
+            A progressFA = learner.getHypothesis();
+            progressFAs.add(progressFA);
+        }
+        ffa = makeFFA(leadingFA, progressFAs);
     }
     
-    protected abstract LearnerLeading getLearnerLeading();
+    protected abstract FFA<M, A> makeFFA(M leadingFA, List<A> progressFAs);
     
-    protected abstract LearnerProgress getLearnerProgress(int state);
+    protected abstract LearnerLeading<M> getLearnerLeading();
+    
+    protected abstract LearnerProgress<A> getLearnerProgress(int state);
+    
+    protected boolean isLeadingNFA() {
+        return false;
+    }
     
     protected boolean isPeriodic() {
         return false;
@@ -102,65 +90,67 @@ public abstract class LearnerFNFA extends LearnerBase<FNFA> {
  
 
     @Override
-    public FNFA getHypothesis() {
-        return fnfa;
+    public FFA<M, A> getHypothesis() {
+        return ffa;
     }
 
     // refine FDFA by counterexample
+    protected abstract int getLeaingState(Query<HashableValue> query, HashableValue resultCE);
     @Override
     public void refineHypothesis(Query<HashableValue> query) {
         // we assume that the counterexample returned are normalized w.r.t the leading DFA
         ExprValue expr = learnerLeading.getExprValueWord(query.getPrefix(), query.getSuffix());
         options.log.verbose("normalized factorization: " + expr.toString());
-        DFA leadDFA = learnerLeading.getHypothesis();
-        int s = leadDFA.getSuccessor(expr.getLeft());
-        Word label = learnerLeading.getStateLabel(s);
-        Query<HashableValue> queryLabel = new QuerySimple<HashableValue>(label, expr.getRight());
-        HashableValue resultLabel = membershipOracle.answerMembershipQuery(queryLabel);
-        Query<HashableValue> queryLeading = new QuerySimple<HashableValue>(expr.getLeft(), expr.getRight());
-        options.log.verbose("Starting counterexample analysis in the learner ("
-                +((Word)expr.getLeft()).length() + "," + ((Word)expr.getRight()).length() + ") ...");
         HashableValue resultCE = query.getQueryAnswer();
+        Query<HashableValue> queryCE = new QuerySimple<>(expr.getLeft(), expr.getRight());
         if(resultCE == null) {
-            resultCE = membershipOracle.answerMembershipQuery(queryLeading);
+            resultCE = membershipOracle.answerMembershipQuery(queryCE);
         }
-        queryLeading.answerQuery(resultCE);
-        if(! resultLabel.equals(resultCE)) { // refine leading automaton
+        int s = getLeaingState(query, resultCE);
+        if(s < 0) { // refine leading automaton
             Timer timer = new Timer();
+            M leadingFA = learnerLeading.getHypothesis();
             timer.start();
-            learnerLeading.refineHypothesis(queryLeading);
+            learnerLeading.refineHypothesis(query);
             timer.stop();
             options.stats.timeOfLearnerLeading += timer.getTimeElapsed();
-            
             timer.start();
-            if(! isPeriodic()) {
-                // Syntactic and Recurrent FDFA should restart progress learning
-                for(LearnerProgress learner : learnerProgress) {
-                    learner.startLearning();
+            if(! isLeadingNFA()) {
+                if(! isPeriodic()) {
+                    // Syntactic and Recurrent FDFA should restart progress learning
+                    for(LearnerProgress<A> learner : learnerProgress) {
+                        learner.startLearning();
+                    }
                 }
-            }
-            DFA leadDFAPrime = learnerLeading.getHypothesis();
-            // new states, not just one (for table-based leading automaton)
-            for(int state = leadDFA.getStateSize(); state < leadDFAPrime.getStateSize(); state ++) {
-                LearnerProgress learner = getLearnerProgress(state);
-                learner.startLearning();
-                learnerProgress.add(learner);
+                // new states, not just one (for table-based leading automaton)
+                for(int state = leadingFA.getStateSize(); state < learnerLeading.getStateSize(); state ++) {
+                    LearnerProgress<A> learner = getLearnerProgress(state);
+                    learner.startLearning();
+                    learnerProgress.add(learner);
+                }
+            }else {
+                // for leading nfa, probably prime upper rows have been changed
+                for(int state = 0; state < learnerLeading.getStateSize(); state ++) {
+                    LearnerProgress<A> learner = getLearnerProgress(state);
+                    learner.startLearning();
+                    learnerProgress.add(learner);
+                }
             }
             timer.stop();
             options.stats.timeOfLearnerProgress += timer.getTimeElapsed();
         }else { // refine progress automaton
             Timer timer = new Timer();
             timer.start();
-            LearnerProgress learnerPro = null;
-            for(LearnerProgress learner : learnerProgress) {
+            LearnerProgress<A> learnerPro = null;
+            for(LearnerProgress<A> learner : learnerProgress) {
                 if(learner.getLeadingState() == s) {
                     learnerPro = learner;
                     break;
                 }
             }
-            HashableValue result = learnerPro.getCeAnalyzerHashableValue(resultCE.get(), alphabet.getEmptyWord(), queryLeading.getSuffix());
-            queryLeading.answerQuery(result);
-            learnerPro.refineHypothesis(queryLeading);
+            HashableValue result = learnerPro.getCeAnalyzerHashableValue(resultCE.get(), alphabet.getEmptyWord(), queryCE.getSuffix());
+            queryCE.answerQuery(result);
+            learnerPro.refineHypothesis(queryCE);
             timer.stop();
             options.stats.timeOfLearnerProgress += timer.getTimeElapsed();
         }
@@ -173,7 +163,7 @@ public abstract class LearnerFNFA extends LearnerBase<FNFA> {
         StringBuilder builder = new StringBuilder();
         builder.append("Leading Learner: \n" + learnerLeading.toString() + "\n");
         
-        for(LearnerProgress learner : learnerProgress) {
+        for(LearnerProgress<A> learner : learnerProgress) {
             builder.append("Progress Learner for " + learner.getLeadingLabel().toStringWithAlphabet() + ": \n");
             builder.append(learner.toString());
         }
@@ -186,7 +176,7 @@ public abstract class LearnerFNFA extends LearnerBase<FNFA> {
                StringBuilder builder = new StringBuilder();
                builder.append("<p> Leading Learner :  </p> <br> "    
                             + NativeTool.dot2SVG(learnerLeading.toString()));
-               for(LearnerProgress learner : learnerProgress) {
+               for(LearnerProgress<A> learner : learnerProgress) {
                    builder.append("<p> Progress Learner for " + learner.getLeadingLabel().toStringWithAlphabet() + ": </p> <br>"
                            + NativeTool.dot2SVG(learner.toString()) + "<br>");
                }
