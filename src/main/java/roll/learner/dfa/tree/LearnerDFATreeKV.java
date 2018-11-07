@@ -68,7 +68,7 @@ public class LearnerDFATreeKV extends LearnerDFATree {
                 dfa.setInitial(stateNode.id);
             }
         }
-        this.dfa = dfa;
+        this.hypothesis = dfa;
     }
     
     @Override
@@ -95,7 +95,7 @@ public class LearnerDFATreeKV extends LearnerDFATree {
             }
             
             Word wordCE = this.exprValue.get();
-            int state = dfa.getInitialState();
+            int state = hypothesis.getInitialState();
             Node<ValueNode> treeNodePrev = null;
             Node<ValueNode> treeNodeCurr = null;
             ValueNode stateNodeCurr = null;
@@ -104,7 +104,7 @@ public class LearnerDFATreeKV extends LearnerDFATree {
                 Word prefix = wordCE.getPrefix(length);
                 treeNodeCurr = sift(prefix);
                 Word nodeLabel = treeNodeCurr.getLabel().get();
-                state = dfa.getSuccessor(state, wordCE.getLetter(length - 1));
+                state = hypothesis.getSuccessor(state, wordCE.getLetter(length - 1));
                 stateNodeCurr = states.get(state);
                 if(nodeLabel.equals(stateNodeCurr.label)) { // si == si hat
                     treeNodePrev = treeNodeCurr;

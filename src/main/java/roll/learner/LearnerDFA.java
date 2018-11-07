@@ -19,8 +19,6 @@ package roll.learner;
 import roll.automata.DFA;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
-import roll.query.Query;
-import roll.query.QuerySimple;
 import roll.table.ExprValue;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
@@ -28,59 +26,17 @@ import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ * Rivest and Schapire's way to treat counterexample
  * */
-public abstract class LearnerDFA extends LearnerBase<DFA> {
-    
-    private boolean alreadyStarted = false;
-    protected DFA dfa;
+public abstract class LearnerDFA extends LearnerFA<DFA> {
     
     public LearnerDFA(Options options, Alphabet alphabet
             , MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
     }
-    
-    @Override
-    public void startLearning() {
-        if(alreadyStarted)
-            try {
-                throw new Exception("Learner should not be started twice");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        alreadyStarted = true;
-        initialize();
-    }
-    
-    protected ExprValue getInitialColumnExprValue() {
-        Word wordEmpty = alphabet.getEmptyWord();
-        ExprValue exprValue = getExprValueWord(wordEmpty);
-        return exprValue;
-    }
-    
-    protected abstract void initialize();
-
-    @Override
-    public DFA getHypothesis() {
-        return dfa;
-    }
-    
-    @Override
-    public Options getOptions() {
-        return options;
-    }
-    
-    public abstract Word getStateLabel(int state);
-    
+        
     protected abstract CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result);
-    
-    protected HashableValue processMembershipQuery(Word prefix, Word suffix) {
-        Query<HashableValue> query = new QuerySimple<>(null, prefix, suffix, -1);
-        return membershipOracle.answerMembershipQuery(query);
-    }
-    
-    protected HashableValue processMembershipQuery(Query<HashableValue> query) {
-        return membershipOracle.answerMembershipQuery(query);
-    }
     
     public abstract class CeAnalyzer {
 
@@ -113,11 +69,11 @@ public abstract class LearnerDFA extends LearnerBase<DFA> {
             Word wordCE = getWordExperiment();
             CeAnalysisResult ceResult = new CeAnalysisResult();
             // get the initial state from automaton
-            int letterNr = 0, currState = -1, prevState = dfa.getInitialState();
+            int letterNr = 0, currState = -1, prevState = hypothesis.getInitialState();
             
             if(! options.binarySearch) {
                 for (letterNr = 0; letterNr < wordCE.length(); letterNr++) {
-                    currState = dfa.getSuccessor(prevState, wordCE.getLetter(letterNr));
+                    currState = hypothesis.getSuccessor(prevState, wordCE.getLetter(letterNr));
                     Word prefix = getStateLabel(currState);
                     Word suffix = wordCE.getSuffix(letterNr + 1);
                     HashableValue memMq = processMembershipQuery(prefix, suffix);
@@ -134,8 +90,8 @@ public abstract class LearnerDFA extends LearnerBase<DFA> {
                 while(low <= high) {
                     int mid = (low + high) / 2;
                     assert mid < wordCE.length();
-                    int fst = dfa.getSuccessor(wordCE.getPrefix(mid));
-                    int snd = dfa.getSuccessor(fst, wordCE.getLetter(mid));
+                    int fst = hypothesis.getSuccessor(wordCE.getPrefix(mid));
+                    int snd = hypothesis.getSuccessor(fst, wordCE.getLetter(mid));
                     Word fstLabel = getStateLabel(fst);
                     Word sndLabel = getStateLabel(snd);
                                         

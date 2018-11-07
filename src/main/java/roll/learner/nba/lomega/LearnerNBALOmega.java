@@ -40,9 +40,8 @@ import roll.words.Alphabet;
 
 public class LearnerNBALOmega extends LearnerBase<NBA>{
 
-    private boolean alreadyStarted = false;
-    private NBA nba;
     private final LearnerFDFA fdfaLearner;
+    
     public LearnerNBALOmega(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
         fdfaLearner = UtilLOmega.getLearnerFDFA(options, alphabet, membershipOracle);
@@ -52,28 +51,19 @@ public class LearnerNBALOmega extends LearnerBase<NBA>{
     public LearnerType getLearnerType() {
         return LearnerType.NBA_FDFA;
     }
-
-    @Override
-    public void startLearning() {
-        if(alreadyStarted) {
-            throw new UnsupportedOperationException("Learner can not start twice");
-        }
-        alreadyStarted = true;
+    
+    protected void initialize() {
         fdfaLearner.startLearning();
         constructHypothesis();
     }
 
+    @Override
     protected void constructHypothesis() {
         // construct BA from FDFA
         FDFA fdfa = fdfaLearner.getHypothesis();
-        nba = UtilLOmega.constructNBA(options, fdfa);
+        hypothesis = UtilLOmega.constructNBA(options, fdfa);
     }
-
-    @Override
-    public NBA getHypothesis() {
-        return nba;
-    }
-
+    
     @Override
     public void refineHypothesis(Query<HashableValue> query) {
         

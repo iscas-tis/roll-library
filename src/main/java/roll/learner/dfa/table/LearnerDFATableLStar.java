@@ -69,7 +69,7 @@ public class LearnerDFATableLStar extends LearnerDFATable {
     
     @Override
     protected void constructHypothesis() {
-        dfa = new DFA(alphabet);
+        hypothesis = new DFA(alphabet);
         List<ObservationRow> upperTable = observationTable.getUpperTable();
 
         // get all distinguished rows in upper table
@@ -79,7 +79,7 @@ public class LearnerDFATableLStar extends LearnerDFATable {
             List<HashableValue> values = upperTable.get(rowNr).getValues();
             if(valuesMap.containsKey(values)) continue;
             // new state now
-            StateNFA state = dfa.createState();
+            StateNFA state = hypothesis.createState();
             stateIndexMap.put(rowNr, state.getId());
             valuesMap.put(values, rowNr);
         }
@@ -89,7 +89,7 @@ public class LearnerDFATableLStar extends LearnerDFATable {
             @Override
             public boolean execute(int rowNr) {
                 // we first get current state
-                StateNFA state = dfa.getState(stateIndexMap.get(rowNr));
+                StateNFA state = hypothesis.getState(stateIndexMap.get(rowNr));
                 for(int letter = 0; letter < alphabet.getLetterSize(); letter ++) {
                     List<HashableValue> succValues = getSuccessorRowValues(rowNr, letter);
                     assert succValues != null : "Didnot find successor in upper table";
@@ -99,12 +99,12 @@ public class LearnerDFATableLStar extends LearnerDFATable {
                 }
                 
                 if(isAccepting(rowNr)) {
-                    dfa.setFinal(state.getId());
+                    hypothesis.setFinal(state.getId());
                 }
                 
                 // we use rowNr because it checked the specific row in upper table
                 if(getStateLabel(rowNr).isEmpty()) {
-                    dfa.setInitial(state.getId());
+                    hypothesis.setInitial(state.getId());
                 }
                 
                 return true;
@@ -131,7 +131,7 @@ public class LearnerDFATableLStar extends LearnerDFATable {
                 newLowerRows.add(newRow);
             }
             // 3. process membership queries
-            processMembershipQueries(newLowerRows, 0, observationTable.getColumns().size());
+            processMembershipQueries(observationTable, newLowerRows, 0, observationTable.getColumns().size());
             lowerRow = observationTable.getUnclosedLowerRow();
         }
         
@@ -146,9 +146,9 @@ public class LearnerDFATableLStar extends LearnerDFATable {
             // 1. add to columns
             int columnIndex = observationTable.addColumn(exprValue);
             // 2. add result of new column to upper table
-            processMembershipQueries(observationTable.getUpperTable(), columnIndex, 1);
+            processMembershipQueries(observationTable, observationTable.getUpperTable(), columnIndex, 1);
             // 3. process membership queries
-            processMembershipQueries(observationTable.getLowerTable(), columnIndex, 1);
+            processMembershipQueries(observationTable, observationTable.getLowerTable(), columnIndex, 1);
             exprValue = observationTable.getInconsistentColumn();
         }
         
@@ -182,8 +182,8 @@ public class LearnerDFATableLStar extends LearnerDFATable {
         // ask membership for new added rows
         List<ObservationRow> newLowerRows = addLowerRowsFromRowsWithExtension(existRows);
         newLowerRows.addAll(addLowerRowsFromRowsWithExtension(newRows));
-        processMembershipQueries(newRows, 0, observationTable.getColumns().size());
-        processMembershipQueries(newLowerRows, 0, observationTable.getColumns().size());
+        processMembershipQueries(observationTable, newRows, 0, observationTable.getColumns().size());
+        processMembershipQueries(observationTable, newLowerRows, 0, observationTable.getColumns().size());
         
         makeTableClosed();
     }

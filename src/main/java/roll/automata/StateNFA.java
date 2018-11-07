@@ -58,7 +58,7 @@ public class StateNFA {
             succs = UtilISet.newISet();
         }
         if(nfa instanceof DFA) {
-            // remove all previous states
+            // remove all previous states in dfa
             succs.clear(); 
         }
         succs.set(state);

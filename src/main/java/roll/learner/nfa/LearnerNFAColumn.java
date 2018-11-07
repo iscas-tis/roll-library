@@ -19,8 +19,8 @@ package roll.learner.nfa;
 import roll.automata.DFA;
 import roll.automata.NFA;
 import roll.automata.StateNFA;
-import roll.learner.LearnerBase;
 import roll.learner.LearnerDFA;
+import roll.learner.LearnerFA;
 import roll.learner.LearnerType;
 import roll.learner.dfa.table.LearnerDFATableColumn;
 import roll.learner.dfa.tree.LearnerDFATreeColumn;
@@ -39,10 +39,9 @@ import roll.words.Word;
  * Learning a NFA of L by learning the DFA which accepts L^c = { x^c | x in L}
  * */
 
-public class LearnerNFAColumn extends LearnerBase<NFA> {
-    private boolean alreadyStarted = false;
+public class LearnerNFAColumn extends LearnerFA<NFA> {
+
     private final LearnerDFA dfaLearner;
-    private NFA nfa;
     
     public LearnerNFAColumn(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
@@ -58,27 +57,24 @@ public class LearnerNFAColumn extends LearnerBase<NFA> {
     public LearnerType getLearnerType() {
         return LearnerType.NFA_RDFA;
     }
-
+    
     @Override
-    public void startLearning() {
-        if(alreadyStarted) {
-            throw new UnsupportedOperationException("Learner can not start twice");
-        }
-        alreadyStarted = true;
+    protected void initialize() {
         dfaLearner.startLearning();
         constructHypothesis();
     }
 
-    private void constructHypothesis() {
-        nfa = new NFA(alphabet);
+    @Override
+    protected void constructHypothesis() {
+        hypothesis = new NFA(alphabet);
         
         DFA dfa = dfaLearner.getHypothesis();
         // now we get the reverse NFA
         ISet inits = UtilISet.newISet();
         for(int i = 0; i < dfa.getStateSize(); i ++) {
-            nfa.createState();
+            hypothesis.createState();
             if(dfa.isInitial(i)) {
-                nfa.setFinal(i);
+                hypothesis.setFinal(i);
             }else if(dfa.isFinal(i)) {
                 inits.set(i);
             }
@@ -88,21 +84,21 @@ public class LearnerNFAColumn extends LearnerBase<NFA> {
             for(int c = 0; c < dfa.getAlphabetSize(); c ++) {
                 int succ = dfa.getState(curr).getSuccessor(c);
                 // reverse the transition curr -- c --> succ
-                nfa.getState(succ).addTransition(c, curr);
+                hypothesis.getState(succ).addTransition(c, curr);
             }
         }
         
         if(inits.cardinality() <= 1) {
             for(final int init : inits) {
-                nfa.setInitial(init);
+                hypothesis.setInitial(init);
             }
         }else {
             // |inits| > 1
-            nfa.createState();
-            nfa.setInitial(dfa.getStateSize());
-            StateNFA initState = nfa.getState(dfa.getStateSize());
+            hypothesis.createState();
+            hypothesis.setInitial(dfa.getStateSize());
+            StateNFA initState = hypothesis.getState(dfa.getStateSize());
             for(final int init : inits) {
-                StateNFA state = nfa.getState(init);
+                StateNFA state = hypothesis.getState(init);
                 for(final int letter : state.getEnabledLetters()) {
                     for(final int succ : state.getSuccessors(letter)) {
                         initState.addTransition(letter, succ);
@@ -111,11 +107,6 @@ public class LearnerNFAColumn extends LearnerBase<NFA> {
             }
         }
         
-    }
-
-    @Override
-    public NFA getHypothesis() {
-        return nfa;
     }
 
     @Override
@@ -133,6 +124,11 @@ public class LearnerNFAColumn extends LearnerBase<NFA> {
     @Override
     public String toHTML() {
         return "<pre>" + toString() + "</pre>";
+    }
+
+    @Override
+    protected Word getStateLabel(int state) {
+        return null;
     }
 
 }

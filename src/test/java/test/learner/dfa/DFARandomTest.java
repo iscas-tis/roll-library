@@ -18,9 +18,9 @@ package test.learner.dfa;
 
 import roll.automata.DFA;
 import roll.automata.operations.DFAGenerator;
-import roll.learner.LearnerDFA2;
+import roll.learner.LearnerDFA;
 import roll.learner.LearnerType;
-import roll.learner.dfa.tree.LearnerDFATreeKV2;
+import roll.learner.dfa.tree.LearnerDFATreeKV;
 import roll.main.Options;
 import roll.oracle.dfa.dk.TeacherDFADK;
 import roll.query.Query;
@@ -104,9 +104,9 @@ public class DFARandomTest {
 	   private static boolean testLearnerDFA2(DFA machine, Alphabet alphabet, LearnerType algo) {
 	        Options options = new Options();
 	        TeacherDFADK teacher = new TeacherDFADK(options, machine);
-	        LearnerDFA2 learner = null;
+	        LearnerDFA learner = null;
 	        System.out.println("target:\n" + machine.toDot());
-	        learner = new LearnerDFATreeKV2(options, alphabet, teacher);
+	        learner = new LearnerDFATreeKV(options, alphabet, teacher);
 	        System.out.println("starting learning");
 	        learner.startLearning();
 

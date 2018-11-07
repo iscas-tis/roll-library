@@ -46,8 +46,6 @@ import roll.words.Word;
 
 public class LearnerNBALDollar extends LearnerBase<NBA>{
     
-    private boolean alreadyStarted = false;
-    private NBA nba;
     private final int dollarLetter;
     private final LearnerDFA dfaLearner;
     private final Automaton nonUPWords;
@@ -72,17 +70,14 @@ public class LearnerNBALDollar extends LearnerBase<NBA>{
     public LearnerType getLearnerType() {
         return LearnerType.NBA_LDOLLAR;
     }
-
+    
     @Override
-    public void startLearning() {
-        if(alreadyStarted) {
-            throw new UnsupportedOperationException("Learner can not start twice");
-        }
-        alreadyStarted = true;
+    protected void initialize() {
         dfaLearner.startLearning();
         constructHypothesis();
     }
 
+    @Override
     protected void constructHypothesis() {
         
         Automaton dkAut;
@@ -105,12 +100,7 @@ public class LearnerNBALDollar extends LearnerBase<NBA>{
         }
         // now we construct the NBA
         Automaton ba = UtilNBALDollar.dkDFAToBuchi(dkAut);
-        nba = NBAOperations.fromDkNBA(ba, alphabet);
-    }
-
-    @Override
-    public NBA getHypothesis() {
-        return nba;
+        hypothesis = NBAOperations.fromDkNBA(ba, alphabet);
     }
 
     @Override

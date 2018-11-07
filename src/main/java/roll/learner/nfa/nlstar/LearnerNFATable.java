@@ -183,12 +183,9 @@ public abstract class LearnerNFATable extends LearnerFA<NFA> {
     }
     
     @Override
-    public Word getLabelWord(int state) {
-        List<ObservationRow> primeRows = observationTable.getUpperPrimes();
-        if(state >= 0 && state < primeRows.size()) {
-            return primeRows.get(state).getWord();
-        }
-        return null;
+    protected Word getStateLabel(int state) {
+        assert state >= 0 && state < observationTable.getUpperPrimes().size();
+        return observationTable.getUpperPrimes().get(state).getWord();
     }
     
     // ----------------------------------------------------------------------

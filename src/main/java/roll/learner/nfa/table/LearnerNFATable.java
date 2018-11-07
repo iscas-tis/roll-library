@@ -21,7 +21,7 @@ import java.util.List;
 
 import roll.automata.NFA;
 import roll.automata.StateNFA;
-import roll.learner.LearnerBase;
+import roll.learner.LearnerFA;
 import roll.learner.LearnerType;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
@@ -44,10 +44,8 @@ import roll.words.Word;
  * 
  * */
 
-public class LearnerNFATable extends LearnerBase<NFA> {
+public class LearnerNFATable extends LearnerFA<NFA> {
 
-    private boolean alreadyStarted = false;
-    protected NFA nfa;
     protected ObservationTableAbstract observationTable;
     
     public LearnerNFATable(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
@@ -59,45 +57,17 @@ public class LearnerNFATable extends LearnerBase<NFA> {
     public LearnerType getLearnerType() {
         return LearnerType.NFA_RDSTAR;
     }
-
-    @Override
-    public void startLearning() {
-        if(alreadyStarted)
-            try {
-                throw new Exception("Learner should not be started twice");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        alreadyStarted = true;
-        initialize();
-    }
     
+    @Override
     protected ExprValue getInitialColumnExprValue() {
         Word wordEmpty = alphabet.getEmptyWord();
         ExprValue exprValue = getExprValueWord(wordEmpty);
         return exprValue;
     }
 
+    @Override
     protected void initialize() {
-        observationTable.clear();
-        Word wordEmpty = alphabet.getEmptyWord();
-        observationTable.addUpperRow(wordEmpty);
-        ExprValue exprValue = getInitialColumnExprValue();
-        
-        // add empty word column
-        observationTable.addColumn(exprValue);
-        // add every alphabet
-        for(int letterNr = 0; letterNr < alphabet.getLetterSize(); letterNr ++) {
-            observationTable.addLowerRow(alphabet.getLetterWord(letterNr));
-        }
-        
-        // ask initial queries for upper table
-        processMembershipQueries(observationTable.getUpperTable()
-                , 0, observationTable.getColumns().size());
-        // ask initial queries for lower table
-        processMembershipQueries(observationTable.getLowerTable()
-                , 0, observationTable.getColumns().size());
-        
+        initializeTable(observationTable);
         makeTableClosed();        
     }
 
@@ -124,14 +94,15 @@ public class LearnerNFATable extends LearnerBase<NFA> {
         constructHypothesis();
     }
     
+    @Override
     protected void constructHypothesis() {
         
-        nfa = new NFA(alphabet);
+        hypothesis = new NFA(alphabet);
         
         List<ObservationRow> upperTable = observationTable.getUpperTable();
         
         for(int rowNr = 0; rowNr < upperTable.size(); rowNr ++) {
-            nfa.createState();
+            hypothesis.createState();
         }
         
         ISet inits = UtilISet.newISet();
@@ -139,12 +110,12 @@ public class LearnerNFATable extends LearnerBase<NFA> {
             for(int letterNr = 0; letterNr < alphabet.getLetterSize(); letterNr ++) {
                 int predNr = getPredecessorRow(rowNr, letterNr);
                 assert predNr != -1: "predecessor index -1";
-                StateNFA state = nfa.getState(predNr);
+                StateNFA state = hypothesis.getState(predNr);
                 state.addTransition(letterNr, rowNr);
             }
             
             if(upperTable.get(rowNr).getWord().isEmpty()) {
-                nfa.setFinal(rowNr);
+                hypothesis.setFinal(rowNr);
             }
             
             if(isAccepting(rowNr)) {
@@ -158,15 +129,15 @@ public class LearnerNFATable extends LearnerBase<NFA> {
 //        }else 
         if(inits.cardinality() <= 1) {
             for(final int init : inits) {
-                nfa.setInitial(init);
+                hypothesis.setInitial(init);
             }
         }else {
             // |inits| > 1
-            nfa.createState();
-            nfa.setInitial(upperTable.size());
-            StateNFA initState = nfa.getState(upperTable.size());
+            hypothesis.createState();
+            hypothesis.setInitial(upperTable.size());
+            StateNFA initState = hypothesis.getState(upperTable.size());
             for(final int init : inits) {
-                StateNFA state = nfa.getState(init);
+                StateNFA state = hypothesis.getState(init);
                 for(final int letter : state.getEnabledLetters()) {
                     for(final int succ : state.getSuccessors(letter)) {
                         initState.addTransition(letter, succ);
@@ -240,11 +211,6 @@ public class LearnerNFATable extends LearnerBase<NFA> {
     }
 
     @Override
-    public NFA getHypothesis() {
-        return nfa;
-    }
-
-    @Override
     public void refineHypothesis(Query<HashableValue> ceQuery) {
         ExprValue exprValue = getCounterExampleWord(ceQuery);
         HashableValue result = ceQuery.getQueryAnswer();
@@ -310,6 +276,11 @@ public class LearnerNFATable extends LearnerBase<NFA> {
     @Override
     public String toHTML() {
         return "<pre>" + toString() + "</pre>";
+    }
+
+    @Override
+    protected Word getStateLabel(int state) {
+        return null;
     }
 
 }

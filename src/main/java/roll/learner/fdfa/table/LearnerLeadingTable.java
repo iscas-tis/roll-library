@@ -39,6 +39,7 @@ public class LearnerLeadingTable extends LearnerOmegaTable implements LearnerLea
         super(options, alphabet, membershipOracle);
     }
     
+    @Override
     protected ExprValue getInitialColumnExprValue() {
         Word wordEmpty = alphabet.getEmptyWord();
         ExprValue exprValue = getExprValueWord(wordEmpty, wordEmpty);
@@ -129,6 +130,12 @@ public class LearnerLeadingTable extends LearnerOmegaTable implements LearnerLea
             return learnerLeading.getExprValueWord(wordCE.getSuffix(result.breakIndex + 1)
                     , learnerLeading.getCeAnalysisLoop());  // y[j+1..n]
         }
+    }
+
+    @Override
+    public Word getStateLabel(int state) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

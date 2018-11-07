@@ -25,7 +25,6 @@ import roll.learner.LearnerDFA;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
-import roll.query.QuerySimple;
 import roll.table.ExprValue;
 import roll.table.HashableValue;
 import roll.table.ObservationRow;
@@ -43,63 +42,10 @@ public abstract class LearnerDFATable extends LearnerDFA {
         this.observationTable = getTableInstance();
     }
     
-    protected Query<HashableValue> processMembershipQuery(ObservationRow row, int offset, ExprValue valueExpr) {
-        Query<HashableValue> query = new QuerySimple<>(row, row.getWord(), valueExpr.get(), offset);
-        HashableValue result = membershipOracle.answerMembershipQuery(query);
-        Query<HashableValue> queryResult = new QuerySimple<>(row, row.getWord(), valueExpr.get(), offset);
-        queryResult.answerQuery(result);
-        return queryResult;
-    }
-    
+    @Override
     protected void initialize() {
-        
-        observationTable.clear();
-        Word wordEmpty = alphabet.getEmptyWord();
-        observationTable.addUpperRow(wordEmpty);
-        ExprValue exprValue = getInitialColumnExprValue();
-        
-        // add empty word column
-        observationTable.addColumn(exprValue);
-        // add every alphabet
-        for(int letterNr = 0; letterNr < alphabet.getLetterSize(); letterNr ++) {
-            observationTable.addLowerRow(alphabet.getLetterWord(letterNr));
-        }
-        
-        // ask initial queries for upper table
-        processMembershipQueries(observationTable.getUpperTable()
-                , 0, observationTable.getColumns().size());
-        // ask initial queries for lower table
-        processMembershipQueries(observationTable.getLowerTable()
-                , 0, observationTable.getColumns().size());
-        
+        initializeTable(observationTable);
         makeTableClosed();
-        
-    }
-    
-    protected void processMembershipQueries(List<ObservationRow> rows
-            , int colOffset, int length) {
-        List<Query<HashableValue>> results = new ArrayList<>();
-        List<ExprValue> columns = observationTable.getColumns();
-        int endNr = length + colOffset;
-        for(ObservationRow row : rows) {
-            for(int colNr = colOffset; colNr < endNr; colNr ++) {
-                results.add(processMembershipQuery(row, colNr, columns.get(colNr)));
-            }
-        }
-        putQueryAnswers(results);
-    }
-        
-    protected void putQueryAnswers(List<Query<HashableValue>> queries) {
-        for(Query<HashableValue> query : queries) {
-            putQueryAnswers(query);
-        }
-    }
-    
-    protected void putQueryAnswers(Query<HashableValue> query) {
-        ObservationRow row = query.getPrefixRow();
-        HashableValue result = query.getQueryAnswer();
-        assert result != null;
-        row.set(query.getSuffixColumn(), result);
     }
     
     protected void makeTableClosed() {
@@ -118,7 +64,7 @@ public abstract class LearnerDFATable extends LearnerDFA {
                 newLowerRows.add(newRow);
             }
             // 3. process membership queries
-            processMembershipQueries(newLowerRows, 0, observationTable.getColumns().size());
+            processMembershipQueries(observationTable, newLowerRows, 0, observationTable.getColumns().size());
             lowerRow = observationTable.getUnclosedLowerRow();
         }
         
@@ -137,38 +83,36 @@ public abstract class LearnerDFATable extends LearnerDFA {
         CeAnalyzer analyzer = getCeAnalyzerInstance(exprValue, result);
         analyzer.analyze();
         observationTable.addColumn(analyzer.getNewExpriment()); // add new experiment
-        processMembershipQueries(observationTable.getUpperTable(), observationTable.getColumns().size() - 1, 1);
-        processMembershipQueries(observationTable.getLowerTable(), observationTable.getColumns().size() - 1, 1);
+        processMembershipQueries(observationTable, observationTable.getUpperTable(), observationTable.getColumns().size() - 1, 1);
+        processMembershipQueries(observationTable, observationTable.getLowerTable(), observationTable.getColumns().size() - 1, 1);
         
         makeTableClosed();
-        
     }
     
     
     // Default learner for DFA
+    @Override
     protected void constructHypothesis() {
         
-        dfa = new DFA(alphabet);
+        hypothesis = new DFA(alphabet);
         
         List<ObservationRow> upperTable = observationTable.getUpperTable();
         
         for(int rowNr = 0; rowNr < upperTable.size(); rowNr ++) {
-            dfa.createState();
+            hypothesis.createState();
         }
         
         for(int rowNr = 0; rowNr < upperTable.size(); rowNr ++) {
-            StateNFA state = dfa.getState(rowNr);
+            StateNFA state = hypothesis.getState(rowNr);
             for(int letterNr = 0; letterNr < alphabet.getLetterSize(); letterNr ++) {
                 int succNr = getSuccessorRow(rowNr, letterNr);
                 state.addTransition(letterNr, succNr);
             }
-            
             if(getStateLabel(rowNr).isEmpty()) {
-                dfa.setInitial(rowNr);
+                hypothesis.setInitial(rowNr);
             }
-            
             if(isAccepting(rowNr)) {
-                dfa.setFinal(rowNr);
+                hypothesis.setFinal(rowNr);
             }
         }
         
@@ -185,31 +129,10 @@ public abstract class LearnerDFATable extends LearnerDFA {
     protected int getSuccessorRow(int state, int letter) {
         ObservationRow stateRow = observationTable.getUpperTable().get(state);
         Word succWord = stateRow.getWord().append(letter);
-
-        // search in upper table
-        for(int succ = 0; succ < observationTable.getUpperTable().size(); succ ++) {
-            ObservationRow succRow = observationTable.getUpperTable().get(succ);
-            if(succRow.getWord().equals(succWord)) {
-                return succ;
-            }
-        }
-        // search in lower table
-        ObservationRow succRow = observationTable.getLowerTableRow(succWord);
-        assert succRow != null;
-        for(int succ = 0; succ < observationTable.getUpperTable().size(); succ ++) {
-            ObservationRow upperRow = observationTable.getUpperTable().get(succ);
-            if(succRow.valuesEqual(upperRow)) {
-                return succ;
-            }
-        }
-        assert false : "successor values not found";
-        return -1;
+        int succ = observationTable.getUpperTableRowIndex(succWord);
+        return succ;
     }
 
-    
-    public String toString() {
-        return observationTable.toString();
-    }
     
     @Override
     public Word getStateLabel(int state) {
@@ -231,6 +154,11 @@ public abstract class LearnerDFATable extends LearnerDFA {
             Word wordCE = getWordExperiment();
             wordExpr = getExprValueWord(wordCE.getSuffix(result.breakIndex + 1));  // y[j+1..n]
         }
+    }
+
+    @Override
+    public String toString() {
+        return observationTable.toString();
     }
     
     @Override

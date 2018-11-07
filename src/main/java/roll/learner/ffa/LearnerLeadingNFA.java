@@ -99,7 +99,7 @@ public class LearnerLeadingNFA extends LearnerNFATable implements LearnerLeading
 
     @Override
     public Word getStateLabel(int state) {
-        return super.getLabelWord(state);
+        return super.getStateLabel(state);
     }
 
 }

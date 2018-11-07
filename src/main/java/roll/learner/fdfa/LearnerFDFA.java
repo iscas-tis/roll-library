@@ -47,8 +47,6 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
 
     protected LearnerLeading learnerLeading;
     protected List<LearnerProgress> learnerProgress;
-    private boolean alreadyStarted;
-    protected FDFA fdfa;
     public LearnerFDFA(Options options, Alphabet alphabet
             , MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
@@ -56,14 +54,7 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
     }
     
     @Override
-    public void startLearning() {
-        if(alreadyStarted)
-            try {
-                throw new UnsupportedOperationException("Learner should not be started twice");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        alreadyStarted = true;
+    protected void initialize() {
         learnerLeading = getLearnerLeading();
         Timer timer = new Timer();
         timer.start();
@@ -83,6 +74,7 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
         constructHypothesis();
     }
     
+    @Override
     protected void constructHypothesis() {
         DFA leadDFA = learnerLeading.getHypothesis();
         List<DFA> proDFAs = new ArrayList<>();
@@ -90,7 +82,7 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
             DFA progressDFA = (DFA)learner.getHypothesis();
             proDFAs.add(progressDFA);
         }
-        fdfa = new FDFA(leadDFA, proDFAs);
+        hypothesis = new FDFA(leadDFA, proDFAs);
     }
 
     @Override
@@ -104,12 +96,6 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
     
     protected boolean isPeriodic() {
         return false;
-    }
- 
-
-    @Override
-    public FDFA getHypothesis() {
-        return fdfa;
     }
 
     // refine FDFA by counterexample
@@ -201,15 +187,5 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
             return "<pre> " + toString() + "</pre>";
         }
     }
-    
-    // -------------- some helper function
-    // for FDFA learning, this function should not be visible
-//    public Word getProgressStateLabel(int stateLeading, int stateProgress) {
-//        return learnerProgress.get(stateLeading).getStateLabel(stateProgress);
-//    }
-//    
-//    public Word getLeadingStateLabel(int stateLeading) {
-//        return learnerLeading.getStateLabel(stateLeading);
-//    }
 
 }

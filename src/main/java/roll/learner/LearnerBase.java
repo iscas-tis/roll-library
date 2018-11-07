@@ -16,25 +16,37 @@
 
 package roll.learner;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import roll.main.IHTML;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
+import roll.query.QuerySimple;
 import roll.table.ExprValue;
 import roll.table.ExprValueWord;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
+import roll.table.ObservationRow;
+import roll.table.ObservationTable;
 import roll.words.Alphabet;
 import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ * basic learner
+ * 
  * */
 public abstract class LearnerBase<M> implements Learner<M, HashableValue>, IHTML {
+    
+    private boolean alreadyStarted = false;
     
     protected final Alphabet alphabet;
     protected final MembershipOracle<HashableValue> membershipOracle;
     protected final Options options;
+    protected M hypothesis;
     
     public LearnerBase(Options options, Alphabet alphabet
             , MembershipOracle<HashableValue> membershipOracle) {
@@ -49,7 +61,25 @@ public abstract class LearnerBase<M> implements Learner<M, HashableValue>, IHTML
         return options;
     }
     
+    @Override
+    public void startLearning() {
+        if (alreadyStarted)
+            try {
+                throw new Exception("Learner should not be started twice");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        alreadyStarted = true;
+        initialize();
+    }
+    
+    @Override
+    public M getHypothesis() {
+        return hypothesis;
+    }
+    
     // ---------------------------------------------------------------------
+    // only for the finite automata learning
     protected ExprValue getCounterExampleWord(Query<HashableValue> query) {
         assert query != null;
         Word word = query.getQueriedWord();
@@ -65,7 +95,87 @@ public abstract class LearnerBase<M> implements Learner<M, HashableValue>, IHTML
         return new HashableValueBoolean(result);
     }
     
-    // ---------------------------------------------------------------------
+    protected HashableValue processMembershipQuery(Word prefix, Word suffix) {
+        Query<HashableValue> query = new QuerySimple<>(null, prefix, suffix, -1);
+        return membershipOracle.answerMembershipQuery(query);
+    }
     
+    protected HashableValue processMembershipQuery(Query<HashableValue> query) {
+        return membershipOracle.answerMembershipQuery(query);
+    }
+    // ---------------------------------------------------------------------
+    // specialized for learning algorithm based on observation table
+    
+    protected Query<HashableValue> makeMembershipQuery(ObservationRow row, int offset, ExprValue exprValue) {
+        throw new UnsupportedOperationException("Learner does not support makeMembershipQuery(ObservationRow, int, ExprValue)");
+    }
 
+    
+    protected Query<HashableValue> makeMembershipQuery(Word prefix, ExprValue exprValue) {
+        throw new UnsupportedOperationException("Learner does not support makeMembershipQuery(Word, ExprValue)");
+    }
+    
+    protected Query<HashableValue> processMembershipQuery(ObservationRow row, int offset, ExprValue exprValue) {
+        Query<HashableValue> query = makeMembershipQuery(row, offset, exprValue);
+        HashableValue result = membershipOracle.answerMembershipQuery(query);
+        Query<HashableValue> queryResult = makeMembershipQuery(row, offset, exprValue);
+        queryResult.answerQuery(result);
+        return queryResult;
+    }
+    
+    protected void processMembershipQueries(ObservationTable observationTable, List<ObservationRow> rows
+            , int colOffset, int length) {
+        List<Query<HashableValue>> results = new ArrayList<>();
+        List<ExprValue> columns = observationTable.getColumns();
+        int endNr = length + colOffset;
+        for(ObservationRow row : rows) {
+            for(int colNr = colOffset; colNr < endNr; colNr ++) {
+                results.add(processMembershipQuery(row, colNr, columns.get(colNr)));
+            }
+        }
+        putQueryAnswers(results);
+    }
+        
+    protected void putQueryAnswers(List<Query<HashableValue>> queries) {
+        for(Query<HashableValue> query : queries) {
+            putQueryAnswers(query);
+        }
+    }
+    
+    protected void putQueryAnswers(Query<HashableValue> query) {
+        ObservationRow row = query.getPrefixRow();
+        HashableValue result = query.getQueryAnswer();
+        assert result != null;
+        row.set(query.getSuffixColumn(), result);
+    }
+    
+    protected ExprValue getInitialColumnExprValue() {
+        throw new UnsupportedOperationException("Learner does not support getStateLabel(int)");
+    }
+    
+    protected void initializeTable(ObservationTable observationTable) {
+        observationTable.clear();
+        Word wordEmpty = alphabet.getEmptyWord();
+        observationTable.addUpperRow(wordEmpty);
+        ExprValue exprValue = getInitialColumnExprValue();
+        
+        // add empty word column
+        observationTable.addColumn(exprValue);
+        // add every alphabet
+        for(int letterNr = 0; letterNr < alphabet.getLetterSize(); letterNr ++) {
+            observationTable.addLowerRow(alphabet.getLetterWord(letterNr));
+        }
+        
+        // ask initial queries for upper table
+        processMembershipQueries(observationTable, observationTable.getUpperTable()
+                , 0, observationTable.getColumns().size());
+        // ask initial queries for lower table
+        processMembershipQueries(observationTable, observationTable.getLowerTable()
+                , 0, observationTable.getColumns().size());
+    }
+    // ---------------------------------------------------------------------
+    protected abstract void initialize();
+        
+    protected abstract void constructHypothesis();
+    
 }

@@ -71,7 +71,7 @@ public enum AutType {
 		}else if(this == FDFA) {
 			return "FDFA";
 		}else if(this == FNFA) {
-            return "FRFSA";
+            return "FNFA";
         }if(this == NBA) {
 			return "NBA";
 		}else if(this == RABIN) {

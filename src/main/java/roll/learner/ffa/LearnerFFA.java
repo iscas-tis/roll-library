@@ -22,7 +22,7 @@ import java.util.List;
 import roll.automata.FFA;
 import roll.automata.NFA;
 import roll.jupyter.NativeTool;
-import roll.learner.LearnerBase2;
+import roll.learner.LearnerBase;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
@@ -32,7 +32,7 @@ import roll.table.HashableValue;
 import roll.util.Timer;
 import roll.words.Alphabet;
 
-public abstract class LearnerFFA<M extends NFA, A extends NFA> extends LearnerBase2<FFA<M, A>> {
+public abstract class LearnerFFA<M extends NFA, A extends NFA> extends LearnerBase<FFA<M, A>> {
 
     protected LearnerLeading<M> learnerLeading;
     protected List<LearnerProgress<A>> learnerProgress;

@@ -29,11 +29,11 @@ import roll.words.Word;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * 
- * Learner for the finite automata accepting finite words
+ * Learner for the finite automata such as DFA and NFA which accept finite words
  * 
  * */
 
-public abstract class LearnerFA<M> extends LearnerBase2<M>{
+public abstract class LearnerFA<M> extends LearnerBase<M>{
 
     public LearnerFA(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);
@@ -53,6 +53,8 @@ public abstract class LearnerFA<M> extends LearnerBase2<M>{
     protected Query<HashableValue> makeMembershipQuery(Word prefix, ExprValue exprValue) {
         throw new UnsupportedOperationException("LearnerFA does not support makeMembershipQuery(Word prefix, ExprValue exprValue)");
     }
+    
+    protected abstract Word getStateLabel(int state);
 
 
 }

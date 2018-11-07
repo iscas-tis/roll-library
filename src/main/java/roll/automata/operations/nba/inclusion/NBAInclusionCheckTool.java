@@ -31,9 +31,9 @@ import roll.words.Alphabet;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * 
- * only can prove inclusion, and GOAL tends to be very slow
+ * 1. Only can prove inclusion, and GOAL tends to be very slow
  *
- * Not responsible to provide the witness for noninclusion and inequivalence
+ * 2. Not able to provide the witness for noninclusion and inequivalence
  * 
  * */
 

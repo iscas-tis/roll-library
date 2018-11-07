@@ -37,11 +37,11 @@ import roll.words.Alphabet;
 import roll.words.Word;
 
 /**
- * Maler and Pnueli way to treat counterexample
+ * Rivest and Schapire's way to treat counterexample
  * */
 
 // only apply to DFA
-public abstract class LearnerDFATree extends LearnerDFA {
+public abstract class LearnerDFATree extends LearnerDFA{
 
 	protected TreeImpl tree;
 	// updates for tree
@@ -110,7 +110,7 @@ public abstract class LearnerDFATree extends LearnerDFA {
 			    dfa.setInitial(state.id);
 			}
 		}
-		this.dfa = dfa;
+		this.hypothesis = dfa;
 	}
 	
 	protected boolean isAccepting(ValueNode state) {
@@ -344,6 +344,7 @@ public abstract class LearnerDFATree extends LearnerDFA {
 		
 	}
 	
+	@Override
 	public String toString() {
 		return tree.toString();
 	}
