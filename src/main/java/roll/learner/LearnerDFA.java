@@ -27,7 +27,8 @@ import roll.words.Word;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * 
- * Rivest and Schapire's way to treat counterexample
+ * Rivest and Schapire's way to treat counterexample, i.e., only add one suffix of the counterexample
+ * as the new experiment
  * */
 public abstract class LearnerDFA extends LearnerFA<DFA> {
     
@@ -38,6 +39,15 @@ public abstract class LearnerDFA extends LearnerFA<DFA> {
         
     protected abstract CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result);
     
+    /**
+     * CounterExample Analyzer to extract a new experiment to further refine current hypothesis
+     * <br>
+     * Assume that current counterexample is a finite word v of length n and current hypothesis is M
+     * we need to find a state s_{j-1} and a letter 'a' such that <br> 
+     *        1. s_{j} = M(s_{j-1} a) and s_{j} = M(v[1..j]) <br>
+     *        2. MQ(s_{j} v[j+1 .. n]) not equal to MQ(s_{j-1} a v[j+1 .. n])  <br>
+     * j is the break index 
+     * */
     public abstract class CeAnalyzer {
 
         protected ExprValue wordExpr;

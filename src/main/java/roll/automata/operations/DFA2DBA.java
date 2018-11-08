@@ -30,6 +30,8 @@ import roll.util.Pair;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ * This algorithm is described in the extended version of our tacas paper
  * */
 
 class DFA2DBA {

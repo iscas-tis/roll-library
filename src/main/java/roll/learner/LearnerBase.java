@@ -36,7 +36,7 @@ import roll.words.Word;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * 
- * basic learner
+ * every learner has to extend this basic learner
  * 
  * */
 public abstract class LearnerBase<M> implements Learner<M, HashableValue>, IHTML {
@@ -65,7 +65,7 @@ public abstract class LearnerBase<M> implements Learner<M, HashableValue>, IHTML
     public void startLearning() {
         if (alreadyStarted)
             try {
-                throw new Exception("Learner should not be started twice");
+                throw new Exception("Learner must not be started twice");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -108,11 +108,6 @@ public abstract class LearnerBase<M> implements Learner<M, HashableValue>, IHTML
     
     protected Query<HashableValue> makeMembershipQuery(ObservationRow row, int offset, ExprValue exprValue) {
         throw new UnsupportedOperationException("Learner does not support makeMembershipQuery(ObservationRow, int, ExprValue)");
-    }
-
-    
-    protected Query<HashableValue> makeMembershipQuery(Word prefix, ExprValue exprValue) {
-        throw new UnsupportedOperationException("Learner does not support makeMembershipQuery(Word, ExprValue)");
     }
     
     protected Query<HashableValue> processMembershipQuery(ObservationRow row, int offset, ExprValue exprValue) {
@@ -161,7 +156,7 @@ public abstract class LearnerBase<M> implements Learner<M, HashableValue>, IHTML
         
         // add empty word column
         observationTable.addColumn(exprValue);
-        // add every alphabet
+        // add every letter extension of the words from the upper table
         for(int letterNr = 0; letterNr < alphabet.getLetterSize(); letterNr ++) {
             observationTable.addLowerRow(alphabet.getLetterWord(letterNr));
         }
@@ -174,6 +169,7 @@ public abstract class LearnerBase<M> implements Learner<M, HashableValue>, IHTML
                 , 0, observationTable.getColumns().size());
     }
     // ---------------------------------------------------------------------
+    // initialize the learner
     protected abstract void initialize();
         
     protected abstract void constructHypothesis();

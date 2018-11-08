@@ -76,11 +76,6 @@ public class LearnerLeadingNFA extends LearnerNFATable implements LearnerLeading
         Pair<Word, Word> pair = UtilFFA.getOmegaWord(alphabet.getLetterWord(preletter), exprValue);
         return new ExprValueWordPair(pair.getLeft(), pair.getRight());
     }
-
-    @Override
-    protected Query<HashableValue> makeMembershipQuery(Word prefix, ExprValue exprValue) {
-        return UtilFFA.makeMembershipQuery(prefix, exprValue);
-    }
     
     @Override
     protected Query<HashableValue> makeMembershipQuery(ObservationRow row, int offset, ExprValue exprValue) {

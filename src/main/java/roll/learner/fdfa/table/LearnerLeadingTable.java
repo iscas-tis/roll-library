@@ -132,10 +132,4 @@ public class LearnerLeadingTable extends LearnerOmegaTable implements LearnerLea
         }
     }
 
-    @Override
-    public Word getStateLabel(int state) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
 }

@@ -20,8 +20,8 @@ import roll.main.Options;
 import roll.query.Query;
 
 /**
- * @M the output automata hypothesis 
- * @O output type
+ * @M the output automata hypothesis such as DFA, NFA, FDFA or NBA 
+ * @O output type like boolean values or other values
  * 
  * @author Yong Li (liyong@ios.ac.cn)
  * */

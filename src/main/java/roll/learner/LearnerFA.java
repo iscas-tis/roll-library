@@ -39,19 +39,20 @@ public abstract class LearnerFA<M> extends LearnerBase<M>{
         super(options, alphabet, membershipOracle);
     }
     
+    /**
+     * for learning finite automata, the ExprValue will be a single word
+     * */
     @Override
     protected Query<HashableValue> makeMembershipQuery(ObservationRow row, int offset, ExprValue exprValue) {
         return new QuerySimple<>(row, row.getWord(), exprValue.get(), offset);
     }
 
+    /**
+     * set the first experiment as empty word
+     * */
     @Override
     protected ExprValue getInitialColumnExprValue() {
         return getExprValueWord(alphabet.getEmptyWord());
-    }
-
-    @Override
-    protected Query<HashableValue> makeMembershipQuery(Word prefix, ExprValue exprValue) {
-        throw new UnsupportedOperationException("LearnerFA does not support makeMembershipQuery(Word prefix, ExprValue exprValue)");
     }
     
     protected abstract Word getStateLabel(int state);
