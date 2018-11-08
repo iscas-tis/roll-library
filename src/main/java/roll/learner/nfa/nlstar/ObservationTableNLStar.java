@@ -95,7 +95,7 @@ public class ObservationTableNLStar extends ObservationTableBase {
         // try lower table
         for(ObservationRow lowerRow : lowerTable) {
             // get all upper rows union
-            if(row != lowerRow && !row.getWord().equals(lowerRow) && !row.valuesEqual(lowerRow) && row.covers(lowerRow)) {
+            if(row != lowerRow && !row.getWord().equals(lowerRow.getWord()) && !row.valuesEqual(lowerRow) && row.covers(lowerRow)) {
                 rowOrOp(rowOrs, lowerRow);
                 merged = true;
             }
