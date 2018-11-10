@@ -42,6 +42,7 @@ import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
 import roll.words.Word;
+import util.PairXX;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -171,7 +172,7 @@ public class NBAInclusionCheck {
         
         boolean isSemiDet = NBAOperations.isSemideterministic(B);
         if(isSemiDet) {
-            boolean result = runNCSBComplement(options, parser, A, B);
+            boolean result = runNCSBComplement(options, alphabet, parser, A, B);
             if(result) {
                 options.log.println("Included");
             }
@@ -222,7 +223,7 @@ public class NBAInclusionCheck {
         options.stats.print();
     }
     
-    private static boolean runNCSBComplement(Options options, PairParser parser, NBA A, NBA B) {
+    private static boolean runNCSBComplement(Options options, Alphabet alphabet, PairParser parser, NBA A, NBA B) {
         options.log.println("Start using NCSB algorithm to prove inclusion...");
         IBuchi bA = UtilInclusion.toBuchiNBA(A);
         IBuchi bB = UtilInclusion.toBuchiNBA(B);
@@ -230,7 +231,11 @@ public class NBAInclusionCheck {
         boolean result = checker.isIncluded();
         if(!result) {
             // not likely to happen
+            PairXX<int[]> counterexample = checker.getCounterexample();
+            Word prefix = alphabet.getArrayWord(counterexample.getFirst());
+            Word period = alphabet.getArrayWord(counterexample.getSecond());
             options.log.println("Not included");
+            printCounterexample(options, parser, new Pair<>(prefix, period));
         }
         return result;
     }
