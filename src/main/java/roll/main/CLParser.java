@@ -112,8 +112,12 @@ public class CLParser {
                 continue;
             }
             if(args[i].compareTo("-v")==0){
-                options.verbose = Integer.parseInt(args[i+1]);
-                i += 1;
+            	if(args.length > i + 1) {
+            		options.verbose = Integer.parseInt(args[i+1]);
+            		i += 1;
+            	}else {
+            		options.verbose = 1;
+            	}
                 continue;
             }
             
@@ -250,7 +254,7 @@ public class CLParser {
         options.log.println("-table", indent, "Use table-based data structure in learning (Default)");
         options.log.println("-lstar", indent, "Use classic L* algorithm");
         options.log.println("-dfa", indent, "Use column based DFA learning algorithm");
-        options.log.println("-nfa", indent, "Use column based NFA learning algorithm");
+//        options.log.println("-nfa", indent, "Use column based NFA learning algorithm");
         options.log.println("-rdfa", indent, "Use reverse DFA learning algorithm");
         options.log.println("-ldollar", indent, "Use L$ automata to learn Omega regular language");
         options.log.println("-periodic", indent, "Use peridoc FDFA to learn Omega regular language");
