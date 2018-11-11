@@ -42,7 +42,6 @@ import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
 import roll.words.Word;
-import util.PairXX;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -231,11 +230,11 @@ public class NBAInclusionCheck {
         boolean result = checker.isIncluded();
         if(!result) {
             // not likely to happen
-            PairXX<int[]> counterexample = checker.getCounterexample();
-            Word prefix = alphabet.getArrayWord(counterexample.getFirst());
-            Word period = alphabet.getArrayWord(counterexample.getSecond());
+//            PairXX<int[]> counterexample = checker.getCounterexample();
+//            Word prefix = alphabet.getArrayWord(counterexample.getFirst());
+//            Word period = alphabet.getArrayWord(counterexample.getSecond());
             options.log.println("Not included");
-            printCounterexample(options, parser, new Pair<>(prefix, period));
+//            printCounterexample(options, parser, new Pair<>(prefix, period));
         }
         return result;
     }
