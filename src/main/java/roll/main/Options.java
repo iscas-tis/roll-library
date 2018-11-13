@@ -27,7 +27,7 @@ import roll.parser.Format;
 public class Options {
     
     // running mode
-    public RunningMode runningMode = RunningMode.LEARNING; 
+    public RunningMode runningMode = null; 
     
     // learning data structure
     public Structure structure = Structure.TABLE;
@@ -93,6 +93,10 @@ public class Options {
     public Options() {
         this.log = new Log(this, new PrintStream(System.out));
         this.stats = new Statistics(this);
+    }
+    
+    protected void setOutputStream(OutputStream out) {
+        this.log = new Log(this, new PrintStream(out));
     }
     
     public static enum RunningMode {

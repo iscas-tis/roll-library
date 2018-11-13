@@ -97,13 +97,13 @@ public final class ROLL {
             options.log.println("Testing case " + (n + 1) + " ...");
             NBA nba = NBAGenerator.getRandomNBA(options.numOfStatesForTest, numLetter);
             try{
-                System.out.println("target: \n" + nba.toString());
+                options.log.println("target: \n" + nba.toString());
                 Executor.executeRABIT(options, nba);
             }catch (Exception e)
             {
                 e.printStackTrace();
                 options.log.err("Exception occured, Learning aborted...");
-                System.out.println(nba.toString());
+                options.log.println(nba.toString());
                 System.exit(-1);
             }
             options.log.info("Done for case " + (n + 1));

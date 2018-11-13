@@ -63,7 +63,7 @@ public class CLParser {
             if(args[i].compareTo("-log") == 0) {
                 String file = args[i + 1];
                 try {
-                    options = new Options(new FileOutputStream(file));
+                    options.setOutputStream(new FileOutputStream(file));
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -228,6 +228,10 @@ public class CLParser {
 
         }
         
+        if(options.runningMode == null) {
+            options.log.err("No running mode specified in the command line");
+            System.exit(-1);
+        }
         options.checkConsistency();
     }
     
