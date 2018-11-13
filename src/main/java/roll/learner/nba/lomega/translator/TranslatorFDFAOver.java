@@ -101,7 +101,7 @@ public class TranslatorFDFAOver extends TranslatorFDFA {
 		
 		Word pre = null, suf = null;
 		// 1. first build dollar deterministic automaton for (u, v) 
-		options.log.verbose(autUVOmega.toDot());
+		options.log.verbose("DFA D_{u$v} for counterexample (u, v):\n" + autUVOmega.toDot());
 		
 		// 2. for every final state, we get normalized counterexample
 		DFA autL = fdfa.getLeadingFA();

@@ -82,12 +82,12 @@ public abstract class TranslatorFDFA implements Translator {
 		Automaton autMinus = autDollar.intersection(dollarFDFAComplement);
 		assert autMinus != null;
 		String ceStr = autMinus.getShortestExample(true);
-		options.log.verbose("in target: " + ceStr);
+		options.log.verbose("Counterexample in target: " + ceStr);
 		return ceStr;
 	}
 	
 	protected Query<HashableValue> getQuery(String counterexample, HashableValue result) {
-		options.log.verbose("final counterexample " + counterexample);
+		options.log.verbose("final counterexample for the FDFA learner: " + counterexample);
 		int dollarNr = counterexample.indexOf(Alphabet.DOLLAR); //
 		Word prefix = alphabet.getWordFromString(counterexample.substring(0, dollarNr));
 		Word period = alphabet.getWordFromString(counterexample.substring(dollarNr + 1));

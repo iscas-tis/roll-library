@@ -43,7 +43,7 @@ public class TranslatorFDFAUnder extends TranslatorFDFA {
 	
 	// -------- this is for lower BA construction ----------------
 	private String translateLower() {
-		options.log.verbose(autUVOmega.toDot());
+		options.log.verbose("DFA D_{u$v} for counterexample (u, v):\n" + autUVOmega.toDot());
 		boolean isCeInTarget = ceQuery.getQueryAnswer().get();
 		
 		String ceStr = null;
@@ -58,7 +58,7 @@ public class TranslatorFDFAUnder extends TranslatorFDFA {
 			Automaton autInter = autUVOmega.intersection(dollarFDFA);
 			assert autInter != null;
 			ceStr = autInter.getShortestExample(true);
-			options.log.verbose("Not in target: " + ceStr);
+			options.log.verbose("Counterexample not in target: " + ceStr);
 		}
 		
 		return ceStr;
