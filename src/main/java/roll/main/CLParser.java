@@ -49,7 +49,7 @@ public class CLParser {
                 
         // parse input arguments
         for(int i = 0; i < args.length; i ++) {
-            if(args[i].compareTo("-h")==0) {
+            if(args[i].compareTo("-h")==0 || args[i].compareTo("help")==0 ) {
                 printUsage();
             }
         }
@@ -265,6 +265,7 @@ public class CLParser {
         options.log.println("sameq e d", indent, "Sampling as the teacher to check equivalence of two BAs");
         options.log.println("", indent + 4, "e - the probability that equivalence check is not correct");
         options.log.println("", indent + 4, "d - the probability of the confidence for equivalence check");
+        options.log.println("help", indent, "Show help page, same as the -h option");
 
         options.log.print("\noptions:\n");
         
