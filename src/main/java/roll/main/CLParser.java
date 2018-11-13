@@ -16,6 +16,8 @@
 
 package roll.main;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.OutputStream;
 
 import roll.parser.Format;
@@ -28,7 +30,7 @@ import roll.parser.Format;
 
 public class CLParser {
     
-    private final Options options;
+    private Options options;
     private final String version = "1.0";
     
     public CLParser(OutputStream out) {
@@ -58,6 +60,16 @@ public class CLParser {
 
         // for learning;
         for(int i = 0; i < args.length; i ++) {
+            if(args[i].compareTo("-log") == 0) {
+                String file = args[i + 1];
+                try {
+                    options = new Options(new FileOutputStream(file));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                i += 1;
+                continue;
+            }
             if(args[i].compareTo("-learn") == 0) {
                 options.runningMode = Options.RunningMode.LEARNING;
                 continue;
@@ -225,28 +237,33 @@ public class CLParser {
                 "ROLL (Regular Omega Language Learning) v" + version + "\n\n");
         
         options.log.print(
-                "Usage: java -jar ROLL.jar [aut.ba, aut.hoa] [options]\n");
+                "Usage: java -jar ROLL.jar <-learn|-complement> <aut.ba|aut.hoa> [options]\n"
+              + "       java -jar ROLL.jar -test <k> <n> [options]\n"
+              + "       java -jar ROLL.jar -play [options]\n"
+              + "       java -jar ROLL.jar -include <A> <B> [options]\n"
+              + "       java -jar ROLL.jar -convert <A> <B> -out2 <AO> <BO>\n\n");
         final int indent = 20;
 //        options.log.println("Recommended use", indent, "java -jar ROLL.jar -play -lstar");
         options.log.println("Recommended use", indent, "java -jar ROLL.jar -test 3 3 -table -syntactic -under");
         options.log.println("             or", indent, "java -jar ROLL.jar -learn B.ba -table -periodic -under");
         options.log.println("             or", indent, "java -jar ROLL.jar -complement B.hoa -table -syntactic");
         options.log.println("             or", indent, "java -jar ROLL.jar -include A.ba B.ba -table -syntactic");
-        options.log.println("             or", indent, "java -jar ROLL.jar -convert A.ba B.ba -out A.hoa B.hoa");
+        options.log.println("             or", indent, "java -jar ROLL.jar -convert A.ba B.ba -out2 A.hoa B.hoa");
         options.log.println("             or", indent, "java -jar ROLL.jar -play -table -syntactic");
         options.log.print("\noptions:\n");
         
         options.log.println("-h", indent, "Show this page");
+        options.log.println("-log <file>", indent, "Output log to <file>");
         options.log.println("-v i", indent, "0 for silent, 1 for normal and 2 for verbose");
         options.log.println("-out <A>", indent, "Output learned automaton in file <A>");
         options.log.println("-out2 <A> <B>", indent, "Output two automata in files <A> and <B>");
         options.log.println("-dot", indent, "Output automaton in DOT format");
         options.log.println("-test k n", indent, "Test ROLL with k randomly generated BAs of n states");
         options.log.println("-play", indent, "You play the role as a teacher");
-        options.log.println("-convert [A] [B]", indent, "Convert two input automata to the other format");
+        options.log.println("-convert <A> <B>", indent, "Convert two input automata to the other format");
         options.log.println("-learn", indent, "Use RABIT or DK package tool as the teacher to learn the input BA");
         options.log.println("-complement", indent, "Use learning algorithm to complement the input BA");
-        options.log.println("-include [A] [B]", indent, "Use learning algorithm to test the inclusion between A and B");
+        options.log.println("-include <A> <B>", indent, "Use learning algorithm to test the inclusion between A and B");
         options.log.println("-sameq e d", indent, "Sampling as the teacher to check equivalence of two BAs");
         options.log.println("", indent + 4, "e - the probability that equivalence check is not correct");
         options.log.println("", indent + 4, "d - the probability of the confidence for equivalence check");
