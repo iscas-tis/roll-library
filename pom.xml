@@ -95,13 +95,6 @@
       <version>0.0.1</version>
     </dependency>
     <dependency>
-      <groupId>buchi</groupId>
-      <artifactId>buchi</artifactId>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/buchi.jar</systemPath>
-      <version>0.0.1</version>
-    </dependency>
-    <dependency>
       <groupId>javabdd</groupId>
       <artifactId>javabdd</artifactId>
       <scope>system</scope>
