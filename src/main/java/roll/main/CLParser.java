@@ -221,11 +221,11 @@ public class CLParser {
     
     
     private void printUsage() {
-        options.log.println(
-                "ROLL (Regular Omega Language Learning) v" + version + "\n");
+        options.log.print(
+                "ROLL (Regular Omega Language Learning) v" + version + "\n\n");
         
-        options.log.println(
-                "Usage: java -jar ROLL.jar [aut.ba, aut.hoa] [options]");
+        options.log.print(
+                "Usage: java -jar ROLL.jar [aut.ba, aut.hoa] [options]\n");
         final int indent = 20;
 //        options.log.println("Recommended use", indent, "java -jar ROLL.jar -play -lstar");
         options.log.println("Recommended use", indent, "java -jar ROLL.jar -test 3 3 -table -syntactic -under");
@@ -234,7 +234,7 @@ public class CLParser {
         options.log.println("             or", indent, "java -jar ROLL.jar -include A.ba B.ba -table -syntactic");
         options.log.println("             or", indent, "java -jar ROLL.jar -convert A.ba B.ba -out A.hoa B.hoa");
         options.log.println("             or", indent, "java -jar ROLL.jar -play -table -syntactic");
-        options.log.println("\noptions:");
+        options.log.print("\noptions:\n");
         
         options.log.println("-h", indent, "Show this page");
         options.log.println("-v i", indent, "0 for silent, 1 for normal and 2 for verbose");
@@ -252,17 +252,17 @@ public class CLParser {
         options.log.println("", indent + 4, "d - the probability of the confidence for equivalence check");
         options.log.println("-tree", indent, "Use tree-based data structure in learning");
         options.log.println("-table", indent, "Use table-based data structure in learning (Default)");
-        options.log.println("-lstar", indent, "Use classic L* algorithm");
-        options.log.println("-dfa", indent, "Use column based DFA learning algorithm");
+//        options.log.println("-lstar", indent, "Use classic L* algorithm");
+//        options.log.println("-dfa", indent, "Use column based DFA learning algorithm");
 //        options.log.println("-nfa", indent, "Use column based NFA learning algorithm");
-        options.log.println("-rdfa", indent, "Use reverse DFA learning algorithm");
+//        options.log.println("-rdfa", indent, "Use reverse DFA learning algorithm");
         options.log.println("-ldollar", indent, "Use L$ automata to learn Omega regular language");
         options.log.println("-periodic", indent, "Use peridoc FDFA to learn Omega regular language");
         options.log.println("-recurrent", indent, "Use recurrent FDFA to learn Omega regular language");
         options.log.println("-syntactic", indent, "Use syntactic FDFA to learn Omega regular language");
         options.log.println("-over", indent, "Use over-approximation in BA construction for FDFA");
         options.log.println("-under", indent, "Use under-approximation in BA construction for FDFA (Default)");
-//        options.log.println("-bs", indent, "Use binary search to find counterexample");
+        options.log.println("-bs", indent, "Use binary search to find counterexample");
         options.log.println("-lazyeq", indent, "Equivalence check as the last resort");
         options.log.println("-ldba", indent, "Learning target is a limit deterministic BA");
 //        options.log.println("-fdfa", indent, "Learning target is an FDFA");
