@@ -17,8 +17,6 @@
 package roll.main.inclusion;
 
 import automata.FiniteAutomaton;
-import automata.IBuchi;
-import operation.isincluded.IsIncludedExplore;
 import oracle.EmptinessChecker;
 import roll.automata.NBA;
 import roll.automata.operations.NBAEmptinessCheck;
@@ -169,16 +167,16 @@ public class NBAInclusionCheck {
         A = UtilInclusion.toNBA(aut1, alphabet);
         B = UtilInclusion.toNBA(aut2, alphabet);
         
-        boolean isSemiDet = NBAOperations.isSemideterministic(B);
-        if(isSemiDet) {
-            boolean result = runNCSBComplement(options, alphabet, parser, A, B);
-            if(result) {
-                options.log.println("Included");
-            }
-            timer.stop();
-            options.log.println("Total checking time: " + timer.getTimeElapsed() / 1000.0 + " secs");
-            System.exit(0);
-        }
+//        boolean isSemiDet = NBAOperations.isSemideterministic(B);
+//        if(isSemiDet) {
+//            boolean result = runNCSBComplement(options, alphabet, parser, A, B);
+//            if(result) {
+//                options.log.println("Included");
+//            }
+//            timer.stop();
+//            options.log.println("Total checking time: " + timer.getTimeElapsed() / 1000.0 + " secs");
+//            System.exit(0);
+//        }
 
         options.log.println("Start using learning algorithm to prove inclusion...");
         // learning algorithm
@@ -222,22 +220,22 @@ public class NBAInclusionCheck {
         options.stats.print();
     }
     
-    private static boolean runNCSBComplement(Options options, Alphabet alphabet, PairParser parser, NBA A, NBA B) {
-        options.log.println("Start using NCSB algorithm to prove inclusion...");
-        IBuchi bA = UtilInclusion.toBuchiNBA(A);
-        IBuchi bB = UtilInclusion.toBuchiNBA(B);
-        IsIncludedExplore checker = new IsIncludedExplore(bA, bB);
-        boolean result = checker.isIncluded();
-        if(!result) {
-            // not likely to happen
-//            PairXX<int[]> counterexample = checker.getCounterexample();
-//            Word prefix = alphabet.getArrayWord(counterexample.getFirst());
-//            Word period = alphabet.getArrayWord(counterexample.getSecond());
-            options.log.println("Not included");
-//            printCounterexample(options, parser, new Pair<>(prefix, period));
-        }
-        return result;
-    }
+//    private static boolean runNCSBComplement(Options options, Alphabet alphabet, PairParser parser, NBA A, NBA B) {
+//        options.log.println("Start using NCSB algorithm to prove inclusion...");
+//        IBuchi bA = UtilInclusion.toBuchiNBA(A);
+//        IBuchi bB = UtilInclusion.toBuchiNBA(B);
+//        IsIncludedExplore checker = new IsIncludedExplore(bA, bB);
+//        boolean result = checker.isIncluded();
+//        if(!result) {
+//            // not likely to happen
+////            PairXX<int[]> counterexample = checker.getCounterexample();
+////            Word prefix = alphabet.getArrayWord(counterexample.getFirst());
+////            Word period = alphabet.getArrayWord(counterexample.getSecond());
+//            options.log.println("Not included");
+////            printCounterexample(options, parser, new Pair<>(prefix, period));
+//        }
+//        return result;
+//    }
     
     public static void main(String[] args) {
         

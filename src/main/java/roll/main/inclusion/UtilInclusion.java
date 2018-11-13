@@ -26,11 +26,8 @@ import algorithms.Minimization;
 import algorithms.Options;
 import algorithms.Simulation;
 import automata.AutomatonPreprocessingResult;
-import automata.Buchi;
 import automata.FAState;
 import automata.FiniteAutomaton;
-import automata.IBuchi;
-import automata.IState;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntIntHashMap;
@@ -96,38 +93,38 @@ public class UtilInclusion {
         return rState;
     }
     
-    //Buchi lib not used any more
-    private static IState getOrAddState(IBuchi result,TIntObjectMap<IState> map, int state) {
-        IState rState = map.get(state);
-        if(rState == null) {
-            rState = result.addState();
-            map.put(state, rState);
-        }
-        return rState;
-    }
+//    //Buchi lib not used any more
+//    private static IState getOrAddState(IBuchi result,TIntObjectMap<IState> map, int state) {
+//        IState rState = map.get(state);
+//        if(rState == null) {
+//            rState = result.addState();
+//            map.put(state, rState);
+//        }
+//        return rState;
+//    }
     
-    public static IBuchi toBuchiNBA(NBA nba) {
-        TIntObjectMap<IState> map = new TIntObjectHashMap<>();
-        IBuchi result = new Buchi(nba.getAlphabetSize());
-        for(int state = 0; state < nba.getStateSize(); state ++) {
-            IState rState = getOrAddState(result, map, state);
-            for(int letter = 0; letter < nba.getAlphabetSize(); letter ++) {
-                ISet succs = nba.getSuccessors(state, letter);
-                for(final int succ : succs) {
-                    IState rSucc = getOrAddState(result, map, succ);
-                    rState.addSuccessor(letter, rSucc.getId());
-                }
-            }
-            if(nba.isInitial(state)) {
-                result.setInitial(rState.getId());
-            }
-            if(nba.isFinal(state)) {
-                result.setFinal(rState.getId());
-            }
-        }
-        
-        return result;
-    }
+//    public static IBuchi toBuchiNBA(NBA nba) {
+//        TIntObjectMap<IState> map = new TIntObjectHashMap<>();
+//        IBuchi result = new Buchi(nba.getAlphabetSize());
+//        for(int state = 0; state < nba.getStateSize(); state ++) {
+//            IState rState = getOrAddState(result, map, state);
+//            for(int letter = 0; letter < nba.getAlphabetSize(); letter ++) {
+//                ISet succs = nba.getSuccessors(state, letter);
+//                for(final int succ : succs) {
+//                    IState rSucc = getOrAddState(result, map, succ);
+//                    rState.addSuccessor(letter, rSucc.getId());
+//                }
+//            }
+//            if(nba.isInitial(state)) {
+//                result.setInitial(rState.getId());
+//            }
+//            if(nba.isFinal(state)) {
+//                result.setFinal(rState.getId());
+//            }
+//        }
+//        
+//        return result;
+//    }
     
     public static FiniteAutomaton toRABITNBA(NBA nba) {
         TIntObjectMap<FAState> map = new TIntObjectHashMap<>();
