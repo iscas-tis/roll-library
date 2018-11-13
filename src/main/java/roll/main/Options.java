@@ -97,6 +97,7 @@ public class Options {
     
     protected void setOutputStream(OutputStream out) {
         this.log = new Log(this, new PrintStream(out));
+        this.stats = new Statistics(this);
     }
     
     public static enum RunningMode {

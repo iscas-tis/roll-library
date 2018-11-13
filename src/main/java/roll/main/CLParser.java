@@ -70,11 +70,11 @@ public class CLParser {
                 i += 1;
                 continue;
             }
-            if(args[i].compareTo("-learn") == 0) {
+            if(args[i].compareTo("learn") == 0) {
                 options.runningMode = Options.RunningMode.LEARNING;
                 continue;
             }
-            if(args[i].compareTo("-convert") == 0) {
+            if(args[i].compareTo("convert") == 0) {
                 options.runningMode = Options.RunningMode.CONVERTING;
                 options.inputA = args[i + 1];
                 options.inputB = args[i + 2];
@@ -87,7 +87,7 @@ public class CLParser {
                 }
                 i += 2;
             }
-            if(args[i].compareTo("-play") == 0) {
+            if(args[i].compareTo("play") == 0) {
                 options.runningMode = Options.RunningMode.PLAYING;
                 continue;
             }
@@ -95,7 +95,7 @@ public class CLParser {
                 options.runningMode = Options.RunningMode.COMPLEMENTING;
                 continue;
             }
-            if(args[i].compareTo("-include") == 0) {
+            if(args[i].compareTo("include") == 0) {
                 options.runningMode = Options.RunningMode.INCLUDING;
                 options.inputA = args[i + 1];
                 options.inputB = args[i + 2];
@@ -109,14 +109,14 @@ public class CLParser {
                 i += 2;
                 continue;
             }
-            if(args[i].compareTo("-test") == 0) {
+            if(args[i].compareTo("test") == 0) {
                 options.runningMode = Options.RunningMode.TESTING;
                 options.numOfTests = Integer.parseInt(args[i+1]);
                 options.numOfStatesForTest = Integer.parseInt(args[i + 2]);
                 i += 2;
                 continue;
             }
-            if(args[i].compareTo("-sameq") == 0) {
+            if(args[i].compareTo("sameq") == 0) {
                 options.runningMode = Options.RunningMode.SAMPLING;
                 options.epsilon = Double.parseDouble(args[i+1]);
                 options.delta = Double.parseDouble(args[i+2]);
@@ -241,19 +241,31 @@ public class CLParser {
                 "ROLL (Regular Omega Language Learning) v" + version + "\n\n");
         
         options.log.print(
-                "Usage: java -jar ROLL.jar <-learn|-complement> <aut.ba|aut.hoa> [options]\n"
-              + "       java -jar ROLL.jar -test <k> <n> [options]\n"
-              + "       java -jar ROLL.jar -play [options]\n"
-              + "       java -jar ROLL.jar -include <A> <B> [options]\n"
-              + "       java -jar ROLL.jar -convert <A> <B> -out2 <AO> <BO>\n\n");
+                "Usage: java -jar ROLL.jar <learn|complement> <aut.ba|aut.hoa> [options]\n"
+              + "       java -jar ROLL.jar test <k> <n> [options]\n"
+              + "       java -jar ROLL.jar play [options]\n"
+              + "       java -jar ROLL.jar include <A> <B> [options]\n"
+              + "       java -jar ROLL.jar convert <A> <B> -out2 <AO> <BO>\n\n");
         final int indent = 20;
 //        options.log.println("Recommended use", indent, "java -jar ROLL.jar -play -lstar");
-        options.log.println("Recommended use", indent, "java -jar ROLL.jar -test 3 3 -table -syntactic -under");
-        options.log.println("             or", indent, "java -jar ROLL.jar -learn B.ba -table -periodic -under");
-        options.log.println("             or", indent, "java -jar ROLL.jar -complement B.hoa -table -syntactic");
-        options.log.println("             or", indent, "java -jar ROLL.jar -include A.ba B.ba -table -syntactic");
-        options.log.println("             or", indent, "java -jar ROLL.jar -convert A.ba B.ba -out2 A.hoa B.hoa");
-        options.log.println("             or", indent, "java -jar ROLL.jar -play -table -syntactic");
+        options.log.println("Recommended use", indent, "java -jar ROLL.jar test 3 3");
+        options.log.println("             or", indent, "java -jar ROLL.jar learn B.ba");
+        options.log.println("             or", indent, "java -jar ROLL.jar complement B.hoa");
+        options.log.println("             or", indent, "java -jar ROLL.jar include A.ba B.ba");
+        options.log.println("             or", indent, "java -jar ROLL.jar convert A.ba B.ba -out2 A.hoa B.hoa");
+        options.log.println("             or", indent, "java -jar ROLL.jar play");
+        
+        options.log.print("\ncommands:\n");
+        options.log.println("test k n", indent, "Test ROLL with k randomly generated BAs of n states");
+        options.log.println("play", indent, "You play the role as a teacher");
+        options.log.println("convert <A> <B>", indent, "Convert two input automata to the other format");
+        options.log.println("learn", indent, "Use RABIT or DK package tool as the teacher to learn the input BA");
+        options.log.println("complement", indent, "Use learning algorithm to complement the input BA");
+        options.log.println("include <A> <B>", indent, "Use learning algorithm to test the inclusion between A and B");
+        options.log.println("sameq e d", indent, "Sampling as the teacher to check equivalence of two BAs");
+        options.log.println("", indent + 4, "e - the probability that equivalence check is not correct");
+        options.log.println("", indent + 4, "d - the probability of the confidence for equivalence check");
+
         options.log.print("\noptions:\n");
         
         options.log.println("-h", indent, "Show this page");
@@ -262,15 +274,6 @@ public class CLParser {
         options.log.println("-out <A>", indent, "Output learned automaton in file <A>");
         options.log.println("-out2 <A> <B>", indent, "Output two automata in files <A> and <B>");
         options.log.println("-dot", indent, "Output automaton in DOT format");
-        options.log.println("-test k n", indent, "Test ROLL with k randomly generated BAs of n states");
-        options.log.println("-play", indent, "You play the role as a teacher");
-        options.log.println("-convert <A> <B>", indent, "Convert two input automata to the other format");
-        options.log.println("-learn", indent, "Use RABIT or DK package tool as the teacher to learn the input BA");
-        options.log.println("-complement", indent, "Use learning algorithm to complement the input BA");
-        options.log.println("-include <A> <B>", indent, "Use learning algorithm to test the inclusion between A and B");
-        options.log.println("-sameq e d", indent, "Sampling as the teacher to check equivalence of two BAs");
-        options.log.println("", indent + 4, "e - the probability that equivalence check is not correct");
-        options.log.println("", indent + 4, "d - the probability of the confidence for equivalence check");
         options.log.println("-tree", indent, "Use tree-based data structure in learning");
         options.log.println("-table", indent, "Use table-based data structure in learning (Default)");
 //        options.log.println("-lstar", indent, "Use classic L* algorithm");
@@ -280,7 +283,7 @@ public class CLParser {
         options.log.println("-ldollar", indent, "Use L$ automata to learn Omega regular language");
         options.log.println("-periodic", indent, "Use peridoc FDFA to learn Omega regular language");
         options.log.println("-recurrent", indent, "Use recurrent FDFA to learn Omega regular language");
-        options.log.println("-syntactic", indent, "Use syntactic FDFA to learn Omega regular language");
+        options.log.println("-syntactic", indent, "Use syntactic FDFA to learn Omega regular language (Default)");
         options.log.println("-over", indent, "Use over-approximation in BA construction for FDFA");
         options.log.println("-under", indent, "Use under-approximation in BA construction for FDFA (Default)");
         options.log.println("-bs", indent, "Use binary search to find counterexample");
