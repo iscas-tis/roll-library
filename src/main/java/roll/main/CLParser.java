@@ -271,7 +271,7 @@ public class CLParser {
         
         options.log.println("-h", indent, "Show this page");
         options.log.println("-log <file>", indent, "Output log to <file>");
-        options.log.println("-v i", indent, "0 for silent, 1 for normal and 2 for verbose");
+        options.log.println("-v i", indent, "0 for silent, 1 for normal and 2 for verbose (verbose mode may output unprintable characters)");
         options.log.println("-out <A>", indent, "Output learned automaton in file <A>");
         options.log.println("-out2 <A> <B>", indent, "Output two automata in files <A> and <B>");
         options.log.println("-dot", indent, "Output automaton in DOT format");
