@@ -264,7 +264,7 @@ public class CLParser {
         options.log.println("-under", indent, "Use under-approximation in BA construction for FDFA (Default)");
         options.log.println("-bs", indent, "Use binary search to find counterexample");
         options.log.println("-lazyeq", indent, "Equivalence check as the last resort");
-        options.log.println("-ldba", indent, "Learning target is a limit deterministic BA");
+        options.log.println("-ldba", indent, "Output learned BA as a limit deterministic BA");
 //        options.log.println("-fdfa", indent, "Learning target is an FDFA");
 //        options.log.println("-nba", indent, "Learning target is a BA");
         System.exit(0);
