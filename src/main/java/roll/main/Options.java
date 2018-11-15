@@ -128,6 +128,7 @@ public class Options {
         DFA_COLUMN,
         NFA_COLUMN,
         NFA_RDSTAR,
+        NFA_NLSTAR,
         NBA_LDOLLAR,
         PERIODIC,
         SYNTACTIC,
@@ -138,7 +139,7 @@ public class Options {
         }
         
         boolean isTargetNFA() {
-            return this == NFA_COLUMN || this == NFA_RDSTAR;
+            return this == NFA_NLSTAR || this == NFA_COLUMN || this == NFA_RDSTAR;
         }
         
         boolean isTargetFDFA() {

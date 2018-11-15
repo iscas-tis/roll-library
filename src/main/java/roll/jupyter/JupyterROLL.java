@@ -33,6 +33,7 @@ import roll.automata.Acceptor;
 import roll.automata.DFA;
 import roll.automata.FDFA;
 import roll.automata.NBA;
+import roll.automata.NFA;
 import roll.automata.operations.DFAOperations;
 import roll.learner.LearnerBase;
 import roll.learner.dfa.table.LearnerDFATableColumn;
@@ -48,6 +49,7 @@ import roll.learner.fdfa.tree.LearnerFDFATreeRecurrent;
 import roll.learner.fdfa.tree.LearnerFDFATreeSyntactic;
 import roll.learner.nba.ldollar.LearnerNBALDollar;
 import roll.learner.nba.lomega.LearnerNBALOmega;
+import roll.learner.nfa.nlstar.LearnerNFANLStar;
 import roll.main.IHTML;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
@@ -58,6 +60,7 @@ import roll.oracle.fdfa.dk.TeacherFDFADK;
 import roll.oracle.nba.TeacherNBA;
 import roll.oracle.nba.rabit.TeacherNBARABIT;
 import roll.oracle.nba.rabit.UtilRABIT;
+import roll.oracle.nfa.TeacherNFA;
 import roll.query.Query;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
@@ -105,6 +108,11 @@ public class JupyterROLL {
         return new NBA(alphabet);
     }
     
+    public static NFA createNFA() {
+        verifyAlphabet();
+        return new NFA(alphabet);
+    }
+    
     public static DFA createDFA() {
         verifyAlphabet();
         return new DFA(alphabet);
@@ -139,9 +147,14 @@ public class JupyterROLL {
             }else if(hypothesis instanceof DFA){
                 TeacherDFA teacherDFA = (TeacherDFA)teacher;
                 ceQuery = teacherDFA.answerEquivalenceQuery((DFA)hypothesis);
-            }else {
+            }else if(hypothesis instanceof FDFA){
                 TeacherFDFADK teacherFDFA = (TeacherFDFADK)teacher;
                 ceQuery = teacherFDFA.answerEquivalenceQuery((FDFA)hypothesis);
+            }else if(hypothesis instanceof NFA) {
+                TeacherNFA teacherNFA = (TeacherNFA)teacher;
+                ceQuery = teacherNFA.answerEquivalenceQuery((NFA)hypothesis);
+            }else {
+                throw new UnsupportedOperationException("Unsupported Learning");
             }
             sequence.add(triple);
             boolean isEq = ceQuery.getQueryAnswer().get();
@@ -182,6 +195,9 @@ public class JupyterROLL {
             options.algorithm = Options.Algorithm.DFA_COLUMN;
             options.automaton = Options.TargetAutomaton.DFA;
             break;
+        case "nfa":
+            options.algorithm = Options.Algorithm.NFA_NLSTAR;
+            options.automaton = Options.TargetAutomaton.NFA;
         default:
                 throw new UnsupportedOperationException("Unknown learning algorithm");
         }
@@ -194,6 +210,10 @@ public class JupyterROLL {
             break;
         default:
             throw new UnsupportedOperationException("Unknown data structure");
+        }
+        
+        if(options.algorithm == Options.Algorithm.NFA_NLSTAR && options.structure == Options.Structure.TREE) {
+            throw new UnsupportedOperationException("NLSTAR only has table data structure");
         }
         
 //        switch(aut) {
@@ -231,6 +251,9 @@ public class JupyterROLL {
                    || options.algorithm == Options.Algorithm.RECURRENT)){
                options.automaton = Options.TargetAutomaton.FDFA;
                return new TeacherFDFADK(options, (FDFA)target);
+           }else if((target instanceof NFA) && (options.algorithm == Options.Algorithm.NFA_NLSTAR)){
+               options.automaton = Options.TargetAutomaton.NFA;
+               return new TeacherNFA(options, (NFA)target);
            }else {
                throw new UnsupportedOperationException("Unsupported Learning Target");
            }
@@ -259,6 +282,8 @@ public class JupyterROLL {
             learner = new LearnerDFATableLStar(options, alphabet, teacher);
         }else if(options.algorithm == Options.Algorithm.DFA_KV) {
             learner = new LearnerDFATreeKV(options, alphabet, teacher);
+        }else if(options.algorithm == Options.Algorithm.NFA_NLSTAR){
+            learner = new LearnerNFANLStar(options, alphabet, teacher);
         }else {
             throw new UnsupportedOperationException("Unsupported Learner");
         }
@@ -328,6 +353,19 @@ public class JupyterROLL {
         LearnerBase<DFA> learner = (LearnerBase<DFA>) getLearner(options, alphabet, mqOracle);
         learner.startLearning();
         return new DFALearner(alphabet, learner, mqOracle);
+    }
+    
+    public static NFALearner createNFALearner(String algo, String structure, Function<String, Boolean> mqFunc) {
+        Options options = parseOptions(algo, structure);
+        if(options.automaton != Options.TargetAutomaton.NFA) {
+            throw new UnsupportedOperationException("Unsupported NFA learner");
+        }
+        verifyAlphabet();
+        MembershipOracle<HashableValue> mqOracle = new MQOracle(mqFunc);
+        @SuppressWarnings("unchecked")
+        LearnerBase<NFA> learner = (LearnerBase<NFA>) getLearner(options, alphabet, mqOracle);
+        learner.startLearning();
+        return new NFALearner(alphabet, learner, mqOracle);
     }
     
     public static FDFALearner createFDFALearner(String algo, String structure, BiFunction<String, String, Boolean> mqFunc) {
