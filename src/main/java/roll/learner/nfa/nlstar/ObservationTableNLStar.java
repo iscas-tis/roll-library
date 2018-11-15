@@ -16,6 +16,7 @@
 
 package roll.learner.nfa.nlstar;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +30,7 @@ import roll.table.ObservationRow;
 import roll.table.ObservationRowAbstract;
 import roll.table.ObservationRowBase;
 import roll.table.ObservationTableBase;
+import roll.table.ObservationTablePrinterBoolean;
 import roll.words.Alphabet;
 
 /**
@@ -176,6 +178,17 @@ public class ObservationTableNLStar extends ObservationTableBase {
             ++ index; 
         }
         return column;
+    }
+    
+    @Override
+    public String toString() {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            ObservationTablePrinterBoolean.print(this, out, true, upperPrimes);
+            return out.toString();
+        } catch (Exception e) {
+            return "ERROR";
+        }
     }
 
 }
