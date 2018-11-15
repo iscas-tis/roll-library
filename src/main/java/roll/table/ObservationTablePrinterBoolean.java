@@ -170,10 +170,13 @@ public class ObservationTablePrinterBoolean {
         // upper table
         for (ObservationRow row : upperTable) {
             String wordStr = "";
-            if (nfa && upperPrimeRows.contains(row)) {
-                wordStr = "* ";
-            }else {
-                wordStr = "  ";
+            if (nfa) {
+                if(upperPrimeRows.contains(row)) {
+                    wordStr = "* ";
+                }else {
+                    wordStr = "  ";
+                }
+                
             }
             wordStr += row.getWord().toStringWithAlphabet();
             f.format("%-" + maxNum4Cols[0] + "s || ", wordStr);
