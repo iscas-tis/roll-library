@@ -195,9 +195,10 @@ public class JupyterROLL {
             options.algorithm = Options.Algorithm.DFA_COLUMN;
             options.automaton = Options.TargetAutomaton.DFA;
             break;
-        case "nfa":
+        case "nlstar":
             options.algorithm = Options.Algorithm.NFA_NLSTAR;
             options.automaton = Options.TargetAutomaton.NFA;
+            break;
         default:
                 throw new UnsupportedOperationException("Unknown learning algorithm");
         }

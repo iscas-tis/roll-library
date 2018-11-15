@@ -42,7 +42,6 @@ public class TeacherNFA extends TeacherAbstract<NFA>{
         this.target = nfa;
         this.alphabet = nfa.getAlphabet();
         this.automaton = NFAOperations.toDkNFA(nfa);
-        System.out.println(automaton.toDot());
     }
     
     @Override
