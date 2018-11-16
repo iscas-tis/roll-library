@@ -120,8 +120,8 @@ public class CLParser {
                 if(i + 2 >= args.length) {
                     throw new UnsupportedOperationException("include should be followed by two integers");
                 }
-                options.numOfTests = parseInt(args[i + 1]);
-                options.numOfStatesForTest = parseInt(args[i + 2]);
+                options.numOfTests = parseInt(args[i + 1], "test");
+                options.numOfStatesForTest = parseInt(args[i + 2], "test");
                 i += 2;
                 continue;
             }
@@ -130,14 +130,14 @@ public class CLParser {
                 if(i + 2 >= args.length) {
                     throw new UnsupportedOperationException("sameq should be followed by two doubles");
                 }
-                options.epsilon = parseDouble(args[i+1]);
-                options.delta = parseDouble(args[i+2]);
+                options.epsilon = parseDouble(args[i+1], "sameq");
+                options.delta = parseDouble(args[i+2], "sameq");
                 i += 2;
                 continue;
             }
             if(args[i].compareTo("-v")==0){
             	if(args.length > i + 1) {
-            		options.verbose = parseInt(args[i+1]);
+            		options.verbose = parseInt(args[i+1], "-v");
             		i += 1;
             	}else {
             		options.verbose = 1;
@@ -254,22 +254,22 @@ public class CLParser {
         options.checkConsistency();
     }
     
-    private int parseInt(String str) {
+    private int parseInt(String str, String option) {
         int num;
         try {
             num = Integer.parseInt(str);
         }catch(NumberFormatException e) {
-            throw new UnsupportedOperationException("Invalid input integers");
+            throw new UnsupportedOperationException("Invalid input integers: " + str + " followed by " + option);
         }
         return num;
     }
     
-    private double parseDouble(String str) {
+    private double parseDouble(String str, String option) {
         double num;
         try {
             num = Double.parseDouble(str);
         }catch(NumberFormatException e) {
-            throw new UnsupportedOperationException("Invalid input doubles");
+            throw new UnsupportedOperationException("Invalid input doubles: " + str + " followed by " + option);
         }
         return num;
     }
@@ -310,7 +310,8 @@ public class CLParser {
         
         options.log.println("-h", indent, "Show this page");
         options.log.println("-log <file>", indent, "Output log to <file>");
-        options.log.println("-v i", indent, "0 for silent, 1 for normal and 2 for verbose (verbose mode may output unprintable characters)");
+        options.log.println("-v i", indent, "0 for silent (minimal output), 1 for normal (default, output stages in learning) and");
+        options.log.println("", indent, "2 for verbose (output internal data structures and may output unprintable characters)");
         options.log.println("-out <A>", indent, "Output learned automaton in file <A>");
         options.log.println("-out2 <A> <B>", indent, "Output two automata in files <A> and <B>");
         options.log.println("-dot", indent, "Output automaton in DOT format");
