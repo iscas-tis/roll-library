@@ -185,7 +185,7 @@ public class CLParser {
                 continue;
             }
             if(args[i].compareTo("-nfa") == 0) {
-                options.algorithm = Options.Algorithm.NFA_COLUMN;
+                options.algorithm = Options.Algorithm.NFA_NLSTAR;
                 options.automaton = Options.TargetAutomaton.NFA;
                 continue;
             }
