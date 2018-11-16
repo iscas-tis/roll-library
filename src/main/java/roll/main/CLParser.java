@@ -65,7 +65,7 @@ public class CLParser {
                 try {
                     options.setOutputStream(new FileOutputStream(file));
                 } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    throw new UnsupportedOperationException("Invalid log file name: " + file);
                 }
                 i += 1;
                 continue;
@@ -76,6 +76,9 @@ public class CLParser {
             }
             if(args[i].compareTo("convert") == 0) {
                 options.runningMode = Options.RunningMode.CONVERTING;
+                if(i + 2 >= args.length) {
+                    throw new UnsupportedOperationException("convert should be followed by two files");
+                }
                 options.inputA = args[i + 1];
                 options.inputB = args[i + 2];
                 if(args[i + 1].endsWith(".ba") && args[i +2].endsWith(".ba")) {
@@ -97,6 +100,9 @@ public class CLParser {
             }
             if(args[i].compareTo("include") == 0) {
                 options.runningMode = Options.RunningMode.INCLUDING;
+                if(i + 2 >= args.length) {
+                    throw new UnsupportedOperationException("include should be followed by two files");
+                }
                 options.inputA = args[i + 1];
                 options.inputB = args[i + 2];
                 if(args[i + 1].endsWith(".ba") && args[i +2].endsWith(".ba")) {
@@ -111,21 +117,27 @@ public class CLParser {
             }
             if(args[i].compareTo("test") == 0) {
                 options.runningMode = Options.RunningMode.TESTING;
-                options.numOfTests = Integer.parseInt(args[i+1]);
-                options.numOfStatesForTest = Integer.parseInt(args[i + 2]);
+                if(i + 2 >= args.length) {
+                    throw new UnsupportedOperationException("include should be followed by two integers");
+                }
+                options.numOfTests = parseInt(args[i + 1]);
+                options.numOfStatesForTest = parseInt(args[i + 2]);
                 i += 2;
                 continue;
             }
             if(args[i].compareTo("sameq") == 0) {
                 options.runningMode = Options.RunningMode.SAMPLING;
-                options.epsilon = Double.parseDouble(args[i+1]);
-                options.delta = Double.parseDouble(args[i+2]);
+                if(i + 2 >= args.length) {
+                    throw new UnsupportedOperationException("sameq should be followed by two doubles");
+                }
+                options.epsilon = parseDouble(args[i+1]);
+                options.delta = parseDouble(args[i+2]);
                 i += 2;
                 continue;
             }
             if(args[i].compareTo("-v")==0){
             	if(args.length > i + 1) {
-            		options.verbose = Integer.parseInt(args[i+1]);
+            		options.verbose = parseInt(args[i+1]);
             		i += 1;
             	}else {
             		options.verbose = 1;
@@ -138,11 +150,17 @@ public class CLParser {
                 continue;
             }
             if(args[i].compareTo("-out")==0){
+                if(i + 1 >= args.length) {
+                    throw new UnsupportedOperationException("-out should be followed by a file name");
+                }
                 options.outputFile = args[i+1];
                 i += 1;
                 continue;
             }
             if(args[i].compareTo("-out2")==0){
+                if(i + 2 >= args.length) {
+                    throw new UnsupportedOperationException("-out2 should be followed by two file names");
+                }
                 options.outputA = args[i+1];
                 options.outputB = args[i+2];
                 i += 2;
@@ -232,7 +250,28 @@ public class CLParser {
             options.log.err("No running mode specified in the command line");
             System.exit(-1);
         }
+        
         options.checkConsistency();
+    }
+    
+    private int parseInt(String str) {
+        int num;
+        try {
+            num = Integer.parseInt(str);
+        }catch(NumberFormatException e) {
+            throw new UnsupportedOperationException("Invalid input integers");
+        }
+        return num;
+    }
+    
+    private double parseDouble(String str) {
+        double num;
+        try {
+            num = Double.parseDouble(str);
+        }catch(NumberFormatException e) {
+            throw new UnsupportedOperationException("Invalid input doubles");
+        }
+        return num;
     }
     
     
