@@ -160,6 +160,7 @@ public class NFA implements Acceptor {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("digraph {\n");
+        builder.append("  rankdir=LR;\n");
         int startNode = this.getStateSize();
         for (int node = 0; node < this.getStateSize(); node++) {
             builder.append(this.getState(node).toString());
@@ -174,6 +175,7 @@ public class NFA implements Acceptor {
     public String toString(List<String> apList) {
         StringBuilder builder = new StringBuilder();
         builder.append("digraph {\n");
+        builder.append("  rankdir=LR;\n");
         int startNode = this.getStateSize();
         for (int node = 0; node < this.getStateSize(); node++) {
             builder.append(this.getState(node).toString(apList));
