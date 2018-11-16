@@ -65,7 +65,7 @@ public class CLParser {
                 try {
                     options.setOutputStream(new FileOutputStream(file));
                 } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    throw new UnsupportedOperationException("Invalid log file name: " + file);
                 }
                 i += 1;
                 continue;
@@ -76,6 +76,9 @@ public class CLParser {
             }
             if(args[i].compareTo("convert") == 0) {
                 options.runningMode = Options.RunningMode.CONVERTING;
+                if(i + 2 >= args.length) {
+                    throw new UnsupportedOperationException("convert should be followed by two files");
+                }
                 options.inputA = args[i + 1];
                 options.inputB = args[i + 2];
                 if(args[i + 1].endsWith(".ba") && args[i +2].endsWith(".ba")) {
@@ -97,6 +100,9 @@ public class CLParser {
             }
             if(args[i].compareTo("include") == 0) {
                 options.runningMode = Options.RunningMode.INCLUDING;
+                if(i + 2 >= args.length) {
+                    throw new UnsupportedOperationException("include should be followed by two files");
+                }
                 options.inputA = args[i + 1];
                 options.inputB = args[i + 2];
                 if(args[i + 1].endsWith(".ba") && args[i +2].endsWith(".ba")) {
@@ -111,21 +117,27 @@ public class CLParser {
             }
             if(args[i].compareTo("test") == 0) {
                 options.runningMode = Options.RunningMode.TESTING;
-                options.numOfTests = Integer.parseInt(args[i+1]);
-                options.numOfStatesForTest = Integer.parseInt(args[i + 2]);
+                if(i + 2 >= args.length) {
+                    throw new UnsupportedOperationException("include should be followed by two integers");
+                }
+                options.numOfTests = parseInt(args[i + 1], "test");
+                options.numOfStatesForTest = parseInt(args[i + 2], "test");
                 i += 2;
                 continue;
             }
             if(args[i].compareTo("sameq") == 0) {
                 options.runningMode = Options.RunningMode.SAMPLING;
-                options.epsilon = Double.parseDouble(args[i+1]);
-                options.delta = Double.parseDouble(args[i+2]);
+                if(i + 2 >= args.length) {
+                    throw new UnsupportedOperationException("sameq should be followed by two doubles");
+                }
+                options.epsilon = parseDouble(args[i+1], "sameq");
+                options.delta = parseDouble(args[i+2], "sameq");
                 i += 2;
                 continue;
             }
             if(args[i].compareTo("-v")==0){
             	if(args.length > i + 1) {
-            		options.verbose = Integer.parseInt(args[i+1]);
+            		options.verbose = parseInt(args[i+1], "-v");
             		i += 1;
             	}else {
             		options.verbose = 1;
@@ -138,11 +150,17 @@ public class CLParser {
                 continue;
             }
             if(args[i].compareTo("-out")==0){
+                if(i + 1 >= args.length) {
+                    throw new UnsupportedOperationException("-out should be followed by a file name");
+                }
                 options.outputFile = args[i+1];
                 i += 1;
                 continue;
             }
             if(args[i].compareTo("-out2")==0){
+                if(i + 2 >= args.length) {
+                    throw new UnsupportedOperationException("-out2 should be followed by two file names");
+                }
                 options.outputA = args[i+1];
                 options.outputB = args[i+2];
                 i += 2;
@@ -166,8 +184,8 @@ public class CLParser {
                 options.automaton = Options.TargetAutomaton.DFA;
                 continue;
             }
-            if(args[i].compareTo("-nfa") == 0) {
-                options.algorithm = Options.Algorithm.NFA_COLUMN;
+            if(args[i].compareTo("-nlstar") == 0) {
+                options.algorithm = Options.Algorithm.NFA_NLSTAR;
                 options.automaton = Options.TargetAutomaton.NFA;
                 continue;
             }
@@ -232,7 +250,28 @@ public class CLParser {
             options.log.err("No running mode specified in the command line");
             System.exit(-1);
         }
+        
         options.checkConsistency();
+    }
+    
+    private int parseInt(String str, String option) {
+        int num;
+        try {
+            num = Integer.parseInt(str);
+        }catch(NumberFormatException e) {
+            throw new UnsupportedOperationException("Invalid input integers: " + str + " followed by " + option);
+        }
+        return num;
+    }
+    
+    private double parseDouble(String str, String option) {
+        double num;
+        try {
+            num = Double.parseDouble(str);
+        }catch(NumberFormatException e) {
+            throw new UnsupportedOperationException("Invalid input doubles: " + str + " followed by " + option);
+        }
+        return num;
     }
     
     
@@ -271,7 +310,8 @@ public class CLParser {
         
         options.log.println("-h", indent, "Show this page");
         options.log.println("-log <file>", indent, "Output log to <file>");
-        options.log.println("-v i", indent, "0 for silent, 1 for normal and 2 for verbose (verbose mode may output unprintable characters)");
+        options.log.println("-v i", indent, "0 for silent (minimal output), 1 for normal (default, output stages in learning) and");
+        options.log.println("", indent, "2 for verbose (output internal data structures and may output unprintable characters)");
         options.log.println("-out <A>", indent, "Output learned automaton in file <A>");
         options.log.println("-out2 <A> <B>", indent, "Output two automata in files <A> and <B>");
         options.log.println("-dot", indent, "Output automaton in DOT format");
@@ -279,7 +319,7 @@ public class CLParser {
         options.log.println("-table", indent, "Use table-based data structure in learning (Default)");
 //        options.log.println("-lstar", indent, "Use classic L* algorithm");
 //        options.log.println("-dfa", indent, "Use column based DFA learning algorithm");
-//        options.log.println("-nfa", indent, "Use column based NFA learning algorithm");
+//        options.log.println("-nlstar", indent, "Use NL* learning algorithm");
 //        options.log.println("-rdfa", indent, "Use reverse DFA learning algorithm");
         options.log.println("-ldollar", indent, "Use L$ automata to learn Omega regular language");
         options.log.println("-periodic", indent, "Use peridoc FDFA to learn Omega regular language");

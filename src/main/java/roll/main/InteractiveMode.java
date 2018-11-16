@@ -30,6 +30,7 @@ import roll.learner.dfa.tree.LearnerDFATreeColumn;
 import roll.learner.dfa.tree.LearnerDFATreeKV;
 import roll.learner.nba.ldollar.LearnerNBALDollar;
 import roll.learner.nba.lomega.LearnerNBALOmega;
+import roll.learner.nfa.nlstar.LearnerNFANLStar;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
 import roll.query.QuerySimple;
@@ -77,7 +78,8 @@ public class InteractiveMode {
             return new MQNBAInteractive();
         }else if(options.algorithm == Options.Algorithm.DFA_COLUMN
              || options.algorithm == Options.Algorithm.DFA_LSTAR
-             || options.algorithm == Options.Algorithm.DFA_KV) {
+             || options.algorithm == Options.Algorithm.DFA_KV
+             || options.algorithm == Options.Algorithm.NFA_NLSTAR) {
             return new MQDFAInteractive();
         }else {
             throw new UnsupportedOperationException("Unsupported Learner");
@@ -92,7 +94,8 @@ public class InteractiveMode {
                return getOmegaCeWord(alphabet);
            }else if(options.algorithm == Options.Algorithm.DFA_COLUMN
                 || options.algorithm == Options.Algorithm.DFA_LSTAR
-                || options.algorithm == Options.Algorithm.DFA_KV) {
+                || options.algorithm == Options.Algorithm.DFA_KV
+                || options.algorithm == Options.Algorithm.NFA_NLSTAR) {
                return getFiniteCeWord(alphabet);
            }else {
                throw new UnsupportedOperationException("Unsupported Learning Target");
@@ -118,6 +121,8 @@ public class InteractiveMode {
             learner = new LearnerDFATableLStar(options, alphabet, teacher);
         }else if(options.algorithm == Options.Algorithm.DFA_KV) {
             learner = new LearnerDFATreeKV(options, alphabet, teacher);
+        }else if(options.algorithm == Options.Algorithm.NFA_NLSTAR){
+            learner = new LearnerNFANLStar(options, alphabet, teacher);
         }else {
             throw new UnsupportedOperationException("Unsupported BA Learner");
         }
