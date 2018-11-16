@@ -184,7 +184,7 @@ public class CLParser {
                 options.automaton = Options.TargetAutomaton.DFA;
                 continue;
             }
-            if(args[i].compareTo("-nfa") == 0) {
+            if(args[i].compareTo("-nlstar") == 0) {
                 options.algorithm = Options.Algorithm.NFA_NLSTAR;
                 options.automaton = Options.TargetAutomaton.NFA;
                 continue;
@@ -319,7 +319,7 @@ public class CLParser {
         options.log.println("-table", indent, "Use table-based data structure in learning (Default)");
 //        options.log.println("-lstar", indent, "Use classic L* algorithm");
 //        options.log.println("-dfa", indent, "Use column based DFA learning algorithm");
-//        options.log.println("-nfa", indent, "Use column based NFA learning algorithm");
+//        options.log.println("-nlstar", indent, "Use NL* learning algorithm");
 //        options.log.println("-rdfa", indent, "Use reverse DFA learning algorithm");
         options.log.println("-ldollar", indent, "Use L$ automata to learn Omega regular language");
         options.log.println("-periodic", indent, "Use peridoc FDFA to learn Omega regular language");
