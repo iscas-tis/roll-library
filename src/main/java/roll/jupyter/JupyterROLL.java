@@ -99,6 +99,10 @@ public class JupyterROLL {
         }
     }
     
+    public static Alphabet getAlphabet() {
+        return alphabet;
+    }
+    
     private static void verifyAlphabet() {
         if(alphabet == null) throw new UnsupportedOperationException("Alphabet is empty, use createAlphabet function");
     }
