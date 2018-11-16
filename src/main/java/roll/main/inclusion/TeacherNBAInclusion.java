@@ -207,7 +207,7 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
                         String prefixStr = RABIT.getPrefix();
                         String suffixStr = RABIT.getSuffix();
                         if(isIncluded) {
-                            options.log.println("Included");
+                            options.log.print("Included\n");
                             isEq = true;
                         }else {
                             isInTarget = false;
@@ -243,7 +243,7 @@ public class TeacherNBAInclusion implements Teacher<FDFA, Query<HashableValue>, 
         ++ options.stats.numOfEquivalenceQuery;
         options.stats.timeOfLastEquivalenceQuery = timer.getTimeElapsed();
         
-        if(options.verbose()) System.out.println("counter example = " + query);
+        if(options.verbose()) options.log.println("counter example = " + query);
         return query;
     }
     

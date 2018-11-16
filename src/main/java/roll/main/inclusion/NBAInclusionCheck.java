@@ -52,7 +52,7 @@ import roll.words.Word;
 public class NBAInclusionCheck {
     
     protected static void printCounterexample(Options options, PairParser parser, Pair<Word, Word> pair) {
-        options.log.println("Not Included");
+        options.log.print("Not Included\n");
         options.log.println("counterexample: ");
         NBALasso lasso = new NBALasso(pair.getLeft(), pair.getRight());
         parser.print(lasso.getNBA(), options.log.getOutputStream());
@@ -76,7 +76,7 @@ public class NBAInclusionCheck {
         options.log.println("Aut B : # of Trans. "+ transB +", # of States "+ B.getStateSize() +".");
         A = NBAOperations.removeDeadStates(A);
         if (A.getFinalStates().isEmpty()) {
-            options.log.println("Included");
+            options.log.print("Included\n");
             timer.stop();
             options.log.println("Total checking time: " + timer.getTimeElapsed()/ 1000.0 + " secs");
             System.exit(0);
@@ -136,7 +136,7 @@ public class NBAInclusionCheck {
         FiniteAutomaton aut2 = UtilInclusion.toRABITNBA(B);
         Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>> pair = UtilInclusion.lightPrepocess(aut1, aut2);
         if (pair.getLeft()) {
-            options.log.println("Included");
+            options.log.print("Included\n");
             parser.close();
             timer.stop();
             options.log.println("Total checking time: " + timer.getTimeElapsed() / 1000.0 + " secs");
@@ -152,7 +152,7 @@ public class NBAInclusionCheck {
         options.log.println("Start using minimization algorithm to prove inclusion...");
         pair = UtilInclusion.prepocess(aut1, aut2);
         if (pair.getLeft()) {
-            options.log.println("Included");
+            options.log.print("Included\n");
             timer.stop();
             options.log.println("Total checking time: " + timer.getTimeElapsed() / 1000.0 + " secs");
             System.exit(0);
