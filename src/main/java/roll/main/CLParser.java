@@ -94,7 +94,7 @@ public class CLParser {
                 options.runningMode = Options.RunningMode.PLAYING;
                 continue;
             }
-            if(args[i].compareTo("-complement") == 0) {
+            if(args[i].compareTo("complement") == 0) {
                 options.runningMode = Options.RunningMode.COMPLEMENTING;
                 continue;
             }
