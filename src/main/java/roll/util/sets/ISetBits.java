@@ -167,5 +167,17 @@ public class ISetBits implements ISet {
     public Iterator<Integer> iterator() {
         return new BitsIterator(this);
     }
+    
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        Iterator<Integer> iter = this.iterator();
+        while(iter.hasNext()) {
+            int n = iter.next();
+            result = prime * result + n;
+        }
+        return result;
+    }
 
 }
