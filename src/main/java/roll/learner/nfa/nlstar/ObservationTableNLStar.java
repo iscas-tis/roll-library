@@ -83,7 +83,7 @@ public class ObservationTableNLStar extends ObservationTableBase {
         // upperTable has been replaced by upperPrimes 
         for(ObservationRow upperRow : upperPrimes) {
             // get all upper rows union
-            if(row != upperRow && !row.getWord().equals(upperRow) && !row.valuesEqual(upperRow) && row.covers(upperRow)) {
+            if(row != upperRow && !row.getWord().equals(upperRow.getWord()) && !row.valuesEqual(upperRow) && row.covers(upperRow)) {
                 rowOrOp(rowOrs, upperRow);
                 merged = true;
             }
