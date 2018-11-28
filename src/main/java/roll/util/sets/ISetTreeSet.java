@@ -135,4 +135,14 @@ public class ISetTreeSet implements ISet {
     public Iterator<Integer> iterator() {
         return mSet.iterator();
     }
+    
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        for(int n : mSet) {
+            result = prime * result + n;
+        }
+        return result;
+    }
 }
