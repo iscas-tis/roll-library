@@ -29,6 +29,10 @@ public class ISetBits implements ISet {
 	public ISetBits() {
 		mSet = new BitSet();
 	}
+	
+	protected ISetBits(ISetBits set) {
+		mSet = set.mSet;
+	}
 
 	@Override
 	public ISet clone() {

@@ -30,6 +30,10 @@ public class ISetTreeSet implements ISet {
 	public ISetTreeSet() {
 		mSet = new TreeSet<>();
 	}
+	
+	protected ISetTreeSet(ISetTreeSet set) {
+		mSet = set.mSet;
+	}
 
 	@Override
 	public ISet clone() {

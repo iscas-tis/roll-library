@@ -36,6 +36,10 @@ public class ISetTIntSet implements ISet {
 	public ISetTIntSet(TIntSet set) {
 		mSet = set;
 	}
+	
+	protected ISetTIntSet(ISetTIntSet set) {
+		mSet = set.mSet;
+	}
 
 	@Override
 	public ISet clone() {
