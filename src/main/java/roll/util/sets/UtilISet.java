@@ -25,7 +25,7 @@ public class UtilISet {
     }
     
     public static ISet newISet() {
-        return new ISetBits();
+        return new ISetTreeSet();
     }
 
 }
