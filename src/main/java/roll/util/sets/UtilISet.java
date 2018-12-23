@@ -19,6 +19,8 @@
 
 package roll.util.sets;
 
+import java.util.Iterator;
+
 public class UtilISet {
     private UtilISet() {
         
@@ -26,6 +28,27 @@ public class UtilISet {
     
     public static ISet newISet() {
         return new ISetTreeSet();
+    }
+    
+    public static boolean compare(ISet set1, ISet set2) {
+    	if(set1.cardinality() < set2.cardinality()) {
+    		return true;
+    	}
+    	if(set1.cardinality() > set2.cardinality()) {
+    		return false;
+    	}
+    	Iterator<Integer> iter1 = set1.iterator();
+    	Iterator<Integer> iter2 = set2.iterator();
+    	while(iter1.hasNext() && iter2.hasNext()) {
+    		int first = iter1.next();
+    		int second = iter2.next();
+    		if(first < second) {
+    			return true;
+    		}else if(first > second) {
+    			return false;
+    		}
+    	}
+		return true;
     }
 
 }

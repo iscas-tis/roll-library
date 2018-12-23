@@ -107,7 +107,7 @@ public class ISetTreeSet implements ISet {
 	@Override
 	public boolean subsetOf(ISet set) {
 		if(! (set instanceof ISetTreeSet)) {
-		    throw new UnsupportedOperationException("OPERAND should be TreeSet");
+		    throw new UnsupportedOperationException("OPERAND should be TreeSet, but it is " + set.getClass());
 		}
 		ISetTreeSet temp = (ISetTreeSet)set;
 		return temp.mSet.containsAll(this.mSet);
