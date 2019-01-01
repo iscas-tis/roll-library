@@ -20,6 +20,7 @@
 package roll.util.sets;
 
 import java.util.Iterator;
+import java.util.TreeSet;
 
 public class UtilISet {
     private UtilISet() {
@@ -28,6 +29,14 @@ public class UtilISet {
     
     public static ISet newISet() {
         return new ISetTreeSet();
+    }
+    
+    public static ISet toISet(TreeSet<Integer> set) {
+    	ISet result = UtilISet.newISet();
+    	for(int elem : set) {
+    		result.set(elem);
+    	}
+    	return result;
     }
     
     public static boolean compare(ISet set1, ISet set2) {
