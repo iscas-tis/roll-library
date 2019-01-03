@@ -33,7 +33,7 @@ import roll.words.Word;
 
 public class TeacherNBARABIT extends TeacherNBA {
    
-    private final FiniteAutomaton rabitTgt;
+    protected final FiniteAutomaton rabitTgt;
     
     public TeacherNBARABIT(Options options, NBA target) {
         super(options, target);
