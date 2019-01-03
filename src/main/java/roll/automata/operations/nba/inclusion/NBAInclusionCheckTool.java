@@ -84,15 +84,11 @@ public class NBAInclusionCheckTool {
         Process proc = null;
         try {
             proc = rt.exec(command);
-        } catch (IOException e1) {
+            proc.waitFor();
+        } catch (IOException | InterruptedException e1) {
             e1.printStackTrace();
         }
         System.out.println(command);
-        while (true) {
-            if (!proc.isAlive()) {
-                break;
-            }
-        }
 
         final BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
         String line = null;

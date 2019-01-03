@@ -26,6 +26,7 @@ import roll.automata.FDFA;
 import roll.automata.NBA;
 import roll.automata.operations.FDFAOperations;
 import roll.automata.operations.NBAOperations;
+import roll.automata.operations.nba.inclusion.NBAInclusionCheckTool;
 import roll.main.Options;
 import roll.main.inclusion.UtilInclusion;
 import roll.oracle.Teacher;
@@ -190,6 +191,25 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
                     // by rabit
                     options.log.println("RABIT for a counterexample to the inclusion...");
                     t = timer.getCurrentTime();
+//                  SpotThread spotThread = new SpotThread(BFC, B);
+//					RABITThread rabitThread = new RABITThread(rBFC, rB);
+//					spotThread.start();
+//					rabitThread.start();
+//					boolean isIncluded;
+//					while(true) {
+//						if(! spotThread.isAlive() && spotThread.result == true) {
+//							isIncluded = true;
+//		                    options.log.println("Spot has proved the inclusion...");
+//							break;
+//						}
+//						if(! rabitThread.isAlive()) {
+//							isIncluded = rabitThread.result;
+//		                    options.log.println("RABIT finished checking the inclusion...");
+//							break;
+//						}
+//					}
+//					spotThread.interrupt();
+//					rabitThread.interrupt();
                     boolean isIncluded = RABIT.isIncluded(rBFC, rB);
                     t = timer.getCurrentTime() - t;
                     this.timeBFCLessB += t;
@@ -239,6 +259,45 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
         options.log.println("#TB(F)&B = " + timeInterBandBF, indent, "    // time for B(F) intersection with B", true);
         options.log.println("#TB(F^c)&BF = " + timeInterBFCandBF, indent, "    // time for B(F^c) intersection with B(F)", true);
         options.log.println("#TB(F^c)<=B = " + timeBFCLessB, indent, "    // time for B(F^c) included in B", true);
+    }
+    
+    public static class SpotThread extends Thread {
+    	Boolean result = null;
+    	
+    	NBA spotBFC;
+    	NBA spotB;
+    	
+    	public SpotThread(NBA BFC, NBA B) {
+    		this.spotBFC = BFC;
+    		this.spotB = B;
+    	}
+		
+		public Boolean getResult() {
+			return result;
+		}
+		
+		@Override
+		public void run() {
+			result = NBAInclusionCheckTool.isIncludedSpot(spotBFC, spotB);
+		}
+    }
+    
+    public static class RABITThread extends Thread {
+    	Boolean result = null;
+//		String prefixStr = null;
+//		String suffixStr = null;
+		FiniteAutomaton rBFC;
+		FiniteAutomaton rB;
+		public RABITThread(FiniteAutomaton bfc, FiniteAutomaton b) {
+			this.rBFC = bfc;
+			this.rB = b;
+		}
+		@Override
+		public void run() {
+			result = RABIT.isIncluded(rBFC, rB);
+//			prefixStr = RABIT.getPrefix();
+//            suffixStr = RABIT.getSuffix();
+		}
     }
 
 }
