@@ -82,10 +82,10 @@ public final class ROLL {
             break;
         case LEARNING:
             options.log.info("ROLL for automata learning ...");
-            if(! options.reverse) {
-            	runLearningMode(options, false);
-            }else {
+            if(options.reverse && options.algorithm != Options.Algorithm.NBA_LDOLLAR) {
             	runComplementingMode(options, false);
+            }else {
+            	runLearningMode(options, false);
             }
             break;
         case SAMPLING:
