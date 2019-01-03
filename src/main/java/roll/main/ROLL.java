@@ -22,9 +22,12 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
+import dk.brics.automaton.Automaton;
 import roll.automata.FDFA;
 import roll.automata.NBA;
+import roll.automata.operations.FDFAOperations;
 import roll.automata.operations.NBAGenerator;
+import roll.automata.operations.NBAOperations;
 import roll.automata.operations.NFAOperations;
 import roll.automata.operations.nba.inclusion.NBAInclusionCheckTool;
 import roll.learner.fdfa.LearnerFDFA;
@@ -71,7 +74,7 @@ public final class ROLL {
             break;
         case COMPLEMENTING:
             options.log.info("ROLL for BA complementation...");
-            runComplementingMode(options);
+            runComplementingMode(options, true);
             break;
         case INCLUDING:
             options.log.info("ROLL for BA inclusion testing...");
@@ -79,7 +82,11 @@ public final class ROLL {
             break;
         case LEARNING:
             options.log.info("ROLL for automata learning ...");
-            runLearningMode(options, false);
+            if(! options.reverse) {
+            	runLearningMode(options, false);
+            }else {
+            	runComplementingMode(options, false);
+            }
             break;
         case SAMPLING:
             options.log.info("ROLL for BA learning via sampling...");
@@ -200,7 +207,7 @@ public final class ROLL {
         
     }
     
-    public static NBA complement(Options options, NBA input) {
+    public static NBA complement(Options options, NBA input, boolean complement) {
         // starting to complement
         options.stats.numOfLetters = input.getAlphabetSize();
         options.stats.numOfStatesInTraget = input.getStateSize();
@@ -247,17 +254,24 @@ public final class ROLL {
         options.log.println("Learning completed...");
         
         teacher.print();
-        return options.stats.hypothesis;
+        if(complement) {
+            return options.stats.hypothesis;
+        }else {
+        	// construct the B(F^c)
+        	Automaton dkBFC = FDFAOperations.buildNegNBA(hypothesis);
+            NBA BFC = NBAOperations.fromDkNBA(dkBFC, input.getAlphabet());
+            return BFC;
+        }
     }
 
-    public static void runComplementingMode(Options options) {
+    public static void runComplementingMode(Options options, boolean comp) {
         
         Timer timer = new Timer();
         timer.start();
         // prepare the parser
         Parser parser = UtilParser.prepare(options, options.inputFile, options.format);
         NBA input = parser.parse();
-        NBA complement = complement(options, input);
+        NBA complement = complement(options, input, comp);
         // output target automaton
         if(options.outputFile != null) {
             try {

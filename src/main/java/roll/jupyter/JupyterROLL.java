@@ -421,7 +421,7 @@ public class JupyterROLL {
             throw new UnsupportedOperationException("Unsupported BA learner");
         }
         
-        return roll.main.ROLL.complement(options, nba);
+        return roll.main.ROLL.complement(options, nba, true);
     }
     
     // check equivalence

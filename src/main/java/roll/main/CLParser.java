@@ -233,6 +233,10 @@ public class CLParser {
                 options.dot = true;
                 continue;
             }
+            if(args[i].compareTo("-rev") == 0) {
+                options.reverse = true;
+                continue;
+            }
             if(args[i].compareTo("-spot") == 0) {
                 options.spot = true;
                 continue;
@@ -335,6 +339,8 @@ public class CLParser {
         options.log.println("-lazyeq", indent, "Equivalence check as the last resort");
         options.log.println("-ldba", indent, "Output learned BA as a limit deterministic BA");
         options.log.println("-spot", indent, "Use also spot to check inclusion in complementation");
+        options.log.println("-rev", indent, "Use complement teacher to learn the target BA");
+
 //        options.log.println("-fdfa", indent, "Learning target is an FDFA");
 //        options.log.println("-nba", indent, "Learning target is a BA");
         System.exit(0);

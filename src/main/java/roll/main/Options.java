@@ -78,6 +78,9 @@ public class Options {
     
     public boolean spot = false;
     
+    // use the complement teacher to learn the target BA
+    public boolean reverse = false;
+    
     //  format
     public Format format;
     
