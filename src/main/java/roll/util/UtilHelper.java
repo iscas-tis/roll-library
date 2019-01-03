@@ -32,5 +32,9 @@ public class UtilHelper {
     public static boolean isOdd(int num) {
         return (num & UtilHelper.ONE) != 0;
     }
+    
+    public static int getNumBits(int num) {
+    	return Integer.SIZE - Integer.numberOfLeadingZeros(num - 1);
+    }
 
 }

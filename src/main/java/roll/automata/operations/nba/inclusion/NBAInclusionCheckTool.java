@@ -26,6 +26,7 @@ import java.io.PrintStream;
 import java.util.function.Function;
 
 import roll.automata.NBA;
+import roll.util.UtilHelper;
 import roll.words.Alphabet;
 
 /**
@@ -106,7 +107,7 @@ public class NBAInclusionCheckTool {
     }
 
     public static void outputHOAStream(NBA nba, PrintStream out) {
-        int numBits = Integer.highestOneBit(nba.getAlphabetSize());
+        int numBits = UtilHelper.getNumBits(nba.getAlphabetSize());
         Function<Integer, String> labelFunc = x -> translateInteger(x, numBits);
         Function<Integer, String> apList = x -> "a" + x;
         outputHOAStream(nba, out, numBits, apList, labelFunc);

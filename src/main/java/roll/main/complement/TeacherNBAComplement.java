@@ -261,27 +261,6 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
         options.log.println("#TB(F^c)<=B = " + timeBFCLessB, indent, "    // time for B(F^c) included in B", true);
     }
     
-    public static class SpotThread extends Thread {
-    	Boolean result = null;
-    	
-    	NBA spotBFC;
-    	NBA spotB;
-    	
-    	public SpotThread(NBA BFC, NBA B) {
-    		this.spotBFC = BFC;
-    		this.spotB = B;
-    	}
-		
-		public Boolean getResult() {
-			return result;
-		}
-		
-		@Override
-		public void run() {
-			result = NBAInclusionCheckTool.isIncludedSpot(spotBFC, spotB);
-		}
-    }
-    
     public static class RABITThread extends Thread {
     	Boolean result = null;
 //		String prefixStr = null;
