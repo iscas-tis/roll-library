@@ -191,7 +191,9 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
                     options.log.println("RABIT/SPOT for a counterexample to the inclusion...");
                     t = timer.getCurrentTime();
 					boolean isIncluded;
-                    if(options.spot) {
+					final int size = 45;
+                    if(options.spot && (B.getStateSize() + BFC.getStateSize() > size)) {
+                    	// ignore small cases
                     	SpotThread spotThread = new SpotThread(BFC, B, options);
     					RABITThread rabitThread = new RABITThread(rBFC, rB);
     					spotThread.start();

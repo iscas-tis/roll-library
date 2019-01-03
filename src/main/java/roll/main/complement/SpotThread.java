@@ -28,6 +28,7 @@ public class SpotThread extends Thread {
 		this.spotBFC = BFC;
 		this.spotB = B;
 		this.options = options;
+		this.flag = true;
 	}
 	
 	public Boolean getResult() {
@@ -39,6 +40,7 @@ public class SpotThread extends Thread {
 		String command = "autfilt --included-in=";
 		File fileA = new File("/tmp/A.hoa");
         File fileB = new File("/tmp/B.hoa");
+        
         try {
         	NBAInclusionCheckTool.outputHOAStream(spotB, new PrintStream(new FileOutputStream(fileA)));
         	NBAInclusionCheckTool.outputHOAStream(spotBFC, new PrintStream(new FileOutputStream(fileB)));
@@ -49,35 +51,35 @@ public class SpotThread extends Thread {
         // check whether it is included in A.hoa
         command = command + fileA.getAbsolutePath() + " " + fileB.getAbsolutePath();
         options.log.println(command);
-        flag = true;
         process = null;
         try {
         	process = rt.exec(command);
-        	while(process.isAlive() && flag) {
+        	while(flag && process.isAlive()) {
         		// do nothing here
         	}
         } catch (IOException e1) {
             e1.printStackTrace();
         }
-
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        String line = null;
-        try {
-            while (flag && (line = reader.readLine()) != null ) {
-                if (line.contains("HOA")) {
-                    result = true;
+        if(flag) {
+        	final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = null;
+            try {
+                while (flag && (line = reader.readLine()) != null ) {
+                    if (line.contains("HOA")) {
+                        result = true;
+                    }
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 	}
 	
 	@SuppressWarnings("deprecation")
 	@Override
 	public void interrupt() {
+		flag = false;
 		if(process != null) {
-			flag = false;
 			process.destroyForcibly();
 		}
 		super.interrupt();
