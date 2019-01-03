@@ -10,9 +10,10 @@ import java.io.PrintStream;
 
 import roll.automata.NBA;
 import roll.automata.operations.nba.inclusion.NBAInclusionCheckTool;
+import roll.main.Options;
 
 public class SpotThread extends Thread {
-	Boolean result = null;
+	Boolean result = false;
 	
 	NBA spotBFC;
 	NBA spotB;
@@ -21,9 +22,12 @@ public class SpotThread extends Thread {
 	
 	boolean flag;
 	
-	public SpotThread(NBA BFC, NBA B) {
+	Options options;
+	
+	public SpotThread(NBA BFC, NBA B, Options options) {
 		this.spotBFC = BFC;
 		this.spotB = B;
+		this.options = options;
 	}
 	
 	public Boolean getResult() {
@@ -44,7 +48,7 @@ public class SpotThread extends Thread {
         final Runtime rt = Runtime.getRuntime();
         // check whether it is included in A.hoa
         command = command + fileA.getAbsolutePath() + " " + fileB.getAbsolutePath();
-        System.out.println(command);
+        options.log.println(command);
         flag = true;
         process = null;
         try {
@@ -69,6 +73,7 @@ public class SpotThread extends Thread {
         }
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public void interrupt() {
 		if(process != null) {
@@ -76,5 +81,6 @@ public class SpotThread extends Thread {
 			process.destroyForcibly();
 		}
 		super.interrupt();
+		this.stop();
 	}
 }

@@ -189,28 +189,28 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
                 
                 if(! hasCE) {
                     // by rabit
-                    options.log.println("RABIT for a counterexample to the inclusion...");
+                    options.log.println("RABIT/SPOT for a counterexample to the inclusion...");
                     t = timer.getCurrentTime();
-//                  SpotThread spotThread = new SpotThread(BFC, B);
-//					RABITThread rabitThread = new RABITThread(rBFC, rB);
-//					spotThread.start();
-//					rabitThread.start();
-//					boolean isIncluded;
-//					while(true) {
-//						if(! spotThread.isAlive() && spotThread.result == true) {
-//							isIncluded = true;
-//		                    options.log.println("Spot has proved the inclusion...");
-//							break;
-//						}
-//						if(! rabitThread.isAlive()) {
-//							isIncluded = rabitThread.result;
-//		                    options.log.println("RABIT finished checking the inclusion...");
-//							break;
-//						}
-//					}
-//					spotThread.interrupt();
-//					rabitThread.interrupt();
-                    boolean isIncluded = RABIT.isIncluded(rBFC, rB);
+                    SpotThread spotThread = new SpotThread(BFC, B, options);
+					RABITThread rabitThread = new RABITThread(rBFC, rB);
+					spotThread.start();
+					rabitThread.start();
+					boolean isIncluded;
+					while(true) {
+						if(! spotThread.isAlive() && spotThread.result == true) {
+							isIncluded = true;
+		                    options.log.println("Spot has proved the inclusion...");
+							break;
+						}
+						if(! rabitThread.isAlive()) {
+							isIncluded = rabitThread.result;
+		                    options.log.println("RABIT finished checking the inclusion...");
+							break;
+						}
+					}
+					spotThread.interrupt();
+					rabitThread.interrupt();
+//                    boolean isIncluded = RABIT.isIncluded(rBFC, rB);
                     t = timer.getCurrentTime() - t;
                     this.timeBFCLessB += t;
                     String prefixStr = RABIT.getPrefix();
@@ -247,7 +247,7 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
         ++ options.stats.numOfEquivalenceQuery;
         options.stats.timeOfLastEquivalenceQuery = timer.getTimeElapsed();
         
-        if(options.verbose()) System.out.println("counter example = " + query);
+        if(options.verbose()) options.log.println("counter example = " + query);
         return query;
     }
     
@@ -276,6 +276,12 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
 			result = RABIT.isIncluded(rBFC, rB);
 //			prefixStr = RABIT.getPrefix();
 //            suffixStr = RABIT.getSuffix();
+		}
+		
+		@Override
+		public void interrupt() {
+			super.interrupt();
+			this.stop();
 		}
     }
 
