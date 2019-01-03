@@ -76,6 +76,8 @@ public class Options {
     
     public boolean dot = false;
     
+    public boolean spot = false;
+    
     //  format
     public Format format;
     

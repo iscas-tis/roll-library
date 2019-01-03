@@ -26,7 +26,6 @@ import roll.automata.FDFA;
 import roll.automata.NBA;
 import roll.automata.operations.FDFAOperations;
 import roll.automata.operations.NBAOperations;
-import roll.automata.operations.nba.inclusion.NBAInclusionCheckTool;
 import roll.main.Options;
 import roll.main.inclusion.UtilInclusion;
 import roll.oracle.Teacher;
@@ -191,26 +190,29 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
                     // by rabit
                     options.log.println("RABIT/SPOT for a counterexample to the inclusion...");
                     t = timer.getCurrentTime();
-                    SpotThread spotThread = new SpotThread(BFC, B, options);
-					RABITThread rabitThread = new RABITThread(rBFC, rB);
-					spotThread.start();
-					rabitThread.start();
 					boolean isIncluded;
-					while(true) {
-						if(! spotThread.isAlive() && spotThread.result == true) {
-							isIncluded = true;
-		                    options.log.println("Spot has proved the inclusion...");
-							break;
-						}
-						if(! rabitThread.isAlive()) {
-							isIncluded = rabitThread.result;
-		                    options.log.println("RABIT finished checking the inclusion...");
-							break;
-						}
-					}
-					spotThread.interrupt();
-					rabitThread.interrupt();
-//                    boolean isIncluded = RABIT.isIncluded(rBFC, rB);
+                    if(options.spot) {
+                    	SpotThread spotThread = new SpotThread(BFC, B, options);
+    					RABITThread rabitThread = new RABITThread(rBFC, rB);
+    					spotThread.start();
+    					rabitThread.start();
+    					while(true) {
+    						if(! spotThread.isAlive() && spotThread.result == true) {
+    							isIncluded = true;
+    		                    options.log.println("Spot has proved the inclusion...");
+    							break;
+    						}
+    						if(! rabitThread.isAlive()) {
+    							isIncluded = rabitThread.result;
+    		                    options.log.println("RABIT finished checking the inclusion...");
+    							break;
+    						}
+    					}
+    					spotThread.interrupt();
+    					rabitThread.interrupt();
+                    }else {
+                    	isIncluded = RABIT.isIncluded(rBFC, rB);
+                    }                    
                     t = timer.getCurrentTime() - t;
                     this.timeBFCLessB += t;
                     String prefixStr = RABIT.getPrefix();
@@ -278,6 +280,7 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
 //            suffixStr = RABIT.getSuffix();
 		}
 		
+		@SuppressWarnings("deprecation")
 		@Override
 		public void interrupt() {
 			super.interrupt();

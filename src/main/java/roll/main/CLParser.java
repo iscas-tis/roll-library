@@ -233,6 +233,10 @@ public class CLParser {
                 options.dot = true;
                 continue;
             }
+            if(args[i].compareTo("-spot") == 0) {
+                options.spot = true;
+                continue;
+            }
             if(args[i].endsWith(".ba")) {
                 options.inputFile = args[i];
                 options.format = Format.BA;
@@ -330,6 +334,7 @@ public class CLParser {
         options.log.println("-bs", indent, "Use binary search to find counterexample");
         options.log.println("-lazyeq", indent, "Equivalence check as the last resort");
         options.log.println("-ldba", indent, "Output learned BA as a limit deterministic BA");
+        options.log.println("-spot", indent, "Use also spot to check inclusion in complementation");
 //        options.log.println("-fdfa", indent, "Learning target is an FDFA");
 //        options.log.println("-nba", indent, "Learning target is a BA");
         System.exit(0);
