@@ -16,6 +16,8 @@
 
 package roll.util;
 
+import roll.parser.hoa.Valuation;
+
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
@@ -36,5 +38,19 @@ public class UtilHelper {
     public static int getNumBits(int num) {
     	return Integer.SIZE - Integer.numberOfLeadingZeros(num - 1);
     }
+
+	public static Valuation translateInteger(int value, int numBits) {
+		int bit = 1;
+        Valuation result = new Valuation(numBits);
+        for (int index = 0; index < numBits; index++) {
+            if ((bit & value) == 0) {
+                result.clear(index);
+            }else {
+            	result.set(index);
+            }
+            bit <<= 1;
+        }
+        return result;
+	}
 
 }
