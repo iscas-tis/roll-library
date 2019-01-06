@@ -112,6 +112,12 @@ public class NBAInclusionCheckTool {
         Function<Integer, String> apList = x -> "a" + x;
         outputHOAStream(nba, out, numBits, apList, labelFunc);
     }
+    
+    public static void outputHOAStream(NBA nba, PrintStream out, int numBits,
+			Function<Integer, String> apList) {
+        Function<Integer, String> labelFunc = x -> translateInteger(x, numBits);
+        outputHOAStream(nba, out, numBits, apList, labelFunc);
+	}
 
     public static void outputHOAStream(NBA nba, PrintStream out, int numAp, Function<Integer, String> apList,
             Function<Integer, String> labelFunc) {
