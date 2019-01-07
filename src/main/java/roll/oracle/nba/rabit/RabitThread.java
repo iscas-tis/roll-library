@@ -1,8 +1,9 @@
-package roll.main.complement;
+package roll.oracle.nba.rabit;
 
 import automata.FiniteAutomaton;
 import mainfiles.RABIT;
 import roll.main.Options;
+import roll.main.complement.IsIncluded;
 import roll.util.Pair;
 import roll.words.Alphabet;
 import roll.words.Word;
@@ -10,8 +11,6 @@ import roll.words.Word;
 public class RabitThread extends Thread implements IsIncluded {
 	
 	Boolean result = null;
-//	String prefixStr = null;
-//	String suffixStr = null;
 	FiniteAutomaton rA;
 	FiniteAutomaton rB;
 	
