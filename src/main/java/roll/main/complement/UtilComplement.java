@@ -43,7 +43,32 @@ public class UtilComplement {
 			, Alphabet alphabet, NBA A, NBA B, FiniteAutomaton rA, FiniteAutomaton rB) {
 		IsIncluded included = null;
 		if(options.parallel) {
-			included = getAnyOne(options, alphabet, A, B, rA, rB);
+			final int size = 45;
+			boolean bigEnough = A.getStateSize() + B.getStateSize() > size;
+			SpotThread1 spotThread = null;
+			if(bigEnough) {
+				spotThread = new SpotThread1(A, B, options);
+			}
+			RabitThread rabitThread = new RabitThread(alphabet, rA, rB, options);
+			if(bigEnough) {
+				spotThread.start();
+			}
+			rabitThread.start();
+			while(true) {
+				if(bigEnough && ! spotThread.isAlive()) {
+					included = spotThread;
+					break;
+				}
+				if(! rabitThread.isAlive()) {
+					included = rabitThread;
+					break;
+				}
+			}
+			rabitThread.interrupt();
+			if(bigEnough) {
+				spotThread.interrupt();
+			}
+//			included = getAnyOne(options, alphabet, A, B, rA, rB);
 		}else {
 			Callable<IsIncluded> caller = null;
 			if(options.spot) {

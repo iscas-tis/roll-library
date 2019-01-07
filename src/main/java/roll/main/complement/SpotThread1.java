@@ -49,13 +49,18 @@ public class SpotThread1 extends Thread implements IsIncluded {
 		String command = "spotj ";
 		File fileA = new File("/tmp/A.hoa");
         File fileB = new File("/tmp/B.hoa");
+    	int numAp = UtilHelper.getNumBits(spotB.getAlphabetSize());
+
         
-        try {
-        	NBAInclusionCheckTool.outputHOAStream(spotB, new PrintStream(new FileOutputStream(fileA)));
-        	NBAInclusionCheckTool.outputHOAStream(spotBFC, new PrintStream(new FileOutputStream(fileB)));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        	try {
+        		if(flag) {
+            		Function<Integer, String> apList = x -> "a" + x;
+                	NBAInclusionCheckTool.outputHOAStream(spotB, new PrintStream(new FileOutputStream(fileA)), numAp, apList);
+                	NBAInclusionCheckTool.outputHOAStream(spotBFC, new PrintStream(new FileOutputStream(fileB)), numAp, apList);        			
+        		}
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         final Runtime rt = Runtime.getRuntime();
         // check whether it is included in A.hoa
         command = command + fileA.getAbsolutePath() + " " + fileB.getAbsolutePath();
@@ -79,7 +84,6 @@ public class SpotThread1 extends Thread implements IsIncluded {
                     }else if(line.contains("Not included")) {
                     	result = false;
                     	// parse result
-                    	int numAp = UtilHelper.getNumBits(spotB.getAlphabetSize());
                     	counterexample = parse(spotB.getAlphabet(), line, numAp, x -> Integer.parseInt(x.substring(1)));
                     }
                 }
