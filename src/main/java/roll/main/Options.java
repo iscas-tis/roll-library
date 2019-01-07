@@ -77,7 +77,9 @@ public class Options {
     public boolean dot = false;
     
     public boolean spot = false;
-    
+
+    public boolean parallel = false;
+
     // use the complement teacher to learn the target BA
     public boolean reverse = false;
     

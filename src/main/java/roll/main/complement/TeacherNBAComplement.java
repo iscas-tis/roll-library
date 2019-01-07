@@ -31,6 +31,7 @@ import roll.main.inclusion.UtilInclusion;
 import roll.oracle.Teacher;
 import roll.oracle.nba.sampler.NBAInclusionSampler;
 import roll.oracle.nba.sampler.SamplerIndexedMonteCarlo;
+import roll.oracle.nba.spot.SpotThread2;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.HashableValue;
@@ -192,33 +193,74 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
                     t = timer.getCurrentTime();
 					boolean isIncluded;
 					final int size = 45;
-                    if(options.spot && (B.getStateSize() + BFC.getStateSize() > size)) {
-                    	// ignore small cases
-                    	SpotThread spotThread = new SpotThread(BFC, B, options);
-    					RABITThread rabitThread = new RABITThread(rBFC, rB);
-    					spotThread.start();
+					IsIncluded included = null;
+					if(options.parallel) {
+						boolean bigEnough = B.getStateSize() + BFC.getStateSize() > size;
+						SpotThread2 spotThread = new SpotThread2(BFC, B, options);
+    					RabitThread rabitThread = new RabitThread(alphabet, rBFC, rB, options);
+    					if(bigEnough) {
+    						spotThread.start();
+    					}
     					rabitThread.start();
     					while(true) {
-    						if(! spotThread.isAlive() && spotThread.result == true) {
-    							isIncluded = true;
-    		                    options.log.println("Spot has proved the inclusion...");
+    						if(bigEnough && !spotThread.isAlive()) {
+    							included = spotThread;
     							break;
     						}
     						if(! rabitThread.isAlive()) {
-    							isIncluded = rabitThread.result;
-    		                    options.log.println("RABIT finished checking the inclusion...");
+    							included = rabitThread;
     							break;
     						}
     					}
-    					spotThread.interrupt();
+    					if(bigEnough) {
+    						spotThread.interrupt();
+    					}
     					rabitThread.interrupt();
-                    }else {
-                    	isIncluded = RABIT.isIncluded(rBFC, rB);
-                    }                    
+					}else {
+						Thread thread = null;
+						if(options.spot) {
+							SpotThread2 spotThread = new SpotThread2(BFC, B, options);
+							included = spotThread;
+							thread = spotThread;
+						}else {
+	    					RabitThread rabitThread = new RabitThread(alphabet, rBFC, rB, options);
+	    					included = rabitThread;
+	    					thread = rabitThread;
+						}
+						thread.start();
+						while(thread.isAlive()) {
+							// do nothing but wait
+						}
+						thread.interrupt();
+					}
+//                    if(options.spot && (B.getStateSize() + BFC.getStateSize() > size)) {
+//                    	// ignore small cases
+//                    	SpotThread2 spotThread = new SpotThread2(BFC, B, options);
+//    					RABITThread rabitThread = new RABITThread(rBFC, rB);
+//    					spotThread.start();
+//    					rabitThread.start();
+//    					while(true) {
+//    						if(! spotThread.isAlive() && spotThread.result == true) {
+//    							isIncluded = true;
+//    		                    options.log.println("Spot has proved the inclusion...");
+//    							break;
+//    						}
+//    						if(! rabitThread.isAlive()) {
+//    							isIncluded = rabitThread.result;
+//    		                    options.log.println("RABIT finished checking the inclusion...");
+//    							break;
+//    						}
+//    					}
+//    					spotThread.interrupt();
+//    					rabitThread.interrupt();
+//                    }else {
+//                    	isIncluded = RABIT.isIncluded(rBFC, rB);
+//                    }                    
                     t = timer.getCurrentTime() - t;
                     this.timeBFCLessB += t;
-                    String prefixStr = RABIT.getPrefix();
-                    String suffixStr = RABIT.getSuffix();
+                    isIncluded = included.isIncluded();
+//                    String prefixStr = RABIT.getPrefix();
+//                    String suffixStr = RABIT.getSuffix();
                     if (isIncluded) {
 //                    	UtilComplement.print(BFC, "A.ba");
 //                    	UtilComplement.print(B, "B.ba");
@@ -226,8 +268,8 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
                     } else {
                         isInTarget = false;
                         // check whether it is in A
-                        prefix = alphabet.getWordFromString(prefixStr);
-                        suffix = alphabet.getWordFromString(suffixStr);
+                        prefix = included.getCounterexample().getLeft();
+                        suffix = included.getCounterexample().getRight();
                         isEq = false;
                     }
                 }
@@ -264,30 +306,4 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
         options.log.println("#TB(F^c)&BF = " + timeInterBFCandBF, indent, "    // time for B(F^c) intersection with B(F)", true);
         options.log.println("#TB(F^c)<=B = " + timeBFCLessB, indent, "    // time for B(F^c) included in B", true);
     }
-    
-    public static class RABITThread extends Thread {
-    	Boolean result = null;
-//		String prefixStr = null;
-//		String suffixStr = null;
-		FiniteAutomaton rBFC;
-		FiniteAutomaton rB;
-		public RABITThread(FiniteAutomaton bfc, FiniteAutomaton b) {
-			this.rBFC = bfc;
-			this.rB = b;
-		}
-		@Override
-		public void run() {
-			result = RABIT.isIncluded(rBFC, rB);
-//			prefixStr = RABIT.getPrefix();
-//            suffixStr = RABIT.getSuffix();
-		}
-		
-		@SuppressWarnings("deprecation")
-		@Override
-		public void interrupt() {
-			super.interrupt();
-			this.stop();
-		}
-    }
-
 }

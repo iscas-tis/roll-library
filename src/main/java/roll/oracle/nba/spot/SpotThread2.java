@@ -9,6 +9,7 @@ import java.util.function.Function;
 import roll.automata.NBA;
 import roll.automata.operations.nba.inclusion.NBAInclusionCheckTool;
 import roll.main.Options;
+import roll.main.complement.IsIncluded;
 import roll.parser.hoa.Valuation;
 import roll.util.Pair;
 import roll.util.UtilHelper;
@@ -19,7 +20,7 @@ import spotj.SpotJ;
 /**
  * use spot to check inclusion of two Buchi automata
  * */
-public class SpotThread2 extends Thread {
+public class SpotThread2 extends Thread implements IsIncluded {
 	
 	// not included
 	private Boolean result = null;
@@ -40,10 +41,12 @@ public class SpotThread2 extends Thread {
 		this.spot = new SpotJ();
 	}
 	
-	public Boolean getResult() {
+	@Override
+	public Boolean isIncluded() {
 		return result;
 	}
 	
+	@Override
 	public Pair<Word, Word> getCounterexample() {
 		return counterexample;
 	}

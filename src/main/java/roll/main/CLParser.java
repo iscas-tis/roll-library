@@ -241,6 +241,10 @@ public class CLParser {
                 options.spot = true;
                 continue;
             }
+            if(args[i].compareTo("-par") == 0) {
+                options.parallel = true;
+                continue;
+            }
             if(args[i].endsWith(".ba")) {
                 options.inputFile = args[i];
                 options.format = Format.BA;
@@ -340,6 +344,7 @@ public class CLParser {
         options.log.println("-ldba", indent, "Output learned BA as a limit deterministic BA");
         options.log.println("-spot", indent, "Use also spot to check inclusion in complementation");
         options.log.println("-rev", indent, "Use complement teacher to learn the target BA");
+        options.log.println("-par", indent, "RABIT and SPot work in parallel in complement teacher");
 
 //        options.log.println("-fdfa", indent, "Learning target is an FDFA");
 //        options.log.println("-nba", indent, "Learning target is a BA");
