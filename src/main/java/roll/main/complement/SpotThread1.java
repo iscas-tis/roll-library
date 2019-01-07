@@ -31,6 +31,7 @@ public class SpotThread1 extends Thread implements IsIncluded {
 	Options options;
 	
 	Pair<Word, Word> counterexample;
+	boolean write = false;
 	
 	public SpotThread1(NBA BFC, NBA B, Options options) {
 		this.spotBFC = BFC;
@@ -51,16 +52,15 @@ public class SpotThread1 extends Thread implements IsIncluded {
         File fileB = new File("/tmp/B.hoa");
     	int numAp = UtilHelper.getNumBits(spotB.getAlphabetSize());
 
-        
-        	try {
-        		if(flag) {
-            		Function<Integer, String> apList = x -> "a" + x;
-                	NBAInclusionCheckTool.outputHOAStream(spotB, new PrintStream(new FileOutputStream(fileA)), numAp, apList);
-                	NBAInclusionCheckTool.outputHOAStream(spotBFC, new PrintStream(new FileOutputStream(fileB)), numAp, apList);        			
-        		}
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
+		try {
+			Function<Integer, String> apList = x -> "a" + x;
+			NBAInclusionCheckTool.outputHOAStream(spotB, new PrintStream(new FileOutputStream(fileA)), numAp, apList);
+			write = true;
+			NBAInclusionCheckTool.outputHOAStream(spotBFC, new PrintStream(new FileOutputStream(fileB)), numAp, apList);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+        write = true;
         final Runtime rt = Runtime.getRuntime();
         // check whether it is included in A.hoa
         command = command + fileA.getAbsolutePath() + " " + fileB.getAbsolutePath();
@@ -97,6 +97,9 @@ public class SpotThread1 extends Thread implements IsIncluded {
 	@Override
 	public void interrupt() {
 		flag = false;
+		while(! write) {
+			// wait
+		}
 		if(process != null) {
 			process.destroyForcibly();
 		}
