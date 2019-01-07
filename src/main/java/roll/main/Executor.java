@@ -27,6 +27,7 @@ import roll.oracle.Teacher;
 import roll.oracle.nba.TeacherNBA;
 import roll.oracle.nba.rabit.TeacherNBARABIT;
 import roll.oracle.nba.sampler.TeacherNBASampler;
+import roll.oracle.nba.spot.TeacherNBASpot;
 import roll.query.Query;
 import roll.table.HashableValue;
 import roll.util.Timer;
@@ -39,7 +40,12 @@ import roll.words.Alphabet;
 public class Executor {
     
     public static void executeRABIT(Options options, NBA target) {
-        TeacherNBARABIT teacher = new TeacherNBARABIT(options, target);
+    	TeacherNBA teacher = null;
+    	if(options.spot) {
+    		teacher = new TeacherNBASpot(options, target);
+    	}else {
+    		teacher = new TeacherNBARABIT(options, target);
+    	}
         Executor.execute(options, target, teacher);
     }
     

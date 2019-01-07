@@ -127,5 +127,10 @@
     	<artifactId>jvm-repr</artifactId>
     	<version>0.3.1</version>
     </dependency>
+    <dependency>
+  		<groupId>net.java.dev.jna</groupId>
+  		<artifactId>jna</artifactId>
+  		<version>5.2.0</version>
+  	</dependency>
   </dependencies>
 </project>
