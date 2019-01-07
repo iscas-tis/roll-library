@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 import roll.automata.NBA;
@@ -20,7 +21,7 @@ import spotj.SpotJ;
 /**
  * use spot to check inclusion of two Buchi automata
  * */
-public class SpotThread2 extends Thread implements IsIncluded {
+public class SpotThread3 implements Callable<IsIncluded>, IsIncluded {
 	
 	// not included
 	private Boolean result = null;
@@ -31,35 +32,14 @@ public class SpotThread2 extends Thread implements IsIncluded {
 	private Options options;
 	
 	private SpotJ spot;
-	private boolean terminated = false;
 	
 	private Pair<Word, Word> counterexample = null;
-	File fileA = new File("A.hoa");
-	File fileB = new File("B.hoa");
-	int numBits;
 	
-	public SpotThread2(NBA A, NBA B, Options options) {
-		synchronized(this) {
-			this.spotA = A;
-			this.spotB = B;
-			this.options = options;
-			this.spot = new SpotJ();
-			numBits = UtilHelper.getNumBits(spotA.getAlphabetSize());
-			try {
-				Function<Integer, String> apList = x -> "a" + x;
-				NBAInclusionCheckTool.outputHOAStream(spotA, new PrintStream(new FileOutputStream(fileA)), numBits,
-						apList);
-				NBAInclusionCheckTool.outputHOAStream(spotB, new PrintStream(new FileOutputStream(fileB)), numBits,
-						apList);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-			terminated = false;
-		}
-	}
-	
-	public void stopRunning() {
-		terminated = true;
+	public SpotThread3(NBA A, NBA B, Options options) {
+		this.spotA = A;
+		this.spotB = B;
+		this.options = options;
+		this.spot = new SpotJ();
 	}
 	
 	@Override
@@ -70,34 +50,6 @@ public class SpotThread2 extends Thread implements IsIncluded {
 	@Override
 	public Pair<Word, Word> getCounterexample() {
 		return counterexample;
-	}
-	
-	@Override
-	public void run() {
-		
-		String ceStr = spot.is_included(fileA.getAbsolutePath(), fileB.getAbsolutePath());
-		Function<String, Integer> revApList = str -> Integer.parseInt(str.substring(1));
-		counterexample = parse(spot, spotA.getAlphabet(), ceStr, numBits, revApList);
-		if (counterexample == null) {
-			result = true;
-			options.log.println("Inclusion has been proved by SPOT");
-		} else {
-			result = false;
-			options.log.println("A counterexample has been found by SPOT");
-			assert spotA.getAcc().accept(counterexample.getLeft(), counterexample.getRight())
-					&& !spotB.getAcc().accept(counterexample.getLeft(), counterexample.getRight());
-		}
-		
-		while(! terminated ) {
-			//
-		}
-	}
-	
-	@SuppressWarnings("deprecation")
-	@Override
-	public void interrupt() {
-		super.interrupt();
-//		this.stop();
 	}
 	
 	protected Pair<Word, Word> parse(
@@ -152,6 +104,35 @@ public class SpotThread2 extends Thread implements IsIncluded {
 			word = word.append(val.toInt());
 		}
 		return word;
+	}
+
+	@Override
+	public IsIncluded call() throws Exception {
+		File fileA = new File("A.hoa");
+		File fileB = new File("B.hoa");
+		int numBits = UtilHelper.getNumBits(spotA.getAlphabetSize());
+		try {
+			Function<Integer, String> apList = x -> "a" + x;
+			NBAInclusionCheckTool.outputHOAStream(spotA, new PrintStream(new FileOutputStream(fileA)), numBits,
+					apList);
+			NBAInclusionCheckTool.outputHOAStream(spotB, new PrintStream(new FileOutputStream(fileB)), numBits,
+					apList);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		String ceStr = spot.is_included(fileA.getAbsolutePath(), fileB.getAbsolutePath());
+		Function<String, Integer> revApList = str -> Integer.parseInt(str.substring(1));
+		counterexample = parse(spot, spotA.getAlphabet(), ceStr, numBits, revApList);
+		if (counterexample == null) {
+			result = true;
+			options.log.println("Inclusion has been proved by SPOT");
+		} else {
+			result = false;
+			options.log.println("A counterexample has been found by SPOT");
+			assert spotA.getAcc().accept(counterexample.getLeft(), counterexample.getRight())
+					&& !spotB.getAcc().accept(counterexample.getLeft(), counterexample.getRight());
+		}
+		return this;
 	}
 
 

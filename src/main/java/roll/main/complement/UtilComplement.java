@@ -3,12 +3,21 @@ package roll.main.complement;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import automata.FiniteAutomaton;
 import roll.automata.NBA;
 import roll.main.Options;
 import roll.oracle.nba.rabit.RabitThread;
+import roll.oracle.nba.rabit.RabitThread3;
 import roll.oracle.nba.spot.SpotThread2;
+import roll.oracle.nba.spot.SpotThread3;
 import roll.util.Pair;
 import roll.words.Alphabet;
 import roll.words.Word;
@@ -32,49 +41,53 @@ public class UtilComplement {
 	
 	public static IsIncluded checkInclusion(Options options
 			, Alphabet alphabet, NBA A, NBA B, FiniteAutomaton rA, FiniteAutomaton rB) {
-		final int size = 45;
 		IsIncluded included = null;
 		if(options.parallel) {
-			boolean bigEnough = B.getStateSize() + A.getStateSize() > size;
-			SpotThread2 spotThread = new SpotThread2(A, B, options);
-			RabitThread rabitThread = new RabitThread(alphabet, rA, rB, options);
-			if(bigEnough) {
-				spotThread.start();
-			}
-			rabitThread.start();
-			while(true) {
-				if(bigEnough && !spotThread.isAlive()) {
-					included = spotThread;
-					break;
-				}
-				if(! rabitThread.isAlive()) {
-					included = rabitThread;
-					break;
-				}
-			}
-			if(bigEnough) {
-				spotThread.interrupt();
-			}
-			rabitThread.interrupt();
+			included = getAnyOne(options, alphabet, A, B, rA, rB);
 		}else {
-			Thread thread = null;
+			Callable<IsIncluded> caller = null;
 			if(options.spot) {
-				SpotThread2 spotThread = new SpotThread2(A, B, options);
-				included = spotThread;
-				thread = spotThread;
+				SpotThread3 spotThread = new SpotThread3(A, B, options);
+				caller = spotThread;
 			}else {
-				RabitThread rabitThread = new RabitThread(alphabet, rA, rB, options);
-				included = rabitThread;
-				thread = rabitThread;
+				RabitThread3 rabitThread = new RabitThread3(alphabet, rA, rB, options);
+				caller = rabitThread;
 			}
-			thread.start();
-			while(thread.isAlive()) {
-				// do nothing but wait
+			try {
+				included = caller.call();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			thread.interrupt();
 		}
 		
 		return included;
+	}
+	
+	private static IsIncluded getAnyOne(Options options
+			, Alphabet alphabet, NBA A, NBA B, FiniteAutomaton rA, FiniteAutomaton rB) {
+		final int size = 45;
+		boolean bigEnough = A.getStateSize() + B.getStateSize() > size;
+		SpotThread3 spotThread = null;
+		if(bigEnough) {
+			spotThread = new SpotThread3(A, B, options);
+		}
+		RabitThread3 rabitThread = new RabitThread3(alphabet, rA, rB, options);
+		ExecutorService executor = Executors.newWorkStealingPool();
+		List<Callable<IsIncluded>> callables = new ArrayList<>(2);
+		callables.add(rabitThread);
+		if(bigEnough) {
+			callables.add(spotThread);
+		}
+//		Runtime rt = Runtime.getRuntime();
+//		Process process = rt.exec(cmdarray);
+		
+		IsIncluded result = null;
+		try {
+			result = executor.invokeAny(callables);
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 
 }
