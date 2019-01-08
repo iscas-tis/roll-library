@@ -51,11 +51,9 @@ public class SpotThread1 extends Thread implements IsIncluded {
 		File fileA = new File("/tmp/A.hoa");
         File fileB = new File("/tmp/B.hoa");
     	int numAp = UtilHelper.getNumBits(spotB.getAlphabetSize());
-
 		try {
 			Function<Integer, String> apList = x -> "a" + x;
 			NBAInclusionCheckTool.outputHOAStream(spotB, new PrintStream(new FileOutputStream(fileA)), numAp, apList);
-			write = true;
 			NBAInclusionCheckTool.outputHOAStream(spotBFC, new PrintStream(new FileOutputStream(fileB)), numAp, apList);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
