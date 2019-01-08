@@ -65,8 +65,12 @@ public class SpotThread1 extends Thread implements IsIncluded {
         options.log.println(command);
         process = null;
         try {
-        	process = rt.exec(command);
-        	while(flag && process.isAlive()) {
+        	if(flag) {
+//        		System.out.println("exe...");
+        		process = rt.exec(command);
+        	}
+//    		System.out.println("Wait...");
+        	while(flag && process != null && process.isAlive()) {
         		// do nothing here
         	}
         } catch (IOException e1) {
@@ -79,9 +83,11 @@ public class SpotThread1 extends Thread implements IsIncluded {
                 while (flag && (line = reader.readLine()) != null ) {
                     if (line.contains("Included.")) {
                         result = true;
+                        options.log.println("Inclusion has been proved by SPOT");
                     }else if(line.contains("Not included")) {
                     	result = false;
                     	// parse result
+                        options.log.println("A counterexample has been found by SPOT");
                     	counterexample = parse(spotB.getAlphabet(), line, numAp, x -> Integer.parseInt(x.substring(1)));
                     }
                 }
