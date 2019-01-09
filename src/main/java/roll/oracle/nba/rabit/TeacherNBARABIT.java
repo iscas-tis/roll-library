@@ -31,6 +31,7 @@ import roll.words.Word;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
+@Deprecated
 public class TeacherNBARABIT extends TeacherNBA {
    
     protected final FiniteAutomaton rabitTgt;

@@ -4,23 +4,22 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import automata.FAState;
 import automata.FiniteAutomaton;
+import mainfiles.RABIT;
 import roll.automata.NBA;
 import roll.main.Options;
 import roll.oracle.nba.rabit.RabitThread;
 import roll.oracle.nba.rabit.RabitThread3;
-import roll.oracle.nba.spot.SpotThread2;
 import roll.oracle.nba.spot.SpotThread3;
-import roll.util.Pair;
 import roll.words.Alphabet;
-import roll.words.Word;
 
 public class UtilComplement {
 	
@@ -34,7 +33,30 @@ public class UtilComplement {
 			out.print(nba.toBA());
 			out.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static void print(FiniteAutomaton nba, String file) {
+		try {
+			FileOutputStream stream = new FileOutputStream(file);
+			PrintStream out = new PrintStream(stream);
+			Set<FAState> states = nba.states;
+			out.print("[" + nba.getInitialState().id + "]");
+	        for (FAState state : states) {
+	            for (String label : nba.getAllTransitionSymbols()) {
+	            	Set<FAState> succs = state.getNext(label);
+	            	if(succs == null) continue;
+	            	for(FAState succ : succs) {
+	            		out.print("\na" + ((int)label.charAt(0)) + ",[" + state.id + "]->[" + succ.id + "]");
+	            	}
+	            }
+	        }	
+	        for(FAState state : nba.F) {
+				out.print("\n[" + state.id + "]");
+	        }
+			out.close();
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
@@ -52,7 +74,7 @@ public class UtilComplement {
 			RabitThread rabitThread = new RabitThread(alphabet, rA, rB, options);
 			if(bigEnough) {
 				spotThread.start();
-			}
+			}			
 			rabitThread.start();
 			while(true) {
 				if(bigEnough && ! spotThread.isAlive()) {
@@ -64,11 +86,15 @@ public class UtilComplement {
 					break;
 				}
 			}
+//			System.out.println("Hi " + (bigEnough ? spotThread.isAlive() : "") + ", " + rabitThread.isAlive());
+			assert spotThread.result != null || rabitThread.result != null;
+			if(bigEnough && !spotThread.isAlive() && !rabitThread.isAlive()) {
+				assert spotThread.result == rabitThread.result;
+			}
 			rabitThread.interrupt();
 			if(bigEnough) {
 				spotThread.interrupt();
 			}
-//			included = getAnyOne(options, alphabet, A, B, rA, rB);
 		}else {
 			Callable<IsIncluded> caller = null;
 			if(options.spot) {
@@ -82,6 +108,28 @@ public class UtilComplement {
 				included = caller.call();
 			} catch (Exception e) {
 				e.printStackTrace();
+			}
+			if( ! options.spot && options.verbose >= 2) {
+				caller = new SpotThread3(A, B, options);
+				try {
+					IsIncluded spot = caller.call();
+					if(spot.isIncluded() != included.isIncluded()) {
+						print(A, "A.ba");
+						print(B, "B.ba");
+						print(rA, "A1.ba");
+						print(rB, "B1.ba");
+						options.log.err("Wrong inclusion proof for RABIT");
+						options.log.err(included.isIncluded() + "");
+//						options.log.err("result = " + RABIT.isIncluded(rA, rB));
+						String[] args = new String[] {"A1.ba", "B1.ba", "-fastc"};
+						RABIT.main(args);
+						System.exit(-1);
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}
 		}
 		

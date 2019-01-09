@@ -4,13 +4,14 @@ import automata.FiniteAutomaton;
 import mainfiles.RABIT;
 import roll.main.Options;
 import roll.main.complement.IsIncluded;
+import roll.main.complement.UtilComplement;
 import roll.util.Pair;
 import roll.words.Alphabet;
 import roll.words.Word;
 
 public class RabitThread extends Thread implements IsIncluded {
 	
-	Boolean result = null;
+	public Boolean result = null;
 	FiniteAutomaton rA;
 	FiniteAutomaton rB;
 	
@@ -27,7 +28,8 @@ public class RabitThread extends Thread implements IsIncluded {
 	}
 	
 	@Override
-	public void run() {
+	public synchronized void run() {
+		// note that RABIT may change this two automata
 		result = RABIT.isIncluded(rA, rB);
 		if(! result) {
 			String prefixStr = RABIT.getPrefix();
@@ -36,7 +38,8 @@ public class RabitThread extends Thread implements IsIncluded {
 			Word suffix = alphabet.getWordFromString(suffixStr);
 			counterexample = new Pair<>(prefix, suffix);
 			options.log.println("A counterexmple has been found by RABIT");
-		}else {
+		}else if(result){
+//			options.log.println("HHIHH");
 			options.log.println("Inclusion has been proved by RABIT");
 		}
 	}
@@ -44,6 +47,7 @@ public class RabitThread extends Thread implements IsIncluded {
 	@SuppressWarnings("deprecation")
 	@Override
 	public void interrupt() {
+//		System.out.println("RABIT interrupt");
 		super.interrupt();
 		this.stop();
 	}

@@ -10,6 +10,7 @@ import roll.table.HashableValueBoolean;
 import roll.util.Pair;
 import roll.words.Word;
 
+@Deprecated
 public class TeacherNBASpot extends TeacherNBA {
 
 	public TeacherNBASpot(Options options, NBA target) {

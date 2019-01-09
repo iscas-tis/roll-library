@@ -55,7 +55,6 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
 
     private final NBA B;
     private final Options options;
-    private final FiniteAutomaton rB;
     private final Alphabet alphabet;
     
     public TeacherNBAComplement(Options options, NBA nba) {
@@ -63,7 +62,6 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
         this.options = options;
         this.B = nba;
         this.alphabet = nba.getAlphabet();
-        this.rB = UtilInclusion.toRABITNBA(nba);
     }
     
     @Override
@@ -117,12 +115,14 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
         options.log.println("Translating FDFA to under Buchi automaton ...");
         Automaton dkBF = FDFAOperations.buildUnderNBA(hypothesis);
         NBA BF = NBAOperations.fromDkNBA(dkBF, alphabet);
+        
         // record the constructed Buchi automaton
         options.stats.hypothesis = BF;
         ++ this.numInterBandBF;
         options.log.println("Checking the intersection of BF (" + BF.getStateSize() + ") and B ("+ B.getStateSize() + ")...");
         long t = timer.getCurrentTime();
         FiniteAutomaton rBF = UtilInclusion.toRABITNBA(BF);
+        FiniteAutomaton rB = UtilInclusion.toRABITNBA(B);
         IntersectionCheck checker = new IntersectionCheck(rBF, rB);
 //        NBAIntersectionCheck interCheck = new NBAIntersectionCheck(BF, B, true);
 //        boolean isEmpty = interCheck.isEmpty();

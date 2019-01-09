@@ -14,35 +14,27 @@ import roll.util.Pair;
 import roll.words.Word;
 
 public class TeacherNBAImpl extends TeacherNBA {
-
-	FiniteAutomaton rTarget = null;
 	
 	public TeacherNBAImpl(Options options, NBA target) {
 		super(options, target);
-		if(options.parallel || !options.spot) {
-			rTarget = UtilRABIT.toRABITNBA(target);
-		}
 	}
 
 	@Override
 	protected Query<HashableValue> checkEquivalence(NBA hypothesis) {
-		FiniteAutomaton rA = null, rB;
+		FiniteAutomaton rA = null, rB = null;
 		NBA A, B;
-		if(options.parallel || !options.spot) {
-			rA = UtilRABIT.toRABITNBA(hypothesis);
-		}
-		rB = rTarget;
 		if(target.getStateSize() > hypothesis.getStateSize()) {
             A = target;
             B = hypothesis;
-            FiniteAutomaton tmp = rA;
-            rA = rTarget;
-            rB = tmp;
         }else {
             A = hypothesis;
             B = target;
         }
 		
+		if(options.parallel || !options.spot) {
+			rA = UtilRABIT.toRABITNBA(A);
+			rB = UtilRABIT.toRABITNBA(B);
+		}
 		IsIncluded included = UtilComplement.checkInclusion(options, target.getAlphabet(), A, B, rA, rB);
 		Pair<Word, Word> result = included.getCounterexample();
         Query<HashableValue> ceQuery = null;
@@ -51,6 +43,11 @@ public class TeacherNBAImpl extends TeacherNBA {
             ceQuery.answerQuery(new HashableValueBoolean(false));
             return ceQuery;
         }
+        // RABIT may change rA and rB, so copy them again
+		if(options.parallel || !options.spot) {
+			rA = UtilRABIT.toRABITNBA(A);
+			rB = UtilRABIT.toRABITNBA(B);
+		}
         included = UtilComplement.checkInclusion(options, target.getAlphabet(), B, A, rB, rA);
         result = included.getCounterexample();
         if(result != null) {

@@ -21,7 +21,7 @@ import roll.words.Word;
 public class SpotThread1 extends Thread implements IsIncluded {
 	Boolean result = null;
 	
-	NBA spotBFC;
+	NBA spotA;
 	NBA spotB;
 	
 	Process process;
@@ -32,9 +32,9 @@ public class SpotThread1 extends Thread implements IsIncluded {
 	
 	Pair<Word, Word> counterexample;
 	boolean write = false;
-	
+	boolean entered = false;
 	public SpotThread1(NBA BFC, NBA B, Options options) {
-		this.spotBFC = BFC;
+		this.spotA = BFC;
 		this.spotB = B;
 		this.options = options;
 		this.flag = true;
@@ -51,14 +51,20 @@ public class SpotThread1 extends Thread implements IsIncluded {
 		File fileA = new File("/tmp/A.hoa");
         File fileB = new File("/tmp/B.hoa");
     	int numAp = UtilHelper.getNumBits(spotB.getAlphabetSize());
-		try {
-			Function<Integer, String> apList = x -> "a" + x;
-			NBAInclusionCheckTool.outputHOAStream(spotB, new PrintStream(new FileOutputStream(fileA)), numAp, apList);
-			NBAInclusionCheckTool.outputHOAStream(spotBFC, new PrintStream(new FileOutputStream(fileB)), numAp, apList);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-        write = true;
+    	synchronized(this) {
+        	// must execute part once entered ----- start------------
+        	try {
+    			Function<Integer, String> apList = x -> "a" + x;
+    			NBAInclusionCheckTool.outputHOAStream(spotA, new PrintStream(new FileOutputStream(fileA)), numAp, apList);
+    			NBAInclusionCheckTool.outputHOAStream(spotB, new PrintStream(new FileOutputStream(fileB)), numAp, apList);
+    		} catch (FileNotFoundException e) {
+    			e.printStackTrace();
+    		}
+        	// must execute part once entered -----------------
+    		// entered a point where this thread can be terminated
+            update();
+    	}
+    	
         final Runtime rt = Runtime.getRuntime();
         // check whether it is included in A.hoa
         command = command + fileA.getAbsolutePath() + " " + fileB.getAbsolutePath();
@@ -73,9 +79,11 @@ public class SpotThread1 extends Thread implements IsIncluded {
         	while(flag && process != null && process.isAlive()) {
         		// do nothing here
         	}
+//        	System.out.println("Finished...");
         } catch (IOException e1) {
             e1.printStackTrace();
         }
+        write = true;
         if(flag) {
         	final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line = null;
@@ -97,18 +105,21 @@ public class SpotThread1 extends Thread implements IsIncluded {
         }
 	}
 	
-	@SuppressWarnings("deprecation")
+//	@SuppressWarnings("deprecation")
 	@Override
 	public void interrupt() {
 		flag = false;
-		while(! write) {
-			// wait
+//		System.out.println("interrupt" + write + ", " + entered);
+		while(! write && entered) {
+			// if it entered run and has not finished output yet, then wait
 		}
 		if(process != null) {
 			process.destroyForcibly();
 		}
+//		System.out.println("interrupt");
 		super.interrupt();
-		this.stop();
+//		this.stop();
+//		System.out.println("stop");
 	}
 	
 	protected Pair<Word, Word> parse(Alphabet alphabet, String counterexample, int numAp, Function<String, Integer> apList) {
@@ -163,5 +174,13 @@ public class SpotThread1 extends Thread implements IsIncluded {
 	@Override
 	public Pair<Word, Word> getCounterexample() {
 		return counterexample;
+	}
+	
+	/**
+	 * when updating this two variables, no other threads should update them
+	 * */
+	private synchronized void update() {
+		this.entered = true;
+		this.write = true;
 	}
 }
