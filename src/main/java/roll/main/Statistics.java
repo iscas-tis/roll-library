@@ -106,8 +106,8 @@ public class Statistics {
         log.println("#TTR = " + timeOfTranslator + " (ms)" , indent , "    // time for the translator");
         
         log.println("#TLR = " + timeOfLearner + " (ms)" , indent , "    // time for the learner");
-        log.println("#TLRL = " + timeOfLearnerLeading + " (ms)"  , indent , "    // time for the learning leading automaton" );
-        log.println("#TLRP = " + timeOfLearnerProgress + " (ms)" , indent , "    // time for the learning progress automata" );
+        log.println("#TLRL = " + timeOfLearnerLeading + " (ms)"  , indent , "    // time for learning leading automaton" );
+        log.println("#TLRP = " + timeOfLearnerProgress + " (ms)" , indent , "    // time for learning progress automata" );
         
         if(options.runningMode == Options.RunningMode.SAMPLING) {
 //            log.println("#SW = " + numOfSamplingOmegaWords, indent, "    // #number of sample omega words");

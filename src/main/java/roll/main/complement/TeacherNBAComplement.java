@@ -123,6 +123,9 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
         long t = timer.getCurrentTime();
         FiniteAutomaton rBF = UtilInclusion.toRABITNBA(BF);
         FiniteAutomaton rB = UtilInclusion.toRABITNBA(B);
+        /**
+         * now check whether the complement B(F) intersects with the input automaton B
+         * */
         IntersectionCheck checker = new IntersectionCheck(rBF, rB);
 //        NBAIntersectionCheck interCheck = new NBAIntersectionCheck(BF, B, true);
 //        boolean isEmpty = interCheck.isEmpty();
@@ -174,7 +177,12 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
                 // by sampler
                 boolean hasCE = false;
                 
-                if(sampling) {
+                /**
+                 * the counterexamples returned from the sampler are nondeterministic,
+                 * we do not encourage nondeterminism in the tool 
+                 * **/
+                boolean nondet = false;
+                if(nondet && sampling) {
                     options.log.println("Sampling for a counterexample to the inclusion...");
                     SamplerIndexedMonteCarlo sampler = new SamplerIndexedMonteCarlo(options.epsilon, options.delta);
                     sampler.K = B.getStateSize();

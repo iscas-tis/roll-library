@@ -19,8 +19,14 @@ package roll.main;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import roll.parser.Format;
+import roll.util.Pair;
 
 
 /**
@@ -32,6 +38,15 @@ public class CLParser {
     
     private Options options;
     private final String version = "1.0";
+    private static final String TEST = "test";
+    private static final String PLAY = "play";
+    private static final String CONVERT = "convert";
+    private static final String LEARN = "learn";
+    private static final String COMPLEMENT = "complement";
+    private static final String INCLUDE = "include";
+    private static final String SAMPEQ = "sameq";
+    private static final String HELP = "help";
+
     
     public CLParser(OutputStream out) {
         options = new Options(out);
@@ -49,7 +64,7 @@ public class CLParser {
                 
         // parse input arguments
         for(int i = 0; i < args.length; i ++) {
-            if(args[i].compareTo("-h")==0 || args[i].compareTo("help")==0 ) {
+            if(args[i].compareTo("-h")==0 || args[i].compareTo(HELP)==0 ) {
                 printUsage();
             }
         }
@@ -70,11 +85,11 @@ public class CLParser {
                 i += 1;
                 continue;
             }
-            if(args[i].compareTo("learn") == 0) {
+            if(args[i].compareTo(LEARN) == 0) {
                 options.runningMode = Options.RunningMode.LEARNING;
                 continue;
             }
-            if(args[i].compareTo("convert") == 0) {
+            if(args[i].compareTo(CONVERT) == 0) {
                 options.runningMode = Options.RunningMode.CONVERTING;
                 if(i + 2 >= args.length) {
                     throw new UnsupportedOperationException("convert should be followed by two files");
@@ -90,15 +105,15 @@ public class CLParser {
                 }
                 i += 2;
             }
-            if(args[i].compareTo("play") == 0) {
+            if(args[i].compareTo(PLAY) == 0) {
                 options.runningMode = Options.RunningMode.PLAYING;
                 continue;
             }
-            if(args[i].compareTo("complement") == 0) {
+            if(args[i].compareTo(COMPLEMENT) == 0) {
                 options.runningMode = Options.RunningMode.COMPLEMENTING;
                 continue;
             }
-            if(args[i].compareTo("include") == 0) {
+            if(args[i].compareTo(INCLUDE) == 0) {
                 options.runningMode = Options.RunningMode.INCLUDING;
                 if(i + 2 >= args.length) {
                     throw new UnsupportedOperationException("include should be followed by two files");
@@ -115,23 +130,23 @@ public class CLParser {
                 i += 2;
                 continue;
             }
-            if(args[i].compareTo("test") == 0) {
+            if(args[i].compareTo(TEST) == 0) {
                 options.runningMode = Options.RunningMode.TESTING;
                 if(i + 2 >= args.length) {
                     throw new UnsupportedOperationException("include should be followed by two integers");
                 }
-                options.numOfTests = parseInt(args[i + 1], "test");
-                options.numOfStatesForTest = parseInt(args[i + 2], "test");
+                options.numOfTests = parseInt(args[i + 1], TEST);
+                options.numOfStatesForTest = parseInt(args[i + 2], TEST);
                 i += 2;
                 continue;
             }
-            if(args[i].compareTo("sameq") == 0) {
+            if(args[i].compareTo(SAMPEQ) == 0) {
                 options.runningMode = Options.RunningMode.SAMPLING;
                 if(i + 2 >= args.length) {
                     throw new UnsupportedOperationException("sameq should be followed by two doubles");
                 }
-                options.epsilon = parseDouble(args[i+1], "sameq");
-                options.delta = parseDouble(args[i+2], "sameq");
+                options.epsilon = parseDouble(args[i+1], SAMPEQ);
+                options.delta = parseDouble(args[i+2], SAMPEQ);
                 i += 2;
                 continue;
             }
@@ -285,8 +300,7 @@ public class CLParser {
         }
         return num;
     }
-    
-    
+        
     private void printUsage() {
         options.log.print(
                 "ROLL (Regular Omega Language Learning) v" + version + "\n\n");
@@ -307,45 +321,87 @@ public class CLParser {
         options.log.println("             or", indent, "java -jar ROLL.jar play");
         
         options.log.print("\ncommands:\n");
-        options.log.println("test k n", indent, "Test ROLL with k randomly generated BAs of n states");
-        options.log.println("play", indent, "You play the role as a teacher");
-        options.log.println("convert <A> <B>", indent, "Convert two input automata to the other format");
-        options.log.println("learn", indent, "Use RABIT or DK package tool as the teacher to learn the input BA");
-        options.log.println("complement", indent, "Use learning algorithm to complement the input BA");
-        options.log.println("include <A> <B>", indent, "Use learning algorithm to test the inclusion between A and B");
-        options.log.println("sameq e d", indent, "Sampling as the teacher to check equivalence of two BAs");
+        options.log.println(TEST + " k n", indent, "Test ROLL with k randomly generated BAs of n states");
+        options.log.println(PLAY, indent, "You play the role as a teacher");
+        options.log.println(CONVERT + " <A> <B>", indent, "Convert two input automata to the other format");
+        options.log.println(LEARN, indent, "Use RABIT or DK package tool as the teacher to learn the input BA");
+        options.log.println(COMPLEMENT, indent, "Use learning algorithm to complement the input BA");
+        options.log.println(INCLUDE + " <A> <B>", indent, "Use learning algorithm to test the inclusion between A and B");
+        options.log.println(SAMPEQ + " e d", indent, "Sampling as the teacher to check equivalence of two BAs");
         options.log.println("", indent + 4, "e - the probability that equivalence check is not correct");
         options.log.println("", indent + 4, "d - the probability of the confidence for equivalence check");
-        options.log.println("help", indent, "Show help page, same as the -h option");
+        options.log.println(HELP, indent, "Show help page, same as the -h option");
 
         options.log.print("\noptions:\n");
         
-        options.log.println("-h", indent, "Show this page");
-        options.log.println("-log <file>", indent, "Output log to <file>");
-        options.log.println("-v i", indent, "0 for silent (minimal output), 1 for normal (default, output stages in learning) and");
-        options.log.println("", indent, "2 for verbose (output internal data structures and may output unprintable characters)");
-        options.log.println("-out <A>", indent, "Output learned automaton in file <A>");
-        options.log.println("-out2 <A> <B>", indent, "Output two automata in files <A> and <B>");
-        options.log.println("-dot", indent, "Output automaton in DOT format");
-        options.log.println("-tree", indent, "Use tree-based data structure in learning");
-        options.log.println("-table", indent, "Use table-based data structure in learning (Default)");
+        final List<Pair<String, String>> optionStrs = Arrays.asList(
+        	new Pair<>("-h", "Show this page")
+        	, new Pair<>("-log <file>", "Output log to <file>")
+        	, new Pair<>("-v i", "0 for silent, 1 for normal output and 2 for verbose output")
+        	, new Pair<>("-out <A>", "Output learned automaton into file <A>")
+        	, new Pair<>("-out2 <A> <B>", "Output two automata into files <A> and <B>")
+        	, new Pair<>("-dot", "Automaton in DOT format as output")
+        	, new Pair<>("-tree", "Tree-based data structure for learning")
+//        	, new Pair<>("-lstar", "Use classic L* algorithm")
+//        	, new Pair<>("-dfa", "Use column based DFA learning algorithm")
+//        	, new Pair<>("-nlstar", "Use NL* learning algorithm")
+        	, new Pair<>("-table", "Table-based data structures for learning (Default)")
+        	, new Pair<>("-ldollar", "L$ automata for learning w-regular language")
+        	, new Pair<>("-periodic", "Peridoc FDFA for learning w-regular language")
+        	, new Pair<>("-recurrent", "Recurrent FDFA for learning w-regular languages")
+        	, new Pair<>("-syntactic", "Syntactic FDFA for learning w-regular languages (Default)")
+        	, new Pair<>("-over", "Over-approximation in BA construction for FDFA")
+        	, new Pair<>("-under", "Under-approximation in BA construction for FDFA (Default)")
+        	, new Pair<>("-bs", "Binary search for finding a suffix in counterexample")
+        	, new Pair<>("-lazyeq", "Equivalence check as the last resort")
+        	, new Pair<>("-ldba", "Limit-deterministic BA as the learned BA")
+        	, new Pair<>("-spot", "Spot for checking inclusion in learning/complementation")
+        	, new Pair<>("-rev", "Complement teacher to learn the target nondeterministic BA")
+        	, new Pair<>("-par", "RABIT and Spot work in parallel in the complement teacher")
+//        	, new Pair<>("-fdfa", "FDFA as the learning target")
+//        	, new Pair<>("-nba", "NBA as the learning target")
+        );
+        Comparator<Pair<String, String>> comparator = new Comparator<Pair<String, String>>() {
+			@Override
+			public int compare(Pair<String, String> o1, Pair<String, String> o2) {
+				int cmp = o1.getLeft().compareTo(o2.getLeft());
+				if(cmp != 0) {
+					return cmp;
+				}
+				cmp = o1.getRight().compareTo(o2.getRight());
+				return cmp;
+			}
+        };
+        Collections.sort(optionStrs, comparator);
+        for(final Pair<String, String> opt : optionStrs) {
+        	options.log.println(opt.getLeft(), indent, opt.getRight());
+        }
+//        options.log.println("-h", indent, "Show this page");
+//        options.log.println("-log <file>", indent, "Output log to <file>");
+//        options.log.println("-v i", indent, "0 for silent (minimal output), 1 for normal (default, output stages in learning) and");
+//        options.log.println("", indent, "2 for verbose (output internal data structures and may output unprintable characters)");
+//        options.log.println("-out <A>", indent, "Output learned automaton in file <A>");
+//        options.log.println("-out2 <A> <B>", indent, "Output two automata in files <A> and <B>");
+//        options.log.println("-dot", indent, "Output automaton in DOT format");
+//        options.log.println("-tree", indent, "Use tree-based data structure in learning");
+//        options.log.println("-table", indent, "Use table-based data structure in learning (Default)");
 //        options.log.println("-lstar", indent, "Use classic L* algorithm");
 //        options.log.println("-dfa", indent, "Use column based DFA learning algorithm");
 //        options.log.println("-nlstar", indent, "Use NL* learning algorithm");
 //        options.log.println("-rdfa", indent, "Use reverse DFA learning algorithm");
-        options.log.println("-ldollar", indent, "Use L$ automata to learn Omega regular language");
-        options.log.println("-periodic", indent, "Use peridoc FDFA to learn Omega regular language");
-        options.log.println("-recurrent", indent, "Use recurrent FDFA to learn Omega regular language");
-        options.log.println("-syntactic", indent, "Use syntactic FDFA to learn Omega regular language (Default)");
-        options.log.println("-over", indent, "Use over-approximation in BA construction for FDFA");
-        options.log.println("-under", indent, "Use under-approximation in BA construction for FDFA (Default)");
-        options.log.println("-bs", indent, "Use binary search to find counterexample");
-        options.log.println("-lazyeq", indent, "Equivalence check as the last resort");
-        options.log.println("-ldba", indent, "Output learned BA as a limit deterministic BA");
-        options.log.println("-spot", indent, "Use also spot to check inclusion in complementation");
-        options.log.println("-rev", indent, "Use complement teacher to learn the target BA");
-        options.log.println("-par", indent, "RABIT and SPot work in parallel in complement teacher");
-
+//        options.log.println("-ldollar", indent, "Use L$ automata to learn Omega regular language");
+//        options.log.println("-periodic", indent, "Use peridoc FDFA to learn Omega regular language");
+//        options.log.println("-recurrent", indent, "Use recurrent FDFA to learn Omega regular language");
+//        options.log.println("-syntactic", indent, "Use syntactic FDFA to learn Omega regular language (Default)");
+//        options.log.println("-over", indent, "Use over-approximation in BA construction for FDFA");
+//        options.log.println("-under", indent, "Use under-approximation in BA construction for FDFA (Default)");
+//        options.log.println("-bs", indent, "Use binary search to find counterexample");
+//        options.log.println("-lazyeq", indent, "Equivalence check as the last resort");
+//        options.log.println("-ldba", indent, "Output learned BA as a limit deterministic BA");
+//        options.log.println("-spot", indent, "Use also spot to check inclusion in complementation");
+//        options.log.println("-rev", indent, "Use complement teacher to learn the target BA");
+//        options.log.println("-par", indent, "RABIT and SPot work in parallel in complement teacher");
+//
 //        options.log.println("-fdfa", indent, "Learning target is an FDFA");
 //        options.log.println("-nba", indent, "Learning target is a BA");
         System.exit(0);

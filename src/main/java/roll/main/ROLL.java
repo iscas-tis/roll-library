@@ -104,7 +104,7 @@ public final class ROLL {
             options.log.println("Testing case " + (n + 1) + " ...");
             NBA nba = NBAGenerator.getRandomNBA(options.numOfStatesForTest, numLetter);
             try{
-                options.log.println("target: \n" + nba.toString());
+                options.log.println("target: \n" + nba.toBA());
                 Executor.executeRABIT(options, nba);
             }catch (Exception e)
             {
