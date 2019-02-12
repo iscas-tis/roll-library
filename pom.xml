@@ -132,5 +132,12 @@
   		<artifactId>jna</artifactId>
   		<version>5.2.0</version>
   	</dependency>
+  	<dependency>
+        <groupId>spotj</groupId>
+        <artifactId>spotj</artifactId>
+        <scope>system</scope>
+        <systemPath>${project.basedir}/lib/spotj.jar</systemPath>
+        <version>0.1</version>
+    </dependency>
   </dependencies>
 </project>

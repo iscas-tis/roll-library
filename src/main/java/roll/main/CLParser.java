@@ -63,13 +63,17 @@ public class CLParser {
     public void prepareOptions(String []args) {
                 
         // parse input arguments
+    	boolean play = false;
         for(int i = 0; i < args.length; i ++) {
             if(args[i].compareTo("-h")==0 || args[i].compareTo(HELP)==0 ) {
                 printUsage();
             }
+            if(args[i].compareTo(PLAY) == 0) {
+            	play = true;
+            }
         }
         
-        if(args.length < 2) {
+        if(!play && args.length < 2) {
             printUsage();
         }
 
