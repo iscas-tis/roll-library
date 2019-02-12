@@ -22,7 +22,9 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import dk.brics.automaton.Automaton;
 import roll.automata.NFA;
+import roll.automata.operations.FDFAOperations;
 import roll.learner.LearnerBase;
 import roll.learner.dfa.table.LearnerDFATableColumn;
 import roll.learner.dfa.table.LearnerDFATableLStar;
@@ -48,7 +50,8 @@ public class InteractiveMode {
     public static void interact(Options options) {
         // prepare the alphabet
         Alphabet alphabet = prepareAlphabet(options);
-        MembershipOracle<HashableValue> teacher = getMembershipOracle(options);
+        KnowledgeBase kb = new KnowledgeBase();
+        MembershipOracle<HashableValue> teacher = getMembershipOracle(options, kb);
         LearnerBase<? extends NFA> learner = getLearner(options, alphabet, teacher);
         
         options.log.println("Initializing learning...");
@@ -70,17 +73,17 @@ public class InteractiveMode {
         System.out.println("Congratulations! Learning completed...");
     }
     
-    public static MembershipOracle<HashableValue> getMembershipOracle(Options options) {
+    public static MembershipOracle<HashableValue> getMembershipOracle(Options options, KnowledgeBase kb) {
         if(options.algorithm == Options.Algorithm.NBA_LDOLLAR
              || options.algorithm == Options.Algorithm.PERIODIC
              || options.algorithm == Options.Algorithm.SYNTACTIC
              || options.algorithm == Options.Algorithm.RECURRENT) {
-            return new MQNBAInteractive();
+            return new MQNBAInteractive(kb);
         }else if(options.algorithm == Options.Algorithm.DFA_COLUMN
              || options.algorithm == Options.Algorithm.DFA_LSTAR
              || options.algorithm == Options.Algorithm.DFA_KV
              || options.algorithm == Options.Algorithm.NFA_NLSTAR) {
-            return new MQDFAInteractive();
+            return new MQDFAInteractive(kb);
         }else {
             throw new UnsupportedOperationException("Unsupported Learner");
         }
@@ -297,6 +300,12 @@ public class InteractiveMode {
     }
     
     private static class MQNBAInteractive implements MembershipOracle<HashableValue> {
+    	
+    	KnowledgeBase kb;
+    	
+    	public MQNBAInteractive(KnowledgeBase kb) {
+    		this.kb = kb;
+    	}
 
         @Override
         public HashableValue answerMembershipQuery(Query<HashableValue> query) {
@@ -305,23 +314,43 @@ public class InteractiveMode {
             if(suffix.isEmpty()) {
                 return new HashableValueBoolean(false);
             }
-            System.out.println("Is w-word (" + prefix.toStringWithAlphabet() + ", " + suffix.toStringWithAlphabet()  + ") in the unknown languge: 1/0");
-            boolean answer = getInputAnswer();
-            HashableValue result = new HashableValueBoolean(answer);
-            query.answerQuery(result);
-            return result;
+            // check whether the word is in knowledge base
+            Boolean memeq = kb.isInKnowledgeBase(prefix, suffix);
+            if(memeq != null) {
+            	return new HashableValueBoolean(memeq);
+            }else {
+            	System.out.println("Is w-word (" + prefix.toStringWithAlphabet() + ", " + suffix.toStringWithAlphabet()  + ") in the unknown languge: 1/0");
+                boolean answer = getInputAnswer();
+                kb.add(prefix, suffix, answer);
+                HashableValue result = new HashableValueBoolean(answer);
+                query.answerQuery(result);
+                return result;
+            }
         }
     }
     
     private static class MQDFAInteractive implements MembershipOracle<HashableValue> {
+    	
+    	KnowledgeBase kb;
+    	
+    	public MQDFAInteractive(KnowledgeBase kb) {
+    		this.kb = kb;
+    	}
+
         @Override
         public HashableValue answerMembershipQuery(Query<HashableValue> query) {
             Word word = query.getQueriedWord();
-            System.out.println("Is word " + word.toStringWithAlphabet() + " in the unknown languge: 1/0");
-            boolean answer = getInputAnswer();
-            HashableValue result = new HashableValueBoolean(answer);
-            query.answerQuery(result);
-            return result;
+            Boolean memeq = kb.isInKnowledgeBase(word);
+            if(memeq != null) {
+            	return new HashableValueBoolean(memeq);
+            }else {
+            	System.out.println("Is word " + word.toStringWithAlphabet() + " in the unknown languge: 1/0");
+                boolean answer = getInputAnswer();
+                kb.add(word, answer);
+                HashableValue result = new HashableValueBoolean(answer);
+                query.answerQuery(result);
+                return result;
+            }
         }
     }
     
@@ -341,6 +370,56 @@ public class InteractiveMode {
         Query<HashableValue> ceQuery = new QuerySimple<>(wordEmpty, wordEmpty);
         ceQuery.answerQuery(new HashableValueBoolean(answer));
         return ceQuery;
+    }
+    
+    private static class KnowledgeBase {
+    	
+    	Automaton positives;
+    	Automaton negatives;
+    	
+    	public KnowledgeBase() {
+    		this.positives = new Automaton();
+    		this.negatives = new Automaton();
+    	}
+    	
+    	public Boolean isInKnowledgeBase(Word prefix, Word suffix) {
+    		String word = prefix.toStringExact() + Alphabet.DOLLAR + suffix.toStringExact();
+    		if(positives.run(word)) {
+    			return true;
+    		}
+    		if(negatives.run(word)) {
+    			return false;
+    		}
+			return null;
+    	}
+    	
+    	public Boolean isInKnowledgeBase(Word word) {
+    		if(positives.run(word.toStringExact())) {
+    			return true;
+    		}
+    		if(negatives.run(word.toStringExact())) {
+    			return false;
+    		}
+    		return null;
+    	}
+    	
+    	public void add(Word prefix, Word suffix, boolean result) {
+    		Automaton ddollar = FDFAOperations.buildDDollar(prefix, suffix);
+    		if(result) {
+    			positives = positives.union(ddollar);
+    		}else {
+    			negatives = negatives.union(ddollar);
+    		}
+    	}
+    	
+    	public void add(Word word, boolean result) {
+    		if(result) {
+    			positives = positives.union(Automaton.makeString(word.toStringExact()));
+    		}else {
+    			negatives = negatives.union(Automaton.makeString(word.toStringExact()));
+    		}
+    	}
+    	
     }
 
 }
