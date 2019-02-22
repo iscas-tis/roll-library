@@ -214,6 +214,9 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
                         prefix = included.getCounterexample().getLeft();
                         suffix = included.getCounterexample().getRight();
                         isEq = false;
+                        if(prefix == null || suffix == null) {
+                        	throw new RuntimeException("Reported not included yet no counterexample has been returned");
+                        }
                     }
                 }
             }
