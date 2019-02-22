@@ -87,6 +87,8 @@ public class ParserHOA implements Parser, HOAConsumer{
     protected final Options options;
     protected final Alphabet alphabet;
     
+    private boolean initialAdded = false;
+    
     public ParserHOA(Options options, String file) {
         this.options = options;
         this.automaton = new Automaton();
@@ -219,9 +221,13 @@ public class ParserHOA implements Parser, HOAConsumer{
     // here we do not allow this
     @Override
     public void addStartStates(List<Integer> stateConjunction) throws HOAConsumerException {
+    	if(initialAdded) {
+    		throw new UnsupportedOperationException( "only allow one initial state and addStartStates has already been called");
+    	}
         if(stateConjunction.size() != 1) {
             throw new UnsupportedOperationException( "only allow one initial state one time");
         }
+        initialAdded = true;
         int initNr = stateConjunction.get(0);
         automaton.setInitialState(indexStateMap.get(initNr));
     }
