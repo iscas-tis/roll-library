@@ -15,11 +15,17 @@ import automata.FAState;
 import automata.FiniteAutomaton;
 import mainfiles.RABIT;
 import roll.automata.NBA;
+import roll.automata.operations.NBAOperations;
 import roll.main.Options;
 import roll.oracle.nba.rabit.RabitThread;
 import roll.oracle.nba.rabit.RabitThread3;
 import roll.oracle.nba.spot.SpotThread3;
+import roll.query.Query;
+import roll.table.HashableValue;
+import roll.table.HashableValueBoolean;
+import roll.util.Pair;
 import roll.words.Alphabet;
+import roll.words.Word;
 
 public class UtilComplement {
 	
@@ -35,6 +41,31 @@ public class UtilComplement {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static Pair<Word, Word> getCounterexample(Alphabet alphabet, List<String> prefix, List<String> suffix) {
+        int[] pre = new int[prefix.size()];
+        for(int i = 0; i < pre.length; i ++) {
+            pre[i] = alphabet.indexOf(prefix.get(i).charAt(0));
+        }
+        int[] suf = new int[suffix.size()];
+        for(int i = 0; i < suf.length; i ++) {
+            suf[i] = alphabet.indexOf(suffix.get(i).charAt(0));
+        }
+        return new Pair<>(alphabet.getArrayWord(pre), alphabet.getArrayWord(suf));
+    }
+	
+	public static boolean answerMembershipQuery(NBA B, Query<HashableValue> query) {
+        boolean result;
+        Word prefix = query.getPrefix();
+        Word suffix = query.getSuffix();
+        
+        if(suffix.isEmpty()) {
+            return false;
+        }else {
+            result = NBAOperations.accepts(B, prefix, suffix);
+        }
+        return result;
 	}
 	
 	public static void print(FiniteAutomaton nba, String file) {

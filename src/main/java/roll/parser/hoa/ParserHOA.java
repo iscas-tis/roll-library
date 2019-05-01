@@ -87,7 +87,7 @@ public class ParserHOA implements Parser, HOAConsumer{
     protected final Options options;
     protected final Alphabet alphabet;
     
-    private boolean initialAdded = false;
+    protected boolean initialAdded = false;
     
     public ParserHOA(Options options, String file) {
         this.options = options;

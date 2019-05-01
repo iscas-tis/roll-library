@@ -78,6 +78,37 @@ public class PairParserHOA extends ParserHOA implements PairParser {
             e.printStackTrace();
         }
     }
+    
+    public PairParserHOA(Options options, InputStream fileA, InputStream fileB) {
+        super(options);
+        try {
+            InputStream fileInputStream = fileA;
+            this.automaton = new Automaton();
+            HOAFParser.parseHOA(fileInputStream, this);
+            this.A = nba;
+            fileInputStream = fileB;
+            this.indexStateMap.clear();
+            this.aliasBddMap.clear();
+            this.automaton = new Automaton();
+            this.initialAdded = false;
+            HOAFParser.parseHOA(fileInputStream, this);
+            this.B = nba;
+            // now check if every possible combination of AP are there
+            BDD leftLabels = atomRemaining.not();
+            // compute the left labels
+            if(! leftLabels.isZero()) {
+                BDD oneSat = leftLabels.fullSatOne();
+                valsRemaining = bdd.toOneFullValuation(oneSat);
+                oneSat.free();
+                // add those letters which did not appear before
+                getValFromAtom(valsRemaining);
+            }
+            atomRemaining.free();
+            atomRemaining = leftLabels;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
 //  
     @Override
     public NBA parse() {

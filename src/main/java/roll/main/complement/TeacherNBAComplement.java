@@ -69,15 +69,7 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
         Timer timer = new Timer();
         timer.start();
         
-        boolean result;
-        Word prefix = query.getPrefix();
-        Word suffix = query.getSuffix();
-        
-        if(suffix.isEmpty()) {
-            return new HashableValueBoolean(false);
-        }else {
-            result = NBAOperations.accepts(B, prefix, suffix);
-        }
+        boolean result = UtilComplement.answerMembershipQuery(B, query);
         
         timer.stop();
         options.stats.timeOfMembershipQuery += timer.getTimeElapsed();
@@ -97,15 +89,7 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
     public boolean sampling = false;
     
     private Pair<Word, Word> getCounterexample(List<String> prefix, List<String> suffix) {
-        int[] pre = new int[prefix.size()];
-        for(int i = 0; i < pre.length; i ++) {
-            pre[i] = alphabet.indexOf(prefix.get(i).charAt(0));
-        }
-        int[] suf = new int[suffix.size()];
-        for(int i = 0; i < suf.length; i ++) {
-            suf[i] = alphabet.indexOf(suffix.get(i).charAt(0));
-        }
-        return new Pair<>(alphabet.getArrayWord(pre), alphabet.getArrayWord(suf));
+        return UtilComplement.getCounterexample(alphabet, prefix, suffix);
     }
 
     @Override
