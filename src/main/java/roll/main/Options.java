@@ -20,6 +20,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 import roll.parser.Format;
+import roll.parser.PairParser;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -92,6 +93,11 @@ public class Options {
     // statistics during learning procedure
     public Statistics stats;
     
+    // for ltl to ldba or dpa
+    public PairParser parser;
+    
+    public String ltl = null;
+    
     public Options(OutputStream out) {
         this.log = new Log(this, new PrintStream(out));
         this.stats = new Statistics(this);
@@ -108,6 +114,7 @@ public class Options {
     }
     
     public static enum RunningMode {
+    	TRANSLATING,
         TESTING,
         PLAYING,
         CONVERTING,    // convert BA to Hanoi format or vice versa
@@ -115,6 +122,7 @@ public class Options {
         SAMPLING,
         COMPLEMENTING, // complement input BA
         INCLUDING;     // inclusion testing for input BAs
+    	
         
         boolean isTestMode() {
             return this == TESTING;
