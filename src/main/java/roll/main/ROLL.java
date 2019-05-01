@@ -36,6 +36,7 @@ import roll.learner.nba.lomega.translator.TranslatorFDFA;
 import roll.learner.nba.lomega.translator.TranslatorFDFAUnder;
 import roll.main.complement.TeacherNBAComplement;
 import roll.main.inclusion.NBAInclusionCheck;
+import roll.main.ltl2dpa.TeacherLTL2LDBA;
 import roll.parser.PairParser;
 import roll.parser.Parser;
 import roll.parser.UtilParser;
@@ -92,6 +93,10 @@ public final class ROLL {
             options.log.info("ROLL for BA learning via sampling...");
             runLearningMode(options, true);
             break;
+        case TRANSLATING:
+        	options.log.info("ROLL for translating formula " + options.ltl);
+        	runTranslatingMode(options);
+        	break;
         default :
                 options.log.err("Incorrect running mode.");
         }
@@ -290,6 +295,68 @@ public final class ROLL {
         options.stats.numOfStatesInHypothesis = complement.getStateSize();
         options.stats.numOfTransInTraget = NFAOperations.getNumberOfTransitions(input);
         options.stats.numOfTransInHypothesis = NFAOperations.getNumberOfTransitions(complement);
+        timer.stop();
+        options.stats.timeInTotal = timer.getTimeElapsed();
+        
+        options.stats.print();
+    }
+    
+   public static void runTranslatingMode(Options options) {
+        
+        Timer timer = new Timer();
+        timer.start();
+        // prepare the parser
+        TeacherLTL2LDBA teacher = new TeacherLTL2LDBA(options, options.ltl);
+        PairParser parser = options.parser;
+        LearnerFDFA learner = UtilLOmega.getLearnerFDFA(options, teacher.getAlphabet(), teacher);
+        options.log.println("Initializing learner...");
+        long t = timer.getCurrentTime();
+        learner.startLearning();
+        t = timer.getCurrentTime() - t;
+        options.stats.timeOfLearner += t;
+        FDFA hypothesis = null;
+        while(true) {
+            options.log.verbose("Table/Tree is both closed and consistent\n" + learner.toString());
+            hypothesis = learner.getHypothesis();
+            // along with ce
+            options.log.println("Resolving equivalence query for hypothesis...  ");
+            Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(hypothesis);
+            boolean isEq = ceQuery.getQueryAnswer().getLeft();
+            if(isEq) {
+                // store statistics
+                options.stats.numOfStatesInLeading = hypothesis.getLeadingFA().getStateSize();
+                for(int state = 0; state < hypothesis.getLeadingFA().getStateSize(); state ++) {
+                    options.stats.numOfStatesInProgress.add(hypothesis.getProgressFA(state).getStateSize());
+                }
+                break;
+            }
+            // counterexample analysis
+            ceQuery.answerQuery(new HashableValueBoolean(ceQuery.getQueryAnswer().getRight()));
+            TranslatorFDFA translator = new TranslatorFDFAUnder(learner);
+            translator.setQuery(ceQuery);
+            while(translator.canRefine()) {
+                ceQuery = translator.translate();
+                options.log.verbose("Counterexample is: " + ceQuery.toString());
+                t = timer.getCurrentTime();
+                options.log.println("Refining current hypothesis...");
+                learner.refineHypothesis(ceQuery);
+                t = timer.getCurrentTime() - t;
+                options.stats.timeOfLearner += t;
+                if(options.optimization != Options.Optimization.LAZY_EQ) break;
+            }            
+        }
+        options.log.println("Learning completed...");
+        
+        teacher.print();
+        Automaton dkBFC = FDFAOperations.buildUnderLDBA(hypothesis);
+        NBA BFC = NBAOperations.fromDkNBA(dkBFC, teacher.getAlphabet());
+        // output target automaton
+        options.log.println("\ntarget automaton:");
+        parser.print(BFC, options.log.getOutputStream());
+        parser.close();
+        // output statistics
+        options.stats.numOfStatesInHypothesis = BFC.getStateSize();
+        options.stats.numOfTransInHypothesis = NFAOperations.getNumberOfTransitions(BFC);
         timer.stop();
         options.stats.timeInTotal = timer.getTimeElapsed();
         
