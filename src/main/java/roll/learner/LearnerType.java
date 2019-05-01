@@ -30,6 +30,7 @@ public enum LearnerType {
 	NFA_RDFA,
 	WEIGHT,
 	NBA_FDFA,
+	DPA_FDFA,
 	NBA_LDOLLAR,
 	NBA_MP,
 	
