@@ -335,6 +335,7 @@ public class CLParser {
         options.log.println("             or", indent, "java -jar ROLL.jar include A.ba B.ba");
         options.log.println("             or", indent, "java -jar ROLL.jar convert A.ba B.ba -out2 A.hoa B.hoa");
         options.log.println("             or", indent, "java -jar ROLL.jar play");
+        options.log.println("             or", indent, "java -jar ROLL.jar translate \"F G a\"");
         
         options.log.print("\ncommands:\n");
         options.log.println(TEST + " k n", indent, "Test ROLL with k randomly generated BAs of n states");
