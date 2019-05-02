@@ -348,7 +348,12 @@ public final class ROLL {
         options.log.println("Learning completed...");
         
         teacher.print();
-        Automaton dkBFC = FDFAOperations.buildUnderLDBA(hypothesis);
+        Automaton dkBFC = null;
+        if(options.automaton.isLDBA()) {
+        	dkBFC = FDFAOperations.buildUnderLDBA(hypothesis);
+        }else {
+        	dkBFC = FDFAOperations.buildUnderNBA(hypothesis);
+        }
         NBA BFC = NBAOperations.fromDkNBA(dkBFC, teacher.getAlphabet());
         // output target automaton
         options.log.println("\ntarget automaton:");
