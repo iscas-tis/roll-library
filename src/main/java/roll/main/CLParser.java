@@ -46,7 +46,7 @@ public class CLParser {
     private static final String INCLUDE = "include";
     private static final String SAMPEQ = "sameq";
     private static final String HELP = "help";
-    private static final String TRANSLATE = "trans";
+    private static final String TRANSLATE = "translate";
 
     
     public CLParser(OutputStream out) {
@@ -346,6 +346,8 @@ public class CLParser {
         options.log.println(SAMPEQ + " e d", indent, "Sampling as the teacher to check equivalence of two BAs");
         options.log.println("", indent + 4, "e - the probability that equivalence check is not correct");
         options.log.println("", indent + 4, "d - the probability of the confidence for equivalence check");
+        options.log.println(TRANSLATE + " <ltl>", indent, "Learning the BA specified by the input LTL formula");
+
         options.log.println(HELP, indent, "Show help page, same as the -h option");
 
         options.log.print("\noptions:\n");

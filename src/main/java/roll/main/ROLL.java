@@ -94,7 +94,7 @@ public final class ROLL {
             runLearningMode(options, true);
             break;
         case TRANSLATING:
-        	options.log.info("ROLL for translating formula " + options.ltl);
+        	options.log.info("ROLL for translating formula \"" + options.ltl + "\"");
         	runTranslatingMode(options);
         	break;
         default :
