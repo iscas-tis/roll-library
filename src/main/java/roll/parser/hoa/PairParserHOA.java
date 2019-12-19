@@ -58,6 +58,7 @@ public class PairParserHOA extends ParserHOA implements PairParser {
             this.indexStateMap.clear();
             this.aliasBddMap.clear();
             this.automaton = new Automaton();
+            this.initialAdded = false;
             HOAFParser.parseHOA(fileInputStream, this);
             this.B = nba;
             // now check if every possible combination of AP are there
