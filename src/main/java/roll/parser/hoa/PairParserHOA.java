@@ -32,6 +32,7 @@ import jhoafparser.consumer.HOAConsumerException;
 import jhoafparser.parser.HOAFParser;
 import jhoafparser.parser.generated.ParseException;
 import net.sf.javabdd.BDD;
+import net.sf.javabdd.BDDPairing;
 import roll.automata.NBA;
 import roll.automata.operations.NBAOperations;
 import roll.bdd.BDDManager;
@@ -47,6 +48,8 @@ import roll.parser.PairParser;
 public class PairParserHOA extends ParserHOA implements PairParser {
     protected NBA A;
     protected NBA B;
+    BDDPairing apB2A = null;
+    
     public PairParserHOA(Options options, String fileA, String fileB) {
         super(options);
         try {
@@ -58,6 +61,7 @@ public class PairParserHOA extends ParserHOA implements PairParser {
             this.indexStateMap.clear();
             this.aliasBddMap.clear();
             this.automaton = new Automaton();
+            this.apB2A = this.bdd.makeBDDPair();
             this.initialAdded = false;
             HOAFParser.parseHOA(fileInputStream, this);
             this.B = nba;
@@ -141,8 +145,12 @@ public class PairParserHOA extends ParserHOA implements PairParser {
                 throw new UnsupportedOperationException("Alphabets not the same between A and B");
             }
             for(int i = 0; i < aps.size(); i ++) {
-                if(!apset.getAP(i).equals(aps.get(i))) {
+            	int apIndex = apset.indexOf(aps.get(i));
+                if(apIndex < 0) {
                     throw new UnsupportedOperationException("Alphabets not the same between A and B");
+                }else {
+                	// index of B mapped to index of A
+                	apB2A.set(i, apIndex);
                 }
             }
         }
@@ -184,6 +192,10 @@ public class PairParserHOA extends ParserHOA implements PairParser {
             expr = aliasBddMap.get(labelExpr.getAtom().getAliasName()).id();
         }else {
             expr = bdd.fromBoolExpr(labelExpr);
+        }
+        // replace bdd values of B with those of A
+        if(apB2A != null) {
+        	expr = expr.replaceWith(apB2A);
         }
         Set<Valuation> vals = null;
         if(apset.size() <= VAR_NUM_BOUND_TO_USE_BDD) {
