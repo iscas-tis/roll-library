@@ -43,6 +43,7 @@ public class CLParser {
     private static final String LEARN = "learn";
     private static final String COMPLEMENT = "complement";
     private static final String INCLUDE = "include";
+    private static final String INCLUDE2 = "include2";
     private static final String SAMPEQ = "sameq";
     private static final String HELP = "help";
     private static final String TRANSLATE = "translate";
@@ -148,6 +149,27 @@ public class CLParser {
                     throw new UnsupportedOperationException("Unsupported input format");
                 }
                 i += 2;
+                continue;
+            }
+            if(args[i].compareTo(INCLUDE2) == 0) {
+                options.runningMode = Options.RunningMode.INCLUDING;
+                if(i + 4 >= args.length) {
+                    throw new UnsupportedOperationException(INCLUDE2 + " should be followed by two doubles and two files");
+                }
+                options.epsilon = parseDouble(args[i+1], INCLUDE2);
+                options.delta = parseDouble(args[i+2], INCLUDE2);
+                i += 2;
+                options.inputA = args[i + 1];
+                options.inputB = args[i + 2];
+                if(args[i + 1].endsWith(".ba") && args[i + 2].endsWith(".ba")) {
+                    options.format = Format.BA;
+                }else if(args[i + 1].endsWith(".hoa") && args[i + 2].endsWith(".hoa")){
+                    options.format = Format.HOA;
+                }else {
+                    throw new UnsupportedOperationException("Unsupported input format: " + args[i + 1]);
+                }
+                i += 2;
+                options.nonIncusion = true;
                 continue;
             }
             if(args[i].compareTo(TEST) == 0) {
@@ -351,6 +373,9 @@ public class CLParser {
         options.log.println(SAMPEQ + " e d", indent, "Sampling as the teacher to check equivalence of two BAs");
         options.log.println("", indent + 4, "e - the probability that equivalence check is not correct");
         options.log.println("", indent + 4, "d - the probability of the confidence for equivalence check");
+        options.log.println(INCLUDE2 + " e d <A> <B>", indent, "Sampling to prove non-inclusion between A and B");
+        options.log.println("", indent + 4, "e - the probability that the result is not correct");
+        options.log.println("", indent + 4, "d - the probability of the confidence for the check");
         options.log.println(TRANSLATE + " <ltl>", indent, "Learning the BA specified by the input LTL formula");
 
         options.log.println(HELP, indent, "Show help page, same as the -h option");

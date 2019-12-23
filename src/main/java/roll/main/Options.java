@@ -59,6 +59,9 @@ public class Options {
     // output mode
     public boolean silent = false;
     
+    // only noninclusion
+    public boolean nonIncusion = false;
+    
     // search method for counterexample
     public boolean binarySearch = false;
     

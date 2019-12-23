@@ -59,9 +59,12 @@ public class NBAInclusionCheck {
     }
     
     public static void execute(Options options) {
-        options.epsilon = 0.0018;
-        options.delta = 0.0001;
-        
+    	
+    	if(! options.nonIncusion) {
+    		options.epsilon = 0.0018;
+            options.delta = 0.0001;
+    	}
+
         if(options.inputA == null || options.inputB == null) {
             throw new UnsupportedOperationException("No input files");
         }
@@ -130,6 +133,12 @@ public class NBAInclusionCheck {
                 }
             }
         }
+        
+        if(options.nonIncusion) {
+        	options.log.println("The probability to find a counterexample via further sampling is less than " + options.delta);
+        	System.exit(0);
+        }
+        	
 
         options.log.println("Start using Forward/Delayed simulation algorithm to prove inclusion...");
         FiniteAutomaton aut1 = UtilInclusion.toRABITNBA(A);
