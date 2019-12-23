@@ -98,6 +98,8 @@ public class Options {
     
     public String ltl = null;
     
+    public boolean finite = false;
+    
     public Options(OutputStream out) {
         this.log = new Log(this, new PrintStream(out));
         this.stats = new Statistics(this);

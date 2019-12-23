@@ -261,6 +261,11 @@ public final class BDDManager {
         }
         return bddPair;
     }
+    
+    public BDDPairing makeBDDPair() {
+    	BDDPairing bddPair = bdd.makePair();
+    	return bddPair;
+    }
 
     public void close() {
         bdd.done();

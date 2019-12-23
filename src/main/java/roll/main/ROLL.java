@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 import dk.brics.automaton.Automaton;
+import roll.automata.DFA;
 import roll.automata.FDFA;
 import roll.automata.NBA;
 import roll.automata.operations.FDFAOperations;
@@ -30,6 +31,9 @@ import roll.automata.operations.NBAGenerator;
 import roll.automata.operations.NBAOperations;
 import roll.automata.operations.NFAOperations;
 import roll.automata.operations.nba.inclusion.NBAInclusionCheckTool;
+import roll.learner.LearnerDFA;
+import roll.learner.dfa.table.LearnerDFATableColumn;
+import roll.learner.dfa.tree.LearnerDFATreeColumn;
 import roll.learner.fdfa.LearnerFDFA;
 import roll.learner.nba.lomega.UtilLOmega;
 import roll.learner.nba.lomega.translator.TranslatorFDFA;
@@ -37,6 +41,7 @@ import roll.learner.nba.lomega.translator.TranslatorFDFAUnder;
 import roll.main.complement.TeacherNBAComplement;
 import roll.main.inclusion.NBAInclusionCheck;
 import roll.main.ltl2dpa.TeacherLTL2LDBA;
+import roll.main.ltlf2dfa.TeacherLTLf2DFA;
 import roll.parser.PairParser;
 import roll.parser.Parser;
 import roll.parser.UtilParser;
@@ -44,6 +49,7 @@ import roll.query.Query;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
 import roll.util.Timer;
+import roll.words.Word;
 
 /**
  * 
@@ -94,8 +100,12 @@ public final class ROLL {
             runLearningMode(options, true);
             break;
         case TRANSLATING:
-        	options.log.info("ROLL for translating formula \"" + options.ltl + "\"");
-        	runTranslatingMode(options);
+        	options.log.info("ROLL for translating formula \"" + options.ltl + "\"" + (options.finite ? " over finite words" : " over infinite words"));
+        	if(options.finite) {
+        		runTranslatingLTLfMode(options);
+        	}else {
+            	runTranslatingLTLMode(options);
+        	}
         	break;
         default :
                 options.log.err("Incorrect running mode.");
@@ -301,7 +311,7 @@ public final class ROLL {
         options.stats.print();
     }
     
-   public static void runTranslatingMode(Options options) {
+   public static void runTranslatingLTLMode(Options options) {
         
         Timer timer = new Timer();
         timer.start();
@@ -367,6 +377,67 @@ public final class ROLL {
         
         options.stats.print();
     }
+   
+   public static void runTranslatingLTLfMode(Options options) {
+       
+       Timer timer = new Timer();
+       timer.start();
+       // prepare the parser
+       TeacherLTLf2DFA teacher = new TeacherLTLf2DFA(options, options.ltl);
+       PairParser parser = options.parser;
+       LearnerDFA learner = null;
+       if(options.structure.isTable()) {
+    	   learner = new LearnerDFATableColumn(options, parser.getA().getAlphabet(), teacher);
+       }else {
+    	   learner = new LearnerDFATreeColumn(options, parser.getA().getAlphabet(), teacher);
+       }
+       options.log.println("Initializing learner...");
+       long t = timer.getCurrentTime();
+       learner.startLearning();
+       t = timer.getCurrentTime() - t;
+       options.stats.timeOfLearner += t;
+       DFA hypothesis = null;
+       while(true) {
+           options.log.verbose("Table/Tree is both closed and consistent\n" + learner.toString());
+           hypothesis = learner.getHypothesis();
+           // along with ce
+           options.log.println("Resolving equivalence query for hypothesis...  ");
+           Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(hypothesis);
+           boolean isEq = ceQuery.getQueryAnswer().get();
+           if(isEq) {
+               break;
+           }
+           // counterexample analysis
+           Word word = ceQuery.getPrefix();
+           boolean answer = hypothesis.isFinal(hypothesis.getSuccessor(word));
+           ceQuery.answerQuery(new HashableValueBoolean(! answer));
+           while(true) {
+               options.log.verbose("Counterexample is: " + ceQuery.toString());
+               t = timer.getCurrentTime();
+               options.log.println("Refining current hypothesis...");
+               learner.refineHypothesis(ceQuery);
+               t = timer.getCurrentTime() - t;
+               options.stats.timeOfLearner += t;
+               if(options.optimization != Options.Optimization.LAZY_EQ) break;
+               else if(hypothesis.isFinal(hypothesis.getSuccessor(word)) != answer){
+            	   break;
+               }
+           }            
+       }
+       options.log.println("Learning completed...");
+       
+       // output target automaton
+       options.log.println("\ntarget automaton:");
+//       parser.print(hypothesis, options.log.getOutputStream());
+       parser.close();
+       // output statistics
+       options.stats.numOfStatesInHypothesis = hypothesis.getStateSize();
+       options.stats.numOfTransInHypothesis = NFAOperations.getNumberOfTransitions(hypothesis);
+       timer.stop();
+       options.stats.timeInTotal = timer.getTimeElapsed();
+       
+       options.stats.print();
+   }
     
     
     public static void runIncludingMode(Options options) {

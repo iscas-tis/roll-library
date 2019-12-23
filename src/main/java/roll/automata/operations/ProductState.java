@@ -4,18 +4,26 @@ public class ProductState {
 	
     int fstState;
     int sndState;
-    int resState;
+    public int resState;
     final int n;
     
-    ProductState(int fstState, int sndState, int n) {
+    public ProductState(int fstState, int sndState, int n) {
         this.fstState = fstState;
         this.sndState = sndState;
-        this.n= n;
+        this.n = n;
     }
     
     @Override
     public int hashCode() {
         return fstState * n + sndState;
+    }
+    
+    public int getFirst() {
+    	return fstState;
+    }
+    
+    public int getSecond() {
+    	return sndState;
     }
     
     @Override
@@ -29,7 +37,7 @@ public class ProductState {
         }
         return false;
     }
-    
+        
     @Override
     public String toString() {
         return resState + ":(" + fstState + "," + sndState + ")";

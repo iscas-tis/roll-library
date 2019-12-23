@@ -19,7 +19,6 @@ package roll.main;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -118,6 +117,11 @@ public class CLParser {
                 }
                 options.ltl = args[i + 1];
                 i += 1;
+                continue;
+            }
+            
+            if(args[i].compareTo("-fin") == 0) {
+                options.finite = true;
                 continue;
             }
             
@@ -377,6 +381,7 @@ public class CLParser {
         	, new Pair<>("-spot", "Spot for checking inclusion in learning/complementation")
         	, new Pair<>("-rev", "Complement teacher to learn the target nondeterministic BA")
         	, new Pair<>("-par", "RABIT and Spot work in parallel in the complement teacher")
+        	, new Pair<>("-fin", "Interpret the input LTL formula over finite words")
 //        	, new Pair<>("-f <ltl>", "Convert LTL to limit deterministic BA")
 //        	, new Pair<>("-fdfa", "FDFA as the learning target")
 //        	, new Pair<>("-nba", "NBA as the learning target")
