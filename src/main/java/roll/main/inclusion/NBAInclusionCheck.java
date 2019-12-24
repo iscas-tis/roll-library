@@ -137,6 +137,8 @@ public class NBAInclusionCheck {
         if(options.nonIncusion) {
         	options.log.println("The probability to find a counterexample via further sampling ");
         	options.log.println("is less than " + options.delta + ", under the assumption that pZ >= " + options.epsilon);
+        	timer.stop();
+            options.log.println("Total checking time: " + timer.getTimeElapsed()/ 1000.0 + " secs");
         	System.exit(0);
         }
         	
