@@ -139,7 +139,7 @@ public class StateNFA {
             @Override
             public boolean execute(int letter, ISet succs) {
                 for(int succ : succs) {
-                    builder.append("a" + letter + ",[" + getId() + "]->[" + succ + "]\n");
+                    builder.append("\na" + letter + ",[" + getId() + "]->[" + succ + "]");
                 }
                 return true;
             }

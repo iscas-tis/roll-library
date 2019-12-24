@@ -163,9 +163,9 @@ public final class ROLL {
             NBAInclusionCheckTool.outputHOAStream(B, outB); // BA to HOA
             break;
         case HOA:
-            outA.println(A.toBA());
+            outA.print(A.toBA());
             out.println("\n");
-            outB.println(B.toBA());
+            outB.print(B.toBA());
             break;
         default:
             throw new UnsupportedOperationException("Unknow input format");
