@@ -108,7 +108,7 @@ public class NBAInclusionCheck {
         transB = NFAOperations.getNumberOfTransitions(B);
         options.log.println("Aut A (after preprocessing): # of Trans. "+ transA +", # of States "+ A.getStateSize() + ".");
         options.log.println("Aut B (after preprocessing): # of Trans. "+ transB +", # of States "+ B.getStateSize() +".");
-        options.log.println("Start to prove inclusion via sampling...");
+        options.log.println("Starting to prove noninclusion via sampling...");
         SamplerIndexedMonteCarlo sampler = new SamplerIndexedMonteCarlo(options.epsilon, options.delta);
         long num = sampler.getSampleSize();
         sampler.setNBA(A);
@@ -135,7 +135,8 @@ public class NBAInclusionCheck {
         }
         
         if(options.nonIncusion) {
-        	options.log.println("The probability to find a counterexample via further sampling is less than " + options.delta);
+        	options.log.println("The probability to find a counterexample via further sampling ");
+        	options.log.println("is less than " + options.delta + ", under the assumption that pZ >= " + options.epsilon);
         	System.exit(0);
         }
         	
