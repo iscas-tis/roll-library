@@ -201,12 +201,12 @@ public class NFA implements Acceptor {
     
     public String toBA() {
         StringBuilder builder = new StringBuilder();
-        builder.append("[" + getInitialState() + "]\n");
+        builder.append("[" + getInitialState() + "]");
         for (int node = 0; node < this.getStateSize(); node++) {
             builder.append(this.getState(node).toBA());
         }
         for (int acc : finalStates) {
-            builder.append("[" + acc + "]\n");
+            builder.append("\n[" + acc + "]");
         }
         return builder.toString();
     }
