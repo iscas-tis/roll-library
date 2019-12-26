@@ -208,6 +208,11 @@ public class NFA implements Acceptor {
         for (int acc : finalStates) {
             builder.append("\n[" + acc + "]");
         }
+        // if the set of accepting states is empty, then nonreachable state will be the final state
+        if(finalStates.isEmpty())
+        {
+        	builder.append("\n[" +  this.getStateSize() + "]");
+        }
         return builder.toString();
     }
 }
