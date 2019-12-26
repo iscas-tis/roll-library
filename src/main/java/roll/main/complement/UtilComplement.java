@@ -140,28 +140,28 @@ public class UtilComplement {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			if( ! options.spot && options.verbose >= 2) {
-				caller = new SpotThread3(A, B, options);
-				try {
-					IsIncluded spot = caller.call();
-					if(spot.isIncluded() != included.isIncluded()) {
-						print(A, "A.ba");
-						print(B, "B.ba");
-						print(rA, "A1.ba");
-						print(rB, "B1.ba");
-						options.log.err("Wrong inclusion proof for RABIT");
-						options.log.err(included.isIncluded() + "");
-//						options.log.err("result = " + RABIT.isIncluded(rA, rB));
-						String[] args = new String[] {"A1.ba", "B1.ba", "-fastc"};
-						RABIT.main(args);
-						System.exit(-1);
-					}
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-			}
+//			if( ! options.spot && options.verbose >= 2) {
+//				caller = new SpotThread3(A, B, options);
+//				try {
+//					IsIncluded spot = caller.call();
+//					if(spot.isIncluded() != included.isIncluded()) {
+//						print(A, "A.ba");
+//						print(B, "B.ba");
+//						print(rA, "A1.ba");
+//						print(rB, "B1.ba");
+//						options.log.err("Wrong inclusion proof for RABIT");
+//						options.log.err(included.isIncluded() + "");
+////						options.log.err("result = " + RABIT.isIncluded(rA, rB));
+//						String[] args = new String[] {"A1.ba", "B1.ba", "-fastc"};
+//						RABIT.main(args);
+//						System.exit(-1);
+//					}
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				
+//			}
 		}
 		
 		return included;

@@ -243,6 +243,11 @@ public class ParserHOA implements Parser, HOAConsumer{
     public void setAPs(List<String> aps) throws HOAConsumerException {
         apset = new APSet(aps);
         bdd = new BDDManager();
+        options.log.verbose("Number of APs is " + apset.size());
+        if(apset.size() <= 0){
+        	options.log.println("[Warning]: added \"dummy\" proposition as original alphabet is empty");
+        	apset.addAP("dummy");
+        }
         bdd.setNumVar(apset.size());
         atomRemaining = bdd.getZero();
         options.log.verbose("alphabet: " + apset + " size: 2^" + apset.size());
