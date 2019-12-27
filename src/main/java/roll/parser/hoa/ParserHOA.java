@@ -348,6 +348,10 @@ public class ParserHOA implements Parser, HOAConsumer{
     @Override
     public void provideAcceptanceName(String name, List<Object> extraInfo) throws HOAConsumerException {
         // do not care
+    	if(! name.contains("Buchi")) {
+    		throw new UnsupportedOperationException("Current acc-name is not Buchi: " + name);
+    	}
+    		
     }
 
     @Override
