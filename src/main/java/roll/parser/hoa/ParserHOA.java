@@ -274,7 +274,7 @@ public class ParserHOA implements Parser, HOAConsumer{
     public void addEdgeWithLabel(int stateId, BooleanExpression<AtomLabel> labelExpr, List<Integer> conjSuccessors,
             List<Integer> accSignature) throws HOAConsumerException {
         if(conjSuccessors.size() != 1) {
-            throw new UnsupportedOperationException("successor conjunction does not allowed");
+            throw new UnsupportedOperationException("Successor conjunction is not allowed");
         }
         
         assert labelExpr != null;

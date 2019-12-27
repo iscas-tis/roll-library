@@ -109,6 +109,7 @@ public class NBAInclusionCheck {
         options.log.println("Aut A (after preprocessing): # of Trans. "+ transA +", # of States "+ A.getStateSize() + ".");
         options.log.println("Aut B (after preprocessing): # of Trans. "+ transB +", # of States "+ B.getStateSize() +".");
         options.log.println("Starting to prove noninclusion via sampling...");
+        System.out.println(A.toBA());
         SamplerIndexedMonteCarlo sampler = new SamplerIndexedMonteCarlo(options.epsilon, options.delta);
         long num = sampler.getSampleSize();
         sampler.setNBA(A);

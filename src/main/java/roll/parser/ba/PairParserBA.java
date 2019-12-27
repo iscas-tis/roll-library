@@ -40,7 +40,7 @@ public class PairParserBA extends ParserBA implements PairParser {
             FileInputStream inputStream = new FileInputStream(new File(fileA));
             JBAParser parser = new JBAParser(inputStream);
             parser.parse(this);
-            final int numLetters = strCharMap.size();
+//            final int numLetters = strCharMap.size();
             this.A = nba;
             this.automaton = new Automaton();
             this.strStateMap.clear();
@@ -49,9 +49,9 @@ public class PairParserBA extends ParserBA implements PairParser {
             parser = new JBAParser(inputStream);
             parser.parse(this);
             this.B = nba;
-            if(strCharMap.size() != numLetters) {
-                throw new UnsupportedOperationException("Alphabet not the same between A and B");
-            }
+//            if(strCharMap.size() != numLetters) {
+//                throw new UnsupportedOperationException("Alphabet not the same between A and B");
+//            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
