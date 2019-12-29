@@ -17,7 +17,11 @@
 package roll.automata.operations;
 
 import java.util.LinkedList;
+import java.util.Set;
+import java.util.TreeSet;
 
+import automata.FAState;
+import automata.FiniteAutomaton;
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.State;
 import dk.brics.automaton.Transition;
@@ -168,7 +172,7 @@ public class NBAOperations {
                 }
             }
         }
-        
+        // repeatedly removing dead states
         ISet unused = UtilISet.newISet();
         // ---------------------------------------------------------
         // secondly remove all reachable states which are dead states
@@ -197,11 +201,13 @@ public class NBAOperations {
                 used.andNot(temp);
             }
         }
+//        System.out.println("Used: " + used);
         ISet reachedFinals = reach.getFinalStates();
         reachedFinals.and(used);
         if(reachedFinals.isEmpty()) {
             return getEmptyNBA(reach.getAlphabet());
         }
+//        System.out.println("Finals: " + reachedFinals);
         // ---------------------------------------------------------
         // thirdly collect all reachable states which can reach final states
         ISet backReached = UtilISet.newISet();
@@ -230,6 +236,7 @@ public class NBAOperations {
             }
             reachedFinals = prevs;
         }
+//        System.out.println("backReached: " + backReached);
         map.clear();
         // ---------------------------------------------------------
         // finally construct the new automaton

@@ -48,6 +48,7 @@ public class Options {
     // sampling precision
     public double epsilon;
     public double delta;
+    public int numOfVisits;
     
     // number of test cases and size of automaton for each case
     public int numOfTests;

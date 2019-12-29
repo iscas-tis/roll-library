@@ -158,7 +158,8 @@ public class CLParser {
                 }
                 options.epsilon = parseDouble(args[i+1], INCLUDE2);
                 options.delta = parseDouble(args[i+2], INCLUDE2);
-                i += 2;
+                options.numOfVisits = parseInt(args[i+3], INCLUDE2);
+                i += 3;
                 options.inputA = args[i + 1];
                 options.inputB = args[i + 2];
                 if(args[i + 1].endsWith(".ba") && args[i + 2].endsWith(".ba")) {
@@ -373,9 +374,10 @@ public class CLParser {
         options.log.println(SAMPEQ + " e d", indent, "Sampling as the teacher to check equivalence of two BAs");
         options.log.println("", indent + 4, "e - the probability that equivalence check is not correct");
         options.log.println("", indent + 4, "d - the probability of the confidence for equivalence check");
-        options.log.println(INCLUDE2 + " e d <A> <B>", indent, "Sampling to prove non-inclusion between A and B");
+        options.log.println(INCLUDE2 + " e d k <A> <B>", indent, "Sampling to prove non-inclusion between A and B");
         options.log.println("", indent + 4, "e - the probability that the result is not correct");
         options.log.println("", indent + 4, "d - the probability of the confidence for the check");
+        options.log.println("", indent + 4, "k - the maximum number of visits allowed for a state");
         options.log.println(TRANSLATE + " <ltl>", indent, "Learning the BA specified by the input LTL formula");
 
         options.log.println(HELP, indent, "Show help page, same as the -h option");

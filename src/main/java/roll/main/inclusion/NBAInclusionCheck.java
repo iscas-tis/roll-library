@@ -68,6 +68,7 @@ public class NBAInclusionCheck {
         if(options.inputA == null || options.inputB == null) {
             throw new UnsupportedOperationException("No input files");
         }
+        options.log.println("Epsilon = " + options.epsilon + ", Confidence = " + options.delta + ", K = " + options.numOfVisits);
         Timer timer = new Timer();
         timer.start();
         PairParser parser = UtilParser.prepare(options, options.inputA, options.inputB, options.format);
@@ -78,14 +79,22 @@ public class NBAInclusionCheck {
         options.log.println("Aut A : # of Trans. "+ transA +", # of States "+ A.getStateSize() + ".");
         options.log.println("Aut B : # of Trans. "+ transB +", # of States "+ B.getStateSize() +".");
         A = NBAOperations.removeDeadStates(A);
-        if (A.getFinalStates().isEmpty()) {
+        B = NBAOperations.removeDeadStates(B);
+        // convert to NBA in RABIT
+        FiniteAutomaton autA = UtilInclusion.toRABITNBA(A);
+        FiniteAutomaton autB = UtilInclusion.toRABITNBA(B);
+        // now we are ready to replace the symbols on the transitions
+        boolean isEmpty = UtilInclusion.removeDeadStates(autA);
+        options.log.println("Aut A (after preprocessing): # of Trans. "+ autA.trans +", # of States "+ autA.states.size() + ".");
+        if (isEmpty) {
             options.log.print("Included\n");
             timer.stop();
             options.log.println("Total checking time: " + timer.getTimeElapsed()/ 1000.0 + " secs");
             System.exit(0);
         }
-        B = NBAOperations.removeDeadStates(B);
-        if (B.getFinalStates().isEmpty()) {
+        isEmpty = UtilInclusion.removeDeadStates(autB);
+        options.log.println("Aut B (after preprocessing): # of Trans. "+ autB.trans +", # of States "+ autB.states.size() + ".");
+        if (isEmpty) {
             ISet allStates = UtilISet.newISet();
             for(int i = 0; i < A.getStateSize(); i ++) {
                 allStates.set(i);
@@ -102,15 +111,15 @@ public class NBAInclusionCheck {
                 System.exit(0);
             }
         }
-        
-        // now we are ready to replace the symbols on the transitions
-        transA = NFAOperations.getNumberOfTransitions(A);
-        transB = NFAOperations.getNumberOfTransitions(B);
-        options.log.println("Aut A (after preprocessing): # of Trans. "+ transA +", # of States "+ A.getStateSize() + ".");
-        options.log.println("Aut B (after preprocessing): # of Trans. "+ transB +", # of States "+ B.getStateSize() +".");
+        // convert back to NBA
+        A = UtilInclusion.toNBA(autA, A.getAlphabet());
+        B = UtilInclusion.toNBA(autB, B.getAlphabet());
+//        transA = NFAOperations.getNumberOfTransitions(A);
+//        transB = NFAOperations.getNumberOfTransitions(B);
         options.log.println("Starting to prove noninclusion via sampling...");
-        System.out.println(A.toBA());
+        //System.out.println(A.toBA());
         SamplerIndexedMonteCarlo sampler = new SamplerIndexedMonteCarlo(options.epsilon, options.delta);
+        sampler.K = options.numOfVisits;
         long num = sampler.getSampleSize();
         sampler.setNBA(A);
         options.log.println("Trying " + num + " samples from A automaton...");
