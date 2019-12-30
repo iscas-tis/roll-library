@@ -67,7 +67,8 @@ public class UtilInclusion {
             while(nextIt.hasNext()) {
                 String symb = nextIt.next();
                 Set<FAState> succs = st.getNext(symb);
-                int ch = alphabet.getLetter(symb.charAt(0));
+                // index of the input character
+                int ch = alphabet.indexOf(symb.charAt(0));
                 if(succs == null) continue;
                 for(FAState succ : succs) {
                     int rSucc = getOrAddState(result, succ, map);

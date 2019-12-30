@@ -83,6 +83,7 @@ public class NBAInclusionCheck {
         // convert to NBA in RABIT
         FiniteAutomaton autA = UtilInclusion.toRABITNBA(A);
         FiniteAutomaton autB = UtilInclusion.toRABITNBA(B);
+        assert A.getAlphabet() == B.getAlphabet();
         // now we are ready to replace the symbols on the transitions
         boolean isEmpty = UtilInclusion.removeDeadStates(autA);
         options.log.println("Aut A (after preprocessing): # of Trans. "+ autA.trans +", # of States "+ autA.states.size() + ".");
