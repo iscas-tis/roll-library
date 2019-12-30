@@ -68,7 +68,7 @@ public class UtilComplement {
         return result;
 	}
 	
-	public static void print(FiniteAutomaton nba, String file) {
+	public static void print(Alphabet alphabet, FiniteAutomaton nba, String file) {
 		try {
 			FileOutputStream stream = new FileOutputStream(file);
 			PrintStream out = new PrintStream(stream);
@@ -79,7 +79,7 @@ public class UtilComplement {
 	            	Set<FAState> succs = state.getNext(label);
 	            	if(succs == null) continue;
 	            	for(FAState succ : succs) {
-	            		out.print("\na" + ((int)label.charAt(0)) + ",[" + state.id + "]->[" + succ.id + "]");
+	            		out.print("\na" + (alphabet.indexOf(label.charAt(0))) + ",[" + state.id + "]->[" + succ.id + "]");
 	            	}
 	            }
 	        }	

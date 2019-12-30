@@ -138,6 +138,7 @@ public class UtilInclusion {
                 ISet succs = nba.getSuccessors(state, letter);
                 for(final int succ : succs) {
                     FAState rSucc = getOrAddState(result, map, succ);
+                    // index to character
                     result.addTransition(rState, rSucc, alphabet.getLetter(letter) + "");
                 }
             }

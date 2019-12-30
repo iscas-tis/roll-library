@@ -28,6 +28,7 @@ import roll.learner.nba.lomega.UtilLOmega;
 import roll.learner.nba.lomega.translator.Translator;
 import roll.learner.nba.lomega.translator.TranslatorFDFAUnder;
 import roll.main.Options;
+import roll.main.complement.UtilComplement;
 import roll.oracle.nba.sampler.SamplerIndexedMonteCarlo;
 import roll.parser.PairParser;
 import roll.parser.UtilParser;
@@ -115,6 +116,8 @@ public class NBAInclusionCheck {
         // convert back to NBA
         A = UtilInclusion.toNBA(autA, A.getAlphabet());
         B = UtilInclusion.toNBA(autB, B.getAlphabet());
+//        UtilComplement.print(A, "bugA.ba");
+//        UtilComplement.print(B, "bugB.ba");
 //        transA = NFAOperations.getNumberOfTransitions(A);
 //        transB = NFAOperations.getNumberOfTransitions(B);
         options.log.println("Starting to prove noninclusion via sampling...");
@@ -147,7 +150,8 @@ public class NBAInclusionCheck {
         
         if(options.nonIncusion) {
         	options.log.println("The probability to find a counterexample via further sampling ");
-        	options.log.println("is less than " + options.delta + ", under the assumption that pZ >= " + options.epsilon);
+        	options.log.println("is less than " + options.delta + ", under the assumption that pZ >= " + options.epsilon + " and K = " + options.numOfVisits + " is large enough");
+        	
         	timer.stop();
             options.log.println("Total checking time: " + timer.getTimeElapsed()/ 1000.0 + " secs");
         	System.exit(0);
@@ -189,7 +193,6 @@ public class NBAInclusionCheck {
         Alphabet alphabet = A.getAlphabet();
         A = UtilInclusion.toNBA(aut1, alphabet);
         B = UtilInclusion.toNBA(aut2, alphabet);
-        
 //        boolean isSemiDet = NBAOperations.isSemideterministic(B);
 //        if(isSemiDet) {
 //            boolean result = runNCSBComplement(options, alphabet, parser, A, B);
