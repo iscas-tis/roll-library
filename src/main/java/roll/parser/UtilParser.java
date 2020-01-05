@@ -58,6 +58,7 @@ public class UtilParser {
     }
     
     public static Parser prepare(Options options, String file, Format format) {
+    	checkInputFile(file);
         if(format == Format.BA) {
             return new ParserBA(options, file);
         }else if(format == Format.HOA) {
@@ -67,8 +68,21 @@ public class UtilParser {
         return null;
     }
     
+    private static void checkInputFile(String file) {
+        if(file == null) {
+        	throw new UnsupportedOperationException("No valid input file with suffix extension hoa or ba");
+        }
+    }
+    
+    private static void checkInputFiles(String fileA, String fileB) {
+        if(fileA == null || fileB == null) {
+        	throw new UnsupportedOperationException("No valid input files with suffix extension hoa or ba");
+        }
+    }
+    
     public static PairParser prepare(Options options, String fileA, String fileB, Format format) {
-        if(format == Format.BA) {
+    	checkInputFiles(fileA, fileB);
+    	if(format == Format.BA) {
             return new PairParserBA(options, fileA, fileB);
         }else if(format == Format.HOA) {
             return new PairParserHOA(options, fileA, fileB);

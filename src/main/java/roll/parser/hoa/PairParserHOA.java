@@ -95,6 +95,7 @@ public class PairParserHOA extends ParserHOA implements PairParser {
             this.indexStateMap.clear();
             this.aliasBddMap.clear();
             this.automaton = new Automaton();
+            this.apB2A = this.bdd.makeBDDPair();
             this.initialAdded = false;
             HOAFParser.parseHOA(fileInputStream, this);
             this.B = nba;
