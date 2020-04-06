@@ -124,6 +124,12 @@ public class NBAInclusionCheck {
         //System.out.println(A.toBA());
         SamplerIndexedMonteCarlo sampler = new SamplerIndexedMonteCarlo(options.epsilon, options.delta);
         sampler.K = options.numOfVisits;
+        if(options.stopProb >= 0)
+        {
+        	// set new probablity
+        	sampler.stopProb = options.stopProb;
+        }
+        //System.out.println("Probability : " + sampler.stopProb);
         long num = sampler.getSampleSize();
         sampler.setNBA(A);
         options.log.println("Trying " + num + " samples from A automaton...");

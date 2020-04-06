@@ -40,7 +40,9 @@ public class SamplerIndexedMonteCarlo extends SamplerAbstract {
     // L(A) where A is the given Buchi automaton
     // the upper bound of K is the 2^n where n is the number of states
     // in the second automaton B for inclusion checking
-    public int K = -1; 
+    public int K = -1;
+    public double stopProb = -1;
+    
     public SamplerIndexedMonteCarlo(double epsilon, double delta) {
         super(epsilon, delta);
     }
@@ -49,8 +51,20 @@ public class SamplerIndexedMonteCarlo extends SamplerAbstract {
     private boolean terminate(int index) {
         if(index >= K) return true;
         // the probability whether to stop right now or not
-        int sNr = ThreadLocalRandom.current().nextInt(0, 2);
-        return sNr == 1;
+        if(stopProb < 0)
+        {
+        	int sNr = ThreadLocalRandom.current().nextInt(0, 2);
+        	return sNr == 1;
+        }else {
+        	 double rd =  ThreadLocalRandom.current().nextDouble();
+     	     //System.out.println(" Generated prob: " + rd + " threshold: " + stopProb + " result: " + (rd <= stopProb));
+             if(rd <= stopProb)
+             {
+             	return true;
+             }else {
+             	return false;
+             }
+        }        
     }
     /**
      * Make sure that every state has at least one successor
@@ -83,6 +97,7 @@ public class SamplerIndexedMonteCarlo extends SamplerAbstract {
                 // next time, it should be one
                 countTable.put(s, 1);
             }
+            // TODO, randomly choose one appreance
             // record last appearance
             hTable.put(s, i); 
             if (nba.isFinal(s)) {

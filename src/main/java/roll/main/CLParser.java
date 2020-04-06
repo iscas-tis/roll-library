@@ -173,6 +173,15 @@ public class CLParser {
                 options.nonIncusion = true;
                 continue;
             }
+            if(args[i].compareTo("-p") == 0) {
+            	options.stopProb = parseDouble(args[i+1], INCLUDE2);
+            	if(options.stopProb < 0 || options.stopProb > 1)
+            	{
+            		throw new UnsupportedOperationException("Unsupported probability: " + args[i + 1]);
+            	}
+            	i += 1;
+            	continue;
+            }
             if(args[i].compareTo(TEST) == 0) {
                 options.runningMode = Options.RunningMode.TESTING;
                 if(i + 2 >= args.length) {
@@ -409,6 +418,7 @@ public class CLParser {
         	, new Pair<>("-rev", "Complement teacher to learn the target nondeterministic BA")
         	, new Pair<>("-par", "RABIT and Spot work in parallel in the complement teacher")
         	, new Pair<>("-fin", "Interpret the input LTL formula over finite words")
+        	, new Pair<>("-p <prob>", "Probability to terminate during sampling")
 //        	, new Pair<>("-f <ltl>", "Convert LTL to limit deterministic BA")
 //        	, new Pair<>("-fdfa", "FDFA as the learning target")
 //        	, new Pair<>("-nba", "NBA as the learning target")
