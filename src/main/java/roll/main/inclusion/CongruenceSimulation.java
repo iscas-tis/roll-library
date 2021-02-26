@@ -340,6 +340,10 @@ public class CongruenceSimulation {
 		
 	}
 	
+	public boolean isEquvalent() {
+		return false;
+	}
+	
 	public boolean isIncluded() {
 		
 		// for finite prefixed, 
@@ -387,7 +391,6 @@ public class CongruenceSimulation {
 	
 	// decide whether there exists an accepting run in B from states in sim
 	private boolean decideAcceptance(ISet pref, TreeSet<IntBoolTriple> period) {
-		
 		for(int state: pref) {
 			// iteratively check whether there exists a triple (q, q: true) reachable from state
 			TreeSet<IntBoolTriple> reachSet = new TreeSet<>();
@@ -428,6 +431,7 @@ public class CongruenceSimulation {
 		B.createState();
 		B.createState();
 		B.createState();
+//		B.getState(0).addTransition(0, 0);
 		B.getState(0).addTransition(1, 1);
 		B.getState(0).addTransition(0, 2);
 		B.getState(1).addTransition(1, 1);
