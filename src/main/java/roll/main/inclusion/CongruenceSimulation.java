@@ -195,14 +195,9 @@ public class CongruenceSimulation {
 	/**
 	 * Only compute the states that can reach accState
 	 * */
-	public void computePrefixSimulation(int accState) {
+	public void computePrefixSimulation(int accState, ISet reachSet) {
 		
 		prefSim.clear();
-		ISet reachSet = getReachSet(A.getInitialState(), A);
-		// only keep those state that can go back to accState
-		ISet predSet = getPredSet(accState, aStates, A);
-		reachSet.and(predSet);
-		
 		// initialization
 		for(int s = 0; s < A.getStateSize(); s ++)
 		{
@@ -518,20 +513,32 @@ public class CongruenceSimulation {
 	
 	public boolean isIncluded() {
 		
-		// for each accepting state
+		// for each accepting state (should be reachable from the initial state and can reach itself)
 		for(int accState : A.getFinalStates()) {
 			
 			System.out.println("Testing for accepting state " + accState);
-			computePrefixSimulation(accState);
-			outputPrefixSimulation();
+			ISet reachSet = getReachSet(A.getInitialState(), A);
+			// only keep those state that can go back to accState
+			ISet predSet = getPredSet(accState, aStates, A);
+			reachSet.and(predSet);
+			if(!reachSet.get(A.getInitialState())) {
+				continue;
+			}
+			computePrefixSimulation(accState, reachSet);
+			//outputPrefixSimulation();
 			
 			// obtain the necessary part for accState
 			HashSet<ISet> prefSims = prefSim.get(accState);
 			ISet allSimulatedStatesInB = UtilISet.newISet();
 			for(ISet sim: prefSims) {
+				if(sim.isEmpty()) {
+					// empty means some word to accState cannot be simulated
+					return false;
+				}
 				allSimulatedStatesInB.or(sim);
 			}
 			allSimulatedStatesInB = getReachSet(allSimulatedStatesInB);
+			System.out.println("Prefix simulated sets: " + prefSims);
 			System.out.println("Necessary states for B: " + allSimulatedStatesInB);
 			// now we compute the simulation for periods from accState
 			computePeriodSimulation(accState, allSimulatedStatesInB);
