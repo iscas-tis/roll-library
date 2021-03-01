@@ -36,6 +36,13 @@ public class CongruenceSimulation {
 	 * otherwise, for each state s_A in A, if i_A - u -> s_A, then there must exist a state t in Set_B_states,
 	 *  such that i_B - u -> t.
 	 *  
+	 *  Assume that for a state q in A that can reach an accepting state f on u' and
+	 *  currently we encode q as [S1, S2] such that S1 \subseteq S2 over states of B,
+	 *  If S1 - u -> [], it means that for some word uu' from i_A to f where u corresponds to S1,
+	 *  no states in B can simulate the word uu'. 
+	 *  Therefore, for the state q, we can just remove S2 and only represent q with [S1].
+	 *  
+	 *  Similarly, we can do the same to period computation
 	 * */
 	ArrayList<HashSet<ISet>> prefSim;
 	StateContainer[] bStates;
