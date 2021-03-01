@@ -100,7 +100,7 @@ public class CongruenceSimulation {
 			// only i_B simulates i_A at first
 			System.out.print("State " + s + "\n");
 			for(ISet set : prefSim.get(s)) {
-				System.out.println(set + ", ");
+				if(!set.isEmpty()) System.out.println(set + ", ");
 			}
 		}
 	}
@@ -173,6 +173,7 @@ public class CongruenceSimulation {
 									}
 									prefSim.set(t, result);
 								}else {
+									changed = true;
 									prefSim.get(t).add(update);
 								}
 							}
@@ -230,6 +231,7 @@ public class CongruenceSimulation {
 				prefSim.get(s).add(set);
 			}
 		}
+		System.out.println("Reachable size: " + reachSet.cardinality());
 		// compute simulation relation
 		while(true) {
 			// copy the first one
@@ -274,6 +276,8 @@ public class CongruenceSimulation {
 									changed = modified[0];
 									prefSim.set(t, result);
 								}else {
+									changed = true;
+									System.out.println(t + "->" + update);
 									prefSim.get(t).add(update);
 								}
 							}
@@ -486,6 +490,7 @@ public class CongruenceSimulation {
 									changed = modified[0];
 									periodSim.put(t, result);
 								}else {
+									changed = true;
 									periodSim.get(t).add(update);
 								}
 							}
@@ -498,14 +503,14 @@ public class CongruenceSimulation {
 			}
 		}
 		
-		System.out.println("Period for state " + accState);
-		for(int s : reachSet)
-		{
-			// only i_B simulates i_A at first
-			System.out.print("State " + s + "\n");
-			
-			System.out.println(periodSim.get(s));
-		}
+//		System.out.println("Period for state " + accState);
+//		for(int s : reachSet)
+//		{
+//			// only i_B simulates i_A at first
+//			System.out.print("State " + s + "\n");
+//			
+//			System.out.println(periodSim.get(s));
+//		}
 //		// checking accepting
 //		// i_A -> q
 //		HashSet<ISet> simPrefix = prefSim.get(accState);
@@ -530,23 +535,45 @@ public class CongruenceSimulation {
 	public boolean isIncluded() {
 		
 		// for each accepting state (should be reachable from the initial state and can reach itself)
+		ISet reachSet = getReachSet(A.getInitialState(), A);
 		for(int accState : A.getFinalStates()) {
-			
-			System.out.println("Testing for accepting state " + accState);
-			ISet reachSet = getReachSet(A.getInitialState(), A);
+			System.out.println("Testing for accepting state " + accState + " out " + A.getFinalStates().cardinality() + " states");
+			// reachable states from the initial state
+			ISet necessaryStates = reachSet.clone();
 			// only keep those state that can go back to accState
 			ISet predSet = getPredSet(accState, aStates, A);
-			reachSet.and(predSet);
-			if(!reachSet.get(A.getInitialState())) {
+			necessaryStates.and(predSet);
+			// if the initial state cannot reach the accepting state
+			if(!necessaryStates.get(A.getInitialState()) || !necessaryStates.get(accState)) {
 				continue;
 			}
-			computePrefixSimulation(accState, reachSet);
-			//outputPrefixSimulation();
+			System.out.println("Necessary states in A: " + necessaryStates + " #size = " + necessaryStates.cardinality());
+			computePrefixSimulation(accState, necessaryStates);
+			outputPrefixSimulation();
 			
 			// obtain the necessary part for accState
 			HashSet<ISet> prefSims = prefSim.get(accState);
+			System.out.println("Acc simulated sets: " + prefSims);
+			// only keep the sets that are subset of another
+			HashSet<ISet> antichainPrefix = new HashSet<>();
+			// compute antichain
+			for(ISet sim1: prefSims) {
+				boolean subsumes = false;
+				for(ISet sim2: prefSims) {
+					// ignore itself
+					if(sim1 == sim2) continue;
+					// only keep those that do not subsume others
+					if(sim2.subsetOf(sim1)) {
+						subsumes = true;
+						break;
+					}
+				}
+				if(! subsumes) {
+					antichainPrefix.add(sim1);
+				}
+			}
 			ISet allSimulatedStatesInB = UtilISet.newISet();
-			for(ISet sim: prefSims) {
+			for(ISet sim: antichainPrefix) {
 				if(sim.isEmpty()) {
 					// empty means some word to accState cannot be simulated
 					return false;
@@ -554,14 +581,29 @@ public class CongruenceSimulation {
 				allSimulatedStatesInB.or(sim);
 			}
 			allSimulatedStatesInB = getReachSet(allSimulatedStatesInB);
-			System.out.println("Prefix simulated sets: " + prefSims);
+			System.out.println("Prefix simulated sets: " + antichainPrefix);
 			System.out.println("Necessary states for B: " + allSimulatedStatesInB);
 			// now we compute the simulation for periods from accState
 			computePeriodSimulation(accState, allSimulatedStatesInB);
 			// now decide whether there is one word accepted by A but not B
-			for(ISet pref: prefSims) {
+			for(ISet pref: antichainPrefix) {
 				System.out.println("Simulated set in B: " + pref);
-				for(TreeSet<IntBoolTriple> period: periodSim.get(accState)) {
+				// compute antichain
+				HashSet<TreeSet<IntBoolTriple>> antichainPeriod = new HashSet<>();
+				for(TreeSet<IntBoolTriple> period1: periodSim.get(accState)) {
+					boolean subsumes = false;
+					for(TreeSet<IntBoolTriple> period2: periodSim.get(accState)) {
+						if(period1 == period2) continue;
+						if(period1.containsAll(period2)) {
+							subsumes = true;
+							break;
+						}
+					}
+					if(!subsumes) {
+						antichainPeriod.add(period1);
+					}
+				}
+				for(TreeSet<IntBoolTriple> period: antichainPeriod) {
 					// decide whether this pref (period) is accepting in B
 					if(! decideAcceptance(pref, period)) {
 						return false;
