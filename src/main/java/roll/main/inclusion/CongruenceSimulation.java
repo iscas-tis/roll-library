@@ -152,27 +152,23 @@ public class CongruenceSimulation {
 							}
 							// check whether we need to update
 							if (!copy.get(t).contains(update)) {
-								//TODO: Antichain, only keep the set that are not a subset of another
+								//TODO: Antichain, only keep the set that are a subset of another
 								if(antichain) {
 									HashSet<ISet> curr = prefSim.get(t);
 									HashSet<ISet> result = new HashSet<>();
 									boolean contained = false;
 									for(ISet sts: curr) {
-										if(sts.isEmpty()) {
-											// must add back empty set
-											result.add(sts);
-										}else 
-										if(sts.subsetOf(update)) {
-											// ignore sets subsumed by update
+										if(update.subsetOf(sts)) {
+											// ignore sets that subsume update
 											continue;
-										}else if(update.subsetOf(sts)){
+										}else if(sts.subsetOf(update)){
 											contained = true;
 											result.add(sts);
 										}else {
 											result.add(sts);
 										}
 									}
-									if(! contained || update.isEmpty()) {
+									if(! contained) {
 										changed = true;
 										result.add(update);
 									}
@@ -251,21 +247,17 @@ public class CongruenceSimulation {
 									HashSet<ISet> result = new HashSet<>();
 									boolean contained = false;
 									for(ISet sts: curr) {
-										if(sts.isEmpty()) {
-											// must add back empty set
-											result.add(sts);
-										}else 
-										if(sts.subsetOf(update)) {
-											// ignore sets subsumed by update
+										if(update.subsetOf(sts)) {
+											// ignore sets that subsume update
 											continue;
-										}else if(update.subsetOf(sts)){
+										}else if(sts.subsetOf(update)){
 											contained = true;
 											result.add(sts);
 										}else {
 											result.add(sts);
 										}
 									}
-									if(! contained || update.isEmpty()) {
+									if(! contained) {
 										changed = true;
 										result.add(update);
 									}
@@ -445,26 +437,24 @@ public class CongruenceSimulation {
 							}
 							// we have extended for set
 							if(! containTriples(copy.get(t), update)) {
-								//TODO: Antichain, only keep the set that are not a subset of another
+								//TODO: Antichain, only keep the set that are a subset of another
 								if(antichain) {
 									HashSet<TreeSet<IntBoolTriple>> curr = periodSim.get(t);
 									HashSet<TreeSet<IntBoolTriple>> result = new HashSet<>();
 									boolean contained = false;
 									for(TreeSet<IntBoolTriple> triples: curr) {
-										if(triples.isEmpty()) {
-											// must add back empty set
-											result.add(triples);
-										}else if(update.containsAll(triples)) {
-											// ignore sets subsumed by update
+										if(triples.containsAll(update)) {
+											// ignore sets that subsume update
 											continue;
-										}else if(triples.containsAll(update)){
+										}else if(update.containsAll(triples)) {
+											// must add triples
 											contained = true;
 											result.add(triples);
 										}else {
 											result.add(triples);
 										}
 									}
-									if(!contained || update.isEmpty()) {
+									if(!contained) {
 										changed = true;
 										result.add(update);
 									}
