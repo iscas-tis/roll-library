@@ -27,7 +27,6 @@ public class CongruenceSimulation {
 	NBA B;
 	
 	// Simulation relation between A and B based on the congruence relations defined for B
-	// Note that B must be complete
 	/**
 	 * for each u, i_A - u -> q, i_B - u -> q', then we have q' simulates q for prefix u
 	 * Here we actually define congruence relations for states in B with respect to states in A
@@ -188,6 +187,32 @@ public class CongruenceSimulation {
 		}
 	}
 	
+	// 
+	HashSet<ISet> addSetToPrefixAntichain(HashSet<ISet> orig, ISet update, boolean[] changed) {
+		boolean contained = false;
+		HashSet<ISet> result = new HashSet<>();
+		changed[0] = false;
+		// a set corresponds to a class of finite prefixes to an accepting state in A
+		for(ISet sts: orig) {
+			if(update.subsetOf(sts)) {
+				// ignore sets that subsume update
+				continue;
+			}else if(sts.subsetOf(update)){
+				// updated should not be added into the hashset
+				contained = true;
+				result.add(sts);
+			}else {
+				// update and sts are incomparable
+				result.add(sts);
+			}
+		}
+		if(! contained) {
+			changed[0] = true;
+			result.add(update);
+		}
+		return result;
+	}
+	
 	/**
 	 * Only compute the states that can reach accState
 	 * */
@@ -243,24 +268,10 @@ public class CongruenceSimulation {
 							if (!copy.get(t).contains(update)) {
 								//TODO: Antichain, only keep the set that are not a subset of another
 								if(antichain) {
-									HashSet<ISet> curr = prefSim.get(t);
-									HashSet<ISet> result = new HashSet<>();
-									boolean contained = false;
-									for(ISet sts: curr) {
-										if(update.subsetOf(sts)) {
-											// ignore sets that subsume update
-											continue;
-										}else if(sts.subsetOf(update)){
-											contained = true;
-											result.add(sts);
-										}else {
-											result.add(sts);
-										}
-									}
-									if(! contained) {
-										changed = true;
-										result.add(update);
-									}
+									HashSet<ISet> orig = prefSim.get(t);
+									boolean[] modified = new boolean[1];
+									HashSet<ISet> result = addSetToPrefixAntichain(orig, update, modified);
+									changed = modified[0];
 									prefSim.set(t, result);
 								}else {
 									prefSim.get(t).add(update);
@@ -369,6 +380,28 @@ public class CongruenceSimulation {
 		return false;
 	}
 	
+	HashSet<TreeSet<IntBoolTriple>> addSetToPeriodAntichain(HashSet<TreeSet<IntBoolTriple>> orig, TreeSet<IntBoolTriple> update, boolean[] changed) {
+		HashSet<TreeSet<IntBoolTriple>> result = new HashSet<TreeSet<IntBoolTriple>>();
+		boolean contained = false;
+		for(TreeSet<IntBoolTriple> triples: orig) {
+			if(triples.containsAll(update)) {
+				// ignore sets that subsume update
+				continue;
+			}else if(update.containsAll(triples)) {
+				// must add triples
+				contained = true;
+				result.add(triples);
+			}else {
+				result.add(triples);
+			}
+		}
+		if(!contained) {
+			changed[0] = true;
+			result.add(update);
+		}
+		return result;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public void computePeriodSimulation(int accState, ISet reachStatesInB) {
 		periodSim.clear();
@@ -401,8 +434,16 @@ public class CongruenceSimulation {
 							set.add(new IntBoolTriple(p, q, acc));
 						}
 					}
-					//TODO: Antichain, only keep the set that are not a subset of another
-					periodSim.get(t).add(set);
+					//TODO: Antichain, only keep the set that are a subset of another
+					if(antichain) {
+						// keep subsets
+						HashSet<TreeSet<IntBoolTriple>> curr = periodSim.get(t);
+						boolean[] modified = new boolean[1];
+						HashSet<TreeSet<IntBoolTriple>> result = addSetToPeriodAntichain(curr, set, modified);
+						periodSim.put(t, result);
+					}else {
+						periodSim.get(t).add(set);	
+					}
 				}
 			}
 		}
@@ -440,24 +481,9 @@ public class CongruenceSimulation {
 								//TODO: Antichain, only keep the set that are a subset of another
 								if(antichain) {
 									HashSet<TreeSet<IntBoolTriple>> curr = periodSim.get(t);
-									HashSet<TreeSet<IntBoolTriple>> result = new HashSet<>();
-									boolean contained = false;
-									for(TreeSet<IntBoolTriple> triples: curr) {
-										if(triples.containsAll(update)) {
-											// ignore sets that subsume update
-											continue;
-										}else if(update.containsAll(triples)) {
-											// must add triples
-											contained = true;
-											result.add(triples);
-										}else {
-											result.add(triples);
-										}
-									}
-									if(!contained) {
-										changed = true;
-										result.add(update);
-									}
+									boolean[] modified = new boolean[1];
+									HashSet<TreeSet<IntBoolTriple>> result = addSetToPeriodAntichain(curr, update, modified);
+									changed = modified[0];
 									periodSim.put(t, result);
 								}else {
 									periodSim.get(t).add(update);
@@ -633,7 +659,7 @@ public class CongruenceSimulation {
 		
 	}
 	
-	
+	// In RABIT, this structure is called Arc
 	public class IntBoolTriple implements Comparable<IntBoolTriple> {
 		
 		private int left;
