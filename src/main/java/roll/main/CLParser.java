@@ -322,6 +322,10 @@ public class CLParser {
                 options.format = Format.HOA;
                 continue;
             }
+            if(args[i].compareTo("-congr") == 0) {
+            	options.congruence = true;
+            	continue;
+            }
 
         }
         
@@ -379,7 +383,7 @@ public class CLParser {
         options.log.println(CONVERT + " <A> <B>", indent, "Convert two input automata to the other format");
         options.log.println(LEARN, indent, "Use RABIT or DK package tool as the teacher to learn the input BA");
         options.log.println(COMPLEMENT, indent, "Use learning algorithm to complement the input BA");
-        options.log.println(INCLUDE + " <A> <B>", indent, "Use learning algorithm to test the inclusion between A and B");
+        options.log.println(INCLUDE + " <A> <B>", indent, "Use learning/congruence-based algorithm to test the inclusion between A and B");
         options.log.println(SAMPEQ + " e d", indent, "Sampling as the teacher to check equivalence of two BAs");
         options.log.println("", indent + 4, "e - the probability that equivalence check is not correct");
         options.log.println("", indent + 4, "d - the probability of the confidence for equivalence check");
@@ -419,6 +423,7 @@ public class CLParser {
         	, new Pair<>("-par", "RABIT and Spot work in parallel in the complement teacher")
         	, new Pair<>("-fin", "Interpret the input LTL formula over finite words")
         	, new Pair<>("-p <prob>", "Probability to terminate during sampling")
+        	, new Pair<>("-congr", "Use congruence-based algorithm for inclusion checking")
 //        	, new Pair<>("-f <ltl>", "Convert LTL to limit deterministic BA")
 //        	, new Pair<>("-fdfa", "FDFA as the learning target")
 //        	, new Pair<>("-nba", "NBA as the learning target")

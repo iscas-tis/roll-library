@@ -39,7 +39,7 @@ public class CongruenceSimulation {
 	 *  Assume that for a state q in A that can reach an accepting state f on u' and
 	 *  currently we encode q as [S1, S2] such that S1 \subseteq S2 over states of B,
 	 *  If S1 - u -> [], it means that for some word uu' from i_A to f where u corresponds to S1,
-	 *  no states in B can simulate the word uu'. 
+	 *  no states in B can simulate the word uu' from the initial state i_B. 
 	 *  Therefore, for the state q, we can just remove S2 and only represent q with [S1].
 	 *  
 	 *  Similarly, we can do the same to period computation

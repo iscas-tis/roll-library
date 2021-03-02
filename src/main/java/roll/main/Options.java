@@ -85,6 +85,8 @@ public class Options {
     public boolean spot = false;
 
     public boolean parallel = false;
+    
+    public boolean congruence = false;
 
     // use the complement teacher to learn the target BA
     public boolean reverse = false;
@@ -242,6 +244,7 @@ public class Options {
         builder.append("outputfile=" + outputFile + ",");
         builder.append("outputA=" + outputA + ",");
         builder.append("outputB=" + outputB + "\n");
+        builder.append("congruence=" + congruence + "\n");
         return builder.toString();
     }
     
@@ -259,6 +262,9 @@ public class Options {
         if(runningMode == RunningMode.COMPLEMENTING
                 && (!algorithm.isTargetFDFA())) {
                   throw new UnsupportedOperationException("arguments for test mode are illegal");
+        }
+        if(congruence && runningMode != RunningMode.INCLUDING) {
+        	throw new UnsupportedOperationException("congruence is only valid for include mode");
         }
         
     }

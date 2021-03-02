@@ -209,47 +209,63 @@ public class NBAInclusionCheck {
 //            options.log.println("Total checking time: " + timer.getTimeElapsed() / 1000.0 + " secs");
 //            System.exit(0);
 //        }
-
-        options.log.println("Start using learning algorithm to prove inclusion...");
-        // learning algorithm
-        TeacherNBAInclusion teacher = new TeacherNBAInclusion(options, parser, A, B);
-        LearnerFDFA learner = UtilLOmega.getLearnerFDFA(options, alphabet, teacher);
-        // learning loop
-        options.log.println("Start learning...");
-        long t = timer.getCurrentTime();
-        learner.startLearning();
-        t = timer.getCurrentTime() - t;
-        options.stats.timeOfLearner += t;
-        boolean result = false;
-        while(! result ) {
-            if(options.verbose()) options.log.println("learner output: " + learner.toString());
-            Query<HashableValue> query = teacher.answerEquivalenceQuery(learner.getHypothesis());
-            // get out of the loop
-            HashableValue answer = query.getQueryAnswer();
-            if(answer.getLeft().equals(true)) {
-                break;
+        
+        if(options.congruence) {
+        	options.log.println("Start using congruence-based algorithm to prove inclusion...");
+        	CongruenceSimulation congrSim = new CongruenceSimulation(A, B);
+        	boolean isIncluded = congrSim.isIncluded();
+        	if (isIncluded) {
+                options.log.print("Included\n");
+            }else {
+            	options.log.print("Not Included\n");
+            	// counter example...
+            	
             }
-            // lazy equivalence check is implemented here
-            Translator translator = new TranslatorFDFAUnder(learner);
-            query.answerQuery(new HashableValueBoolean(answer.getRight()));
-            translator.setQuery(query);
-            while(translator.canRefine()) {
-                Query<HashableValue> ceQuery = translator.translate();
-                t = timer.getCurrentTime();
-                learner.refineHypothesis(ceQuery);
-                t = timer.getCurrentTime() - t;
-                options.stats.timeOfLearner += t;
+        	timer.stop();
+        	options.log.println("Total checking time: " + timer.getTimeElapsed() / 1000.0 + " secs");
+            System.exit(0);
+        }else {
+        	options.log.println("Start using learning algorithm to prove inclusion...");
+            // learning algorithm
+            TeacherNBAInclusion teacher = new TeacherNBAInclusion(options, parser, A, B);
+            LearnerFDFA learner = UtilLOmega.getLearnerFDFA(options, alphabet, teacher);
+            // learning loop
+            options.log.println("Start learning...");
+            long t = timer.getCurrentTime();
+            learner.startLearning();
+            t = timer.getCurrentTime() - t;
+            options.stats.timeOfLearner += t;
+            boolean result = false;
+            while(! result ) {
                 if(options.verbose()) options.log.println("learner output: " + learner.toString());
-                // if do not set lazy eq check or it is learnerBuechi
-                if(options.optimization != Options.Optimization.LAZY_EQ) break;
+                Query<HashableValue> query = teacher.answerEquivalenceQuery(learner.getHypothesis());
+                // get out of the loop
+                HashableValue answer = query.getQueryAnswer();
+                if(answer.getLeft().equals(true)) {
+                    break;
+                }
+                // lazy equivalence check is implemented here
+                Translator translator = new TranslatorFDFAUnder(learner);
+                query.answerQuery(new HashableValueBoolean(answer.getRight()));
+                translator.setQuery(query);
+                while(translator.canRefine()) {
+                    Query<HashableValue> ceQuery = translator.translate();
+                    t = timer.getCurrentTime();
+                    learner.refineHypothesis(ceQuery);
+                    t = timer.getCurrentTime() - t;
+                    options.stats.timeOfLearner += t;
+                    if(options.verbose()) options.log.println("learner output: " + learner.toString());
+                    // if do not set lazy eq check or it is learnerBuechi
+                    if(options.optimization != Options.Optimization.LAZY_EQ) break;
+                }
             }
+            parser.close();
+            timer.stop();
+            options.stats.timeInTotal = timer.getTimeElapsed();
+            options.log.println("Learning completed...");
+            teacher.print();
+            options.stats.print();
         }
-        parser.close();
-        timer.stop();
-        options.stats.timeInTotal = timer.getTimeElapsed();
-        options.log.println("Learning completed...");
-        teacher.print();
-        options.stats.print();
     }
     
 //    private static boolean runNCSBComplement(Options options, Alphabet alphabet, PairParser parser, NBA A, NBA B) {
