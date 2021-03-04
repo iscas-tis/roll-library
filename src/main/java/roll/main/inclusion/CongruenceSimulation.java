@@ -1,8 +1,25 @@
+/* Copyright (c) since 2016                                               */
+/*       Institute of Software, Chinese Academy of Sciences               */
+/* This file is part of ROLL, a Regular Omega Language Learning library.  */
+/* ROLL is free software: you can redistribute it and/or modify           */
+/* it under the terms of the GNU General Public License as published by   */
+/* the Free Software Foundation, either version 3 of the License, or      */
+/* (at your option) any later version.                                    */
+
+/* This program is distributed in the hope that it will be useful,        */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of         */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          */
+/* GNU General Public License for more details.                           */
+
+/* You should have received a copy of the GNU General Public License      */
+/* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
 package roll.main.inclusion;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.TreeSet;
 
 import gnu.trove.map.TIntObjectMap;
@@ -11,6 +28,7 @@ import roll.automata.NBA;
 import roll.automata.StateNFA;
 import roll.automata.operations.StateContainer;
 import roll.main.Options;
+import roll.main.inclusion.run.SuccessorInfo;
 import roll.parser.ba.PairParserBA;
 import roll.util.Timer;
 import roll.util.sets.ISet;
@@ -59,7 +77,7 @@ public class CongruenceSimulation {
 	TIntObjectMap<HashSet<TreeSet<IntBoolTriple>>> periodSim;
 	
 	boolean antichain = false;
-	
+		
 	CongruenceSimulation(NBA A, NBA B) {
 		this.A = A;
 		this.B = B;
@@ -240,62 +258,55 @@ public class CongruenceSimulation {
 		}
 		System.out.println("Reachable size: " + reachSet.cardinality());
 		// compute simulation relation
-		while(true) {
-			// copy the first one
-			boolean changed = false;
-			ArrayList<HashSet<ISet>> copy = new ArrayList<HashSet<ISet>>();
-			for(int s = 0; s < A.getStateSize(); s ++) {
-				HashSet<ISet> sets = prefSim.get(s);
-				copy.add(new HashSet<>());
-				for(ISet set : sets) {
-					// now sets will not be changed anymore
-					copy.get(s).add(set);
-				}
-			}
-			// compute relations 
-			for(int s : reachSet) {
-				// tried to update successors
-				ISet letters = A.getState(s).getEnabledLetters();
-				// the letter is changed
-				for(int a : letters) {
-					for(int t : A.getState(s).getSuccessors(a)) {
-						if(! reachSet.get(t)) continue;
-						// s - a - > t in A
-						// f(s) - a -> P'
-						// p \in f(s), then P' \subseteq f(t) in B
-						// compute mapping relations to B
-						for(ISet set : copy.get(s)) {
-							// for every set, we update the sets
-							ISet update = UtilISet.newISet();
-							for (int p : set) {
-								for (int q : B.getSuccessors(p, a)) {
-									// update the states for t
-									update.set(q);
-								}
+		LinkedList<Integer> workList = new LinkedList<>();
+		workList.add(A.getInitialState());
+		ISet inWorkList = UtilISet.newISet();
+		inWorkList.set(A.getInitialState());
+		while(! workList.isEmpty()) {
+			// take out one state
+			int s = workList.removeFirst();
+			inWorkList.clear(s);
+			// the letter is changed
+			for(int a : A.getState(s).getEnabledLetters()) {
+				for(int t : A.getState(s).getSuccessors(a)) {
+					if(! reachSet.get(t)) continue;
+					// s - a - > t in A
+					// f(s) - a -> P'
+					// p \in f(s), then P' \subseteq f(t) in B
+					// compute mapping relations to B
+					// a set corresponds to a word u
+					for(ISet set : prefSim.get(s)) {
+						// for every set, we update the sets
+						ISet update = UtilISet.newISet();
+						for (int p : set) {
+							for (int q : B.getSuccessors(p, a)) {
+								// update the states for t
+								update.set(q);
 							}
-							// check whether we need to update
-							if (!copy.get(t).contains(update)) {
-								//TODO: Antichain, only keep the set that are not a subset of another
-								if(antichain) {
-									HashSet<ISet> orig = prefSim.get(t);
-									boolean[] modified = new boolean[1];
-									HashSet<ISet> result = addSetToPrefixAntichain(orig, update, modified);
-									changed = modified[0];
-									prefSim.set(t, result);
-								}else {
-									changed = true;
-									System.out.println(t + "->" + update);
-									prefSim.get(t).add(update);
-								}
+						}
+						// update is the word ua and check whether we need to update
+						if (! prefSim.get(t).contains(update)) {
+							//TODO: Antichain, only keep the set that are not a subset of another
+							boolean changed = false;
+							if(antichain) {
+								HashSet<ISet> orig = prefSim.get(t);
+								boolean[] modified = new boolean[1];
+								HashSet<ISet> result = addSetToPrefixAntichain(orig, update, modified);
+								changed = modified[0];
+								prefSim.set(t, result);
+							}else {
+								prefSim.get(t).add(update);
+								changed = true;
+							}
+							if(changed && !inWorkList.get(t)) {
+								workList.addLast(t);
+								inWorkList.set(t);
 							}
 						}
 					}
 				}
 			}
-			// changed or not
-			if(! changed ) {
-				break;
-			}
+			
 		}
 	}
 	
@@ -322,9 +333,10 @@ public class CongruenceSimulation {
 	
 	private ISet getPredSet(int state, StateContainer[] states, NBA nba) {
 		LinkedList<Integer> queue = new LinkedList<>();
+		ISet visited = UtilISet.newISet();
         queue.add(state);
-        ISet visited = UtilISet.newISet();
         visited.set(state);
+        boolean accLoop = false;
         while(! queue.isEmpty()) {
         	int lState = queue.remove();
             // ignore unused states
@@ -333,9 +345,16 @@ public class CongruenceSimulation {
                     if(! visited.get(lPred.getId())) {
                         queue.add(lPred.getId());
                         visited.set(lPred.getId());
+                    }else if(lPred.getId() == state) {
+                    	// the state can reach itself
+                    	System.out.println("Found loop from state " + state);
+                    	accLoop = true;
                     }
                 }
             }
+        }
+        if(! accLoop) {
+        	visited.clear(state);
         }
         return visited;
 	}
@@ -413,8 +432,9 @@ public class CongruenceSimulation {
 		return result;
 	}
 	
+	// the Input simulatedStatesInB can simulate accState
 	@SuppressWarnings("unchecked")
-	public void computePeriodSimulation(int accState, ISet reachStatesInB) {
+	public void computePeriodSimulation(int accState, ISet simulatedStatesInB) {
 		periodSim.clear();
 		// now compute every state that can be reached by accState
 		ISet reachSet = getReachSet(accState);
@@ -422,23 +442,30 @@ public class CongruenceSimulation {
 		ISet predSet = getPredSet(accState, aStates, A);
 		reachSet.and(predSet);
 		System.out.println("States for A: " + reachSet);
-		System.out.println("States for B: " + reachStatesInB);
+		System.out.println("States for B: " + simulatedStatesInB);
 		// those can not be reached should corresponds to empty set
 		for(int s : reachSet)
 		{
 			// only i_B simulates i_A at first
 			periodSim.put(s, new HashSet<TreeSet<IntBoolTriple>>());
 		}
+		LinkedList<Integer> workList = new LinkedList<>();
+		ISet inWorkList = UtilISet.newISet();
+		// 1. initialization
 		{
-			// only care about reachable states from reachStatesInB
+			// only care about states from simulatedStatesInB
 			int s = accState;
 			// v must not be empty word
 			for (int a : A.getState(s).getEnabledLetters()) {
 				for (int t : A.getSuccessors(s, a)) {
 					if(!reachSet.get(t)) continue;
+					// add to worklist
+					workList.add(t);
+					inWorkList.set(t);
+					// compute the simulation relations
 					TreeSet<IntBoolTriple> set = new TreeSet<>();
 					// s - a -> t
-					for (int p : reachStatesInB) {
+					for (int p : simulatedStatesInB) {
 						for (int q : B.getSuccessors(p, a)) {
 							// put every p - a -> q in f(t)
 							boolean acc = B.isFinal(p) || B.isFinal(q);
@@ -458,57 +485,102 @@ public class CongruenceSimulation {
 				}
 			}
 		}
-		// compute simulation relation
-		while(true) {
-			// copy the first one
-			boolean changed = false;
-			TIntObjectMap<HashSet<TreeSet<IntBoolTriple>>> copy = new TIntObjectHashMap<>();
-			for(int s : reachSet) {
-				copy.put(s, new HashSet<TreeSet<IntBoolTriple>>());
-				for(TreeSet<IntBoolTriple> set: periodSim.get(s)) {
-					copy.get(s).add(set);
-				}
-			}
-			for(int s : reachSet)
-			{
-				for(int a : A.getState(s).getEnabledLetters()) {
-					for(int t : A.getSuccessors(s, a)) {
-						if(!reachSet.get(t)) continue;
-						// s - a -> t
-						for(TreeSet<IntBoolTriple> set: copy.get(s)) {
-							TreeSet<IntBoolTriple> update = new TreeSet<>();
-							// put sets
-							for(IntBoolTriple triple : set) {
-								int p = triple.getLeft();
-								int q = triple.getRight();
-								for(int qr : B.getSuccessors(q, a)) {
-									boolean acc = B.isFinal(qr) || triple.getBool();
-									IntBoolTriple newTriple  = new IntBoolTriple(p, qr, acc);
-									update.add(newTriple);
-								}
+		// 2. computation of simulated relations
+		while(! workList.isEmpty()) {
+			int s = workList.removeFirst();
+			inWorkList.clear(s);
+			// update for successors
+			for(int a : A.getState(s).getEnabledLetters()) {
+				for(int t : A.getSuccessors(s, a)) {
+					// Again, ignore states that cannot reach accState
+					if(!reachSet.get(t)) continue;
+					// s - a -> t
+					for(TreeSet<IntBoolTriple> set: periodSim.get(s)) {
+						TreeSet<IntBoolTriple> update = new TreeSet<>();
+						// put sets
+						for(IntBoolTriple triple : set) {
+							int p = triple.getLeft();
+							int q = triple.getRight();
+							for(int qr : B.getSuccessors(q, a)) {
+								boolean acc = B.isFinal(qr) || triple.getBool();
+								IntBoolTriple newTriple  = new IntBoolTriple(p, qr, acc);
+								update.add(newTriple);
 							}
-							// we have extended for set
-							if(! containTriples(copy.get(t), update)) {
-								//TODO: Antichain, only keep the set that are a subset of another
-								if(antichain) {
-									HashSet<TreeSet<IntBoolTriple>> curr = periodSim.get(t);
-									boolean[] modified = new boolean[1];
-									HashSet<TreeSet<IntBoolTriple>> result = addSetToPeriodAntichain(curr, update, modified);
-									changed = modified[0];
-									periodSim.put(t, result);
-								}else {
-									changed = true;
-									periodSim.get(t).add(update);
-								}
+						}
+						// we have extended for set
+						if(! containTriples(periodSim.get(t), update)) {
+							//TODO: Antichain, only keep the set that are a subset of another
+							boolean changed = false;
+							if(antichain) {
+								HashSet<TreeSet<IntBoolTriple>> curr = periodSim.get(t);
+								boolean[] modified = new boolean[1];
+								HashSet<TreeSet<IntBoolTriple>> result = addSetToPeriodAntichain(curr, update, modified);
+								changed = modified[0];
+								periodSim.put(t, result);
+							}else {
+								changed = true;
+								periodSim.get(t).add(update);
+							}
+							if(changed && !inWorkList.get(t)) {
+								workList.add(t);
+								inWorkList.set(t);
 							}
 						}
 					}
 				}
 			}
-			if(! changed) {
-				break;
-			}
 		}
+//		// compute simulation relation
+//		while(true) {
+//			// copy the first one
+//			boolean changed = false;
+//			TIntObjectMap<HashSet<TreeSet<IntBoolTriple>>> copy = new TIntObjectHashMap<>();
+//			for(int s : reachSet) {
+//				copy.put(s, new HashSet<TreeSet<IntBoolTriple>>());
+//				for(TreeSet<IntBoolTriple> set: periodSim.get(s)) {
+//					copy.get(s).add(set);
+//				}
+//			}
+//			for(int s : reachSet)
+//			{
+//				for(int a : A.getState(s).getEnabledLetters()) {
+//					for(int t : A.getSuccessors(s, a)) {
+//						if(!reachSet.get(t)) continue;
+//						// s - a -> t
+//						for(TreeSet<IntBoolTriple> set: copy.get(s)) {
+//							TreeSet<IntBoolTriple> update = new TreeSet<>();
+//							// put sets
+//							for(IntBoolTriple triple : set) {
+//								int p = triple.getLeft();
+//								int q = triple.getRight();
+//								for(int qr : B.getSuccessors(q, a)) {
+//									boolean acc = B.isFinal(qr) || triple.getBool();
+//									IntBoolTriple newTriple  = new IntBoolTriple(p, qr, acc);
+//									update.add(newTriple);
+//								}
+//							}
+//							// we have extended for set
+//							if(! containTriples(copy.get(t), update)) {
+//								//TODO: Antichain, only keep the set that are a subset of another
+//								if(antichain) {
+//									HashSet<TreeSet<IntBoolTriple>> curr = periodSim.get(t);
+//									boolean[] modified = new boolean[1];
+//									HashSet<TreeSet<IntBoolTriple>> result = addSetToPeriodAntichain(curr, update, modified);
+//									changed = modified[0];
+//									periodSim.put(t, result);
+//								}else {
+//									changed = true;
+//									periodSim.get(t).add(update);
+//								}
+//							}
+//						}
+//					}
+//				}
+//			}
+//			if(! changed) {
+//				break;
+//			}
+//		}
 		
 //		System.out.println("Period for state " + accState);
 //		for(int s : reachSet)
@@ -544,20 +616,30 @@ public class CongruenceSimulation {
 		// for each accepting state (should be reachable from the initial state and can reach itself)
 		ISet reachSet = getReachSet(A.getInitialState(), A);
 		for(int accState : A.getFinalStates()) {
+//			if(accState != 1117) {
+//				continue;
+//			}
 			System.out.println("Testing for accepting state " + accState + " out " + A.getFinalStates().cardinality() + " states");
 			// reachable states from the initial state
 			ISet necessaryStates = reachSet.clone();
 			// only keep those state that can go back to accState
 			ISet predSet = getPredSet(accState, aStates, A);
 			necessaryStates.and(predSet);
-			// if the initial state cannot reach the accepting state
+			// if the initial state cannot reach the accepting state or the accepting state cannot reach itself
+			//, then language is empty
 			if(!necessaryStates.get(A.getInitialState()) || !necessaryStates.get(accState)) {
 				continue;
 			}
 			System.out.println("Necessary states in A: " + necessaryStates + " #size = " + necessaryStates.cardinality());
+			if(accState == 1117) {
+				System.out.println("Reach state 1117");
+			}
 			computePrefixSimulation(accState, necessaryStates);
-			outputPrefixSimulation();
-			
+			//outputPrefixSimulation();
+			for(int i = 0; i < A.getStateSize(); i ++) {
+				System.out.println("state " + i + " -> " + prefSim.get(i));
+			}
+//			System.exit(-1);
 			// obtain the necessary part for accState
 			HashSet<ISet> prefSims = prefSim.get(accState);
 			System.out.println("Acc simulated sets: " + prefSims);
@@ -579,24 +661,29 @@ public class CongruenceSimulation {
 					antichainPrefix.add(sim1);
 				}
 			}
-			ISet allSimulatedStatesInB = UtilISet.newISet();
+			ISet simulatedStatesInB = UtilISet.newISet();
 			for(ISet sim: antichainPrefix) {
 				if(sim.isEmpty()) {
 					// empty means some word to accState cannot be simulated
+					//computeCounterexamplePrefix(accState);
 					return false;
 				}
-				allSimulatedStatesInB.or(sim);
+				simulatedStatesInB.or(sim);
 			}
-			allSimulatedStatesInB = getReachSet(allSimulatedStatesInB);
+			//simulatedStatesInB = getReachSet(simulatedStatesInB);
 			System.out.println("Prefix simulated sets: " + antichainPrefix);
-			System.out.println("Necessary states for B: " + allSimulatedStatesInB);
+			System.out.println("Necessary states for B: " + simulatedStatesInB);
 			// now we compute the simulation for periods from accState
-			computePeriodSimulation(accState, allSimulatedStatesInB);
+			computePeriodSimulation(accState, simulatedStatesInB);
 			// now decide whether there is one word accepted by A but not B
 			for(ISet pref: antichainPrefix) {
 				System.out.println("Simulated set in B: " + pref);
 				// compute antichain
 				HashSet<TreeSet<IntBoolTriple>> antichainPeriod = new HashSet<>();
+				if(antichainPeriod.contains(new TreeSet<>())) {
+					// empty means some word from accState to itself cannot be simulated
+					return false;
+				}
 				for(TreeSet<IntBoolTriple> period1: periodSim.get(accState)) {
 					boolean subsumes = false;
 					for(TreeSet<IntBoolTriple> period2: periodSim.get(accState)) {
@@ -621,6 +708,64 @@ public class CongruenceSimulation {
 		return true;
 	}
 	
+	private SuccessorInfo getSuccessorInfo(TIntObjectMap<SuccessorInfo> map, int state) {
+		if(map.containsKey(state)) {
+            return map.get(state);
+        }
+        SuccessorInfo succInfo = new SuccessorInfo(state);
+        map.put(state, succInfo);
+        return succInfo;
+	}
+	
+	private void computeCounterexamplePrefix(int accState) {
+		LinkedList<Integer> word = new LinkedList<Integer>();
+		// we make use of aStates to compute a word that can not be simulated by B
+		//1. First, find the word that precessor has empty set
+		PriorityQueue<SuccessorInfo> workList = new PriorityQueue<>();
+        // input source states
+		TIntObjectMap<SuccessorInfo> map = new TIntObjectHashMap<>();
+		SuccessorInfo accSuccInfo = getSuccessorInfo(map, accState);
+        workList.add(accSuccInfo);
+        accSuccInfo.distance = 0;
+        
+        ISet visited = UtilISet.newISet();
+        while(! workList.isEmpty()) {
+            SuccessorInfo currInfo = workList.remove(); 
+            if(visited.get(currInfo.state)) {
+                continue;
+            }
+            if(currInfo.state == A.getInitialState()) {
+                break;
+            }
+            if(currInfo.unreachable()) {
+                assert false : "Unreachable state";
+            }
+            // update distance of successors
+            for(int letter = 0; letter < A.getAlphabetSize(); letter ++) {
+            	HashSet<ISet> currSims = prefSim.get(currInfo.state);
+                for(final StateNFA pred : aStates[currInfo.state].getPredecessors(letter)) {
+                	// first check whether it also contains empty set
+                	HashSet<ISet> prefSims = prefSim.get(pred.getId());
+                	
+                    SuccessorInfo predInfo = getSuccessorInfo(map, pred.getId());
+                    int distance = currInfo.distance + 1;
+                    if(!visited.get(pred.getId()) && predInfo.distance > distance) {
+                        // update predInfo
+                    	predInfo.letter = letter;
+                    	predInfo.distance = distance;
+                    	predInfo.predState = currInfo.state;
+                        workList.remove(predInfo);
+                        workList.add(predInfo);
+                    }
+                }
+            }
+        }
+        
+        // construct loop
+        
+		
+	}
+
 	private TreeSet<IntBoolTriple> compose(TreeSet<IntBoolTriple> first, TreeSet<IntBoolTriple> second) {
 		TreeSet<IntBoolTriple> result = new TreeSet<>();
 		for(IntBoolTriple fstTriple: first) {
