@@ -30,6 +30,7 @@ import roll.automata.operations.StateContainer;
 import roll.main.Options;
 import roll.main.inclusion.run.SuccessorInfo;
 import roll.parser.ba.PairParserBA;
+import roll.util.Pair;
 import roll.util.Timer;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
@@ -77,6 +78,7 @@ public class CongruenceSimulation {
 	TIntObjectMap<HashSet<TreeSet<IntBoolTriple>>> periodSim;
 	
 	boolean antichain = false;
+	boolean debug = false;
 		
 	CongruenceSimulation(NBA A, NBA B) {
 		this.A = A;
@@ -256,7 +258,7 @@ public class CongruenceSimulation {
 				prefSim.get(s).add(set);
 			}
 		}
-		System.out.println("Reachable size: " + reachSet.cardinality());
+		if(debug) System.out.println("Reachable size: " + reachSet.cardinality());
 		// compute simulation relation
 		LinkedList<Integer> workList = new LinkedList<>();
 		workList.add(A.getInitialState());
@@ -347,7 +349,7 @@ public class CongruenceSimulation {
                         visited.set(lPred.getId());
                     }else if(lPred.getId() == state) {
                     	// the state can reach itself
-                    	System.out.println("Found loop from state " + state);
+                    	if(debug) System.out.println("Found loop from state " + state);
                     	accLoop = true;
                     }
                 }
@@ -441,8 +443,8 @@ public class CongruenceSimulation {
 		// only keep those state that can go back to accState
 		ISet predSet = getPredSet(accState, aStates, A);
 		reachSet.and(predSet);
-		System.out.println("States for A: " + reachSet);
-		System.out.println("States for B: " + simulatedStatesInB);
+		if(debug) System.out.println("States for A: " + reachSet);
+		if(debug) System.out.println("States for B: " + simulatedStatesInB);
 		// those can not be reached should corresponds to empty set
 		for(int s : reachSet)
 		{
@@ -451,6 +453,7 @@ public class CongruenceSimulation {
 		}
 		LinkedList<Integer> workList = new LinkedList<>();
 		ISet inWorkList = UtilISet.newISet();
+		System.out.println("Start computing the congruence representation for accepting state " + accState + " ...");
 		// 1. initialization
 		{
 			// only care about states from simulatedStatesInB
@@ -530,96 +533,54 @@ public class CongruenceSimulation {
 				}
 			}
 		}
-//		// compute simulation relation
-//		while(true) {
-//			// copy the first one
-//			boolean changed = false;
-//			TIntObjectMap<HashSet<TreeSet<IntBoolTriple>>> copy = new TIntObjectHashMap<>();
-//			for(int s : reachSet) {
-//				copy.put(s, new HashSet<TreeSet<IntBoolTriple>>());
-//				for(TreeSet<IntBoolTriple> set: periodSim.get(s)) {
-//					copy.get(s).add(set);
-//				}
-//			}
-//			for(int s : reachSet)
-//			{
-//				for(int a : A.getState(s).getEnabledLetters()) {
-//					for(int t : A.getSuccessors(s, a)) {
-//						if(!reachSet.get(t)) continue;
-//						// s - a -> t
-//						for(TreeSet<IntBoolTriple> set: copy.get(s)) {
-//							TreeSet<IntBoolTriple> update = new TreeSet<>();
-//							// put sets
-//							for(IntBoolTriple triple : set) {
-//								int p = triple.getLeft();
-//								int q = triple.getRight();
-//								for(int qr : B.getSuccessors(q, a)) {
-//									boolean acc = B.isFinal(qr) || triple.getBool();
-//									IntBoolTriple newTriple  = new IntBoolTriple(p, qr, acc);
-//									update.add(newTriple);
-//								}
-//							}
-//							// we have extended for set
-//							if(! containTriples(copy.get(t), update)) {
-//								//TODO: Antichain, only keep the set that are a subset of another
-//								if(antichain) {
-//									HashSet<TreeSet<IntBoolTriple>> curr = periodSim.get(t);
-//									boolean[] modified = new boolean[1];
-//									HashSet<TreeSet<IntBoolTriple>> result = addSetToPeriodAntichain(curr, update, modified);
-//									changed = modified[0];
-//									periodSim.put(t, result);
-//								}else {
-//									changed = true;
-//									periodSim.get(t).add(update);
-//								}
-//							}
-//						}
-//					}
-//				}
-//			}
-//			if(! changed) {
-//				break;
-//			}
-//		}
-		
-//		System.out.println("Period for state " + accState);
-//		for(int s : reachSet)
-//		{
-//			// only i_B simulates i_A at first
-//			System.out.print("State " + s + "\n");
-//			
-//			System.out.println(periodSim.get(s));
-//		}
-//		// checking accepting
-//		// i_A -> q
-//		HashSet<ISet> simPrefix = prefSim.get(accState);
-//		for(ISet set : simPrefix) {
-//			// q - u -> q
-//			System.out.println("Simulated sets for A_state " + accState + ": " + set);
-//			HashSet<TreeSet<IntBoolTriple>> simPeriod = periodSim.get(accState);
-//			// decide whether there exists one accepting run in B
-//			// must satisfy every set
-//			System.out.println("Loop arrows for " + accState + " -> " + accState);
-//			for(TreeSet<IntBoolTriple> setPeriod : simPeriod) {
-//				System.out.println(setPeriod);
-//			}
-//		}
-		
+		System.out.println("Finished computing the congruence representation for accepting state " + accState + " ...");		
 	}
 	
 	public boolean isEquvalent() {
 		return false;
 	}
 	
+	private boolean coveredBy(Pair<HashSet<ISet>, HashSet<TreeSet<IntBoolTriple>>> left
+			, Pair<HashSet<ISet>, HashSet<TreeSet<IntBoolTriple>>> right) {
+		// check whether left is coveredby right
+		// first, check prefix
+		for(ISet lSet : left.getLeft()) {
+			boolean covered = false;
+			for(ISet rSet : right.getLeft()) {
+				if(rSet.subsetOf(lSet)) {
+					covered = true;
+					break;
+				}
+			}
+			if(! covered) {
+				return false;
+			}
+		}
+		for(TreeSet<IntBoolTriple> lTriples : left.getRight()) {
+			boolean covered = false;
+			for(TreeSet<IntBoolTriple> rTriples : right.getRight()) {
+				if(lTriples.containsAll(rTriples)) {
+					covered = true;
+					break;
+				}
+			}
+			if(! covered) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	public boolean isIncluded() {
 		
 		// for each accepting state (should be reachable from the initial state and can reach itself)
 		ISet reachSet = getReachSet(A.getInitialState(), A);
+		int countStates = 0;
+//		LinkedList<Pair<HashSet<ISet>, HashSet<TreeSet<IntBoolTriple>>>> antichainFinals = new LinkedList<>();
+		long timeForAcceptance = 0;
 		for(int accState : A.getFinalStates()) {
-//			if(accState != 1117) {
-//				continue;
-//			}
-			System.out.println("Testing for accepting state " + accState + " out " + A.getFinalStates().cardinality() + " states");
+			countStates ++;
+			System.out.println("Checking for "+ countStates + "-th accepting state " + accState + " out of " + A.getFinalStates().cardinality() + " states");
 			// reachable states from the initial state
 			ISet necessaryStates = reachSet.clone();
 			// only keep those state that can go back to accState
@@ -630,19 +591,19 @@ public class CongruenceSimulation {
 			if(!necessaryStates.get(A.getInitialState()) || !necessaryStates.get(accState)) {
 				continue;
 			}
-			System.out.println("Necessary states in A: " + necessaryStates + " #size = " + necessaryStates.cardinality());
-			if(accState == 1117) {
-				System.out.println("Reach state 1117");
-			}
+			if(debug) System.out.println("Necessary states in A: " + necessaryStates + " #size = " + necessaryStates.cardinality());
 			computePrefixSimulation(accState, necessaryStates);
 			//outputPrefixSimulation();
-			for(int i = 0; i < A.getStateSize(); i ++) {
+			for(int i = 0; i < A.getStateSize() && debug; i ++) {
 				System.out.println("state " + i + " -> " + prefSim.get(i));
 			}
 //			System.exit(-1);
 			// obtain the necessary part for accState
 			HashSet<ISet> prefSims = prefSim.get(accState);
-			System.out.println("Acc simulated sets: " + prefSims);
+			if(debug) System.out.println("Acc simulated sets: " + prefSims);
+			if(prefSims.isEmpty()) {
+				return false;
+			}
 			// only keep the sets that are subset of another
 			HashSet<ISet> antichainPrefix = new HashSet<>();
 			// compute antichain
@@ -658,6 +619,7 @@ public class CongruenceSimulation {
 					}
 				}
 				if(! subsumes) {
+					// not subsume others
 					antichainPrefix.add(sim1);
 				}
 			}
@@ -671,19 +633,19 @@ public class CongruenceSimulation {
 				simulatedStatesInB.or(sim);
 			}
 			//simulatedStatesInB = getReachSet(simulatedStatesInB);
-			System.out.println("Prefix simulated sets: " + antichainPrefix);
-			System.out.println("Necessary states for B: " + simulatedStatesInB);
+			if(debug) System.out.println("Prefix simulated sets: " + antichainPrefix);
+			if(debug) System.out.println("Necessary states for B: " + simulatedStatesInB);
 			// now we compute the simulation for periods from accState
 			computePeriodSimulation(accState, simulatedStatesInB);
 			// now decide whether there is one word accepted by A but not B
+			System.out.println("Deciding the language inclusion between L(A^i_f) (A^f_f)^w and L(B) ...");
+			Timer timer = new Timer();
+			timer.start();
 			for(ISet pref: antichainPrefix) {
-				System.out.println("Simulated set in B: " + pref);
+				if(debug) System.out.println("Simulated set in B: " + pref);
+//				computePeriodSimulation(accState, pref);
 				// compute antichain
 				HashSet<TreeSet<IntBoolTriple>> antichainPeriod = new HashSet<>();
-				if(antichainPeriod.contains(new TreeSet<>())) {
-					// empty means some word from accState to itself cannot be simulated
-					return false;
-				}
 				for(TreeSet<IntBoolTriple> period1: periodSim.get(accState)) {
 					boolean subsumes = false;
 					for(TreeSet<IntBoolTriple> period2: periodSim.get(accState)) {
@@ -697,6 +659,10 @@ public class CongruenceSimulation {
 						antichainPeriod.add(period1);
 					}
 				}
+				if(antichainPeriod.contains(new TreeSet<>())) {
+					// empty means some word from accState to itself cannot be simulated
+					return false;
+				}
 				for(TreeSet<IntBoolTriple> period: antichainPeriod) {
 					// decide whether this pref (period) is accepting in B
 					if(! decideAcceptance(pref, period)) {
@@ -704,7 +670,11 @@ public class CongruenceSimulation {
 					}
 				}
 			}
+			timer.stop();
+			timeForAcceptance += timer.getTimeElapsed();
+//			antichainFinals.add(new Pair(prefSim.get(accState), periodSim.get(accState)));
 		}
+		System.out.println("Time elapsed for deciding acceptance: " + timeForAcceptance);
 		return true;
 	}
 	
