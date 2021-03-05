@@ -245,7 +245,8 @@ public class CongruenceSimulation {
 	 * Only compute the states that can reach accState
 	 * */
 	public void computePrefixSimulation(int accState, ISet reachSet) {
-		
+		Timer timer = new Timer();
+		timer.start();
 		prefSim.clear();
 		// initialization
 		for(int s = 0; s < A.getStateSize(); s ++)
@@ -310,6 +311,8 @@ public class CongruenceSimulation {
 			}
 			
 		}
+		timer.stop();
+		this.timeForPrefixSim += timer.getTimeElapsed();
 	}
 	
 	private ISet getReachSet(int state) {
@@ -434,9 +437,14 @@ public class CongruenceSimulation {
 		return result;
 	}
 	
+	private long timeForPrefixSim = 0;
+	private long timeForPeriodSim = 0;
+	
 	// the Input simulatedStatesInB can simulate accState
 	@SuppressWarnings("unchecked")
 	public void computePeriodSimulation(int accState, ISet simulatedStatesInB) {
+		Timer timer = new Timer();
+		timer.start();
 		periodSim.clear();
 		// now compute every state that can be reached by accState
 		ISet reachSet = getReachSet(accState);
@@ -453,7 +461,7 @@ public class CongruenceSimulation {
 		}
 		LinkedList<Integer> workList = new LinkedList<>();
 		ISet inWorkList = UtilISet.newISet();
-		System.out.println("Start computing the congruence representation for accepting state " + accState + " ...");
+		System.out.println("Computing the congruence representation of periods for accepting state " + accState + " ...");
 		// 1. initialization
 		{
 			// only care about states from simulatedStatesInB
@@ -533,7 +541,9 @@ public class CongruenceSimulation {
 				}
 			}
 		}
-		System.out.println("Finished computing the congruence representation for accepting state " + accState + " ...");		
+		timer.stop();
+		this.timeForPeriodSim += timer.getTimeElapsed();
+//		System.out.println("Finished computing the congruence representation for accepting state " + accState + " ...");		
 	}
 	
 	public boolean isEquvalent() {
@@ -589,6 +599,7 @@ public class CongruenceSimulation {
 			// if the initial state cannot reach the accepting state or the accepting state cannot reach itself
 			//, then language is empty
 			if(!necessaryStates.get(A.getInitialState()) || !necessaryStates.get(accState)) {
+				//System.out.println("Ignored the accepting state " + accState + "");
 				continue;
 			}
 			if(debug) System.out.println("Necessary states in A: " + necessaryStates + " #size = " + necessaryStates.cardinality());
@@ -674,7 +685,10 @@ public class CongruenceSimulation {
 			timeForAcceptance += timer.getTimeElapsed();
 //			antichainFinals.add(new Pair(prefSim.get(accState), periodSim.get(accState)));
 		}
-		System.out.println("Time elapsed for deciding acceptance: " + timeForAcceptance);
+		System.out.println("Time for deciding acceptance: " + timeForAcceptance);
+		System.out.println("Time for computing prefix simulation: " + this.timeForPrefixSim);
+		System.out.println("Time for computing period simulation: " + this.timeForPeriodSim);
+
 		return true;
 	}
 	
