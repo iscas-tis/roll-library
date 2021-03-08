@@ -26,6 +26,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import roll.automata.NBA;
 import roll.automata.StateNFA;
+import roll.automata.operations.NBALasso;
 import roll.automata.operations.StateContainer;
 import roll.main.Options;
 import roll.main.inclusion.run.SuccessorInfo;
@@ -35,6 +36,7 @@ import roll.util.Timer;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
+import roll.words.Word;
 
 // This algorithm is inspired by simulation relation and the work 
 //	Congruence Relations for B\"uchi Automata submitted to ICALP'21
@@ -79,6 +81,16 @@ public class CongruenceSimulation {
 	
 	boolean antichain = false;
 	boolean debug = false;
+	
+	Word prefix = null;
+	Word period = null;
+	
+	// p - a -> q cannot be simulated with transitions in B
+	int aPState = -1;
+	int aQState = -1;
+	int aLetter = -1;
+	boolean earlyTerminated = false;
+	ISet bSetForP;
 		
 	CongruenceSimulation(NBA A, NBA B) {
 		this.A = A;
@@ -131,90 +143,7 @@ public class CongruenceSimulation {
 			}
 		}
 	}
-		
-	public void computePrefixSimulation() {
-		// initialization
-		for(int s = 0; s < A.getStateSize(); s ++)
-		{
-			// only i_B simulates i_A at first
-			if(s == A.getInitialState()) {
-				ISet set = UtilISet.newISet();
-				set.set(B.getInitialState());
-				prefSim.get(s).add(set);
-			}
-		}
-		// compute simulation relation
-		while(true) {
-			// copy the first one
-			boolean changed = false;
-			ArrayList<HashSet<ISet>> copy = new ArrayList<HashSet<ISet>>();
-			for(int s = 0; s < A.getStateSize(); s ++) {
-				HashSet<ISet> sets = prefSim.get(s);
-				copy.add(new HashSet<>());
-				for(ISet set : sets) {
-					// now sets will not be changed anymore
-					copy.get(s).add(set);
-				}
-			}
-			// compute relations 
-			for(int s = 0; s < A.getStateSize(); s++) {
-				// tried to update successors
-				ISet letters = A.getState(s).getEnabledLetters();
-				// the letter is changed
-				for(int a : letters) {
-					for(int t : A.getState(s).getSuccessors(a)) {
-						// s - a - > t in A
-						// f(s) - a -> P'
-						// p \in f(s), then P' \subseteq f(t) in B
-						// compute mapping relations to B
-						for(ISet set : copy.get(s)) {
-							// for every set, we update the sets
-							ISet update = UtilISet.newISet();
-							for (int p : set) {
-								for (int q : B.getSuccessors(p, a)) {
-									// update the states for t
-									update.set(q);
-								}
-							}
-							// check whether we need to update
-							if (!copy.get(t).contains(update)) {
-								//TODO: Antichain, only keep the set that are a subset of another
-								if(antichain) {
-									HashSet<ISet> curr = prefSim.get(t);
-									HashSet<ISet> result = new HashSet<>();
-									boolean contained = false;
-									for(ISet sts: curr) {
-										if(update.subsetOf(sts)) {
-											// ignore sets that subsume update
-											continue;
-										}else if(sts.subsetOf(update)){
-											contained = true;
-											result.add(sts);
-										}else {
-											result.add(sts);
-										}
-									}
-									if(! contained) {
-										changed = true;
-										result.add(update);
-									}
-									prefSim.set(t, result);
-								}else {
-									changed = true;
-									prefSim.get(t).add(update);
-								}
-							}
-						}
-					}
-				}
-			}
-			// changed or not
-			if(! changed ) {
-				break;
-			}
-		}
-	}
-	
+			
 	// 
 	HashSet<ISet> addSetToPrefixAntichain(HashSet<ISet> orig, ISet update, boolean[] changed) {
 		boolean contained = false;
@@ -306,10 +235,29 @@ public class CongruenceSimulation {
 								inWorkList.set(t);
 							}
 						}
+						// detected that update is empty for the first time
+						// now need to update 
+						if(update.isEmpty()) {
+							aPState = s;
+							aQState = t;
+							aLetter = a;
+							earlyTerminated = true;
+							bSetForP = set;
+							break;
+						}
+					}
+					if(earlyTerminated) {
+						break;
 					}
 				}
+				if(earlyTerminated) {
+					break;
+				}
 			}
-			
+			if(earlyTerminated) {
+				prefSim.get(accState).add(UtilISet.newISet());
+				break;
+			}
 		}
 		timer.stop();
 		this.timeForPrefixSim += timer.getTimeElapsed();
@@ -537,8 +485,26 @@ public class CongruenceSimulation {
 								inWorkList.set(t);
 							}
 						}
+						if(update.isEmpty()) {
+							aPState = s;
+							aQState = t;
+							aLetter = a;
+							earlyTerminated = true;
+							break;
+						}
+					}
+					if(earlyTerminated) {
+						break;
 					}
 				}
+				if(earlyTerminated) {
+					break;
+				}
+			}
+			if(earlyTerminated) {
+				periodSim.get(accState).add(new TreeSet<>());
+				System.out.println("Early termination in computing representation of periods.");
+				break;
 			}
 		}
 		timer.stop();
@@ -613,6 +579,8 @@ public class CongruenceSimulation {
 			HashSet<ISet> prefSims = prefSim.get(accState);
 			if(debug) System.out.println("Acc simulated sets: " + prefSims);
 			if(prefSims.isEmpty()) {
+				// any word that reaches accState will do
+				computeCounterexamplePrefix(accState, necessaryStates);
 				return false;
 			}
 			// only keep the sets that are subset of another
@@ -638,7 +606,10 @@ public class CongruenceSimulation {
 			for(ISet sim: antichainPrefix) {
 				if(sim.isEmpty()) {
 					// empty means some word to accState cannot be simulated
-					//computeCounterexamplePrefix(accState);
+					System.out.println("Computing counterexample ...");
+					computeCounterexamplePrefix(accState, necessaryStates);
+					System.out.println("Prefix: " + prefix);
+					System.out.println("Period: " + period);
 					return false;
 				}
 				simulatedStatesInB.or(sim);
@@ -672,11 +643,14 @@ public class CongruenceSimulation {
 				}
 				if(antichainPeriod.contains(new TreeSet<>())) {
 					// empty means some word from accState to itself cannot be simulated
+					computeCounterexamplePeriod(accState, necessaryStates);
 					return false;
 				}
 				for(TreeSet<IntBoolTriple> period: antichainPeriod) {
 					// decide whether this pref (period) is accepting in B
 					if(! decideAcceptance(pref, period)) {
+						// we need to construct a counterexample here
+						computeCounterexample(pref, period);
 						return false;
 					}
 				}
@@ -691,65 +665,124 @@ public class CongruenceSimulation {
 
 		return true;
 	}
-	
-	private SuccessorInfo getSuccessorInfo(TIntObjectMap<SuccessorInfo> map, int state) {
-		if(map.containsKey(state)) {
-            return map.get(state);
-        }
-        SuccessorInfo succInfo = new SuccessorInfo(state);
-        map.put(state, succInfo);
-        return succInfo;
-	}
-	
-	private void computeCounterexamplePrefix(int accState) {
-		LinkedList<Integer> word = new LinkedList<Integer>();
-		// we make use of aStates to compute a word that can not be simulated by B
-		//1. First, find the word that precessor has empty set
-		PriorityQueue<SuccessorInfo> workList = new PriorityQueue<>();
-        // input source states
-		TIntObjectMap<SuccessorInfo> map = new TIntObjectHashMap<>();
-		SuccessorInfo accSuccInfo = getSuccessorInfo(map, accState);
-        workList.add(accSuccInfo);
-        accSuccInfo.distance = 0;
-        
-        ISet visited = UtilISet.newISet();
-        while(! workList.isEmpty()) {
-            SuccessorInfo currInfo = workList.remove(); 
-            if(visited.get(currInfo.state)) {
-                continue;
-            }
-            if(currInfo.state == A.getInitialState()) {
-                break;
-            }
-            if(currInfo.unreachable()) {
-                assert false : "Unreachable state";
-            }
-            // update distance of successors
-            for(int letter = 0; letter < A.getAlphabetSize(); letter ++) {
-            	HashSet<ISet> currSims = prefSim.get(currInfo.state);
-                for(final StateNFA pred : aStates[currInfo.state].getPredecessors(letter)) {
-                	// first check whether it also contains empty set
-                	HashSet<ISet> prefSims = prefSim.get(pred.getId());
-                	
-                    SuccessorInfo predInfo = getSuccessorInfo(map, pred.getId());
-                    int distance = currInfo.distance + 1;
-                    if(!visited.get(pred.getId()) && predInfo.distance > distance) {
-                        // update predInfo
-                    	predInfo.letter = letter;
-                    	predInfo.distance = distance;
-                    	predInfo.predState = currInfo.state;
-                        workList.remove(predInfo);
-                        workList.add(predInfo);
-                    }
-                }
-            }
-        }
-        
-        // construct loop
-        
+
+	private void computeCounterexample(ISet pref, TreeSet<IntBoolTriple> period2) {
 		
 	}
+	
+	private Word computeWordInB(ISet start, ISet goal) {
+		PriorityQueue<SuccessorInfo<ISet>> queue = new PriorityQueue<SuccessorInfo<ISet>>();
+		SuccessorInfo<ISet> info = new SuccessorInfo<>(start);
+		info.word = A.getAlphabet().getEmptyWord();
+		queue.add(info);
+		HashSet<ISet> visited = new HashSet<>();
+		visited.add(start);
+		
+		while(! queue.isEmpty()) {
+			SuccessorInfo<ISet> curr = queue.remove();
+            // trace back to the initial state
+            for(int letter = 0; letter < B.getAlphabetSize(); letter ++) {
+            	// for sure current state has empty set
+            	Word word = curr.word.append(letter);
+            	ISet succs = UtilISet.newISet();
+            	for(int currId : curr.state) {
+            		for(int succId : B.getState(currId).getSuccessors(letter)) {
+                    	// now add those states into it
+                    	succs.set(succId);
+                    }
+            	}
+            	if(! visited.contains(succs)) {
+            		SuccessorInfo<ISet> succInfo = new SuccessorInfo<>(succs);
+            		succInfo.word = word;
+            		queue.add(succInfo);
+            		visited.add(succs);
+            	}
+            	if(succs.equals(goal)) {
+            		return word;
+            	}
+            }
+		}
+		assert false;
+		return null;
+	}
 
+	// goal must be reachable from start
+	private Word computeWordInA(int start, int goal) {
+		PriorityQueue<SuccessorInfo<Integer>> queue = new PriorityQueue<SuccessorInfo<Integer>>();
+		SuccessorInfo<Integer> info = new SuccessorInfo<Integer>(start);
+		info.word = A.getAlphabet().getEmptyWord();
+		queue.add(info);
+		ISet visited = UtilISet.newISet();
+		visited.set(start);
+		
+		while(! queue.isEmpty()) {
+			SuccessorInfo<Integer> curr = queue.remove();
+            // trace back to the initial state
+            for(int letter : A.getState(curr.state).getEnabledLetters()) {
+            	// for sure current state has empty set
+            	Word word = curr.word.append(letter);
+                for(int succId : A.getState(curr.state).getSuccessors(letter)) {
+                	// now add those states into it
+                	if(! visited.get(succId)) {
+                		SuccessorInfo<Integer> succInfo = new SuccessorInfo<Integer>(succId);
+                		succInfo.word = word;
+                		queue.add(succInfo);
+                		visited.set(succId);
+                	}
+                	if(succId == goal) {
+                		return word;
+                	}
+                }
+            }
+		}
+		assert false;
+		return null;
+	}
+	
+	private void computeCounterexamplePrefix(int accState, ISet reachSet) {
+		assert (aPState >= 0  && aQState >= 0);
+		ISet initSet = UtilISet.newISet();
+		initSet.set(B.getInitialState());
+		// construct prefix
+		Word p1 = computeWordInB(initSet, bSetForP);
+		Word p2 = computeWordInA(aQState, accState);
+		this.prefix = p1.append(this.aLetter);
+		this.prefix = this.prefix.concat(p2);
+		
+		// construct loop
+		this.period = A.getAlphabet().getEmptyWord();
+        int start = -1;
+        for(int letter : A.getState(accState).getEnabledLetters()) {
+        	// just choose this one
+        	for(int succ : A.getState(accState).getSuccessors(letter)) {
+        		if(reachSet.get(succ)) {
+        			this.period = this.period.append(letter);
+//        			System.out.println("Start = " + succ + " letter = " + letter);
+        			start = succ;
+        			break;
+        		}
+        	}
+        	if(start >= 0) {
+        		break;
+        	}
+        }
+//        System.out.println("Start = " + start + " accState = " + accState);
+        Word suffix = computeWordInA(start, accState);
+//        System.out.println("pref = " + this.period + "suffix = " + suffix);
+        assert(suffix != null);
+        this.period = this.period.concat(suffix);
+	}
+	
+	private void computeCounterexamplePeriod(int accState, ISet reachSet) {
+		assert (aPState >= 0  && aQState >= 0);
+		this.prefix = computeWordInA(A.getInitialState(), accState);
+		// construct period
+		Word p1 = computeWordInA(accState, aPState);
+		Word p2 = computeWordInA(aQState, accState);
+		this.period = p1.append(this.aLetter);
+		this.period = this.period.concat(p2);
+	}
+//
 	private TreeSet<IntBoolTriple> compose(TreeSet<IntBoolTriple> first, TreeSet<IntBoolTriple> second) {
 		TreeSet<IntBoolTriple> result = new TreeSet<>();
 		for(IntBoolTriple fstTriple: first) {
@@ -832,6 +865,10 @@ public class CongruenceSimulation {
 		sim.antichain = true;
 		boolean included = sim.isIncluded();
 		System.out.println(included ? "Included" : "Not included");
+		if(!included) {
+			NBALasso lasso = new NBALasso(sim.prefix, sim.period);
+			pairParser.print(lasso.getNBA(), options.log.getOutputStream());
+		}
 		timer.stop();
 		System.out.println("Time elapsed " + timer.getTimeElapsed());
 		
@@ -897,7 +934,4 @@ public class CongruenceSimulation {
 		}
 
 	}
-
-	
-
 }
