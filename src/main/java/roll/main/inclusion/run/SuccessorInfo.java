@@ -20,24 +20,19 @@ package roll.main.inclusion.run;
 
 import java.util.Comparator;
 
-class SuccessorInfo implements Comparator<SuccessorInfo>{
-    final int state;
-    int predState;
-    int letter;
-    int distance;
+import roll.words.Word;
+
+public class SuccessorInfo<T> implements Comparator<SuccessorInfo<T>>, Comparable<SuccessorInfo<T>>{
+    public final T state;
+    public Word word;
     
-    SuccessorInfo(int state) {
+    public SuccessorInfo(T state) {
         this.state = state;
-        distance = Integer.MAX_VALUE;
-    }
-    
-    boolean unreachable() {
-        return distance == Integer.MAX_VALUE;
     }
 
     @Override
-    public int compare(SuccessorInfo arg0, SuccessorInfo arg1) {
-        return arg0.distance - arg1.distance;
+    public int compare(SuccessorInfo<T> arg0, SuccessorInfo<T> arg1) {
+        return arg0.word.length() - arg1.word.length();
     }
     
     @Override
@@ -46,13 +41,19 @@ class SuccessorInfo implements Comparator<SuccessorInfo>{
         if(! (obj instanceof SuccessorInfo)) {
             return false;
         }
-        SuccessorInfo other = (SuccessorInfo)obj;
+        @SuppressWarnings("unchecked")
+		SuccessorInfo<T> other = (SuccessorInfo<T>)obj;
         return other.state == state;
     }
     
     @Override
     public String toString() {
-        return "<" + state + "," + predState + "," + letter + "," + distance + ">";
+        return "<" + state + "," + word + "," + word.length() + ">";
     }
+
+	@Override
+	public int compareTo(SuccessorInfo<T> other) {
+		return word.length() - other.word.length();
+	}
     
 }
