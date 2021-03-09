@@ -17,6 +17,7 @@
 package roll.main.inclusion;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
@@ -92,6 +93,8 @@ public class CongruenceSimulation {
 	ISet bSetForP;
 	
 	boolean computeCounterexample = false;
+	
+	HashMap<Pair<Integer, ISet>, Word> prefWordMap;
 		
 	CongruenceSimulation(NBA A, NBA B) {
 		this.A = A;
@@ -152,7 +155,7 @@ public class CongruenceSimulation {
 	}
 			
 	// 
-	HashSet<ISet> addSetToPrefixAntichain(HashSet<ISet> orig, ISet update, boolean[] changed) {
+	HashSet<ISet> addSetToPrefixAntichain(HashSet<ISet> orig, ISet update, HashSet<ISet> subsetOfUpdate, boolean[] changed) {
 		boolean contained = false;
 		HashSet<ISet> result = new HashSet<>();
 		changed[0] = false;
@@ -160,6 +163,9 @@ public class CongruenceSimulation {
 		for(ISet sts: orig) {
 			if(update.subsetOf(sts)) {
 				// ignore sets that subsume update
+				if(computeCounterexample) {
+					subsetOfUpdate.add(sts);
+				}
 				continue;
 			}else if(sts.subsetOf(update)){
 				// updated should not be added into the hashset
@@ -181,6 +187,9 @@ public class CongruenceSimulation {
 	 * Only compute the states that can reach accState
 	 * */
 	public void computePrefixSimulation(int accState, ISet reachSet) {
+		if(computeCounterexample) {
+			this.prefWordMap = new HashMap<>();
+		}
 		Timer timer = new Timer();
 		timer.start();
 		prefSim.clear();
@@ -193,6 +202,9 @@ public class CongruenceSimulation {
 				ISet set = UtilISet.newISet();
 				set.set(B.getInitialState());
 				prefSim.get(s).add(set);
+				if(computeCounterexample) {
+					this.prefWordMap.put(new Pair<>(s,  set), A.getAlphabet().getEmptyWord());
+				}
 			}
 		}
 		if(debug) System.out.println("Reachable size: " + reachSet.cardinality());
@@ -230,9 +242,18 @@ public class CongruenceSimulation {
 							if(antichain) {
 								HashSet<ISet> orig = prefSim.get(t);
 								boolean[] modified = new boolean[1];
-								HashSet<ISet> result = addSetToPrefixAntichain(orig, update, modified);
+								HashSet<ISet> subsetsOfUpdate = new HashSet<>();
+								HashSet<ISet> result = addSetToPrefixAntichain(orig, update, subsetsOfUpdate, modified);
 								changed = modified[0];
 								prefSim.set(t, result);
+								if(changed && computeCounterexample) {
+									Word pref = this.prefWordMap.get(new Pair<>(s, set));
+									Word newPref = pref.append(a);
+									this.prefWordMap.put(new Pair<>(t,  update), newPref);
+									for(ISet subset : subsetsOfUpdate) {
+										prefWordMap.remove(new Pair<>(t, subset));
+									}
+								}
 							}else {
 								prefSim.get(t).add(update);
 								changed = true;
@@ -767,11 +788,68 @@ public class CongruenceSimulation {
                 		//System.out.println("Found a word to " + goal);
                 		return word;
                 	}
+            		// ignore representation that are not in the prefSim
+            		//if(! prefSim.get(aSucc).contains(succs)) {
+            		//	continue;
+            		//}
             		Pair<Integer, ISet> newPair = new Pair<>(aSucc, succs);
+            		// only add those words that are in prefSim
                 	if(! visited.contains(newPair)) {
                 		SuccessorInfo<Pair<Integer, ISet>> succInfo = new SuccessorInfo<>(newPair);
                 		succInfo.word = word;
                 		queue.add(succInfo);
+                		visited.add(newPair);
+                	}
+            	}
+            }
+		}
+		throw new RuntimeException("Exception happened in computing words in B: " + start + " -> " + goal);
+	}
+	
+	private Word computeWordInProductBackward(ISet start, ISet goal, ISet aReachSet) {
+		if(start.equals(goal) && A.getInitialState() == aPState) {
+			//System.out.println("Computing words in B from " + start + " to " + goal);
+			return A.getAlphabet().getEmptyWord();
+		}
+		PriorityQueue<SuccessorInfo<Pair<Integer, ISet>>> queue = new PriorityQueue<SuccessorInfo<Pair<Integer, ISet>>>();
+		Pair<Integer, ISet> pair = new Pair<>(aPState, goal);
+		SuccessorInfo<Pair<Integer, ISet>> info = new SuccessorInfo<>(pair);
+		info.word = A.getAlphabet().getEmptyWord();
+		queue.add(info);
+		HashSet<Pair<Integer, ISet>> visited = new HashSet<>();
+		visited.add(pair);
+		
+		while(! queue.isEmpty()) {
+			SuccessorInfo<Pair<Integer, ISet>> curr = queue.remove();
+            // trace back to the initial state
+            for(int letter = 0; letter < B.getAlphabetSize(); letter ++) {
+            	// for sure current state has empty set
+            	Word word = curr.word.preappend(letter);
+            	ISet preds = UtilISet.newISet();
+            	for(int currId : curr.state.getRight()) {
+            		for(StateNFA predNfa : bStates[currId].getPredecessors(letter)) {
+                    	// now add those states into it
+            			preds.set(predNfa.getId());
+                    }
+            	}
+            	// preds
+            	for(StateNFA aPredNfa: aStates[curr.state.getLeft()].getPredecessors(letter)) {
+            		if(! aReachSet.get(aPredNfa.getId())) continue;
+            		// found the word in the product
+            		if(aPredNfa.getId() == A.getInitialState() && preds.equals(start)) {
+                		//System.out.println("Found a word to " + goal);
+                		return word;
+                	}
+            		// now check the prefSim, not the one in computation of representation
+            		if(! prefSim.get(aPredNfa.getId()).contains(preds)) {
+            			continue;
+            		}
+            		System.out.println("");
+            		Pair<Integer, ISet> newPair = new Pair<>(aPredNfa.getId(), preds);
+                	if(! visited.contains(newPair)) {
+                		SuccessorInfo<Pair<Integer, ISet>> predInfo = new SuccessorInfo<>(newPair);
+                		predInfo.word = word;
+                		queue.add(predInfo);
                 		visited.add(newPair);
                 	}
             	}
@@ -820,7 +898,8 @@ public class CongruenceSimulation {
 		ISet initSet = UtilISet.newISet();
 		initSet.set(B.getInitialState());
 		// construct prefix
-		Word p1 = computeWordInProduct(initSet, bSetForP, reachSet);
+//		 Word p1 = computeWordInProduct(initSet, bSetForP, reachSet);
+		Word p1 = this.prefWordMap.get(new Pair<>(aPState, bSetForP));
 		this.prefix = p1.append(this.aLetter);
 		Word p2 = computeWordInA(aQState, accState);
 		this.prefix = this.prefix.concat(p2);
@@ -954,6 +1033,7 @@ public class CongruenceSimulation {
 		timer.start();
 		CongruenceSimulation sim = new CongruenceSimulation(A, B);
 		sim.antichain = true;
+		sim.computeCounterexample = true;
 		boolean included = sim.isIncluded();
 		System.out.println(included ? "Included" : "Not included");
 		if(!included) {
