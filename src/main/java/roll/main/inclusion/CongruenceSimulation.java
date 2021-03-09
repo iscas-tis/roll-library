@@ -809,11 +809,13 @@ public class CongruenceSimulation {
 		this.period = this.period.concat(p2);
 	}
 //
-	private TreeSet<IntBoolTriple> compose(TreeSet<IntBoolTriple> first, TreeSet<IntBoolTriple> second) {
+	private TreeSet<IntBoolTriple> compose(TreeSet<IntBoolTriple> first
+			, TreeSet<IntBoolTriple> second) { //, ISet sndStates
 		TreeSet<IntBoolTriple> result = new TreeSet<>();
 		for(IntBoolTriple fstTriple: first) {
 			for(IntBoolTriple sndTriple: second) {
-				if(fstTriple.getRight() == sndTriple.getRight()) {
+				// (p, q, ) + (q, r) -> (p, r)
+				if(fstTriple.getRight() == sndTriple.getLeft()) {
 					result.add(new IntBoolTriple(fstTriple.getLeft()
 							, sndTriple.getRight()
 							, fstTriple.getBool() || sndTriple.getBool()));
@@ -836,30 +838,54 @@ public class CongruenceSimulation {
 		return result;
 	}
 	
+	private TreeSet<IntBoolTriple> compose(ISet preds, TreeSet<IntBoolTriple> triples) {
+		TreeSet<IntBoolTriple> result = new TreeSet<>();
+		for(IntBoolTriple triple: triples) {
+			if(preds.get(triple.getLeft())) {
+					result.add(triple);
+			}
+		}
+		return result;
+	}
+	
 	// decide whether there exists an accepting run in B from states in sim
+	// all states on the left are from pref
 	private boolean decideAcceptance(ISet pref, TreeSet<IntBoolTriple> period) {
+//		System.out.println("pref: " + pref);
+		boolean foundLoop = false;
 		for(int state: pref) {
 			// iteratively check whether there exists a triple (q, q: true) reachable from state
 			TreeSet<IntBoolTriple> reachSet = new TreeSet<>();
-			reachSet.add(new IntBoolTriple(state, state, false));
+			for(IntBoolTriple triple: period) {
+				if(state == triple.getLeft()) {
+					reachSet.add(triple);
+				}
+			}
 			while(true) {
 				// compute update
 				int origSize = reachSet.size();
 				TreeSet<IntBoolTriple> update = compose(reachSet, period);
+				// reachable states from pref can also be first states
 				reachSet.addAll(update);
-				// if we reach a fixed point
-				if(origSize == reachSet.size()) {
-					break;
-				}
 				// a triple (q, q: true) means that we have found an accepting run
 				for(IntBoolTriple triple: reachSet) {
 					if(triple.getLeft() == triple.getRight() && triple.getBool()) {
-						return true;
+						foundLoop = true;
+						break;
 					}
 				}
-			}	
+				// reach a fixed point
+				if(foundLoop || origSize == reachSet.size()) {
+					break;
+				}
+			}
+//			System.out.println("state = " + state + ", reachSet :\n" + reachSet);
+			if(foundLoop) {
+				break;
+			}
 		}
-		return false;
+		
+		return foundLoop;
 	}
 
 	public static void main(String[] args) {
@@ -902,7 +928,7 @@ public class CongruenceSimulation {
 		timer.start();
 		CongruenceSimulation sim = new CongruenceSimulation(A, B);
 		sim.antichain = true;
-		sim.computeCounterexample = true;
+		sim.computeCounterexample = false;
 		boolean included = sim.isIncluded();
 		System.out.println(included ? "Included" : "Not included");
 		if(!included) {
