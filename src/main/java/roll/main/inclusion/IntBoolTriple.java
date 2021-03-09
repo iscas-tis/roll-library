@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2017                                               */
+/* Copyright (c) since 2016                                               */
 /*       Institute of Software, Chinese Academy of Sciences               */
 /* This file is part of ROLL, a Regular Omega Language Learning library.  */
 /* ROLL is free software: you can redistribute it and/or modify           */
@@ -14,58 +14,66 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.util;
+package roll.main.inclusion;
 
-import roll.main.IHTML;
-
-public class Pair<L, R> implements IHTML {
+// In RABIT, this structure is called Arc
+public class IntBoolTriple implements Comparable<IntBoolTriple> {
 	
-	private final L left;
-	private final R right;
+	protected int left;
+	protected int right;
+	protected boolean acc;
 	
-	public Pair(L left, R right) {
+	public IntBoolTriple(int left, int right, boolean acc) {
 		this.left = left;
 		this.right = right;
+		this.acc = acc;
 	}
 	
-	public L getLeft() {
+	public int getLeft() {
 		return this.left;
 	}
 	
-	public R getRight() {
+	public int getRight() {
 		return this.right;
+	}
+	
+	public boolean getBool() {
+		return this.acc;
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
 	    if(this == obj) return true;
 	    if(obj == null) return false;
-		if(obj instanceof Pair<?, ?>) {
+		if(obj instanceof IntBoolTriple) {
 			@SuppressWarnings("unchecked")
-			Pair<L, R> p = (Pair<L, R>)obj;
-			return p.left.equals(left) 
-				&& p.right.equals(right); 
+			IntBoolTriple p = (IntBoolTriple)obj;
+			return p.left == left 
+				&& p.right == right
+				&& p.acc == acc; 
 		}
 		return false;
 	}
 	
 	@Override
 	public String toString() {
-		return "(" + left.toString() + ", " + right.toString() + ")";
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-        int result = 1;
-        result = prime * result + left.hashCode();
-        result = prime * result + right.hashCode();
-		return result;	
+		return "(" + left + ", " + right + ": "+ acc +")";
 	}
 
-    @Override
-    public String toHTML() {
-        return "<pre>" + toString() + "</pre>";
-    }
+	@Override
+	public int compareTo(IntBoolTriple other) {
+		if(this.left != other.left) {
+			return this.left - other.left;
+		}
+		assert (this.left == other.left);
+		if(this.right != other.right) {
+			return this.right - other.right;
+		}
+		assert (this.right == other.right);
+		int lBool = this.acc ? 1 : 0;
+		int rBool = other.acc ? 1 : 0;
+		return lBool - rBool;
+	}
 
 }
+

@@ -35,7 +35,6 @@ import roll.util.Pair;
 import roll.util.Timer;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
-import roll.words.Alphabet;
 import roll.words.Word;
 
 // This algorithm is inspired by simulation relation and the work 
@@ -91,6 +90,8 @@ public class CongruenceSimulation {
 	int aLetter = -1;
 	boolean earlyTerminated = false;
 	ISet bSetForP;
+	
+	boolean computeCounterexample = false;
 		
 	CongruenceSimulation(NBA A, NBA B) {
 		this.A = A;
@@ -131,6 +132,12 @@ public class CongruenceSimulation {
 			}
 		}
 		periodSim = new TIntObjectHashMap<>();
+	}
+	
+	
+	public Pair<Word, Word> getCounterexample() {
+		assert prefix != null && period != null;
+		return new Pair<>(prefix, period);
 	}
 	
 	public void outputPrefixSimulation() {
@@ -580,8 +587,7 @@ public class CongruenceSimulation {
 			if(debug) System.out.println("Acc simulated sets: " + prefSims);
 			if(prefSims.isEmpty()) {
 				// any word that reaches accState will do
-				computeCounterexamplePrefix(accState, necessaryStates);
-				return false;
+				assert false;
 			}
 			// only keep the sets that are subset of another
 			HashSet<ISet> antichainPrefix = new HashSet<>();
@@ -607,7 +613,7 @@ public class CongruenceSimulation {
 				if(sim.isEmpty()) {
 					// empty means some word to accState cannot be simulated
 					System.out.println("Computing counterexample ...");
-					computeCounterexamplePrefix(accState, necessaryStates);
+					if(computeCounterexample) computeCounterexamplePrefix(accState, necessaryStates);
 					System.out.println("Prefix: " + prefix);
 					System.out.println("Period: " + period);
 					return false;
@@ -650,7 +656,7 @@ public class CongruenceSimulation {
 					// decide whether this pref (period) is accepting in B
 					if(! decideAcceptance(pref, period)) {
 						// we need to construct a counterexample here
-						computeCounterexample(pref, period);
+						if(computeCounterexample) computeCounterexample(accState, pref, period, necessaryStates);
 						return false;
 					}
 				}
@@ -666,44 +672,112 @@ public class CongruenceSimulation {
 		return true;
 	}
 
-	private void computeCounterexample(ISet pref, TreeSet<IntBoolTriple> period2) {
-		
+	private void computeCounterexample(int accState, ISet pref, TreeSet<IntBoolTriple> period, ISet aReachSet) {
+		// first, compute the word to this pref
+		ISet initSet = UtilISet.newISet();
+		initSet.set(B.getInitialState());
+		this.aPState = accState;
+		// construct prefix
+		this.prefix = computeWordInProduct(initSet, pref, aReachSet);
+
+		// construct period
+		 TreeSet<IntBoolTriple> start = new TreeSet<>();
+		 TreeSet<IntBoolTriple> goal = new TreeSet<>();
+		 for(int bState : pref) {
+			 IntBoolTriple triple = new IntBoolTriple(bState, bState, false);
+			 start.add(triple);
+			 goal.add(triple);
+			 for(IntBoolTriple temp : period) {
+				 if(temp.getLeft() == bState) {
+					 goal.add(temp);
+				 }
+			 }
+		 }
+		 
+		this.period = computeWordInProduct(accState, start, goal, aReachSet);
 	}
 	
-	private Word computeWordInB(ISet start, ISet goal) {
-		PriorityQueue<SuccessorInfo<ISet>> queue = new PriorityQueue<SuccessorInfo<ISet>>();
-		SuccessorInfo<ISet> info = new SuccessorInfo<>(start);
+	private Word computeWordInProduct(int accState, TreeSet<IntBoolTriple> start, TreeSet<IntBoolTriple> goal, ISet aReachSet) {
+		PriorityQueue<SuccessorInfo<Pair<Integer, TreeSet<IntBoolTriple>>>> queue = new PriorityQueue<SuccessorInfo<Pair<Integer, TreeSet<IntBoolTriple>>>>();
+		Pair<Integer, TreeSet<IntBoolTriple>> pair = new Pair<>(accState, start);
+		SuccessorInfo<Pair<Integer, TreeSet<IntBoolTriple>>> info = new SuccessorInfo<>(pair);
 		info.word = A.getAlphabet().getEmptyWord();
 		queue.add(info);
-		HashSet<ISet> visited = new HashSet<>();
-		visited.add(start);
+		HashSet<Pair<Integer, TreeSet<IntBoolTriple>>> visited = new HashSet<>();
+		visited.add(pair);
 		
 		while(! queue.isEmpty()) {
-			SuccessorInfo<ISet> curr = queue.remove();
+			SuccessorInfo<Pair<Integer, TreeSet<IntBoolTriple>>> curr = queue.remove();
+            // trace back to the initial state
+            for(int letter = 0; letter < B.getAlphabetSize(); letter ++) {
+            	// for sure current state has empty set
+            	Word word = curr.word.append(letter);
+            	TreeSet<IntBoolTriple> succTriple = extend(curr.state.getRight(), letter);
+            	for(int aSucc: A.getState(curr.state.getLeft()).getSuccessors(letter)) {
+            		if(! aReachSet.get(aSucc)) continue;
+            		// found the word in the product
+            		if(aSucc == accState && succTriple.equals(goal)) {
+                		//System.out.println("Found a word to " + goal);
+                		return word;
+                	}
+            		Pair<Integer, TreeSet<IntBoolTriple>> newPair = new Pair<>(aSucc, succTriple);
+                	if(! visited.contains(newPair)) {
+                		SuccessorInfo<Pair<Integer, TreeSet<IntBoolTriple>>> succInfo = new SuccessorInfo<>(newPair);
+                		succInfo.word = word;
+                		queue.add(succInfo);
+                		visited.add(newPair);
+                	}
+            	}
+            }
+		}
+		throw new RuntimeException("Exception happened in computing words in B: " + start + " -> " + goal);
+	}
+
+	
+	private Word computeWordInProduct(ISet start, ISet goal, ISet aReachSet) {
+		if(start.equals(goal) && A.getInitialState() == aPState) {
+			//System.out.println("Computing words in B from " + start + " to " + goal);
+			return A.getAlphabet().getEmptyWord();
+		}
+		PriorityQueue<SuccessorInfo<Pair<Integer, ISet>>> queue = new PriorityQueue<SuccessorInfo<Pair<Integer, ISet>>>();
+		Pair<Integer, ISet> pair = new Pair<>(A.getInitialState(), start);
+		SuccessorInfo<Pair<Integer, ISet>> info = new SuccessorInfo<>(pair);
+		info.word = A.getAlphabet().getEmptyWord();
+		queue.add(info);
+		HashSet<Pair<Integer, ISet>> visited = new HashSet<>();
+		visited.add(pair);
+		
+		while(! queue.isEmpty()) {
+			SuccessorInfo<Pair<Integer, ISet>> curr = queue.remove();
             // trace back to the initial state
             for(int letter = 0; letter < B.getAlphabetSize(); letter ++) {
             	// for sure current state has empty set
             	Word word = curr.word.append(letter);
             	ISet succs = UtilISet.newISet();
-            	for(int currId : curr.state) {
+            	for(int currId : curr.state.getRight()) {
             		for(int succId : B.getState(currId).getSuccessors(letter)) {
                     	// now add those states into it
                     	succs.set(succId);
                     }
             	}
-            	if(! visited.contains(succs)) {
-            		SuccessorInfo<ISet> succInfo = new SuccessorInfo<>(succs);
-            		succInfo.word = word;
-            		queue.add(succInfo);
-            		visited.add(succs);
-            	}
-            	if(succs.equals(goal)) {
-            		return word;
+            	for(int aSucc: A.getState(curr.state.getLeft()).getSuccessors(letter)) {
+            		if(! aReachSet.get(aSucc)) continue;
+            		// found the word in the product
+            		if(aSucc == aPState && succs.equals(goal)) {
+                		//System.out.println("Found a word to " + goal);
+                		return word;
+                	}
+            		Pair<Integer, ISet> newPair = new Pair<>(aSucc, succs);
+                	if(! visited.contains(newPair)) {
+                		SuccessorInfo<Pair<Integer, ISet>> succInfo = new SuccessorInfo<>(newPair);
+                		succInfo.word = word;
+                		queue.add(succInfo);
+                		visited.add(newPair);
+                	}
             	}
             }
 		}
-		assert false;
-		return null;
+		throw new RuntimeException("Exception happened in computing words in B: " + start + " -> " + goal);
 	}
 
 	// goal must be reachable from start
@@ -741,12 +815,14 @@ public class CongruenceSimulation {
 	
 	private void computeCounterexamplePrefix(int accState, ISet reachSet) {
 		assert (aPState >= 0  && aQState >= 0);
+		System.out.println("Computing counterexample for the accepting state " + accState);
+		//System.out.println("Computing counterexample prefix: " + accState + " bSetForP: " + bSetForP);
 		ISet initSet = UtilISet.newISet();
 		initSet.set(B.getInitialState());
 		// construct prefix
-		Word p1 = computeWordInB(initSet, bSetForP);
-		Word p2 = computeWordInA(aQState, accState);
+		Word p1 = computeWordInProduct(initSet, bSetForP, reachSet);
 		this.prefix = p1.append(this.aLetter);
+		Word p2 = computeWordInA(aQState, accState);
 		this.prefix = this.prefix.concat(p2);
 		
 		// construct loop
@@ -773,8 +849,10 @@ public class CongruenceSimulation {
         this.period = this.period.concat(suffix);
 	}
 	
+	// This function should not be called
 	private void computeCounterexamplePeriod(int accState, ISet reachSet) {
 		assert (aPState >= 0  && aQState >= 0);
+		System.out.println("Computing counterexample period: " + accState + " reachSet: " + reachSet);
 		this.prefix = computeWordInA(A.getInitialState(), accState);
 		// construct period
 		Word p1 = computeWordInA(accState, aPState);
@@ -792,6 +870,19 @@ public class CongruenceSimulation {
 							, sndTriple.getRight()
 							, fstTriple.getBool() || sndTriple.getBool()));
 				}
+			}
+		}
+		return result;
+	}
+	
+	private TreeSet<IntBoolTriple> extend(TreeSet<IntBoolTriple> first, int letter) {
+		TreeSet<IntBoolTriple> result = new TreeSet<>();
+		for(IntBoolTriple triple: first) {
+			int state = triple.getRight();
+			for(int succ: B.getState(state).getSuccessors(letter)) {
+					result.add(new IntBoolTriple(triple.getLeft()
+							, succ
+							, triple.getBool() || B.isFinal(succ)));
 			}
 		}
 		return result;
@@ -874,64 +965,4 @@ public class CongruenceSimulation {
 		
 	}
 	
-	// In RABIT, this structure is called Arc
-	public class IntBoolTriple implements Comparable<IntBoolTriple> {
-		
-		private int left;
-		private int right;
-		private boolean acc;
-		
-		public IntBoolTriple(int left, int right, boolean acc) {
-			this.left = left;
-			this.right = right;
-			this.acc = acc;
-		}
-		
-		public int getLeft() {
-			return this.left;
-		}
-		
-		public int getRight() {
-			return this.right;
-		}
-		
-		public boolean getBool() {
-			return this.acc;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-		    if(this == obj) return true;
-		    if(obj == null) return false;
-			if(obj instanceof IntBoolTriple) {
-				@SuppressWarnings("unchecked")
-				IntBoolTriple p = (IntBoolTriple)obj;
-				return p.left == left 
-					&& p.right == right
-					&& p.acc == acc; 
-			}
-			return false;
-		}
-		
-		@Override
-		public String toString() {
-			return "(" + left + ", " + right + ": "+ acc +")";
-		}
-
-		@Override
-		public int compareTo(IntBoolTriple other) {
-			if(this.left != other.left) {
-				return this.left - other.left;
-			}
-			assert (this.left == other.left);
-			if(this.right != other.right) {
-				return this.right - other.right;
-			}
-			assert (this.right == other.right);
-			int lBool = this.acc ? 1 : 0;
-			int rBool = other.acc ? 1 : 0;
-			return lBool - rBool;
-		}
-
-	}
 }
