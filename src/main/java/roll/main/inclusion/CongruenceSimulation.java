@@ -228,7 +228,11 @@ public class CongruenceSimulation {
 					// p \in f(s), then P' \subseteq f(t) in B
 					// compute mapping relations to B
 					// a set corresponds to a word u
+					HashSet<ISet> copy = new HashSet<>();
 					for(ISet set : prefSim.get(s)) {
+						copy.add(set);
+					}
+					for(ISet set : copy) {
 						// for every set, we update the sets
 						ISet update = UtilISet.newISet();
 						for (int p : set) {
@@ -499,7 +503,11 @@ public class CongruenceSimulation {
 					// Again, ignore states that cannot reach accState
 					if(!reachSet.get(t)) continue;
 					// s - a -> t
+					HashSet<TreeSet<IntBoolTriple>> copy = new HashSet<>();
 					for(TreeSet<IntBoolTriple> set: periodSim.get(s)) {
+						copy.add(set);
+					}
+					for(TreeSet<IntBoolTriple> set: copy) {
 						TreeSet<IntBoolTriple> update = new TreeSet<>();
 						// put sets
 						for(IntBoolTriple triple : set) {
