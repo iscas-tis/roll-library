@@ -31,6 +31,7 @@ import roll.automata.StateNFA;
 import roll.automata.operations.NBALasso;
 import roll.automata.operations.StateContainer;
 import roll.automata.operations.TarjanSCCs;
+import roll.automata.operations.TarjanSCCsNonrecursive;
 import roll.main.Options;
 import roll.main.inclusion.run.SuccessorInfo;
 import roll.parser.ba.PairParserBA;
@@ -585,9 +586,9 @@ public class CongruenceSimulation {
 								workList.add(t);
 								inWorkList.set(t);
 							}
-							if(t == accState) {
-								System.out.println("AccState Sim: \n" + periodSim.get(accState));
-							}
+//							if(t == accState) {
+//								System.out.println("AccState Sim: \n" + periodSim.get(accState));
+//							}
 						}
 						// not possible
 						if(update.isEmpty()) {
@@ -726,11 +727,19 @@ public class CongruenceSimulation {
 			if(debug) System.out.println("Necessary states for B: " + simulatedStatesInB);
 			// now we compute the simulation for periods from accState
 			System.out.println("pref rep: " + antichainPrefix + " -> " + simulatedStatesInB);
-			TarjanSCCs sccs = new TarjanSCCs(B, simulatedStatesInB);
+//			TarjanSCCs sccs = new TarjanSCCs(B, simulatedStatesInB);
 			ISet allowSccs = UtilISet.newISet();
 			ISet bFinals = B.getFinalStates();			
 			System.out.println("Final states: " + bFinals);
-			for(ISet scc : sccs.getSCCs()) {
+//			for(ISet scc : sccs.getSCCs()) {
+//				System.out.println("SCC: " + scc);
+//				if(scc.overlap(simulatedStatesInB) && scc.overlap(bFinals)) {
+//					allowSccs.or(scc);
+//				}
+//			}
+			System.out.println("Nonrecursive: ");
+			TarjanSCCsNonrecursive sccNonrecur = new TarjanSCCsNonrecursive(B, simulatedStatesInB);;
+			for(ISet scc : sccNonrecur.getSCCs()) {
 				System.out.println("SCC: " + scc);
 				if(scc.overlap(simulatedStatesInB) && scc.overlap(bFinals)) {
 					allowSccs.or(scc);
@@ -738,6 +747,8 @@ public class CongruenceSimulation {
 			}
 			System.out.println("pref rep: " + antichainPrefix);
 			System.out.println("pref bReach: " + allowSccs);
+			simulatedStatesInB.and(allowSccs);
+			System.out.println("simulated states in B: " + simulatedStatesInB);
 //			System.out.println("Final states: " + B.getFinalStates());
 			computePeriodSimulation(accState, simulatedStatesInB, allowSccs);
 			// now decide whether there is one word accepted by A but not B
