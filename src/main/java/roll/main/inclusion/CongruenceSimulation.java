@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.TreeSet;
 
@@ -29,6 +30,7 @@ import roll.automata.NBA;
 import roll.automata.StateNFA;
 import roll.automata.operations.NBALasso;
 import roll.automata.operations.StateContainer;
+import roll.automata.operations.TarjanSCCs;
 import roll.main.Options;
 import roll.main.inclusion.run.SuccessorInfo;
 import roll.parser.ba.PairParserBA;
@@ -220,6 +222,7 @@ public class CongruenceSimulation {
 			int s = workList.removeFirst();
 			inWorkList.clear(s);
 			// the letter is changed
+			LinkedList<Pair<Integer, ISet>> removedPairs = new LinkedList<>();
 			for(int a : A.getState(s).getEnabledLetters()) {
 				for(int t : A.getState(s).getSuccessors(a)) {
 					if(! reachSet.get(t)) continue;
@@ -253,11 +256,19 @@ public class CongruenceSimulation {
 								changed = modified[0];
 								prefSim.set(t, result);
 								if(changed && computeCounterexample) {
-									Word pref = this.prefWordMap.get(new Pair<>(s, set));
+									Pair<Integer, ISet> pair = new Pair<>(s, set);
+									
+									Word pref = this.prefWordMap.get(pair);
+						
+									if(pref == null) {
+										for(Entry<Pair<Integer, ISet>, Word> entry : this.prefWordMap.entrySet()) {
+											System.out.println();
+										}
+									}
 									Word newPref = pref.append(a);
 									this.prefWordMap.put(new Pair<>(t,  update), newPref);
 									for(ISet subset : subsetsOfUpdate) {
-										prefWordMap.remove(new Pair<>(t, subset));
+										removedPairs.add(new Pair<>(t, subset));
 									}
 								}
 							}else {
@@ -291,6 +302,9 @@ public class CongruenceSimulation {
 			if(earlyTerminated) {
 				prefSim.get(accState).add(UtilISet.newISet());
 				break;
+			}
+			for(Pair<Integer, ISet> pair : removedPairs) {
+				prefWordMap.remove(pair);
 			}
 		}
 		timer.stop();
@@ -426,9 +440,27 @@ public class CongruenceSimulation {
 	private long timeForPrefixSim = 0;
 	private long timeForPeriodSim = 0;
 	
+	
+	
+	// Always guarantte that if there is (q, r: true), then no (q, r: false) appears
+	private void addTriple(TreeSet<IntBoolTriple> set, IntBoolTriple triple) {
+		IntBoolTriple revTriple = new IntBoolTriple(triple.left, triple.right, !triple.acc);
+		boolean containedRev = set.contains(revTriple);
+		if(containedRev) {
+			if(triple.acc) {
+				set.remove(revTriple);
+				set.add(triple);
+			}else {
+				// do nothing, keep the original one
+			}
+		}else {
+			set.add(triple);
+		}
+	}
+	
 	// the Input simulatedStatesInB can simulate accState
 	@SuppressWarnings("unchecked")
-	public void computePeriodSimulation(int accState, ISet simulatedStatesInB) {
+	public void computePeriodSimulation(int accState, ISet simulatedStatesInB, ISet bReachSet) {
 		if(computeCounterexample) {
 			this.periodWordMap = new HashMap<>();
 		}
@@ -455,6 +487,7 @@ public class CongruenceSimulation {
 		{
 			// only care about states from simulatedStatesInB
 			int s = accState;
+			LinkedList<Pair<Integer, TreeSet<IntBoolTriple>>> removedPairs = new LinkedList<>();
 			// v must not be empty word
 			for (int a : A.getState(s).getEnabledLetters()) {
 				for (int t : A.getSuccessors(s, a)) {
@@ -467,9 +500,10 @@ public class CongruenceSimulation {
 					// s - a -> t
 					for (int p : simulatedStatesInB) {
 						for (int q : B.getSuccessors(p, a)) {
+							if(!bReachSet.get(q)) continue;
 							// put every p - a -> q in f(t)
 							boolean acc = B.isFinal(p) || B.isFinal(q);
-							set.add(new IntBoolTriple(p, q, acc));
+							addTriple(set, new IntBoolTriple(p, q, acc));
 						}
 					}
 					//TODO: Antichain, only keep the set that are a subset of another
@@ -484,7 +518,7 @@ public class CongruenceSimulation {
 							Word pref = A.getAlphabet().getLetterWord(a);
 							this.periodWordMap.put(new Pair<>(t,  set), pref);
 							for(TreeSet<IntBoolTriple> key : subsetOfUpdate) {
-								this.periodWordMap.remove(new Pair<>(t, key));
+								removedPairs.add(new Pair<>(t, key));
 							}
 						}
 					}else {
@@ -492,11 +526,15 @@ public class CongruenceSimulation {
 					}
 				}
 			}
+			for(Pair<Integer, TreeSet<IntBoolTriple>> pair : removedPairs) {
+				this.periodWordMap.remove(pair);
+			}
 		}
 		// 2. computation of simulated relations
 		while(! workList.isEmpty()) {
 			int s = workList.removeFirst();
 			inWorkList.clear(s);
+			LinkedList<Pair<Integer, TreeSet<IntBoolTriple>>> removedPairs = new LinkedList<>();
 			// update for successors
 			for(int a : A.getState(s).getEnabledLetters()) {
 				for(int t : A.getSuccessors(s, a)) {
@@ -514,9 +552,10 @@ public class CongruenceSimulation {
 							int p = triple.getLeft();
 							int q = triple.getRight();
 							for(int qr : B.getSuccessors(q, a)) {
+								if(!bReachSet.get(q)) continue;
 								boolean acc = B.isFinal(qr) || triple.getBool();
 								IntBoolTriple newTriple  = new IntBoolTriple(p, qr, acc);
-								update.add(newTriple);
+								addTriple(update, newTriple);
 							}
 						}
 						// we have extended for set
@@ -535,7 +574,7 @@ public class CongruenceSimulation {
 									Word newPref = pref.append(a);
 									this.periodWordMap.put(new Pair<>(t,  update), newPref);
 									for(TreeSet<IntBoolTriple> key : subsetOfUpdate) {
-										this.periodWordMap.remove(new Pair<>(t, key));
+										removedPairs.add(new Pair<>(t, key));
 									}
 								}
 							}else {
@@ -545,6 +584,9 @@ public class CongruenceSimulation {
 							if(changed && !inWorkList.get(t)) {
 								workList.add(t);
 								inWorkList.set(t);
+							}
+							if(t == accState) {
+								System.out.println("AccState Sim: \n" + periodSim.get(accState));
 							}
 						}
 						// not possible
@@ -563,6 +605,9 @@ public class CongruenceSimulation {
 				if(earlyTerminated) {
 					break;
 				}
+			}
+			for(Pair<Integer, TreeSet<IntBoolTriple>> pair : removedPairs) {
+				this.periodWordMap.remove(pair);
 			}
 			if(earlyTerminated) {
 				periodSim.get(accState).add(new TreeSet<>());
@@ -680,7 +725,21 @@ public class CongruenceSimulation {
 			if(debug) System.out.println("Prefix simulated sets: " + antichainPrefix);
 			if(debug) System.out.println("Necessary states for B: " + simulatedStatesInB);
 			// now we compute the simulation for periods from accState
-			computePeriodSimulation(accState, simulatedStatesInB);
+			System.out.println("pref rep: " + antichainPrefix + " -> " + simulatedStatesInB);
+			TarjanSCCs sccs = new TarjanSCCs(B, simulatedStatesInB);
+			ISet allowSccs = UtilISet.newISet();
+			ISet bFinals = B.getFinalStates();			
+			System.out.println("Final states: " + bFinals);
+			for(ISet scc : sccs.getSCCs()) {
+				System.out.println("SCC: " + scc);
+				if(scc.overlap(simulatedStatesInB) && scc.overlap(bFinals)) {
+					allowSccs.or(scc);
+				}
+			}
+			System.out.println("pref rep: " + antichainPrefix);
+			System.out.println("pref bReach: " + allowSccs);
+//			System.out.println("Final states: " + B.getFinalStates());
+			computePeriodSimulation(accState, simulatedStatesInB, allowSccs);
 			// now decide whether there is one word accepted by A but not B
 			System.out.println("Deciding the language inclusion between L(A^i_f) (A^f_f)^w and L(B) ...");
 			Timer timer = new Timer();
@@ -824,7 +883,7 @@ public class CongruenceSimulation {
 			for(IntBoolTriple sndTriple: second) {
 				// (p, q, ) + (q, r) -> (p, r)
 				if(fstTriple.getRight() == sndTriple.getLeft()) {
-					result.add(new IntBoolTriple(fstTriple.getLeft()
+					addTriple(result, new IntBoolTriple(fstTriple.getLeft()
 							, sndTriple.getRight()
 							, fstTriple.getBool() || sndTriple.getBool()));
 				}
@@ -838,7 +897,7 @@ public class CongruenceSimulation {
 		for(IntBoolTriple triple: first) {
 			int state = triple.getRight();
 			for(int succ: B.getState(state).getSuccessors(letter)) {
-					result.add(new IntBoolTriple(triple.getLeft()
+				addTriple(result, new IntBoolTriple(triple.getLeft()
 							, succ
 							, triple.getBool() || B.isFinal(succ)));
 			}
@@ -850,7 +909,7 @@ public class CongruenceSimulation {
 		TreeSet<IntBoolTriple> result = new TreeSet<>();
 		for(IntBoolTriple triple: triples) {
 			if(preds.get(triple.getLeft())) {
-					result.add(triple);
+				addTriple(result, triple);
 			}
 		}
 		return result;
@@ -898,6 +957,14 @@ public class CongruenceSimulation {
 
 	public static void main(String[] args) {
 		
+		TreeSet<IntBoolTriple> set1 = new TreeSet<>();
+		set1.add(new IntBoolTriple(0, 0, true));
+		set1.add(new IntBoolTriple(24, 0, true));
+		
+		TreeSet<IntBoolTriple> set2 = new TreeSet<>();
+		set2.add(new IntBoolTriple(0, 0, true));
+		
+		System.out.println(set1.containsAll(set1));
 //		Alphabet alphabet = new Alphabet();
 //		alphabet.addLetter('a');
 //		alphabet.addLetter('b');
@@ -936,10 +1003,10 @@ public class CongruenceSimulation {
 		timer.start();
 		CongruenceSimulation sim = new CongruenceSimulation(A, B);
 		sim.antichain = true;
-		sim.computeCounterexample = false;
+		sim.computeCounterexample = true;
 		boolean included = sim.isIncluded();
 		System.out.println(included ? "Included" : "Not included");
-		if(!included) {
+		if(!included && sim.computeCounterexample) {
 			NBALasso lasso = new NBALasso(sim.prefix, sim.period);
 			pairParser.print(lasso.getNBA(), options.log.getOutputStream());
 		}
