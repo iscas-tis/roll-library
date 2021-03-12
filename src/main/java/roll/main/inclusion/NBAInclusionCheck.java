@@ -16,6 +16,10 @@
 
 package roll.main.inclusion;
 
+import java.util.Set;
+
+import algorithms.Simulation;
+import automata.FAState;
 import automata.FiniteAutomaton;
 import oracle.EmptinessChecker;
 import roll.automata.NBA;
@@ -29,6 +33,7 @@ import roll.learner.nba.lomega.translator.Translator;
 import roll.learner.nba.lomega.translator.TranslatorFDFAUnder;
 import roll.main.Options;
 import roll.main.complement.UtilComplement;
+import roll.main.inclusion.congr.CongruenceSimulation;
 import roll.oracle.nba.sampler.SamplerIndexedMonteCarlo;
 import roll.parser.PairParser;
 import roll.parser.UtilParser;
@@ -192,6 +197,12 @@ public class NBAInclusionCheck {
         }
         aut1 = pair.getRight().getLeft();
         aut2 = pair.getRight().getRight();
+        // compute the forward simulation
+//        Simulation simulation = new Simulation();
+//        Set<datastructure.Pair<FAState, FAState>> frel;
+//        frel = simulation.ForwardSimRelNBW(aut1, aut1);
+//        System.out.println("Forward simulation: " + frel);
+//        System.exit(0);
         options.log.println(
                 "Aut A (after minimization) : # of Trans. " + aut1.trans + ", # of States " + aut1.states.size() + ".");
         options.log.println(
@@ -217,9 +228,8 @@ public class NBAInclusionCheck {
         	if (isIncluded) {
                 options.log.print("Included\n");
             }else {
-            	options.log.print("Not Included\n");
-            	// counter example...
-            	
+            	Pair<Word, Word> counterexample = congrSim.getCounterexample();
+            	printCounterexample(options, parser, counterexample);
             }
         	timer.stop();
         	options.log.println("Total checking time: " + timer.getTimeElapsed() / 1000.0 + " secs");

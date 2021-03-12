@@ -14,7 +14,7 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.main.inclusion;
+package roll.main.inclusion.congr;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -92,8 +92,7 @@ public class CongruenceSimulation {
 	int aPState = -1;
 	int aQState = -1;
 	int aLetter = -1;
-	boolean earlyTerminated = false;
-	ISet bSetForP;
+	Word cePrefix = null;
 	
 	boolean computeCounterexample = false;
 	
@@ -101,7 +100,7 @@ public class CongruenceSimulation {
 	
 	HashMap<Pair<Integer, TreeSet<IntBoolTriple>>, Word> periodWordMap;
 		
-	CongruenceSimulation(NBA A, NBA B) {
+	public CongruenceSimulation(NBA A, NBA B) {
 		this.A = A;
 		this.B = B;
 		prefSim = new ArrayList<>();
@@ -284,25 +283,14 @@ public class CongruenceSimulation {
 						// detected that update is empty for the first time
 						// now need to update 
 						if(update.isEmpty()) {
-							aPState = s;
 							aQState = t;
 							aLetter = a;
-							earlyTerminated = true;
-							bSetForP = set;
-							break;
+							cePrefix = this.prefWordMap.get(new Pair<>(s, set));
+							prefSim.get(accState).add(UtilISet.newISet());
+							return;
 						}
 					}
-					if(earlyTerminated) {
-						break;
-					}
 				}
-				if(earlyTerminated) {
-					break;
-				}
-			}
-			if(earlyTerminated) {
-				prefSim.get(accState).add(UtilISet.newISet());
-				break;
 			}
 			for(Pair<Integer, ISet> pair : removedPairs) {
 				prefWordMap.remove(pair);
@@ -469,7 +457,7 @@ public class CongruenceSimulation {
 		timer.start();
 		periodSim.clear();
 		// now compute every state that can be reached by accState
-		ISet reachSet = getReachSet(accState);
+		ISet reachSet = getReachSet(accState, A);
 		// only keep those state that can go back to accState
 		ISet predSet = getPredSet(accState, aStates, A);
 		reachSet.and(predSet);
@@ -525,6 +513,15 @@ public class CongruenceSimulation {
 					}else {
 						periodSim.get(t).add(set);	
 					}
+					if(set.isEmpty()) {
+						cePrefix = A.getAlphabet().getEmptyWord();
+						aQState = t;
+						aLetter = a;
+						this.periodSim.get(accState).add(new TreeSet<>());
+						return;
+					}
+//					System.out.println("t = " + t + " set = " + set);
+//					System.out.println("word = " + this.periodWordMap.get(new Pair<>(t,  set)));
 				}
 			}
 			for(Pair<Integer, TreeSet<IntBoolTriple>> pair : removedPairs) {
@@ -586,34 +583,21 @@ public class CongruenceSimulation {
 								workList.add(t);
 								inWorkList.set(t);
 							}
-//							if(t == accState) {
-//								System.out.println("AccState Sim: \n" + periodSim.get(accState));
-//							}
 						}
 						// not possible
 						if(update.isEmpty()) {
-							aPState = s;
 							aQState = t;
+							cePrefix = this.periodWordMap.get(new Pair<>(s, set));
 							aLetter = a;
-							earlyTerminated = true;
-							break;
+							System.out.println("Early termination in computing representation of periods.");
+							this.periodSim.get(accState).add(new TreeSet<>());
+							return;
 						}
 					}
-					if(earlyTerminated) {
-						break;
-					}
-				}
-				if(earlyTerminated) {
-					break;
 				}
 			}
 			for(Pair<Integer, TreeSet<IntBoolTriple>> pair : removedPairs) {
 				this.periodWordMap.remove(pair);
-			}
-			if(earlyTerminated) {
-				periodSim.get(accState).add(new TreeSet<>());
-				System.out.println("Early termination in computing representation of periods.");
-				break;
 			}
 		}
 		timer.stop();
@@ -663,6 +647,7 @@ public class CongruenceSimulation {
 		int countStates = 0;
 //		LinkedList<Pair<HashSet<ISet>, HashSet<TreeSet<IntBoolTriple>>>> antichainFinals = new LinkedList<>();
 		long timeForAcceptance = 0;
+		TIntObjectMap<HashSet<ISet>> finalsSim = new TIntObjectHashMap<>();
 		for(int accState : A.getFinalStates()) {
 			countStates ++;
 			System.out.println("Checking for "+ countStates + "-th accepting state " + accState + " out of " + A.getFinalStates().cardinality() + " states");
@@ -710,6 +695,7 @@ public class CongruenceSimulation {
 					antichainPrefix.add(sim1);
 				}
 			}
+			finalsSim.put(accState, antichainPrefix);
 			ISet simulatedStatesInB = UtilISet.newISet();
 			for(ISet sim: antichainPrefix) {
 				if(sim.isEmpty()) {
@@ -740,13 +726,13 @@ public class CongruenceSimulation {
 			System.out.println("Nonrecursive: ");
 			TarjanSCCsNonrecursive sccNonrecur = new TarjanSCCsNonrecursive(B, simulatedStatesInB);;
 			for(ISet scc : sccNonrecur.getSCCs()) {
-				System.out.println("SCC: " + scc);
+//				System.out.println("SCC: " + scc);
 				if(scc.overlap(simulatedStatesInB) && scc.overlap(bFinals)) {
 					allowSccs.or(scc);
 				}
 			}
-			System.out.println("pref rep: " + antichainPrefix);
-			System.out.println("pref bReach: " + allowSccs);
+//			System.out.println("pref rep: " + antichainPrefix);
+//			System.out.println("pref bReach: " + allowSccs);
 			simulatedStatesInB.and(allowSccs);
 			System.out.println("simulated states in B: " + simulatedStatesInB);
 //			System.out.println("Final states: " + B.getFinalStates());
@@ -775,7 +761,7 @@ public class CongruenceSimulation {
 				}
 				if(antichainPeriod.contains(new TreeSet<>())) {
 					// empty means some word from accState to itself cannot be simulated
-					computeCounterexamplePeriod(accState, necessaryStates);
+					computeCounterexamplePeriod(accState, pref, necessaryStates);
 					return false;
 				}
 				for(TreeSet<IntBoolTriple> period: antichainPeriod) {
@@ -839,14 +825,14 @@ public class CongruenceSimulation {
 	}
 	
 	private void computeCounterexamplePrefix(int accState, ISet reachSet) {
-		assert (aPState >= 0  && aQState >= 0);
+		assert (aQState >= 0);
 		System.out.println("Computing counterexample for the accepting state " + accState);
 		//System.out.println("Computing counterexample prefix: " + accState + " bSetForP: " + bSetForP);
 		ISet initSet = UtilISet.newISet();
 		initSet.set(B.getInitialState());
 		// construct prefix
 //		 Word p1 = computeWordInProduct(initSet, bSetForP, reachSet);
-		Word p1 = this.prefWordMap.get(new Pair<>(aPState, bSetForP));
+		Word p1 = this.cePrefix;
 		this.prefix = p1.append(this.aLetter);
 		Word p2 = computeWordInA(aQState, accState);
 		this.prefix = this.prefix.concat(p2);
@@ -876,14 +862,15 @@ public class CongruenceSimulation {
 	}
 	
 	// This function should not be called
-	private void computeCounterexamplePeriod(int accState, ISet reachSet) {
-		assert (aPState >= 0  && aQState >= 0);
+	private void computeCounterexamplePeriod(int accState, ISet pref, ISet reachSet) {
+		assert (aQState >= 0);
 		System.out.println("Computing counterexample period: " + accState + " reachSet: " + reachSet);
-		this.prefix = computeWordInA(A.getInitialState(), accState);
+		// first the prefix
+		this.prefix = this.prefWordMap.get(new Pair<>(accState, pref));
 		// construct period
-		Word p1 = computeWordInA(accState, aPState);
+		System.out.println("Period: " + cePrefix);
 		Word p2 = computeWordInA(aQState, accState);
-		this.period = p1.append(this.aLetter);
+		this.period = cePrefix.append(this.aLetter);
 		this.period = this.period.concat(p2);
 	}
 //
@@ -929,7 +916,8 @@ public class CongruenceSimulation {
 	// decide whether there exists an accepting run in B from states in sim
 	// all states on the left are from pref
 	private boolean decideAcceptance(ISet pref, TreeSet<IntBoolTriple> period) {
-//		System.out.println("pref: " + pref);
+		System.out.println("pref: " + pref);
+		System.out.println("period: " + period);
 		boolean foundLoop = false;
 		for(int state: pref) {
 			// iteratively check whether there exists a triple (q, q: true) reachable from state
