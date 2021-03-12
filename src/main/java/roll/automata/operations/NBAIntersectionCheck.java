@@ -17,11 +17,14 @@
 package roll.automata.operations;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Stack;
 
 import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import roll.automata.NBA;
 import roll.util.Pair;
 import roll.util.sets.ISet;
@@ -231,6 +234,101 @@ public class NBAIntersectionCheck {
                     assert !act.isEmpty() : "Act empty";
                     u = act.pop();
                 }while(u != prod.resState);
+            }
+        }
+        
+        void strongConnectNonrecursive(ProductState prod) {
+        	
+        	TIntObjectMap<ProductState[]> prodSuccMap = new TIntObjectHashMap<>();
+        	Stack<ProductState> prodStateStack = new Stack<>(); // stack for return
+        	Stack<Integer> prodSuccStack = new Stack<>(); // next successor
+        	
+        	ProductState tjCurr = prod;
+            ++ depth;
+            dfsNum.put(tjCurr.resState, depth);
+            sccs.push(new Elem(tjCurr, getLabel(tjCurr)));
+            act.push(tjCurr.resState);
+            
+            Alphabet alphabet = fstOp.getAlphabet();
+            prodStateStack.push(tjCurr);
+            
+            int tjSuccIter = 0;
+            int tjCallStackIndex = 0;
+            
+            while(tjCallStackIndex >= 0) {
+            	// current stack
+            	if(! prodSuccMap.containsKey(tjCurr.resState)) {
+            		HashSet<ProductState> succs = new HashSet<>();
+                    for (int letter = 0; letter < alphabet.getLetterSize(); letter ++) {
+                        for(int sndSucc : sndOp.getSuccessors(tjCurr.sndState, letter)) {
+                            for(int fstSucc : fstOp.getSuccessors(tjCurr.fstState, letter)) {
+                            	ProductState succ = getOrAddState(fstSucc, sndSucc);
+                            	succs.add(succ);
+                            }
+                        }
+                    }
+                    ProductState[] arrSuccs = new ProductState[succs.size()];
+                    int i = 0 ;
+                    for(ProductState succ : succs) {
+                    	arrSuccs[i] = succ;
+                    	i ++;
+                    }
+                    prodSuccMap.put(tjCurr.resState, arrSuccs);
+            	}
+            	// now turn to the successor
+            	int numSucc = prodSuccMap.get(tjCurr.resState).length;
+            	if(tjSuccIter < numSucc) {
+            		ProductState tjSucc = prodSuccMap.get(tjCurr.resState)[tjSuccIter];
+            		tjSuccIter ++ ; // move to next successor
+            		if (! dfsNum.containsKey(tjSucc.resState)) {
+                        // store current node and next iterator
+            			prodStateStack.push(tjCurr); // current product state
+            			prodSuccStack.push(tjSuccIter);// cursor to next successor
+            			tjCallStackIndex ++;
+            			// now do things for curr
+            			tjCurr = tjSucc;
+            			tjSuccIter = 0;
+                        ++ depth;
+                        dfsNum.put(tjCurr.resState, depth);
+                        sccs.push(new Elem(tjCurr, getLabel(tjCurr)));
+                        act.push(tjCurr.resState);
+                    } else if (act.contains(tjSucc.resState)) {
+                        // we have already seen it before, there is a loop
+                        // probably there is one final state without self-loop
+                        byte B = 0;
+                        ProductState u;
+                        do {
+                            Elem p = sccs.pop();
+                            u = p.state;
+                            B |= p.label;
+                            if(B == 3) {
+                                empty = false;
+                                return;
+                            }
+                        }while(dfsNum.get(u.resState) > dfsNum.get(tjSucc.resState));
+                        sccs.push(new Elem(u, B));
+                    }
+            	}else {
+            		// else we have visited 
+            		// if current number is done, then we should remove all 
+                    // active states in the same scc
+                    if(sccs.peek().state.resState == tjCurr.resState) {
+                        sccs.pop();
+                        int u = 0;
+                        do {
+                            assert !act.isEmpty() : "Act empty";
+                            u = act.pop();
+                        }while(u != tjCurr.resState);
+                    }
+                    tjCallStackIndex --;
+                    // now return to upper level
+                    if(tjCallStackIndex >= 0) {
+                    	//ProductState succ = tjCurr;
+                    	tjCurr = prodStateStack.pop();
+                    	tjSuccIter = prodSuccStack.pop();
+                    	if(! empty) return ;
+                    }
+            	}
             }
         }
     }
