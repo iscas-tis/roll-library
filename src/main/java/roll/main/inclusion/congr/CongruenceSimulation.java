@@ -30,7 +30,6 @@ import roll.automata.NBA;
 import roll.automata.StateNFA;
 import roll.automata.operations.NBALasso;
 import roll.automata.operations.StateContainer;
-import roll.automata.operations.TarjanSCCs;
 import roll.automata.operations.TarjanSCCsNonrecursive;
 import roll.main.Options;
 import roll.main.inclusion.run.SuccessorInfo;
@@ -82,19 +81,20 @@ public class CongruenceSimulation {
 	// only care about reachable states from q_A
 	TIntObjectMap<HashSet<TreeSet<IntBoolTriple>>> periodSim;
 	
-	boolean antichain = false;
+	boolean antichain = true;
 	boolean debug = false;
 	
 	Word prefix = null;
 	Word period = null;
 	
 	// p - a -> q cannot be simulated with transitions in B
-	int aPState = -1;
+//	int aPState = -1;
 	int aQState = -1;
 	int aLetter = -1;
+	// I_A -> p or f -> p
 	Word cePrefix = null;
 	
-	boolean computeCounterexample = false;
+	boolean computeCounterexample = true;
 	
 	HashMap<Pair<Integer, ISet>, Word> prefWordMap;
 	
@@ -257,14 +257,7 @@ public class CongruenceSimulation {
 								prefSim.set(t, result);
 								if(changed && computeCounterexample) {
 									Pair<Integer, ISet> pair = new Pair<>(s, set);
-									
 									Word pref = this.prefWordMap.get(pair);
-						
-									if(pref == null) {
-										for(Entry<Pair<Integer, ISet>, Word> entry : this.prefWordMap.entrySet()) {
-											System.out.println();
-										}
-									}
 									Word newPref = pref.append(a);
 									this.prefWordMap.put(new Pair<>(t,  update), newPref);
 									for(ISet subset : subsetsOfUpdate) {
@@ -298,27 +291,6 @@ public class CongruenceSimulation {
 		}
 		timer.stop();
 		this.timeForPrefixSim += timer.getTimeElapsed();
-	}
-	
-	private ISet getReachSet(int state) {
-		
-		LinkedList<Integer> queue = new LinkedList<>();
-        queue.add(state);
-        ISet visited = UtilISet.newISet();
-        visited.set(state);
-        while(! queue.isEmpty()) {
-        	int lState = queue.remove();
-            // ignore unused states
-            for(int c = 0; c < B.getAlphabetSize(); c ++) {
-                for(int lSucc : B.getSuccessors(lState, c)) {
-                    if(! visited.get(lSucc)) {
-                        queue.add(lSucc);
-                        visited.set(lSucc);
-                    }
-                }
-            }
-        }
-        return visited;
 	}
 	
 	private ISet getPredSet(int state, StateContainer[] states, NBA nba) {
@@ -359,28 +331,6 @@ public class CongruenceSimulation {
             // ignore unused states
             for(int c = 0; c < nba.getAlphabetSize(); c ++) {
                 for(int lSucc : nba.getSuccessors(lState, c)) {
-                    if(! visited.get(lSucc)) {
-                        queue.add(lSucc);
-                        visited.set(lSucc);
-                    }
-                }
-            }
-        }
-        return visited;
-	}
-	
-	private ISet getReachSet(ISet states) {
-		LinkedList<Integer> queue = new LinkedList<>();
-        ISet visited = UtilISet.newISet();
-        for(int state: states) {
-        	queue.add(state);
-        	visited.set(state);
-        }
-        while(! queue.isEmpty()) {
-        	int lState = queue.remove();
-            for(int c = 0; c < B.getAlphabetSize(); c ++) {
-                for(int lSucc : B.getSuccessors(lState, c)) {
-                	// ignore states that are already in the queue
                     if(! visited.get(lSucc)) {
                         queue.add(lSucc);
                         visited.set(lSucc);
@@ -700,10 +650,10 @@ public class CongruenceSimulation {
 			for(ISet sim: antichainPrefix) {
 				if(sim.isEmpty()) {
 					// empty means some word to accState cannot be simulated
-					System.out.println("Computing counterexample ...");
+//					System.out.println("Computing counterexample ...");
 					if(computeCounterexample) computeCounterexamplePrefix(accState, necessaryStates);
-					System.out.println("Prefix: " + prefix);
-					System.out.println("Period: " + period);
+//					System.out.println("Prefix: " + prefix);
+//					System.out.println("Period: " + period);
 					return false;
 				}
 				simulatedStatesInB.or(sim);
@@ -712,18 +662,18 @@ public class CongruenceSimulation {
 			if(debug) System.out.println("Prefix simulated sets: " + antichainPrefix);
 			if(debug) System.out.println("Necessary states for B: " + simulatedStatesInB);
 			// now we compute the simulation for periods from accState
-			System.out.println("pref rep: " + antichainPrefix + " -> " + simulatedStatesInB);
+//			System.out.println("pref rep: " + antichainPrefix + " -> " + simulatedStatesInB);
 //			TarjanSCCs sccs = new TarjanSCCs(B, simulatedStatesInB);
 			ISet allowSccs = UtilISet.newISet();
 			ISet bFinals = B.getFinalStates();			
-			System.out.println("Final states: " + bFinals);
+//			System.out.println("Final states: " + bFinals);
 //			for(ISet scc : sccs.getSCCs()) {
 //				System.out.println("SCC: " + scc);
 //				if(scc.overlap(simulatedStatesInB) && scc.overlap(bFinals)) {
 //					allowSccs.or(scc);
 //				}
 //			}
-			System.out.println("Nonrecursive: ");
+//			System.out.println("Nonrecursive: ");
 			TarjanSCCsNonrecursive sccNonrecur = new TarjanSCCsNonrecursive(B, simulatedStatesInB);;
 			for(ISet scc : sccNonrecur.getSCCs()) {
 //				System.out.println("SCC: " + scc);
@@ -734,7 +684,7 @@ public class CongruenceSimulation {
 //			System.out.println("pref rep: " + antichainPrefix);
 //			System.out.println("pref bReach: " + allowSccs);
 			simulatedStatesInB.and(allowSccs);
-			System.out.println("simulated states in B: " + simulatedStatesInB);
+			if(debug) System.out.println("simulated states in B: " + simulatedStatesInB);
 //			System.out.println("Final states: " + B.getFinalStates());
 			computePeriodSimulation(accState, simulatedStatesInB, allowSccs);
 			// now decide whether there is one word accepted by A but not B
@@ -783,7 +733,8 @@ public class CongruenceSimulation {
 
 		return true;
 	}
-
+	
+	// This function will be called if decideAcceptance returns false
 	private void computeCounterexample(int accState, ISet pref, TreeSet<IntBoolTriple> period, ISet aReachSet) {
 		// first, compute the word to this pref
 		// construct prefix
@@ -861,14 +812,13 @@ public class CongruenceSimulation {
         this.period = this.period.concat(suffix);
 	}
 	
-	// This function should not be called
+	// This function can be called when SCC decomposition has been performed
 	private void computeCounterexamplePeriod(int accState, ISet pref, ISet reachSet) {
 		assert (aQState >= 0);
-		System.out.println("Computing counterexample period: " + accState + " reachSet: " + reachSet);
+//		System.out.println("Computing counterexample period: " + accState + " reachSet: " + reachSet);
 		// first the prefix
 		this.prefix = this.prefWordMap.get(new Pair<>(accState, pref));
 		// construct period
-		System.out.println("Period: " + cePrefix);
 		Word p2 = computeWordInA(aQState, accState);
 		this.period = cePrefix.append(this.aLetter);
 		this.period = this.period.concat(p2);
@@ -879,7 +829,7 @@ public class CongruenceSimulation {
 		TreeSet<IntBoolTriple> result = new TreeSet<>();
 		for(IntBoolTriple fstTriple: first) {
 			for(IntBoolTriple sndTriple: second) {
-				// (p, q, ) + (q, r) -> (p, r)
+				// (p, q, ) \times (q, r) -> (p, r)
 				if(fstTriple.getRight() == sndTriple.getLeft()) {
 					addTriple(result, new IntBoolTriple(fstTriple.getLeft()
 							, sndTriple.getRight()
@@ -916,8 +866,8 @@ public class CongruenceSimulation {
 	// decide whether there exists an accepting run in B from states in sim
 	// all states on the left are from pref
 	private boolean decideAcceptance(ISet pref, TreeSet<IntBoolTriple> period) {
-		System.out.println("pref: " + pref);
-		System.out.println("period: " + period);
+//		System.out.println("pref: " + pref);
+//		System.out.println("period: " + period);
 		boolean foundLoop = false;
 		for(int state: pref) {
 			// iteratively check whether there exists a triple (q, q: true) reachable from state
@@ -1015,144 +965,3 @@ public class CongruenceSimulation {
 	}
 	
 }
-
-//private Word computeWordInProduct(int accState, TreeSet<IntBoolTriple> start, TreeSet<IntBoolTriple> goal, ISet aReachSet) {
-//PriorityQueue<SuccessorInfo<Pair<Integer, TreeSet<IntBoolTriple>>>> queue = new PriorityQueue<SuccessorInfo<Pair<Integer, TreeSet<IntBoolTriple>>>>();
-//Pair<Integer, TreeSet<IntBoolTriple>> pair = new Pair<>(accState, start);
-//SuccessorInfo<Pair<Integer, TreeSet<IntBoolTriple>>> info = new SuccessorInfo<>(pair);
-//info.word = A.getAlphabet().getEmptyWord();
-//queue.add(info);
-//HashSet<Pair<Integer, TreeSet<IntBoolTriple>>> visited = new HashSet<>();
-//visited.add(pair);
-//
-//while(! queue.isEmpty()) {
-//	SuccessorInfo<Pair<Integer, TreeSet<IntBoolTriple>>> curr = queue.remove();
-//    // trace back to the initial state
-//    for(int letter = 0; letter < B.getAlphabetSize(); letter ++) {
-//    	// for sure current state has empty set
-//    	Word word = curr.word.append(letter);
-//    	TreeSet<IntBoolTriple> succTriple = extend(curr.state.getRight(), letter);
-//    	for(int aSucc: A.getState(curr.state.getLeft()).getSuccessors(letter)) {
-//    		if(! aReachSet.get(aSucc)) continue;
-//    		// found the word in the product
-//    		if(aSucc == accState && succTriple.equals(goal)) {
-//        		//System.out.println("Found a word to " + goal);
-//        		return word;
-//        	}
-//    		Pair<Integer, TreeSet<IntBoolTriple>> newPair = new Pair<>(aSucc, succTriple);
-//        	if(! visited.contains(newPair)) {
-//        		SuccessorInfo<Pair<Integer, TreeSet<IntBoolTriple>>> succInfo = new SuccessorInfo<>(newPair);
-//        		succInfo.word = word;
-//        		queue.add(succInfo);
-//        		visited.add(newPair);
-//        	}
-//    	}
-//    }
-//}
-//throw new RuntimeException("Exception happened in computing words in B: " + start + " -> " + goal);
-//}
-//
-
-//private Word computeWordInProduct(ISet start, ISet goal, ISet aReachSet) {
-//if(start.equals(goal) && A.getInitialState() == aPState) {
-//	//System.out.println("Computing words in B from " + start + " to " + goal);
-//	return A.getAlphabet().getEmptyWord();
-//}
-//PriorityQueue<SuccessorInfo<Pair<Integer, ISet>>> queue = new PriorityQueue<SuccessorInfo<Pair<Integer, ISet>>>();
-//Pair<Integer, ISet> pair = new Pair<>(A.getInitialState(), start);
-//SuccessorInfo<Pair<Integer, ISet>> info = new SuccessorInfo<>(pair);
-//info.word = A.getAlphabet().getEmptyWord();
-//queue.add(info);
-//HashSet<Pair<Integer, ISet>> visited = new HashSet<>();
-//visited.add(pair);
-//
-//while(! queue.isEmpty()) {
-//	SuccessorInfo<Pair<Integer, ISet>> curr = queue.remove();
-//    // trace back to the initial state
-//    for(int letter = 0; letter < B.getAlphabetSize(); letter ++) {
-//    	// for sure current state has empty set
-//    	Word word = curr.word.append(letter);
-//    	ISet succs = UtilISet.newISet();
-//    	for(int currId : curr.state.getRight()) {
-//    		for(int succId : B.getState(currId).getSuccessors(letter)) {
-//            	// now add those states into it
-//            	succs.set(succId);
-//            }
-//    	}
-//    	for(int aSucc: A.getState(curr.state.getLeft()).getSuccessors(letter)) {
-//    		if(! aReachSet.get(aSucc)) continue;
-//    		// found the word in the product
-//    		if(aSucc == aPState && succs.equals(goal)) {
-//        		//System.out.println("Found a word to " + goal);
-//        		return word;
-//        	}
-//    		// ignore representation that are not in the prefSim
-//    		//if(! prefSim.get(aSucc).contains(succs)) {
-//    		//	continue;
-//    		//}
-//    		Pair<Integer, ISet> newPair = new Pair<>(aSucc, succs);
-//    		// only add those words that are in prefSim
-//        	if(! visited.contains(newPair)) {
-//        		SuccessorInfo<Pair<Integer, ISet>> succInfo = new SuccessorInfo<>(newPair);
-//        		succInfo.word = word;
-//        		queue.add(succInfo);
-//        		visited.add(newPair);
-//        	}
-//    	}
-//    }
-//}
-//throw new RuntimeException("Exception happened in computing words in B: " + start + " -> " + goal);
-//}
-//
-//private Word computeWordInProductBackward(ISet start, ISet goal, ISet aReachSet) {
-//if(start.equals(goal) && A.getInitialState() == aPState) {
-//	//System.out.println("Computing words in B from " + start + " to " + goal);
-//	return A.getAlphabet().getEmptyWord();
-//}
-//PriorityQueue<SuccessorInfo<Pair<Integer, ISet>>> queue = new PriorityQueue<SuccessorInfo<Pair<Integer, ISet>>>();
-//Pair<Integer, ISet> pair = new Pair<>(aPState, goal);
-//SuccessorInfo<Pair<Integer, ISet>> info = new SuccessorInfo<>(pair);
-//info.word = A.getAlphabet().getEmptyWord();
-//queue.add(info);
-//HashSet<Pair<Integer, ISet>> visited = new HashSet<>();
-//visited.add(pair);
-//
-//while(! queue.isEmpty()) {
-//	SuccessorInfo<Pair<Integer, ISet>> curr = queue.remove();
-//    // trace back to the initial state
-//    for(int letter = 0; letter < B.getAlphabetSize(); letter ++) {
-//    	// for sure current state has empty set
-//    	Word word = curr.word.preappend(letter);
-//    	ISet preds = UtilISet.newISet();
-//    	for(int currId : curr.state.getRight()) {
-//    		for(StateNFA predNfa : bStates[currId].getPredecessors(letter)) {
-//            	// now add those states into it
-//    			preds.set(predNfa.getId());
-//            }
-//    	}
-//    	// preds
-//    	for(StateNFA aPredNfa: aStates[curr.state.getLeft()].getPredecessors(letter)) {
-//    		if(! aReachSet.get(aPredNfa.getId())) continue;
-//    		// found the word in the product
-//    		if(aPredNfa.getId() == A.getInitialState() && preds.equals(start)) {
-//        		//System.out.println("Found a word to " + goal);
-//        		return word;
-//        	}
-//    		// now check the prefSim, not the one in computation of representation
-//    		if(! prefSim.get(aPredNfa.getId()).contains(preds)) {
-//    			continue;
-//    		}
-//    		System.out.println("");
-//    		Pair<Integer, ISet> newPair = new Pair<>(aPredNfa.getId(), preds);
-//        	if(! visited.contains(newPair)) {
-//        		SuccessorInfo<Pair<Integer, ISet>> predInfo = new SuccessorInfo<>(newPair);
-//        		predInfo.word = word;
-//        		queue.add(predInfo);
-//        		visited.add(newPair);
-//        	}
-//    	}
-//    }
-//}
-//throw new RuntimeException("Exception happened in computing words in B: " + start + " -> " + goal);
-//}
-
