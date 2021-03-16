@@ -84,6 +84,7 @@ public class CongruenceSimulation {
 	boolean antichain = true;
 	boolean debug = false;
 	
+	// counterexample (prefix, period) if exists
 	Word prefix = null;
 	Word period = null;
 	
@@ -906,14 +907,14 @@ public class CongruenceSimulation {
 
 	public static void main(String[] args) {
 		
-		TreeSet<IntBoolTriple> set1 = new TreeSet<>();
-		set1.add(new IntBoolTriple(0, 0, true));
-		set1.add(new IntBoolTriple(24, 0, true));
-		
-		TreeSet<IntBoolTriple> set2 = new TreeSet<>();
-		set2.add(new IntBoolTriple(0, 0, true));
-		
-		System.out.println(set1.containsAll(set1));
+//		TreeSet<IntBoolTriple> set1 = new TreeSet<>();
+//		set1.add(new IntBoolTriple(0, 0, true));
+//		set1.add(new IntBoolTriple(24, 0, true));
+//		
+//		TreeSet<IntBoolTriple> set2 = new TreeSet<>();
+//		set2.add(new IntBoolTriple(0, 0, true));
+//		
+//		System.out.println(set1.containsAll(set1));
 //		Alphabet alphabet = new Alphabet();
 //		alphabet.addLetter('a');
 //		alphabet.addLetter('b');
@@ -941,7 +942,7 @@ public class CongruenceSimulation {
 //		B.setFinal(1);
 //		B.setInitial(0);
 		
-		System.out.println(args.length + " " + args[0]);
+//		System.out.println(args.length + " " + args[0]);
 		
 		Options options = new Options();
 		PairParserBA pairParser = new PairParserBA(options, args[0], args[1]);
@@ -950,6 +951,7 @@ public class CongruenceSimulation {
 		System.out.println("#A = " + A.getStateSize() + ", #B = " + B.getStateSize());
 		Timer timer = new Timer();
 		timer.start();
+		
 		CongruenceSimulation sim = new CongruenceSimulation(A, B);
 		sim.antichain = true;
 		sim.computeCounterexample = true;
