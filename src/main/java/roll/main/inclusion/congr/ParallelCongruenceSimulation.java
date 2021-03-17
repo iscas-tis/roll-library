@@ -116,8 +116,8 @@ public class ParallelCongruenceSimulation {
 					writeCounterexample(sim.getCounterexample());
 //					System.out.println(" result = " + result);
 				}
-			} catch (Exception e) {
-				System.out.println("Thread has been interrupted");
+			} catch (OutOfMemoryError e) {
+				System.exit(-1);
 			}
 		}
 		
