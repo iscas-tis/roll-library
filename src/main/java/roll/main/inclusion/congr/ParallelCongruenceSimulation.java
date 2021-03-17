@@ -1,6 +1,8 @@
 package roll.main.inclusion.congr;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import roll.automata.NBA;
 import roll.automata.operations.NBALasso;
@@ -16,21 +18,24 @@ public class ParallelCongruenceSimulation {
 	NBA A;
 	NBA B;
 	
-	Pair<Word, Word> ce;
+	Pair<Word, Word> counterexample;
 	Boolean result;
-	protected boolean terminate = false;
+	boolean terminate = false;
 	
-	public ParallelCongruenceSimulation(NBA A, NBA B) {
+	int numWorkers;
+	
+	
+	public ParallelCongruenceSimulation(NBA A, NBA B, int numWorks) {
 		this.A = A;
 		this.B = B;
+		this.numWorkers = numWorks;
 	}
 	
 	public Pair<Word, Word> getCounterexample() {
-		return ce;
+		return counterexample;
 	} 
 	
 	public boolean isIncluded() {
-		
 		ISet aFinals = A.getFinalStates();
 		NBA[] nbas = new NBA[aFinals.cardinality()];
 		int i = 0;
@@ -57,41 +62,38 @@ public class ParallelCongruenceSimulation {
 			NBA nba = nbas[j];
 			InclusionCheck checker = new InclusionCheck(nba, B);
 			threads.add(checker);
-			checker.start();
 		}
-		boolean isIncluded = true;
-		while (! terminate) {
+		ExecutorService executor = Executors.newFixedThreadPool(numWorkers);//Executors.newWorkStealingPool(numCores);
+		for(int j = 0; j < nbas.length; j ++) {
+			executor.execute(threads.get(j));
+			System.out.println("Create thread " + j);
+		}
+		executor.shutdown();
+		System.out.println("Entering while loop ......");
+		while (true) {
 			// create a thread to look up
-			boolean oneAlive = false;
-			for(int j = 0; j < threads.size(); j ++) {
-				if(threads.get(j).isAlive()) {
-					oneAlive = true;
-				}
+			if(executor.isTerminated()) {
+				System.out.println("executor terminate ?");
+				break;
 			}
-			if(! oneAlive) {
+			if(terminate) {
+				executor.shutdownNow();
+				System.out.println("Terminate ?");
 				break;
 			}
 		}
 		
-		System.out.println("Hello");
-		for(int j = 0; j < threads.size(); j ++) {
-			if(threads.get(j).isAlive()) {
-				threads.get(j).interrupt();
-			}
-		}
 		if(this.result != null) {
 			return this.result;
 		}
-		return isIncluded;
+		return true;
 	}
 	
 	class InclusionCheck extends Thread {
 		
 		NBA first;
 		NBA second;
-		
-//		boolean stopping;
-		
+				
 		InclusionCheck(NBA fst, NBA snd) {
 			this.first = fst;
 			this.second = snd;
@@ -100,35 +102,34 @@ public class ParallelCongruenceSimulation {
 		@Override
 		public void run() {
 			try {
+				synchronized(this) {
+					if(result != null && !result) {
+						return;
+					}
+				}
 				CongruenceSimulation sim = new CongruenceSimulation(first, second);
 				sim.antichain = true;
 				sim.computeCounterexample = true;
 				boolean included = sim.isIncluded();
-				System.out.println(included ? "Included" : "Not included");
+//				System.out.println(included ? "Included" : "Not included");
 				if(!included) {
-					write(sim.getCounterexample());
-					System.out.println(" result = " + result);
+					writeCounterexample(sim.getCounterexample());
+//					System.out.println(" result = " + result);
 				}
 			} catch (Exception e) {
-				System.out.println("Interrupted");
+				System.out.println("Thread has been interrupted");
 			}
 		}
 		
-		public synchronized void write(Pair<Word, Word> counterexample) {
-			ce = counterexample;
+		public synchronized void writeCounterexample(Pair<Word, Word> ce) {
+			if(result != null && !result) {
+				return ;
+			}
+			counterexample = ce;
 			result = false;
 			terminate = true;
 			System.out.println("Visited" + " " + terminate);
 		}
-		
-//		public synchronized void shutdown() {
-//		    stopping = true;
-//		    this.notifyAll();
-//		}
-
-//		public synchronized boolean isStopping() {
-//		    return stopping;
-//		}
 		
 	}
 	
@@ -142,17 +143,18 @@ public class ParallelCongruenceSimulation {
 		System.out.println("#A = " + A.getStateSize() + ", #B = " + B.getStateSize());
 		Timer timer = new Timer();
 		timer.start();
-		
-		ParallelCongruenceSimulation sim = new ParallelCongruenceSimulation(A, B);
+		int numCores = Runtime.getRuntime().availableProcessors();
+		System.out.println("NumCores = " + numCores);
+		ParallelCongruenceSimulation sim = new ParallelCongruenceSimulation(A, B, numCores - 4);
 		boolean included = sim.isIncluded();
 		System.out.println(included ? "Included" : "Not included");
 		if(!included) {
-			Pair<Word, Word> counterexample = sim.getCounterexample();
-			NBALasso lasso = new NBALasso(counterexample.getLeft(), counterexample.getRight());
-			pairParser.print(lasso.getNBA(), options.log.getOutputStream());
+				Pair<Word, Word> counterexample = sim.getCounterexample();
+				NBALasso lasso = new NBALasso(counterexample.getLeft(), counterexample.getRight());
+				pairParser.print(lasso.getNBA(), options.log.getOutputStream());
 		}
 		timer.stop();
-		System.out.println("Time elapsed " + timer.getTimeElapsed());
+		System.out.println("Total time elapsed " + timer.getTimeElapsed());
 	}
 
 }
