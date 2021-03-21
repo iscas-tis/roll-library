@@ -29,9 +29,12 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import roll.automata.NBA;
 import roll.automata.StateNFA;
 import roll.automata.operations.NBALasso;
+import roll.automata.operations.NBAOperations;
 import roll.automata.operations.StateContainer;
 import roll.automata.operations.TarjanSCCsNonrecursive;
+import roll.automata.operations.nba.inclusion.NBAInclusionCheckTool;
 import roll.main.Options;
+import roll.main.complement.IsIncluded;
 import roll.main.inclusion.run.SuccessorInfo;
 import roll.parser.ba.PairParserBA;
 import roll.util.Pair;
@@ -44,7 +47,7 @@ import roll.words.Word;
 //	Congruence Relations for B\"uchi Automata submitted to ICALP'21
 // We actually can define congruence relations for language inclusion checking
 
-public class CongruenceSimulation {
+public class CongruenceSimulation implements IsIncluded {
 	
 	NBA A;
 	NBA B;
@@ -142,7 +145,7 @@ public class CongruenceSimulation {
 		periodSim = new TIntObjectHashMap<>();
 	}
 	
-	
+	@Override
 	public Pair<Word, Word> getCounterexample() {
 		assert prefix != null && period != null;
 		return new Pair<>(prefix, period);
@@ -310,7 +313,7 @@ public class CongruenceSimulation {
                         visited.set(lPred.getId());
                     }else if(lPred.getId() == state) {
                     	// the state can reach itself
-                    	if(debug) System.out.println("Found loop from state " + state);
+//                    	if(debug) System.out.println("Found loop from state " + state);
                     	accLoop = true;
                     }
                 }
@@ -342,9 +345,10 @@ public class CongruenceSimulation {
         return visited;
 	}
 	
+	// ignore the set that already contains one set in the sets
 	boolean containTriples(HashSet<TreeSet<IntBoolTriple>> sets, TreeSet<IntBoolTriple> set) {
 		for(TreeSet<IntBoolTriple> s : sets) {
-			if(s.equals(set)) {
+			if(set.containsAll(s)) { //s.equals(set)
 				return true;
 			}
 		}
@@ -440,14 +444,15 @@ public class CongruenceSimulation {
 					// s - a -> t
 					for (int p : simulatedStatesInB) {
 						for (int q : B.getSuccessors(p, a)) {
-							if(!bReachSet.get(q)) continue;
+//							if(!bReachSet.get(q)) continue;
 							// put every p - a -> q in f(t)
 							boolean acc = B.isFinal(p) || B.isFinal(q);
 							addTriple(set, new IntBoolTriple(p, q, acc));
 						}
 					}
+					System.out.println(t + " AccTriple " + set);
 					//TODO: Antichain, only keep the set that are a subset of another
-					if(antichain) {
+					if(antichain ) { // && ! containTriples(periodSim.get(t), set)
 						// keep subsets
 						HashSet<TreeSet<IntBoolTriple>> curr = periodSim.get(t);
 						boolean[] modified = new boolean[1];
@@ -461,6 +466,20 @@ public class CongruenceSimulation {
 								removedPairs.add(new Pair<>(t, key));
 							}
 						}
+						if(modified[0] && t == accState) {
+							// decide whether it ...
+							if(accState == 7) {
+								System.out.println("Deciding ... ");
+							}
+							for(ISet pref: this.prefSim.get(accState)) {
+								if(! decideAcceptance(pref, set)) {
+									System.out.println("Early Early terminated " + pref + " " + set);
+									return ;
+								}
+							}
+							System.out.println("Deciding Done... ");
+						}
+						System.out.println("AccTriple " + set);
 					}else {
 						periodSim.get(t).add(set);	
 					}
@@ -478,6 +497,10 @@ public class CongruenceSimulation {
 			for(Pair<Integer, TreeSet<IntBoolTriple>> pair : removedPairs) {
 				this.periodWordMap.remove(pair);
 			}
+		}
+		
+		if(accState == 7) {
+			System.out.println("Entering loop");
 		}
 		// 2. computation of simulated relations
 		while(! workList.isEmpty()) {
@@ -501,7 +524,7 @@ public class CongruenceSimulation {
 							int p = triple.getLeft();
 							int q = triple.getRight();
 							for(int qr : B.getSuccessors(q, a)) {
-								if(!bReachSet.get(q)) continue;
+//								if(!bReachSet.get(q)) continue;
 								boolean acc = B.isFinal(qr) || triple.getBool();
 								IntBoolTriple newTriple  = new IntBoolTriple(p, qr, acc);
 								addTriple(update, newTriple);
@@ -526,6 +549,19 @@ public class CongruenceSimulation {
 										removedPairs.add(new Pair<>(t, key));
 									}
 								}
+								if(modified[0] && t == accState) {
+									// decide whether it ...
+									for(ISet pref: this.prefSim.get(accState)) {
+										if(! decideAcceptance(pref, update)) {
+											System.out.println("Early terminated " + pref + " " + update);
+											return ;
+										}
+									}
+								}
+								if(debug && t == accState) {
+									System.out.println("Set = " + this.periodSim.get(t));
+								}
+								System.out.println("Loop AccTriple " + set + " state " + t + " from " + s + " modified = " + changed + " a = " + a + " Asize = " + A.getAlphabetSize());
 							}else {
 								changed = true;
 								periodSim.get(t).add(update);
@@ -591,7 +627,8 @@ public class CongruenceSimulation {
 		return true;
 	}
 	
-	public boolean isIncluded() {
+	@Override
+	public Boolean isIncluded() {
 		
 		// for each accepting state (should be reachable from the initial state and can reach itself)
 		ISet reachSet = getReachSet(A.getInitialState(), A);
@@ -675,16 +712,16 @@ public class CongruenceSimulation {
 //				}
 //			}
 //			System.out.println("Nonrecursive: ");
-			TarjanSCCsNonrecursive sccNonrecur = new TarjanSCCsNonrecursive(B, simulatedStatesInB);;
-			for(ISet scc : sccNonrecur.getSCCs()) {
-//				System.out.println("SCC: " + scc);
-				if(scc.overlap(simulatedStatesInB) && scc.overlap(bFinals)) {
-					allowSccs.or(scc);
-				}
-			}
-//			System.out.println("pref rep: " + antichainPrefix);
-//			System.out.println("pref bReach: " + allowSccs);
-			simulatedStatesInB.and(allowSccs);
+//			TarjanSCCsNonrecursive sccNonrecur = new TarjanSCCsNonrecursive(B, simulatedStatesInB);;
+//			for(ISet scc : sccNonrecur.getSCCs()) {
+////				System.out.println("SCC: " + scc);
+//				if(scc.overlap(simulatedStatesInB) && scc.overlap(bFinals)) {
+//					allowSccs.or(scc);
+//				}
+//			}
+			System.out.println("pre scc: " + simulatedStatesInB);
+			System.out.println("allow scc: " + allowSccs);
+//			simulatedStatesInB.and(allowSccs);
 			if(debug) System.out.println("simulated states in B: " + simulatedStatesInB);
 //			System.out.println("Final states: " + B.getFinalStates());
 			computePeriodSimulation(accState, simulatedStatesInB, allowSccs);
@@ -694,7 +731,7 @@ public class CongruenceSimulation {
 			timer.start();
 			for(ISet pref: antichainPrefix) {
 				if(debug) System.out.println("Simulated set in B: " + pref);
-//				computePeriodSimulation(accState, pref);
+				//				computePeriodSimulation(accState, pref);
 				// compute antichain
 				HashSet<TreeSet<IntBoolTriple>> antichainPeriod = new HashSet<>();
 				for(TreeSet<IntBoolTriple> period1: periodSim.get(accState)) {
@@ -716,6 +753,7 @@ public class CongruenceSimulation {
 					return false;
 				}
 				for(TreeSet<IntBoolTriple> period: antichainPeriod) {
+					if(debug) System.out.println("Simulated triples in B: " + period);
 					// decide whether this pref (period) is accepting in B
 					if(! decideAcceptance(pref, period)) {
 						// we need to construct a counterexample here
@@ -738,9 +776,12 @@ public class CongruenceSimulation {
 	// This function will be called if decideAcceptance returns false
 	private void computeCounterexample(int accState, ISet pref, TreeSet<IntBoolTriple> period, ISet aReachSet) {
 		// first, compute the word to this pref
+		System.out.println("Pref: " + pref);
+		System.out.println("Period: " + period);
 		// construct prefix
 		this.prefix = this.prefWordMap.get(new Pair<>(accState, pref));
 		this.period = this.periodWordMap.get(new Pair<>(accState, period));
+		System.out.println("pref = " + prefix + ", period = " + this.period);
 	}
 
 	// goal must be reachable from start
@@ -825,14 +866,14 @@ public class CongruenceSimulation {
 		this.period = this.period.concat(p2);
 	}
 //
-	private TreeSet<IntBoolTriple> compose(TreeSet<IntBoolTriple> first
+	private static TreeSet<IntBoolTriple> compose(TreeSet<IntBoolTriple> first
 			, TreeSet<IntBoolTriple> second) { //, ISet sndStates
 		TreeSet<IntBoolTriple> result = new TreeSet<>();
 		for(IntBoolTriple fstTriple: first) {
 			for(IntBoolTriple sndTriple: second) {
 				// (p, q, ) \times (q, r) -> (p, r)
 				if(fstTriple.getRight() == sndTriple.getLeft()) {
-					addTriple(result, new IntBoolTriple(fstTriple.getLeft()
+					result.add(new IntBoolTriple(fstTriple.getLeft()
 							, sndTriple.getRight()
 							, fstTriple.getBool() || sndTriple.getBool()));
 				}
@@ -866,42 +907,55 @@ public class CongruenceSimulation {
 	
 	// decide whether there exists an accepting run in B from states in sim
 	// all states on the left are from pref
-	private boolean decideAcceptance(ISet pref, TreeSet<IntBoolTriple> period) {
-//		System.out.println("pref: " + pref);
-//		System.out.println("period: " + period);
+	private static boolean decideAcceptance(ISet pref, TreeSet<IntBoolTriple> period) {
+		System.out.println("pref: " + pref);
+		System.out.println("period: " + period);
 		boolean foundLoop = false;
-		for(int state: pref) {
+		ISet reachStates = pref.clone();
+//		for(int state: pref) {
 			// iteratively check whether there exists a triple (q, q: true) reachable from state
-			TreeSet<IntBoolTriple> reachSet = new TreeSet<>();
-			for(IntBoolTriple triple: period) {
-				if(state == triple.getLeft()) {
+		ISet reachableStates = pref.clone();
+		TreeSet<IntBoolTriple> reachSet = new TreeSet<>();
+		while (true) {
+			ISet newReach = UtilISet.newISet();
+			for (IntBoolTriple triple : period) {
+				if (reachStates.get(triple.getLeft())) {
 					reachSet.add(triple);
+					// add states that can be reached
+					newReach.set(triple.getRight());
 				}
 			}
-			while(true) {
-				// compute update
-				int origSize = reachSet.size();
-				TreeSet<IntBoolTriple> update = compose(reachSet, period);
-				// reachable states from pref can also be first states
-				reachSet.addAll(update);
-				// a triple (q, q: true) means that we have found an accepting run
-				for(IntBoolTriple triple: reachSet) {
-					if(triple.getLeft() == triple.getRight() && triple.getBool()) {
-						foundLoop = true;
-						break;
-					}
-				}
-				// reach a fixed point
-				if(foundLoop || origSize == reachSet.size()) {
+			System.out.println("ReachSet = " + reachSet);
+			// first add reachable triples
+			// compute update
+			int origSize = reachSet.size();
+			TreeSet<IntBoolTriple> update = compose(reachSet, period);
+			// reachable states from pref can also be first states
+			reachSet.addAll(update);
+			System.out.println("ReachSet = " + reachSet);
+			// a triple (q, q: true) means that we have found an accepting run
+			for (IntBoolTriple triple : reachSet) {
+				if (triple.getLeft() == triple.getRight() && triple.getBool()) {
+					foundLoop = true;
 					break;
 				}
 			}
-//			System.out.println("state = " + state + ", reachSet :\n" + reachSet);
-			if(foundLoop) {
-				break;
+			for(IntBoolTriple triple : update) {
+				// more reachable states 
+				newReach.set(triple.getRight());
 			}
+			// new reachable states
+//			System.out.println("New reach = " + newReach);
+			int statesSize = reachableStates.cardinality();
+			newReach.andNot(reachableStates);
+			reachableStates.or(newReach);
+			// reach a fixed point
+			if (foundLoop || (origSize == reachSet.size() && statesSize == reachableStates.cardinality())) {
+					break;
+			}
+			reachStates = newReach;
 		}
-		
+//		}
 		return foundLoop;
 	}
 
@@ -943,6 +997,37 @@ public class CongruenceSimulation {
 //		B.setInitial(0);
 		
 //		System.out.println(args.length + " " + args[0]);
+		ISet pref = UtilISet.newISet();
+		pref.set(0);
+		pref.set(1);
+		pref.set(2);
+		TreeSet<IntBoolTriple> set1 = new TreeSet<>();
+		set1.add(new IntBoolTriple(0, 0, false));
+		set1.add(new IntBoolTriple(0, 108, false));
+		set1.add(new IntBoolTriple(0, 109, true));
+		set1.add(new IntBoolTriple(0, 110, true));
+		set1.add(new IntBoolTriple(0, 112, false));
+		set1.add(new IntBoolTriple(0, 120, false));
+		set1.add(new IntBoolTriple(1, 1, false));
+
+		set1.add(new IntBoolTriple(1, 2, true));
+		set1.add(new IntBoolTriple(1, 112, true));
+		set1.add(new IntBoolTriple(2, 112, true));
+
+		set1.add(new IntBoolTriple(109, 109, true));
+		set1.add(new IntBoolTriple(109, 110, true));
+		set1.add(new IntBoolTriple(110, 109, true));
+		set1.add(new IntBoolTriple(110, 110, true));
+		set1.add(new IntBoolTriple(112, 112, false));
+		
+		System.out.print(decideAcceptance(pref, set1));
+
+
+
+//		System.exit(0);
+
+
+		
 		
 		Options options = new Options();
 		PairParserBA pairParser = new PairParserBA(options, args[0], args[1]);
@@ -955,11 +1040,28 @@ public class CongruenceSimulation {
 		CongruenceSimulation sim = new CongruenceSimulation(A, B);
 		sim.antichain = true;
 		sim.computeCounterexample = true;
+		sim.debug = true;
 		boolean included = sim.isIncluded();
 		System.out.println(included ? "Included" : "Not included");
 		if(!included && sim.computeCounterexample) {
 			NBALasso lasso = new NBALasso(sim.prefix, sim.period);
 			pairParser.print(lasso.getNBA(), options.log.getOutputStream());
+			boolean inA = NBAOperations.accepts(A, sim.prefix, sim.period);
+			boolean inB = NBAOperations.accepts(B, sim.prefix, sim.period);
+			if(!(inA && !inB)) {
+				System.out.println("Error counterexample: " + inA + ", " + inB);
+			}
+			inA = NBAOperations.tarjanAccepts(A, sim.prefix, sim.period);
+			inB = NBAOperations.tarjanAccepts(B, sim.prefix, sim.period);
+			if(!(inA && !inB)) {
+				System.out.println("Error counterexample: " + inA + ", " + inB);
+			}else {
+				System.out.println("True counterexample: " + inA + ", " + inB);
+			}
+			//System.out.println("SPOT: " + NBAInclusionCheckTool.isIncludedSpot(lasso.getNBA(), A));
+			//System.out.println("SPOT" + NBAInclusionCheckTool.isIncludedSpot(lasso.getNBA(), B));
+			//System.out.println("RABIT: " + NBAInclusionCheckTool.isIncludedGoal("/home/liyong/tools/GOAL-20151018/goal", lasso.getNBA(), A));
+			//System.out.println("RABIT" + NBAInclusionCheckTool.isIncludedGoal("/home/liyong/tools/GOAL-20151018/goal", lasso.getNBA(), B));
 		}
 		timer.stop();
 		System.out.println("Time elapsed " + timer.getTimeElapsed());

@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import automata.FiniteAutomaton;
 import roll.automata.NBA;
 import roll.automata.operations.NBALasso;
 import roll.main.Options;
+import roll.main.inclusion.UtilInclusion;
 import roll.parser.ba.PairParserBA;
 import roll.util.Pair;
 import roll.util.Timer;
@@ -58,13 +60,14 @@ public class ParallelCongruenceSimulation {
 		}
 		// run parallelly for checking inclusion
 		ArrayList<InclusionCheck> threads = new ArrayList<>();
+		System.out.println("There are " + nbas.length + " small NBAs");
 		for(int j = 0; j < nbas.length; j ++) {
 			NBA nba = nbas[j];
 			InclusionCheck checker = new InclusionCheck(nba, B);
 			threads.add(checker);
 		}
 		ExecutorService executor = Executors.newFixedThreadPool(numWorkers);//Executors.newWorkStealingPool(numCores);
-		for(int j = 0; j < nbas.length; j ++) {
+		for(int j = 0; j < threads.size(); j ++) {
 			executor.execute(threads.get(j));
 			System.out.println("Create thread " + j);
 		}
@@ -107,7 +110,28 @@ public class ParallelCongruenceSimulation {
 						return;
 					}
 				}
-				CongruenceSimulation sim = new CongruenceSimulation(first, second);
+				// light processing 
+				FiniteAutomaton faA = UtilInclusion.toRABITNBA(first);
+				FiniteAutomaton faB = UtilInclusion.toRABITNBA(second);
+				System.out.println("Light proceesing for NBA ");
+				// now do light processing
+		        Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>> pair = UtilInclusion.lightPrepocess(faA, faB);
+		        if(pair.getLeft()) {
+		        	return;
+		        }
+		        // else do a bit more processing
+		        faA = pair.getRight().getLeft();
+		        faB = pair.getRight().getRight();
+				System.out.println("Proceesing for NBA ");
+		        pair = UtilInclusion.prepocess(faA, faB);
+		        if(pair.getLeft()) {
+		        	return;
+		        }
+		        faA = pair.getRight().getLeft();
+		        faB = pair.getRight().getRight();
+		        NBA fst = UtilInclusion.toNBA(faA, A.getAlphabet());
+		        NBA snd = UtilInclusion.toNBA(faB, B.getAlphabet());
+				CongruenceSimulation sim = new CongruenceSimulation(fst, snd);
 				sim.antichain = true;
 				sim.computeCounterexample = true;
 				boolean included = sim.isIncluded();
@@ -117,6 +141,7 @@ public class ParallelCongruenceSimulation {
 //					System.out.println(" result = " + result);
 				}
 			} catch (OutOfMemoryError e) {
+				e.printStackTrace();
 				System.exit(-1);
 			}
 		}
@@ -145,7 +170,7 @@ public class ParallelCongruenceSimulation {
 		timer.start();
 		int numCores = Runtime.getRuntime().availableProcessors();
 		System.out.println("NumCores = " + numCores);
-		ParallelCongruenceSimulation sim = new ParallelCongruenceSimulation(A, B, numCores - 4);
+		ParallelCongruenceSimulation sim = new ParallelCongruenceSimulation(A, B, numCores - 2);
 		boolean included = sim.isIncluded();
 		System.out.println(included ? "Included" : "Not included");
 		if(!included) {

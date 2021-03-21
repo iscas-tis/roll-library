@@ -30,7 +30,7 @@ import roll.util.sets.UtilISet;
 
 public class TarjanSCCsNonrecursive {
 	
-//	private final NBA automaton;
+	//	private final NBA automaton;
 	private ISet initials;
 	
 	private int tjNode;

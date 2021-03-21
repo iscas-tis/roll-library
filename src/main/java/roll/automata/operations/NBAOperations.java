@@ -92,7 +92,13 @@ public class NBAOperations {
         return !checker.isEmpty();
     }
     
-
+    public static boolean tarjanAccepts(NBA nba, Word stem, Word loop) {
+        assert nba != null && stem != null && loop != null;
+        NBALasso lasso = new NBALasso(stem, loop);
+        if(loop.isEmpty()) return false;
+        NBAIntersectCheck checker = new NBAIntersectCheck(nba, lasso.getNBA());
+        return !checker.isEmpty();
+    }
     
     public static boolean isSemideterministic(NBA result) {
 //        NBA result = removeDeadStates(input);

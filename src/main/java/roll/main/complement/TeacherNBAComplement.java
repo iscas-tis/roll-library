@@ -179,10 +179,11 @@ public class TeacherNBAComplement implements Teacher<FDFA, Query<HashableValue>,
                         hasCE = true;
                     }
                 }
-                
+            	UtilComplement.print(BFC, "A.ba");
+            	UtilComplement.print(B, "B.ba");
                 if(! hasCE) {
                     // by rabit
-                    options.log.println("RABIT/SPOT for a counterexample to the inclusion...");
+                    options.log.println("RABIT/SPOT/CONGR for a counterexample to the inclusion...");
                     t = timer.getCurrentTime();
 					IsIncluded included = UtilComplement.checkInclusion(options, alphabet, BFC, B, rBFC, rB);                
                     t = timer.getCurrentTime() - t;

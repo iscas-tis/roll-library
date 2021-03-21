@@ -17,6 +17,7 @@ import mainfiles.RABIT;
 import roll.automata.NBA;
 import roll.automata.operations.NBAOperations;
 import roll.main.Options;
+import roll.main.inclusion.congr.CongrThread;
 import roll.oracle.nba.rabit.RabitThread;
 import roll.oracle.nba.rabit.RabitThread3;
 import roll.oracle.nba.spot.SpotThread3;
@@ -131,7 +132,11 @@ public class UtilComplement {
 			if(options.spot) {
 				SpotThread3 spotThread = new SpotThread3(A, B, options);
 				caller = spotThread;
-			}else {
+			}else if(options.congruence) {
+				CongrThread congThread = new CongrThread(A, B, options);
+				caller = congThread;
+			}
+			else{
 				RabitThread3 rabitThread = new RabitThread3(alphabet, rA, rB, options);
 				caller = rabitThread;
 			}
