@@ -159,5 +159,14 @@ public class StateNFA {
         }
         return false;
     }
+    
+	public boolean forwardCovers(StateNFA other) {
+		for (int letter : other.getEnabledLetters()) {
+			if (!successors.containsKey(letter)) {
+				return false;
+			}
+		}
+		return true;
+	}
 
 }

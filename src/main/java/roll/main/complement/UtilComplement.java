@@ -96,7 +96,7 @@ public class UtilComplement {
 	public static IsIncluded checkInclusion(Options options
 			, Alphabet alphabet, NBA A, NBA B, FiniteAutomaton rA, FiniteAutomaton rB) {
 		IsIncluded included = null;
-		if(options.parallel) {
+		if(options.parallel && !options.congruence) {
 			final int size = 45;
 			boolean bigEnough = A.getStateSize() + B.getStateSize() > size;
 			SpotThread1 spotThread = null;

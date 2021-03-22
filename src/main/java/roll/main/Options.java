@@ -86,6 +86,8 @@ public class Options {
 
     public boolean parallel = false;
     
+    public int numWorkers = 4;
+    
     public boolean congruence = false;
 
     // use the complement teacher to learn the target BA
@@ -263,7 +265,7 @@ public class Options {
                 && (!algorithm.isTargetFDFA())) {
                   throw new UnsupportedOperationException("arguments for test mode are illegal");
         }
-        if(congruence && runningMode != RunningMode.INCLUDING) {
+        if(congruence && (runningMode != RunningMode.INCLUDING && runningMode != RunningMode.COMPLEMENTING)) {
         	throw new UnsupportedOperationException("congruence is only valid for include mode");
         }
         

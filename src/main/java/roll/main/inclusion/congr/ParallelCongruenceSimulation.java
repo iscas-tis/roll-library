@@ -8,6 +8,7 @@ import automata.FiniteAutomaton;
 import roll.automata.NBA;
 import roll.automata.operations.NBALasso;
 import roll.main.Options;
+import roll.main.complement.IsIncluded;
 import roll.main.inclusion.UtilInclusion;
 import roll.parser.ba.PairParserBA;
 import roll.util.Pair;
@@ -15,7 +16,7 @@ import roll.util.Timer;
 import roll.util.sets.ISet;
 import roll.words.Word;
 
-public class ParallelCongruenceSimulation {
+public class ParallelCongruenceSimulation implements IsIncluded {
 	
 	NBA A;
 	NBA B;
@@ -33,11 +34,13 @@ public class ParallelCongruenceSimulation {
 		this.numWorkers = numWorks;
 	}
 	
+	@Override
 	public Pair<Word, Word> getCounterexample() {
 		return counterexample;
 	} 
 	
-	public boolean isIncluded() {
+	@Override
+	public Boolean isIncluded() {
 		ISet aFinals = A.getFinalStates();
 		NBA[] nbas = new NBA[aFinals.cardinality()];
 		int i = 0;
@@ -110,28 +113,37 @@ public class ParallelCongruenceSimulation {
 						return;
 					}
 				}
+				CongruenceSimulation sim = new CongruenceSimulation(first, second);
 				// light processing 
-				FiniteAutomaton faA = UtilInclusion.toRABITNBA(first);
-				FiniteAutomaton faB = UtilInclusion.toRABITNBA(second);
-				System.out.println("Light proceesing for NBA ");
-				// now do light processing
-		        Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>> pair = UtilInclusion.lightPrepocess(faA, faB);
-		        if(pair.getLeft()) {
-		        	return;
-		        }
-		        // else do a bit more processing
-		        faA = pair.getRight().getLeft();
-		        faB = pair.getRight().getRight();
-				System.out.println("Proceesing for NBA ");
-		        pair = UtilInclusion.prepocess(faA, faB);
-		        if(pair.getLeft()) {
-		        	return;
-		        }
-		        faA = pair.getRight().getLeft();
-		        faB = pair.getRight().getRight();
-		        NBA fst = UtilInclusion.toNBA(faA, A.getAlphabet());
-		        NBA snd = UtilInclusion.toNBA(faB, B.getAlphabet());
-				CongruenceSimulation sim = new CongruenceSimulation(fst, snd);
+//				FiniteAutomaton faA = UtilInclusion.toRABITNBA(first);
+//				FiniteAutomaton faB = UtilInclusion.toRABITNBA(second);
+//		        System.out.println("Before minimization: #A.St=" + faA.states.size() + ", #A.Tr=" + faA.trans);
+//		        System.out.println("Before minimization: #B.St=" + faB.states.size() + ", #B.Tr=" + faB.trans);
+//				System.out.println("Light proceesing for NBA ");
+//				// now do light processing
+//		        Pair<Boolean, Pair<FiniteAutomaton, FiniteAutomaton>> pair = UtilInclusion.lightPrepocess(faA, faB);
+//		        if(pair.getLeft()) {
+//			        System.out.println("Light processing finished the task.");
+//		        	return;
+//		        }
+//		        // else do a bit more processing
+//		        faA = pair.getRight().getLeft();
+//		        faB = pair.getRight().getRight();
+//				System.out.println("Proceesing for NBA ");
+//		        pair = UtilInclusion.prepocess(faA, faB);
+//		        if(pair.getLeft()) {
+//			        System.out.println("Processing finished the task.");
+//		        	return;
+//		        }
+//		        System.out.println("Processing did not finish the task.");
+//		        faA = pair.getRight().getLeft();
+//		        faB = pair.getRight().getRight();
+//		        NBA fst = UtilInclusion.toNBA(faA, A.getAlphabet());
+//		        NBA snd = UtilInclusion.toNBA(faB, B.getAlphabet());
+//		        System.out.println("After minimization: #A.St=" + faA.states.size() + ", #A.Tr=" + faA.trans);
+//		        System.out.println("After minimization: #B.St=" + faB.states.size() + ", #B.Tr=" + faB.trans);
+//
+//				CongruenceSimulation sim = new CongruenceSimulation(fst, snd);
 				sim.antichain = true;
 				sim.computeCounterexample = true;
 				boolean included = sim.isIncluded();
@@ -170,7 +182,7 @@ public class ParallelCongruenceSimulation {
 		timer.start();
 		int numCores = Runtime.getRuntime().availableProcessors();
 		System.out.println("NumCores = " + numCores);
-		ParallelCongruenceSimulation sim = new ParallelCongruenceSimulation(A, B, numCores - 2);
+		ParallelCongruenceSimulation sim = new ParallelCongruenceSimulation(A, B, 4);
 		boolean included = sim.isIncluded();
 		System.out.println(included ? "Included" : "Not included");
 		if(!included) {

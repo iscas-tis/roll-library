@@ -36,10 +36,16 @@ public class CongrThread implements Callable<IsIncluded>, IsIncluded {
 
 	@Override
 	public IsIncluded call() throws Exception {
-		CongruenceSimulation sim = new CongruenceSimulation(A, B);
-		result = sim.isIncluded();
+		
+		IsIncluded congr = null;
+		if(options.parallel) {
+			congr = new ParallelCongruenceSimulation(A, B, options.numWorkers);
+		}else {
+			congr = new CongruenceSimulation(A, B);
+		}
+		result = congr.isIncluded();
 		if(! result) {
-			counterexample = sim.getCounterexample();
+			counterexample = congr.getCounterexample();
 			options.log.println("A counterexmple has been found by CONGR");
 		}else {
 			options.log.println("Inclusion has been proved by CONGR");
