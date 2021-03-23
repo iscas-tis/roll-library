@@ -104,8 +104,9 @@ public class CongruenceSimulation implements IsIncluded {
 	
 	HashMap<Pair<Integer, TreeSet<IntBoolTriple>>, Word> periodWordMap;
 	
-	boolean fwSim[][];
+	boolean fwSim[][]; // simulation inside B 
 	boolean useSimulation = false;
+	boolean fwSimAB[][];
 		
 	public CongruenceSimulation(NBA A, NBA B) {
 		this.A = A;
@@ -148,11 +149,19 @@ public class CongruenceSimulation implements IsIncluded {
 		periodSim = new TIntObjectHashMap<>();
 		if(useSimulation) {
 			fwSim = Simulation.computeForwardSimilation(B, bStates);
+			fwSimAB = Simulation.computeForwardSimulation(A, B);
 		}else {
 			fwSim = new boolean[B.getStateSize()][B.getStateSize()];
 			for(int s = 0; s < B.getStateSize(); s++) {
 				for(int t = 0; t < B.getStateSize(); t ++) {
 					fwSim[s][t] = (s == t);
+				}
+			}
+			int num = A.getStateSize() + B.getStateSize();
+			fwSimAB = new boolean[num][num];
+			for(int s = 0; s < num; s++) {
+				for(int t = 0; t < num; t ++) {
+					fwSimAB[s][t] = (s == t);
 				}
 			}
 		}
@@ -204,7 +213,7 @@ public class CongruenceSimulation implements IsIncluded {
 					subsetOfUpdate.add(sts);
 				}
 				continue;
-			}else if(isSimulated(sts, update)){ //sts.subsetOf(update) || 
+			}else if(sts.subsetOf(update) || isSimulated(sts, update)){ // 
 				// updated should not be added into the hashset
 				contained = true;
 				result.add(sts);
@@ -271,12 +280,23 @@ public class CongruenceSimulation implements IsIncluded {
 					for(ISet set : copy) {
 						// for every set, we update the sets
 						ISet update = UtilISet.newISet();
+						boolean isFwSimulated = false;
 						for (int p : set) {
 							for (int q : B.getSuccessors(p, a)) {
 								// update the states for t
 								update.set(q);
 							}
 						}
+						for(int q : update) {
+							if(fwSimAB[t][q + A.getStateSize()]) {
+								isFwSimulated = true;
+								break;
+							}
+						}
+						if(isFwSimulated) {
+							System.out.println("Ignore state the set " + update + " for " + t);
+							continue;
+						}	
 						// update is the word ua and check whether we need to update
 						if (! prefSim.get(t).contains(update)) {
 							//TODO: Antichain, only keep the set that are not a subset of another
@@ -392,6 +412,7 @@ public class CongruenceSimulation implements IsIncluded {
 				&& fwSim[fstTriple.getRight()][sndTriple.getRight()]
 				&& (!fstTriple.getBool() || sndTriple.getBool())) {
 					simulated = true;
+					break;
 				}
 			}
 			if(! simulated) {
@@ -412,7 +433,7 @@ public class CongruenceSimulation implements IsIncluded {
 					subsetOfUpdate.add(triples);
 				}
 				continue;
-			}else if(isSimulated(triples, update)) { //update.containsAll(triples) || 
+			}else if(update.containsAll(triples) || isSimulated(triples, update)) { // 
 				// must add triples
 				contained = true;
 				result.add(triples);
@@ -496,6 +517,17 @@ public class CongruenceSimulation implements IsIncluded {
 							addTriple(set, new IntBoolTriple(p, q, acc));
 						}
 					}
+					boolean isFwSimulated = false;
+					for(IntBoolTriple tr : set) {
+						if(fwSimAB[t][tr.getRight() + A.getStateSize()]) {
+							isFwSimulated = true;
+							break;
+						}
+					}
+					if(isFwSimulated) {
+						System.out.println("Ignore state the set " + set + " for " + t);
+						continue;
+					}	
 					if(debug) System.out.println(t + " AccTriple " + set);
 					//TODO: Antichain, only keep the set that are a subset of another
 					if(antichain ) { // && ! containTriples(periodSim.get(t), set)
@@ -570,6 +602,17 @@ public class CongruenceSimulation implements IsIncluded {
 								addTriple(update, newTriple);
 							}
 						}
+						boolean isFwSimulated = false;
+						for(IntBoolTriple tr : update) {
+							if(fwSimAB[t][tr.getRight() + A.getStateSize()]) {
+								isFwSimulated = true;
+								break;
+							}
+						}
+						if(isFwSimulated) {
+							System.out.println("Ignore state the set " + update + " for " + t);
+							continue;
+						}	
 						// we have extended for set
 						if(! containTriples(periodSim.get(t), update)) {
 							//TODO: Antichain, only keep the set that are a subset of another
@@ -669,7 +712,9 @@ public class CongruenceSimulation implements IsIncluded {
 	
 	@Override
 	public Boolean isIncluded() {
-		
+		if(fwSimAB[0][A.getStateSize()]) {
+			return true;
+		}
 		// for each accepting state (should be reachable from the initial state and can reach itself)
 		ISet reachSet = getReachSet(A.getInitialState(), A);
 		int countStates = 0;
@@ -752,13 +797,13 @@ public class CongruenceSimulation implements IsIncluded {
 //				}
 //			}
 //			System.out.println("Nonrecursive: ");
-			TarjanSCCsNonrecursive sccNonrecur = new TarjanSCCsNonrecursive(B, simulatedStatesInB);;
-			for(ISet scc : sccNonrecur.getSCCs()) {
-				System.out.println("SCC: " + scc);
-				if(scc.overlap(simulatedStatesInB) && scc.overlap(bFinals)) {
-					System.out.println("SCC 2: " + scc);
-				}
-			}
+//			TarjanSCCsNonrecursive sccNonrecur = new TarjanSCCsNonrecursive(B, simulatedStatesInB);;
+//			for(ISet scc : sccNonrecur.getSCCs()) {
+//				System.out.println("SCC: " + scc);
+//				if(scc.overlap(simulatedStatesInB) && scc.overlap(bFinals)) {
+//					System.out.println("SCC 2: " + scc);
+//				}
+//			}
 //			System.out.println("pre scc: " + simulatedStatesInB);
 //			System.out.println("allow scc: " + allowSccs);
 //			simulatedStatesInB.and(allowSccs);
@@ -950,7 +995,7 @@ public class CongruenceSimulation implements IsIncluded {
 	private static boolean decideAcceptance(ISet pref, TreeSet<IntBoolTriple> period) {
 //		System.out.println("pref: " + pref);
 //		System.out.println("period: " + period);
-		System.out.println("Start deciding acceptance ...");
+//		System.out.println("Start deciding acceptance ...");
 		boolean foundLoop = false;
 		ISet reachStates = pref.clone();
 //		for(int state: pref) {
@@ -997,7 +1042,7 @@ public class CongruenceSimulation implements IsIncluded {
 			reachStates = newReach;
 		}
 //		}
-		System.out.println("Finished deciding acceptance ...");
+//		System.out.println("Finished deciding acceptance ...");
 
 		return foundLoop;
 	}
@@ -1083,7 +1128,7 @@ public class CongruenceSimulation implements IsIncluded {
 		CongruenceSimulation sim = new CongruenceSimulation(A, B);
 		sim.antichain = true;
 		sim.computeCounterexample = true;
-		sim.debug = true;
+		sim.debug = false;
 		sim.useSimulation = true;
 		boolean included = sim.isIncluded();
 		System.out.println(included ? "Included" : "Not included");

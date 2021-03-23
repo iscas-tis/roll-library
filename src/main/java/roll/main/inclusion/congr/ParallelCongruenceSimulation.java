@@ -146,6 +146,7 @@ public class ParallelCongruenceSimulation implements IsIncluded {
 //				CongruenceSimulation sim = new CongruenceSimulation(fst, snd);
 				sim.antichain = true;
 				sim.computeCounterexample = true;
+				sim.useSimulation = true;
 				boolean included = sim.isIncluded();
 //				System.out.println(included ? "Included" : "Not included");
 				if(!included) {
