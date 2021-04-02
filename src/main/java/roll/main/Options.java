@@ -87,8 +87,11 @@ public class Options {
     public boolean parallel = false;
     
     public int numWorkers = 4;
-    
+    // use congruence simulation algorithm for inclusion checking
     public boolean congruence = false;
+    public boolean simulation = false;
+    // minimize graphs
+    public boolean minimization = false;
 
     // use the complement teacher to learn the target BA
     public boolean reverse = false;
@@ -247,6 +250,7 @@ public class Options {
         builder.append("outputA=" + outputA + ",");
         builder.append("outputB=" + outputB + "\n");
         builder.append("congruence=" + congruence + "\n");
+        builder.append("simulation=" + simulation + "\n");
         return builder.toString();
     }
     

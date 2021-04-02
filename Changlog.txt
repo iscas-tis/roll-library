@@ -1,0 +1,9 @@
+
+New in ROLL v1.1 (2021-03-25)
+	* Add new inclusion checking algorithm for B\"uchi automata based on novel congruence relations and simulation relations
+
+New in ROLL v1.0
+	* Modular design for adding new learning algorithms
+
+
+This code of the ROLL is developed and maintained by Yong Li and licensed under GPLv3.

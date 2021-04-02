@@ -57,18 +57,18 @@ public class Simulation {
 			}
 		}
 		computeFastFwSimilation(fst.getAlphabetSize(), map, fsim);
-		boolean[][] result = new boolean[fst.getStateSize()][snd.getStateSize()];
-		for(int i = 0; i < numStates; i ++) {
-			for(int j = 0; j < numStates; j ++) {
-					if(i < fst.getStateSize() && j >= base && fsim[i][j]) {
-						result[i][j - base] = fsim[i][j];
-						System.out.println((j-base) + " simulates " + i);
-					}
-					if(i >= base && j >= base && fsim[i][j] ) {
-						System.out.println((j-base) + " B-simulates " + (i-base) );
-					}
-			}
-		}
+//		boolean[][] result = new boolean[fst.getStateSize()][snd.getStateSize()];
+//		for(int i = 0; i < numStates; i ++) {
+//			for(int j = 0; j < numStates; j ++) {
+//					if(i < fst.getStateSize() && j >= base && fsim[i][j]) {
+//						result[i][j - base] = fsim[i][j];
+//						System.out.println((j-base) + " simulates " + i);
+//					}
+//					if(i >= base && j >= base && fsim[i][j] ) {
+//						System.out.println((j-base) + " B-simulates " + (i-base) );
+//					}
+//			}
+//		}
 		return fsim;
 	}
 	
@@ -227,10 +227,10 @@ public class Simulation {
 		}
 //
 //		Set<Pair<FAState,FAState>> FSim2 = new TreeSet<Pair<FAState,FAState>>(new StatePairComparator());
-		for(int p=0; p<numStates; p++)	
-			for(int q=0; q<numStates; q++)
-				if(fsim[p][q]) // q is in sim(p), q simulates p
-					System.out.println(map[q].getStateId() + ": " + q + " simulates " + map[p].getStateId() + ": " + p);
+//		for(int p=0; p<numStates; p++)	
+//			for(int q=0; q<numStates; q++)
+//				if(fsim[p][q]) // q is in sim(p), q simulates p
+//					System.out.println(map[q].getStateId() + ": " + q + " simulates " + map[p].getStateId() + ": " + p);
 		return fsim;
 	}
 
@@ -369,10 +369,10 @@ public class Simulation {
 		}
 //
 //		Set<Pair<FAState,FAState>> FSim2 = new TreeSet<Pair<FAState,FAState>>(new StatePairComparator());
-		for(int p=0; p<numStates; p++)	
-			for(int q=0; q<numStates; q++)
-				if(fsim[p][q]) // q is in sim(p), q simulates p
-					System.out.println(q + " B-simulates " + p);
+//		for(int p=0; p<numStates; p++)	
+//			for(int q=0; q<numStates; q++)
+//				if(fsim[p][q]) // q is in sim(p), q simulates p
+//					System.out.println(q + " B-simulates " + p);
 		return fsim;
 	}
 	

@@ -36,7 +36,7 @@ import roll.util.Pair;
 public class CLParser {
     
     private Options options;
-    private final String version = "1.0";
+    private final String version = "1.1";
     private static final String TEST = "test";
     private static final String PLAY = "play";
     private static final String CONVERT = "convert";
@@ -326,7 +326,14 @@ public class CLParser {
             	options.congruence = true;
             	continue;
             }
-
+            if(args[i].compareTo("-sim") == 0) {
+            	options.simulation = true;
+            	continue;
+            }
+            if(args[i].compareTo("-min") == 0) {
+            	options.minimization = true;
+            	continue;
+            }
         }
         
         if(options.runningMode == null) {
@@ -424,6 +431,7 @@ public class CLParser {
         	, new Pair<>("-fin", "Interpret the input LTL formula over finite words")
         	, new Pair<>("-p <prob>", "Probability to terminate during sampling")
         	, new Pair<>("-congr", "Use congruence-based algorithm for inclusion checking")
+        	, new Pair<>("-sim", "Use simulation in congruence-based algorithm")
 //        	, new Pair<>("-f <ltl>", "Convert LTL to limit deterministic BA")
 //        	, new Pair<>("-fdfa", "FDFA as the learning target")
 //        	, new Pair<>("-nba", "NBA as the learning target")

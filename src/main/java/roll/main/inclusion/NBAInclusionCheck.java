@@ -32,8 +32,10 @@ import roll.learner.nba.lomega.UtilLOmega;
 import roll.learner.nba.lomega.translator.Translator;
 import roll.learner.nba.lomega.translator.TranslatorFDFAUnder;
 import roll.main.Options;
+import roll.main.complement.IsIncluded;
 import roll.main.complement.UtilComplement;
 import roll.main.inclusion.congr.CongruenceSimulation;
+import roll.main.inclusion.congr.ParallelCongruenceSimulation;
 import roll.oracle.nba.sampler.SamplerIndexedMonteCarlo;
 import roll.parser.PairParser;
 import roll.parser.UtilParser;
@@ -223,7 +225,12 @@ public class NBAInclusionCheck {
         
         if(options.congruence) {
         	options.log.println("Start using congruence-based algorithm to prove inclusion...");
-        	CongruenceSimulation congrSim = new CongruenceSimulation(A, B);
+        	IsIncluded congrSim = null;
+        	if(options.parallel) {
+        		congrSim = new ParallelCongruenceSimulation(A, B, options);
+        	}else {
+        		congrSim = new CongruenceSimulation(A, B, options);
+        	}
         	boolean isIncluded = congrSim.isIncluded();
         	if (isIncluded) {
                 options.log.print("Included\n");
