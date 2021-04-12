@@ -16,7 +16,12 @@
 
 package roll.automata;
 
+import java.util.List;
+
 import roll.automata.operations.NBAOperations;
+import roll.automata.operations.TarjanSCCsNonrecursive;
+import roll.util.sets.ISet;
+import roll.util.sets.UtilISet;
 import roll.words.Word;
 
 /**
@@ -37,6 +42,27 @@ public class AcceptNBA extends AcceptNFA {
     @Override
     public boolean accept(Word word) {
         throw new UnsupportedOperationException("The input word is a finite word");
+    }
+    
+    public void minimizeFinalSet() {
+    	ISet inits = UtilISet.newISet();
+    	inits.set(nfa.getInitialState());
+    	TarjanSCCsNonrecursive tarjan = new TarjanSCCsNonrecursive((NBA)nfa, inits);
+    	List<ISet> msccs = tarjan.getSCCs(); // scc that has state with self-loop or with multiple states
+    	ISet mayStates = UtilISet.newISet();
+    	System.out.println("The number of maximal SCC in automaton: " + msccs.size());
+    	for(ISet scc : msccs) {
+    		mayStates.or(scc);
+    	}
+    	ISet rmStates = nfa.getFinalStates();
+    	for(int q : rmStates) {
+    		if(!mayStates.get(q)) {
+    			// remove final states that are not in an SCC
+    			nfa.clearFinal(q);
+    		}
+    	}
+    	System.out.println("The number of accepting states in automaton: " + nfa.getFinalSize());
+    	// now remove those states that must reach itself via another final state
     }
 
 }
