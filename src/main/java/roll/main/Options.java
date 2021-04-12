@@ -64,6 +64,8 @@ public class Options {
     // only noninclusion
     public boolean nonIncusion = false;
     
+    public boolean onlyCongr = false;
+    
     // search method for counterexample
     public boolean binarySearch = false;
     
@@ -248,8 +250,8 @@ public class Options {
         builder.append("inputfile=" + inputFile + ",");
         builder.append("outputfile=" + outputFile + ",");
         builder.append("outputA=" + outputA + ",");
-        builder.append("outputB=" + outputB + "\n");
-        builder.append("congruence=" + congruence + "\n");
+        builder.append("outputB=" + outputB + ",");
+        builder.append("congruence=" + congruence + ",");
         builder.append("simulation=" + simulation + "\n");
         return builder.toString();
     }

@@ -44,6 +44,7 @@ public class CLParser {
     private static final String COMPLEMENT = "complement";
     private static final String INCLUDE = "include";
     private static final String INCLUDE2 = "include2";
+    private static final String INCLUDE3 = "include3";
     private static final String SAMPEQ = "sameq";
     private static final String HELP = "help";
     private static final String TRANSLATE = "translate";
@@ -134,7 +135,7 @@ public class CLParser {
                 options.runningMode = Options.RunningMode.COMPLEMENTING;
                 continue;
             }
-            if(args[i].compareTo(INCLUDE) == 0) {
+            if(args[i].compareTo(INCLUDE) == 0 || args[i].compareTo(INCLUDE3) == 0) {
                 options.runningMode = Options.RunningMode.INCLUDING;
                 if(i + 2 >= args.length) {
                     throw new UnsupportedOperationException("include should be followed by two files");
@@ -148,6 +149,7 @@ public class CLParser {
                 }else {
                     throw new UnsupportedOperationException("Unsupported input format");
                 }
+                options.onlyCongr = (args[i].compareTo(INCLUDE3) == 0);
                 i += 2;
                 continue;
             }
@@ -398,6 +400,7 @@ public class CLParser {
         options.log.println("", indent + 4, "e - the probability that the result is not correct");
         options.log.println("", indent + 4, "d - the probability of the confidence for the check");
         options.log.println("", indent + 4, "k - the maximum number of visits allowed for a state");
+        options.log.println(INCLUDE3 + " <A> <B>", indent, "Congruence-based algorithm to prove checking inclusion between A and B");
         options.log.println(TRANSLATE + " <ltl>", indent, "Learning the BA specified by the input LTL formula");
 
         options.log.println(HELP, indent, "Show help page, same as the -h option");

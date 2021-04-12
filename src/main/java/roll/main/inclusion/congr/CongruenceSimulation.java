@@ -20,19 +20,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.TreeSet;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import roll.automata.AcceptNBA;
 import roll.automata.NBA;
 import roll.automata.StateNFA;
 import roll.automata.operations.NBALasso;
 import roll.automata.operations.NBAOperations;
 import roll.automata.operations.StateContainer;
 import roll.automata.operations.TarjanSCCsNonrecursive;
-import roll.automata.operations.nba.inclusion.NBAInclusionCheckTool;
 import roll.main.Options;
 import roll.main.complement.IsIncluded;
 import roll.main.inclusion.run.SuccessorInfo;
@@ -108,9 +107,10 @@ public class CongruenceSimulation implements IsIncluded {
 
 	HashMap<Pair<Integer, TreeSet<IntBoolTriple>>, Word> periodWordMap;
 
-	boolean useSimulation = true;
+	boolean useSimulationAB = false;
+	boolean useSimulation = false;
 	boolean fwSimB[][]; // forward simulation on B
-	boolean fwSimA[][]; // forward simulation on A
+	boolean fwSimA[][]; // forward simulation on A, didn't use this one
 	boolean fwSimAB[][]; // simulation between A and B
 	
 	Options options;
@@ -156,7 +156,8 @@ public class CongruenceSimulation implements IsIncluded {
 			}
 		}
 		periodSim = new TIntObjectHashMap<>();
-		
+		this.useSimulation = options.simulation;
+		this.useSimulationAB = options.simulation;
 		if (options.minimization) {
 			useSimulation = true;
 			minimizePrefix = true;
@@ -491,7 +492,7 @@ public class CongruenceSimulation implements IsIncluded {
 
 	// the Input simulatedStatesInB can simulate accState
 	@SuppressWarnings("unchecked")
-	public void computePeriodSimulation(int accState, ISet simulatedStatesInB, ISet bReachSet) {
+	public void computePeriodSimulation(int accState, ISet simulatedStatesInB) {
 		if (computeCounterexample) {
 			this.periodWordMap = new HashMap<>();
 		}
@@ -770,10 +771,11 @@ public class CongruenceSimulation implements IsIncluded {
 
 	@Override
 	public Boolean isIncluded() {
-		if (useSimulation) {
+		if (useSimulationAB) {
 //			fwSimA = Simulation.computeForwardSimilation(A, aStates);
 			fwSimAB = Simulation.computeForwardSimulation(A, B);
 		} else {
+//			System.out.println("Hello");
 			int num = A.getStateSize() + B.getStateSize();
 			fwSimAB = new boolean[num][num];
 			for (int s = 0; s < num; s++) {
@@ -789,6 +791,7 @@ public class CongruenceSimulation implements IsIncluded {
 		if(useSimulation) {
 			fwSimB = Simulation.computeForwardSimilation(B, bStates);
 		}else {
+//			System.out.println("Hello");
 			fwSimB = new boolean[B.getStateSize()][B.getStateSize()];
 			for (int s = 0; s < B.getStateSize(); s++) {
 				for (int t = 0; t < B.getStateSize(); t++) {
@@ -803,6 +806,7 @@ public class CongruenceSimulation implements IsIncluded {
 //		LinkedList<Pair<HashSet<ISet>, HashSet<TreeSet<IntBoolTriple>>>> antichainFinals = new LinkedList<>();
 		long timeForAcceptance = 0;
 		TIntObjectMap<HashSet<ISet>> finalsSim = new TIntObjectHashMap<>();
+//		ISet bFinals = B.getFinalStates();
 		for (int accState : A.getFinalStates()) {
 			countStates++;
 			options.log.println("Checking for " + countStates + "-th accepting state " + accState + " out of "
@@ -826,31 +830,12 @@ public class CongruenceSimulation implements IsIncluded {
 			// outputPrefixSimulation();
 //			System.exit(-1);
 			// obtain the necessary part for accState
-			HashSet<ISet> prefSims = prefSim.get(accState);
-			System.out.println("Acc simulated sets: " + prefSims);
-			if (prefSims.isEmpty()) {
+			// we assume that prefSims is already computed under subsumption relation
+			HashSet<ISet> antichainPrefix = prefSim.get(accState);
+//			System.out.println("Acc simulated sets: " + antichainPrefix);
+			if (antichainPrefix.isEmpty()) {
 				// any word that reaches accState can be simulated by B
 				continue;
-			}
-			// only keep the sets that are subset of another
-			HashSet<ISet> antichainPrefix = new HashSet<>();
-			// compute antichain
-			for (ISet sim1 : prefSims) {
-				boolean subsumes = false;
-				for (ISet sim2 : prefSims) {
-					// ignore itself
-					if (sim1 == sim2)
-						continue;
-					// only keep those that do not subsume others
-					if (sim2.subsetOf(sim1)) {
-						subsumes = true;
-						break;
-					}
-				}
-				if (!subsumes) {
-					// not subsume others
-					antichainPrefix.add(sim1);
-				}
 			}
 			finalsSim.put(accState, antichainPrefix);
 			ISet simulatedStatesInB = UtilISet.newISet();
@@ -872,31 +857,24 @@ public class CongruenceSimulation implements IsIncluded {
 			if (debug)
 				System.out.println("Necessary states for B: " + simulatedStatesInB);
 			// now we compute the simulation for periods from accState
-//			System.out.println("pref rep: " + antichainPrefix + " -> " + simulatedStatesInB);
-//			TarjanSCCs sccs = new TarjanSCCs(B, simulatedStatesInB);
-			ISet allowSccs = UtilISet.newISet();
-			ISet bFinals = B.getFinalStates();
-//			System.out.println("Final states: " + bFinals);
-//			for(ISet scc : sccs.getSCCs()) {
-//				System.out.println("SCC: " + scc);
-//				if(scc.overlap(simulatedStatesInB) && scc.overlap(bFinals)) {
-//					allowSccs.or(scc);
-//				}
-//			}
-//			System.out.println("Nonrecursive: ");
-//			TarjanSCCsNonrecursive sccNonrecur = new TarjanSCCsNonrecursive(B, simulatedStatesInB);;
-//			for(ISet scc : sccNonrecur.getSCCs()) {
-//				System.out.println("SCC: " + scc);
-//				if(scc.overlap(simulatedStatesInB) && scc.overlap(bFinals)) {
-//					System.out.println("SCC 2: " + scc);
-//				}
-//			}
+			TarjanSCCsNonrecursive sccNonrecur = new TarjanSCCsNonrecursive(B, simulatedStatesInB);
+			// remove must states and test mayStates
+			ISet mayStates = UtilISet.newISet();
+			for(ISet scc : sccNonrecur.getSCCs()) {
+//				if(scc.overlap(bFinals))
+					mayStates.or(scc);
+			}
+			if (debug)
+				System.out.println("May states in B for accState in SCC: " + mayStates);
+//			mayStates.and(simulatedStates);
+			if (debug)
+				System.out.println("May states in B for accState: " + mayStates);
 //			System.out.println("pre scc: " + simulatedStatesInB);
 //			System.out.println("allow scc: " + allowSccs);
-//			simulatedStatesInB.and(allowSccs);
-//			if(debug) System.out.println("simulated states in B: " + simulatedStatesInB);
+			simulatedStatesInB.or(mayStates);
+			if(debug) System.out.println("simulated states in B: " + simulatedStatesInB);
 //			System.out.println("Final states: " + B.getFinalStates());
-			computePeriodSimulation(accState, simulatedStatesInB, allowSccs);
+			computePeriodSimulation(accState, simulatedStatesInB);
 			// now decide whether there is one word accepted by A but not B
 			System.out.println("Deciding the language inclusion between L(A^i_f) (A^f_f)^w and L(B) ...");
 			Timer timer = new Timer();
@@ -905,22 +883,8 @@ public class CongruenceSimulation implements IsIncluded {
 				if (debug)
 					System.out.println("Simulated set in B: " + pref);
 				// computePeriodSimulation(accState, pref);
-				// compute antichain
-				HashSet<TreeSet<IntBoolTriple>> antichainPeriod = new HashSet<>();
-				for (TreeSet<IntBoolTriple> period1 : periodSim.get(accState)) {
-					boolean subsumes = false;
-					for (TreeSet<IntBoolTriple> period2 : periodSim.get(accState)) {
-						if (period1 == period2)
-							continue;
-						if (period1.containsAll(period2)) {
-							subsumes = true;
-							break;
-						}
-					}
-					if (!subsumes) {
-						antichainPeriod.add(period1);
-					}
-				}
+				// computed set is already under subsumption relation
+				HashSet<TreeSet<IntBoolTriple>> antichainPeriod = periodSim.get(accState);
 				if (antichainPeriod.contains(new TreeSet<>())) {
 					// empty means some word from accState to itself cannot be simulated
 					computeCounterexamplePeriod(accState, pref, necessaryStates);
@@ -940,7 +904,7 @@ public class CongruenceSimulation implements IsIncluded {
 			}
 			timer.stop();
 			timeForAcceptance += timer.getTimeElapsed();
-			System.out.println("Move on to next accepting state...");
+//			System.out.println("Move on to next accepting state...");
 //			antichainFinals.add(new Pair(prefSim.get(accState), periodSim.get(accState)));
 		}
 		System.out.println("Time for deciding acceptance: " + timeForAcceptance);
@@ -1224,6 +1188,10 @@ public class CongruenceSimulation implements IsIncluded {
 		NBA A = pairParser.getA();
 		NBA B = pairParser.getB();
 		System.out.println("#A = " + A.getStateSize() + ", #B = " + B.getStateSize());
+		System.out.println("#AF = " + A.getFinalSize() + ", #BF = " + B.getFinalSize());
+		AcceptNBA acc = (AcceptNBA) A.getAcc();
+		acc.minimizeFinalSet();
+		System.out.println("#AF = " + A.getFinalSize() + ", #BF = " + B.getFinalSize());
 		Timer timer = new Timer();
 		timer.start();
 
@@ -1232,8 +1200,9 @@ public class CongruenceSimulation implements IsIncluded {
 		sim.computeCounterexample = true;
 		sim.debug = false;
 		sim.useSimulation = true;
-		sim.minimizePrefix = true;
+		sim.minimizePrefix = false;
 		sim.minimizePeriod = false;
+		sim.useSimulationAB = false;
 
 		boolean included = sim.isIncluded();
 		System.out.println(included ? "Included" : "Not included");

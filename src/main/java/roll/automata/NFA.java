@@ -77,6 +77,10 @@ public class NFA implements Acceptor {
         return initialState;
     }
     
+    public int getFinalSize() {
+    	return finalStates.cardinality();
+    }
+    
     public ISet getFinalStates() {
         return finalStates.clone();
     }
@@ -123,6 +127,11 @@ public class NFA implements Acceptor {
     public void setFinal(int state) {
         assert checkValidState(state);
         finalStates.set(state);
+    }
+    
+    public void clearFinal(int state) {
+    	assert checkValidState(state);
+    	finalStates.clear(state);
     }
     
     // -------------------------------------------

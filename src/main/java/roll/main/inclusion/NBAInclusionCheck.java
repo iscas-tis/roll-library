@@ -22,6 +22,7 @@ import algorithms.Simulation;
 import automata.FAState;
 import automata.FiniteAutomaton;
 import oracle.EmptinessChecker;
+import roll.automata.AcceptNBA;
 import roll.automata.NBA;
 import roll.automata.operations.NBAEmptinessCheck;
 import roll.automata.operations.NBALasso;
@@ -66,6 +67,25 @@ public class NBAInclusionCheck {
         parser.print(lasso.getNBA(), options.log.getOutputStream());
     }
     
+    protected static void callCongruenceSimulation(Timer timer, Options options, PairParser parser, NBA A, NBA B) {
+    	options.log.println("Start using congruence-based algorithm to prove inclusion...");
+    	IsIncluded congrSim = null;
+    	if(options.parallel) {
+    		congrSim = new ParallelCongruenceSimulation(A, B, options);
+    	}else {
+    		congrSim = new CongruenceSimulation(A, B, options);
+    	}
+    	boolean isIncluded = congrSim.isIncluded();
+    	if (isIncluded) {
+            options.log.print("Included\n");
+        }else {
+        	Pair<Word, Word> counterexample = congrSim.getCounterexample();
+        	printCounterexample(options, parser, counterexample);
+        }
+    	timer.stop();
+    	options.log.println("Total checking time: " + timer.getTimeElapsed() / 1000.0 + " secs");
+    }
+    
     public static void execute(Options options) {
     	
     	if(! options.nonIncusion) {
@@ -86,6 +106,12 @@ public class NBAInclusionCheck {
         int transB = NFAOperations.getNumberOfTransitions(B);
         options.log.println("Aut A : # of Trans. "+ transA +", # of States "+ A.getStateSize() + ".");
         options.log.println("Aut B : # of Trans. "+ transB +", # of States "+ B.getStateSize() +".");
+        if(options.onlyCongr) {
+        	AcceptNBA accNBA = (AcceptNBA) A.getAcc();
+        	accNBA.minimizeFinalSet();
+        	callCongruenceSimulation(timer, options, parser, A, B);
+        	System.exit(0);
+        }
         A = NBAOperations.removeDeadStates(A);
         B = NBAOperations.removeDeadStates(B);
         // convert to NBA in RABIT
@@ -224,23 +250,8 @@ public class NBAInclusionCheck {
 //        }
         
         if(options.congruence) {
-        	options.log.println("Start using congruence-based algorithm to prove inclusion...");
-        	IsIncluded congrSim = null;
-        	if(options.parallel) {
-        		congrSim = new ParallelCongruenceSimulation(A, B, options);
-        	}else {
-        		congrSim = new CongruenceSimulation(A, B, options);
-        	}
-        	boolean isIncluded = congrSim.isIncluded();
-        	if (isIncluded) {
-                options.log.print("Included\n");
-            }else {
-            	Pair<Word, Word> counterexample = congrSim.getCounterexample();
-            	printCounterexample(options, parser, counterexample);
-            }
-        	timer.stop();
-        	options.log.println("Total checking time: " + timer.getTimeElapsed() / 1000.0 + " secs");
-            System.exit(0);
+        	callCongruenceSimulation(timer, options, parser, A, B);
+        	System.exit(0);
         }else {
         	options.log.println("Start using learning algorithm to prove inclusion...");
             // learning algorithm

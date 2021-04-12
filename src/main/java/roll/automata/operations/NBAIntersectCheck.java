@@ -216,7 +216,7 @@ public class NBAIntersectCheck {
                         } while (tjNode != succNode);
             			if((scc.cardinality() > 1 || hasLoop[tjNode]) && fstAcc && sndAcc) {
             				empty = false;
-            				System.out.println("fstAcc = " + fstAcc + " sndAcc = " + sndAcc);
+//            				System.out.println("fstAcc = " + fstAcc + " sndAcc = " + sndAcc);
             				return;
             			}
                     }
