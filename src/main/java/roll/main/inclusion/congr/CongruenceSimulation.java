@@ -158,6 +158,7 @@ public class CongruenceSimulation implements IsIncluded {
 		periodSim = new TIntObjectHashMap<>();
 		this.useSimulation = options.simulation;
 		this.useSimulationAB = options.simulation;
+		this.minimizePrefix = options.simulation;
 		if (options.minimization) {
 			useSimulation = true;
 			minimizePrefix = true;
@@ -432,7 +433,7 @@ public class CongruenceSimulation implements IsIncluded {
 		for (IntBoolTriple fstTriple : set) {
 			boolean simulated = false;
 			for (IntBoolTriple sndTriple : update) {
-				if (fwSimB[fstTriple.getLeft()][sndTriple.getLeft()] && fwSimB[fstTriple.getRight()][sndTriple.getRight()]
+				if (fstTriple.getLeft() == sndTriple.getLeft() && fwSimB[fstTriple.getRight()][sndTriple.getRight()]
 						&& (!fstTriple.getBool() || sndTriple.getBool())) {
 					simulated = true;
 					break;
@@ -528,8 +529,10 @@ public class CongruenceSimulation implements IsIncluded {
 					if (!reachSet.get(t))
 						continue;
 					// add to worklist
-					workList.add(t);
-					inWorkList.set(t);
+					if(! inWorkList.get(t)) {
+						workList.add(t);
+						inWorkList.set(t);
+					}
 					// compute the simulation relations
 					TreeSet<IntBoolTriple> set = new TreeSet<>();
 					// s - a -> t
@@ -545,17 +548,6 @@ public class CongruenceSimulation implements IsIncluded {
 								addTriple(set, tpl);
 							}
 						}
-					}
-					boolean isFwSimulated = false;
-					for (IntBoolTriple tr : set) {
-						if (fwSimAB[t][tr.getRight() + A.getStateSize()]) {
-							isFwSimulated = true;
-							break;
-						}
-					}
-					if (isFwSimulated) {
-						System.out.println("Ignore state the set " + set + " for " + t);
-						continue;
 					}
 					if (debug)
 						System.out.println(t + " AccTriple " + set);
@@ -639,17 +631,6 @@ public class CongruenceSimulation implements IsIncluded {
 									addTriple(update, newTriple);
 								}
 							}
-						}
-						boolean isFwSimulated = false;
-						for (IntBoolTriple tr : update) {
-							if (fwSimAB[t][tr.getRight() + A.getStateSize()]) {
-								isFwSimulated = true;
-								break;
-							}
-						}
-						if (isFwSimulated) {
-							System.out.println("Ignore state the set " + update + " for " + t);
-							continue;
 						}
 						// we have extended for set
 						if (!containTriples(periodSim.get(t), update)) {
@@ -1198,10 +1179,10 @@ public class CongruenceSimulation implements IsIncluded {
 		CongruenceSimulation sim = new CongruenceSimulation(A, B, options);
 		sim.antichain = true;
 		sim.computeCounterexample = true;
-		sim.debug = false;
+		sim.debug = true;
 		sim.useSimulation = true;
-		sim.minimizePrefix = true;
-		sim.minimizePeriod = true;
+		sim.minimizePrefix = false;
+		sim.minimizePeriod = false;
 		sim.useSimulationAB = true;
 
 		boolean included = sim.isIncluded();
