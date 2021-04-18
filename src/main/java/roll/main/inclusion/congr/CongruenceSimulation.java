@@ -1200,9 +1200,9 @@ public class CongruenceSimulation implements IsIncluded {
 		sim.computeCounterexample = true;
 		sim.debug = false;
 		sim.useSimulation = true;
-		sim.minimizePrefix = false;
-		sim.minimizePeriod = false;
-		sim.useSimulationAB = false;
+		sim.minimizePrefix = true;
+		sim.minimizePeriod = true;
+		sim.useSimulationAB = true;
 
 		boolean included = sim.isIncluded();
 		System.out.println(included ? "Included" : "Not included");

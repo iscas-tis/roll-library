@@ -94,6 +94,10 @@ public class Options {
     public boolean simulation = false;
     // minimize graphs
     public boolean minimization = false;
+    
+    // NCSB complementation
+    public boolean lazyS = true;
+    public boolean lazyB = true;
 
     // use the complement teacher to learn the target BA
     public boolean reverse = false;
