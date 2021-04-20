@@ -74,6 +74,11 @@ public class IntBoolTriple implements Comparable<IntBoolTriple> {
 		int rBool = other.acc ? 1 : 0;
 		return lBool - rBool;
 	}
+	
+	@Override
+	public int hashCode() {
+		return left * 31 + right + (this.acc ? 1 : 0);
+	}
 
 }
 

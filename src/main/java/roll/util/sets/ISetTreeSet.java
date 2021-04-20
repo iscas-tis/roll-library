@@ -115,8 +115,9 @@ public class ISetTreeSet implements ISet {
 
 	@Override
 	public boolean contentEq(ISet set) {
+		if(set == null) return false;
 		if(! (set instanceof ISetTreeSet)) {
-		    throw new UnsupportedOperationException("OPERAND should be TreeSet");
+		    throw new UnsupportedOperationException("OPERAND should be TreeSet : " + set.getClass());
 		}
 		ISetTreeSet temp = (ISetTreeSet)set;
 		return this.mSet.equals(temp.mSet);
@@ -128,6 +129,7 @@ public class ISetTreeSet implements ISet {
 	}
 	
 	public boolean equals(Object obj) {
+		if(obj == null) return false;
 		if(! (obj instanceof ISetTreeSet)) {
 		    throw new UnsupportedOperationException("OPERAND should be TreeSet");
 		}

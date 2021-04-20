@@ -16,6 +16,10 @@
 
 package roll.automata;
 
+import java.util.LinkedList;
+
+import roll.util.sets.ISet;
+import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
 
 /**
@@ -31,6 +35,31 @@ public class NBA extends NFA {
     @Override
     public AutType getAccType() {
         return AutType.NBA;
+    }
+    
+    public void explore() {
+        LinkedList<StateNFA> walkList = new LinkedList<>();
+        walkList.add(this.getState(this.getInitialState()));
+        explore(walkList);
+    }
+    
+    public void explore(LinkedList<StateNFA> walkList) {
+    	ISet visited = UtilISet.newISet();
+
+        while (!walkList.isEmpty()) {
+            StateNFA s = walkList.remove();
+            if (visited.get(s.getId()))
+                continue;
+            visited.set(s.getId());
+
+            for (int letter = 0; letter < this.getAlphabetSize(); letter++) {
+                for(int succ : s.getSuccessors(letter)) {
+                    if (!visited.get(succ)) {
+                        walkList.addFirst(this.getState(succ));
+                    }
+                }
+            }
+        }
     }
 
 }

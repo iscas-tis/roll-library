@@ -1,6 +1,7 @@
 
 New in ROLL v1.1 (2021-03-25)
 	* Add new inclusion checking algorithm for B\"uchi automata based on novel congruence relations and simulation relations
+	* Add Kushan's complementation algorithm for determinisitic B\"uchi automata and NCSB complementation algorithm for limit deterministic B\"uchi automata
 
 New in ROLL v1.0
 	* Modular design for adding new learning algorithms
