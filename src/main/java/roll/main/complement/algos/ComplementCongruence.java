@@ -17,6 +17,7 @@ import roll.automata.StateNFA;
 import roll.automata.operations.FDFAOperations;
 import roll.automata.operations.NBAOperations;
 import roll.automata.operations.TarjanSCCsNonrecursive;
+import roll.learner.nba.ldollar.UtilNBALDollar;
 import roll.main.Options;
 import roll.main.complement.Complement;
 import roll.main.inclusion.congr.IntBoolTriple;
@@ -45,6 +46,7 @@ public class ComplementCongruence extends Complement {
 		this.setInitial(state.getId());
 	}
 	
+	@Override
 	public NBA getResult() {
 		if(result == null) {
 			this.explore();
@@ -136,6 +138,7 @@ public class ComplementCongruence extends Complement {
 		super.explore(walkList);
 		for (int i = 0; i < leadingDFA.getStateSize(); i++) {
 			DFACongruence proDFA = proDFAs.get(i);
+			proDFA.computeInitialState();
 			if (sccStates.get(i)) {
 				// first the transitions for initial state
 				TIntIntMap map = new TIntIntHashMap();
@@ -162,31 +165,41 @@ public class ComplementCongruence extends Complement {
 						}
 					}
 				}
-				// check accepting states
-				if(proDFA.getFinalSize() <= 0) {
-					proDFAs.set(i, new DFACongruence(operand, walkListArr.get(i).congrClass));
+			}
+			// check accepting states
+			if(proDFA.getFinalSize() <= 0 || !sccStates.get(i)) {
+				proDFAs.set(i, new DFACongruence(operand, walkListArr.get(i).congrClass));
+				proDFAs.get(i).computeInitialState();
+				for(int letter = 0; letter < this.getAlphabetSize(); letter ++) {
+					proDFAs.get(i).getState(0).addTransition(letter, 0);
 				}
 			}
-			proDFAs.get(i).setInitial(0);
-			System.out.println(proDFA.toBA());
+			//proDFAs.get(i).setInitial(0);
+			System.out.println("proDRFA: " + i + "\n" + proDFAs.get(i).toBA());
 		}
 		// now we have an FDFA
 		ArrayList<DFA> castDFAs = new ArrayList<>();
 		for(int i = 0; i < leadingDFA.getStateSize(); i ++) {
 			castDFAs.add(proDFAs.get(i));
 		}
-		System.out.println("leading DFA size: " + leadingDFA.getStateSize());
+		System.out.println("leading DFA size: " + leadingDFA.getStateSize() + " progress Size " + castDFAs.size() );
 		FDFA fdfa = new FDFA(leadingDFA, castDFAs);
 		ArrayList<String> apList = new ArrayList<>();
-		apList.add("a");
-		apList.add("b");
-		System.out.println(fdfa.toString(apList));
+		for(int c = 0; c < this.getAlphabetSize(); c ++) {
+			apList.add("a" + c);
+		}
+		//System.out.println(fdfa.toString(apList));
 		Automaton dkNBA = FDFAOperations.buildUnderNBA(fdfa);
 		this.result = NBAOperations.fromDkNBA(dkNBA, getAlphabet());
 		System.out.println(result.toBA());
 		ComplementNcsbOtf comp = new ComplementNcsbOtf(new Options(), operand);
 		comp.explore();
 		System.out.println(comp.toBA());
+		dkNBA = FDFAOperations.buildDOne(fdfa);
+		dkNBA.minimize();
+		dkNBA = UtilNBALDollar.dkDFAToBuchi(dkNBA);
+		NBA minimizedNBA = NBAOperations.fromDkNBA(dkNBA, getAlphabet());
+		System.out.println(minimizedNBA.toBA());
 	}
 
 	public static void main(String[] args) {

@@ -36,7 +36,6 @@ public class DFACongruence extends DFA {
 	protected void computeInitialState() {
 		// map from global index to local index
 		StateDFA state = this.getOrAddState(initCongrCls);
-		
 		this.setInitial(state.getId());
 	}
 	
