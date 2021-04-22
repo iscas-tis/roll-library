@@ -17,6 +17,8 @@
 package roll.automata;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import roll.jupyter.NativeTool;
@@ -132,8 +134,36 @@ public class NFA implements Acceptor {
         return state;
     }
     
+    protected int addState(StateNFA state) {
+    	int id = states.size();
+    	states.add(state);
+    	return id;
+    }
+    
     protected StateNFA makeState(int index) {
         return new StateNFA(this, index);
+    }
+    
+    public void makeComplete() {
+        StateNFA deadState = null;
+        List<StateNFA> states = new ArrayList<>();
+        for(int s = 0; s < this.getStateSize(); s ++) {
+            states.add(getState(s));
+        }
+        for(final StateNFA state : states) {
+            for (int letter = 0; letter < getAlphabetSize(); letter ++) {
+                ISet succs = state.getSuccessors(letter);
+                if(succs.cardinality() == 0) {
+                    if(deadState == null) deadState = createState();
+                    state.addTransition(letter, deadState.getId());
+                }
+            }
+        }
+        if(deadState != null) {
+            for (int letter = 0; letter < getAlphabetSize(); letter ++) {
+                deadState.addTransition(letter, deadState.getId());
+            }
+        }
     }
     
     // -------------------------------------------
@@ -152,6 +182,65 @@ public class NFA implements Acceptor {
     
     protected boolean checkValidLetter(int letter) {
         return letter >= 0 && letter < getAlphabetSize();
+    }
+    
+    public boolean isLimitdeterministic() {
+        ISet finIds = getFinalStates();
+        LinkedList<StateNFA> workList = new LinkedList<>();
+        
+        // add final states to list
+        for(final int fin : finIds) {
+            workList.addFirst(getState(fin));
+        }
+        
+        ISet visited = UtilISet.newISet();
+        while(! workList.isEmpty()) {
+        	StateNFA s = workList.remove();
+            if(visited.get(s.getId())) continue;
+            visited.set(s.getId());
+            for(int i = 0; i < getAlphabetSize(); i ++) {
+                ISet succs = s.getSuccessors(i);
+                if(succs.isEmpty()) continue;
+                if(succs.cardinality() > 1) {
+                    return false;
+                }
+                for(final int succ : succs) {
+                    if(! visited.get(succ)) {
+                        workList.addFirst(getState(succ));
+                    }
+                }                
+            }
+        }
+        return true;
+    }
+    
+    public boolean isDeterministic(int state) {
+        LinkedList<StateNFA> workList = new LinkedList<>();
+        workList.addFirst(getState(state));
+        
+        ISet visited = UtilISet.newISet();
+        while(! workList.isEmpty()) {
+        	StateNFA s = workList.remove();
+            if(visited.get(s.getId())) continue;
+            visited.set(s.getId());
+            for(int i = 0; i < getAlphabetSize(); i ++) {
+                ISet succs = s.getSuccessors(i);
+                if(succs.cardinality() > 1) return false;
+                if(succs.isEmpty()) continue;
+                Iterator<Integer> iter = succs.iterator();
+                int succ = iter.next();
+                if(! visited.get(succ)) {
+                    workList.addFirst(getState(succ));
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    public boolean isDeterministic() {
+        int init = this.getInitialState();
+        return isDeterministic(init);
     }
 
     

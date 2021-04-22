@@ -32,9 +32,9 @@ import roll.util.sets.UtilISet;
 
 public class StateNFA {
     
-    private final int id;
-    private final NFA nfa;
-    private final TIntObjectMap<ISet> successors; // Alphabet -> 2^Q
+    protected final int id;
+    protected final NFA nfa;
+    protected final TIntObjectMap<ISet> successors; // Alphabet -> 2^Q
     
     public StateNFA(final NFA fa, final int id) {
         assert fa != null;

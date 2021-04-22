@@ -16,13 +16,16 @@
 
 package roll.automata.operations;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Stack;
 
+import gnu.trove.map.TIntCharMap;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntCharHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import roll.automata.NBA;
@@ -90,30 +93,32 @@ public class NBAIntersectCheck {
     	private final ISet tjInStack;
     	private final TIntIntMap tjDfsMap ; // index
     	private final TIntIntMap tjLowlinkMap; // lowlink
-        private final int[] tjCallNodeStack;
-        private int[] tjCallSuccStack;
+//        private final int[] tjCallNodeStack;
+//        private int[] tjCallSuccStack;
         private int tjCallStackIndex = -1;
         private int tjSuccIter;
         private int tjMaxdfs;
+        private Stack<Integer> tjCallSuccStack;
+        private Stack<Integer> tjCallNodeStack;
     	private final Stack<Integer> tjStack;
         private TIntObjectMap<int[]> tjSuccMap;
-        private ProductState[] prodArr;
+        private ArrayList<ProductState> prodArr;
         
         private Map<ProductState, ProductState> map;
         
-    	private boolean[] hasLoop;
+    	private ISet hasLoop;
 
     	    
     	public TarjanExplore() {
     		int size = fstOp.getStateSize() * sndOp.getStateSize();
 //    		this.automaton = aut;
-            this.hasLoop = new boolean[size];
-            this.prodArr = new ProductState[size];
+            this.hasLoop = UtilISet.newISet();
+            this.prodArr = new ArrayList<ProductState>();
             this.tjStack = new Stack<>();
             this.tjLowlinkMap = new TIntIntHashMap();
             this.tjDfsMap   = new TIntIntHashMap();
-            this.tjCallNodeStack = new int[size];
-            this.tjCallSuccStack = new int[size];
+            this.tjCallNodeStack = new Stack<>();
+            this.tjCallSuccStack = new Stack<>();
             this.tjSuccMap = new TIntObjectHashMap<>();
             this.tjInStack = UtilISet.newISet();
             this.tjMaxdfs = 0;
@@ -127,7 +132,10 @@ public class NBAIntersectCheck {
                 return map.get(prod);
             }
             prod.resState = numStates;
-            prodArr[numStates] = prod;
+            while(prodArr.size() <= numStates) {
+            	prodArr.add(null);
+            }
+            prodArr.add(numStates, prod);
             map.put(prod, prod);
             ++ numStates;
             return prod;
@@ -154,7 +162,7 @@ public class NBAIntersectCheck {
 
             while (tjCallStackIndex >= 0) {
             	// needs to compute the sucessor of tjNode
-            	ProductState currProd = this.prodArr[tjNode];
+            	ProductState currProd = this.prodArr.get(tjNode);
             	assert(tjNode == currProd.resState);
             	if(! this.tjSuccMap.containsKey(currProd.resState)) {
             		HashSet<ProductState> succs = new HashSet<>();
@@ -164,7 +172,7 @@ public class NBAIntersectCheck {
                             	ProductState succ = getOrAddState(fstSucc, sndSucc);
                             	succs.add(succ);
                             	if(currProd.resState == succ.resState) {
-                            		this.hasLoop[currProd.resState] = true;
+                            		this.hasLoop.set(currProd.resState);
                             	}
                             }
                         }
@@ -185,8 +193,10 @@ public class NBAIntersectCheck {
     				// did not visit succNode before
     				if (!tjDfsMap.containsKey(succNode)) {
     					// first, put node and tjSuccIter for return
-    					tjCallNodeStack[tjCallStackIndex] = tjNode;
-    					tjCallSuccStack[tjCallStackIndex] = tjSuccIter;
+    					System.out.println("CallStackIndex = " + tjCallStackIndex);
+    					System.out.println("arr length = " + tjCallNodeStack.size());
+    					tjCallNodeStack.push(tjNode);
+    					tjCallSuccStack.push(tjSuccIter);
     					tjCallStackIndex++; // stack size
     					// jump to succNode
     					tjNode = succNode;
@@ -210,11 +220,11 @@ public class NBAIntersectCheck {
                             succNode = tjStack.pop();
                             tjInStack.clear(succNode);
                             scc.set(succNode);
-                            ProductState prod = this.prodArr[succNode];
+                            ProductState prod = this.prodArr.get(succNode);
                             fstAcc = fstAcc || fstOp.isFinal(prod.fstState);
                             sndAcc = sndAcc || sndOp.isFinal(prod.sndState);
                         } while (tjNode != succNode);
-            			if((scc.cardinality() > 1 || hasLoop[tjNode]) && fstAcc && sndAcc) {
+            			if((scc.cardinality() > 1 || hasLoop.get(tjNode)) && fstAcc && sndAcc) {
             				empty = false;
             				System.out.println("fstAcc = " + fstAcc + " sndAcc = " + sndAcc);
             				return;
@@ -225,9 +235,9 @@ public class NBAIntersectCheck {
                     // now return back to tjNode
                     if (tjCallStackIndex >= 0) {
                         int succNode = tjNode;
-                        tjNode = tjCallNodeStack[tjCallStackIndex];
+                        tjNode = tjCallNodeStack.pop();
                         // restore
-                        tjSuccIter = tjCallSuccStack[tjCallStackIndex];
+                        tjSuccIter = tjCallSuccStack.pop();
                         tjLowlinkMap.put(tjNode, Math.min(tjLowlinkMap.get(tjNode), tjLowlinkMap.get(succNode)));
                     }
                 }

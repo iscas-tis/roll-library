@@ -89,6 +89,10 @@ public class Options {
     public int numWorkers = 4;
     
     public boolean congruence = false;
+    
+    // options for NCSB complementation
+    public boolean lazyS = true;
+    public boolean lazyB = true;
 
     // use the complement teacher to learn the target BA
     public boolean reverse = false;
