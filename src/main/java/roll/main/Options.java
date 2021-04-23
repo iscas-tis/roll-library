@@ -96,7 +96,7 @@ public class Options {
     public boolean minimization = false;
     
     // NCSB complementation
-    public boolean lazyS = true;
+    public boolean lazyS = false;
     public boolean lazyB = true;
 
     // use the complement teacher to learn the target BA

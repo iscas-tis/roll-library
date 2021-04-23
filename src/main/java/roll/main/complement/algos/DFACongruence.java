@@ -62,13 +62,9 @@ public class DFACongruence extends DFA {
 				throw new RuntimeException("ComplementCongruence state index error");
 			}
 			localIndices.put(newState, localIndex);
-			if (! congrCls.isSet && congrCls.isAccepted()) {
+			if (! congrCls.isSet && congrCls.isAccepted(this.inits)) {
 				// now decide if it is subsumed by initCongr 
-				ISet reached = this.getReachSet(congrCls.level);
-				if(reached.contentEq(inits)) {
-					setFinal(localIndex);
-					System.out.println("Final: " + localIndex + " " + newState);
-				}
+				setFinal(localIndex);
 			}
 			return newState;
 		}

@@ -32,7 +32,7 @@ public class StateCongruence extends StateNFA {
 		ISet result = UtilISet.newISet();
 		if(congrClass.isSet && congrClass.guess.isEmpty()) {
 			super.addTransition(letter, this.getId());
-			System.out.println(this.getId() + ": " + this + " -> " + this.getId() + " : " + this + " > " + letter );
+//			System.out.println(this.getId() + ": " + this + " -> " + this.getId() + " : " + this + " > " + letter );
 			result.set(this.getId());
 			return result;
 		}
@@ -48,7 +48,7 @@ public class StateCongruence extends StateNFA {
 			// add one state
 			StateCongruence nextState = complement.getOrAddState(nextCongrCls);
 			super.addTransition(letter, nextState.getId());
-			System.out.println(this.getId() + ": " + this + " -> " + nextState.getId() + " : " + nextState + " > " + letter );
+//			System.out.println(this.getId() + ": " + this + " -> " + nextState.getId() + " : " + nextState + " > " + letter );
 			result.set(nextState.getId());
 		}else {
 			// now move onto level
@@ -58,7 +58,7 @@ public class StateCongruence extends StateNFA {
 			// add one state
 			StateCongruence nextState = complement.getOrAddState(nextCongrCls);
 			super.addTransition(letter, nextState.getId());
-			System.out.println(this.getId() + ": " + this + " -> " + nextState.getId() + " : " + nextState + " > " + letter);
+//			System.out.println(this.getId() + ": " + this + " -> " + nextState.getId() + " : " + nextState + " > " + letter);
 			result.set(nextState.getId());
 		}
 		return result;

@@ -87,7 +87,7 @@ public class CongruenceSimulation implements IsIncluded {
 	// only care about reachable states from q_A
 	TIntObjectMap<HashSet<TreeSet<IntBoolTriple>>> periodSim;
 
-	boolean antichain = true;
+	// antichain is used by default
 	boolean debug = false;
 
 	// counterexample (prefix, period) if exists
@@ -197,10 +197,6 @@ public class CongruenceSimulation implements IsIncluded {
 		return true;
 	}
 	
-	boolean isBisimulated(ISet set, ISet update) {
-		return isSimulated(set, update) && isSimulated(update, set);
-	}
-	
 	// keep the least one
 	boolean canAddToSet(HashSet<ISet> orig, ISet update) {
 		for(ISet set : orig) {
@@ -214,13 +210,11 @@ public class CongruenceSimulation implements IsIncluded {
 	}
 
 	// PRECONDITION: we know that update can not simulate any set in orig
-	HashSet<ISet> addSetToPrefixAntichain(HashSet<ISet> orig, ISet update, HashSet<ISet> subsetOfUpdate,
-			boolean[] changed) {
+	HashSet<ISet> addSetToPrefixAntichain(HashSet<ISet> orig, ISet update, HashSet<ISet> subsetOfUpdate) {
 		HashSet<ISet> result = new HashSet<>();
 		if(debug) System.out.println("Current set = " + orig + " update = " + update);
-		changed[0] = true;
 		// a set corresponds to a class of finite prefixes to an accepting state in A
-		// check whether there is set that can simulte update
+		// check whether there is set that can simulate update
 		for (ISet sts : orig) {
 			if (isSimulated(update, sts)) {
 				// ignore set that simulates update
@@ -260,7 +254,7 @@ public class CongruenceSimulation implements IsIncluded {
 				if (computeCounterexample) {
 					this.prefWordMap.put(new Pair<>(s, set), A.getAlphabet().getEmptyWord());
 				}
-				if(debug) {
+				if (debug) {
 					System.out.println("t = " + s + " set = " + set);
 					System.out.println("word = " + this.prefWordMap.get(new Pair<>(s, set)));
 				}
@@ -294,7 +288,7 @@ public class CongruenceSimulation implements IsIncluded {
 					}
 					for (ISet set : copy) {
 						// if the successor is itself and some set has been removed
-						if( s == t && removedSets.contains(set)) {
+						if (s == t && removedSets.contains(set)) {
 							continue;
 						}
 						// for every set, we update the sets
@@ -317,19 +311,21 @@ public class CongruenceSimulation implements IsIncluded {
 							}
 						}
 						if (isFwSimulated) {
-							System.out.println("Ignore state the set " + update + " for " + t);
+							if (debug)
+								System.out.println("Ignore state the set " + update + " for " + t);
 							continue;
 						}
 						HashSet<ISet> orig = prefSim.get(t);
 						// update is the word ua and check whether we need to update
 						if (canAddToSet(orig, update)) {
 							// POSTCONDITION: update can not simulate any set in orig
-							boolean[] modified = new boolean[1];
 							HashSet<ISet> subsetsOfUpdate = new HashSet<>();
-							if(debug) System.out.println("Next state is " + t);
-							HashSet<ISet> result = addSetToPrefixAntichain(orig, update, subsetsOfUpdate, modified);
+							if (debug)
+								System.out.println("Next state is " + t);
+							HashSet<ISet> result = addSetToPrefixAntichain(orig, update, subsetsOfUpdate);
 							prefSim.set(t, result);
-							if(debug) System.out.println("Updated sim " + t + " is " + prefSim.get(t));
+							if (debug)
+								System.out.println("Updated sim " + t + " is " + prefSim.get(t));
 							if (computeCounterexample) {
 								Pair<Integer, ISet> pair = new Pair<>(s, set);
 								Word pref = this.prefWordMap.get(pair);
@@ -337,15 +333,15 @@ public class CongruenceSimulation implements IsIncluded {
 								this.prefWordMap.put(new Pair<>(t, update), newPref);
 								for (ISet subset : subsetsOfUpdate) {
 									prefWordMap.remove(new Pair<>(t, subset));
-									if(s == t) {
+									if (s == t) {
 										removedSets.add(subset);
 									}
 								}
 							}
-							if (! inWorkList.get(t)) {
+							if (!inWorkList.get(t)) {
 								workList.addLast(t);
 								inWorkList.set(t);
-								if(debug) {
+								if (debug) {
 									System.out.println("t = " + t + " set = " + update);
 									System.out.println("word = " + this.prefWordMap.get(new Pair<>(t, update)));
 								}
@@ -367,7 +363,7 @@ public class CongruenceSimulation implements IsIncluded {
 		timer.stop();
 		this.timeForPrefixSim += timer.getTimeElapsed();
 	}
-	
+
 	// needs to check equivalence relation
 	private void addToMinimizedPrefixSet(ISet update, int q) {
 		ISet result = UtilISet.newISet();
@@ -454,7 +450,8 @@ public class CongruenceSimulation implements IsIncluded {
 		for (IntBoolTriple fstTriple : left) {
 			boolean simulated = false;
 			for (IntBoolTriple sndTriple : right) {
-				if (fstTriple.getLeft() == sndTriple.getLeft() && fwSimB[fstTriple.getRight()][sndTriple.getRight()]
+				if (fstTriple.getLeft() == sndTriple.getLeft() 
+						&& fwSimB[fstTriple.getRight()][sndTriple.getRight()]
 						&& (!fstTriple.getBool() || sndTriple.getBool())) {
 					simulated = true;
 					break;
@@ -466,13 +463,10 @@ public class CongruenceSimulation implements IsIncluded {
 		}
 		return true;
 	}
-	
-	boolean isBisimulated(TreeSet<IntBoolTriple> set, TreeSet<IntBoolTriple> update) {
-		return isSimulated(set, update) && isSimulated(update, set);
-	}
+
 
 	HashSet<TreeSet<IntBoolTriple>> addSetToPeriodAntichain(HashSet<TreeSet<IntBoolTriple>> orig,
-			TreeSet<IntBoolTriple> update, HashSet<TreeSet<IntBoolTriple>> subsetOfUpdate, boolean[] changed) {
+			TreeSet<IntBoolTriple> update, HashSet<TreeSet<IntBoolTriple>> subsetOfUpdate) {
 		HashSet<TreeSet<IntBoolTriple>> result = new HashSet<TreeSet<IntBoolTriple>>();
 		// PRECONDITION: update cannot simulate a set in orig
 		for (TreeSet<IntBoolTriple> triples : orig) {
@@ -487,7 +481,6 @@ public class CongruenceSimulation implements IsIncluded {
 				result.add(triples);
 			}
 		}
-		changed[0] = true;
 		if(debug) System.out.println("Need to add " + update);
 		result.add(update);
 		return result;
@@ -530,6 +523,7 @@ public class CongruenceSimulation implements IsIncluded {
 			System.out.println("States for A: " + reachSet);
 		if (debug)
 			System.out.println("States for B: " + simulatedStatesInB);
+		ISet mustSimulatedStates = this.computeNecessaryBStatesForPeriods(accState, reachSet, simulatedStatesInB);
 		// those can not be reached should corresponds to empty set
 		for (int s : reachSet) {
 			// only i_B simulates i_A at first
@@ -555,62 +549,55 @@ public class CongruenceSimulation implements IsIncluded {
 						inWorkList.set(t);
 					}
 					// compute the simulation relations
-					TreeSet<IntBoolTriple> set = new TreeSet<>();
+					TreeSet<IntBoolTriple> update = new TreeSet<>();
 					// s - a -> t
-					for (int p : simulatedStatesInB) {
+					for (int p : mustSimulatedStates) {
 						for (int q : B.getSuccessors(p, a)) {
-//							if(!bReachSet.get(q)) continue;
 							// put every p - a -> q in f(t)
 							boolean acc = B.isFinal(p) || B.isFinal(q);
 							IntBoolTriple tpl = new IntBoolTriple(p, q, acc);
 							if (minimizePeriod) {
-								addMinimizedPeriodTriple(set, tpl);
+								addMinimizedPeriodTriple(update, tpl);
 							} else {
-								addTriple(set, tpl);
+								addTriple(update, tpl);
 							}
 						}
 					}
 					if (debug)
-						System.out.println(t + " AccTriple " + set);
+						System.out.println(t + " AccTriple " + update);
 					HashSet<TreeSet<IntBoolTriple>> curr = periodSim.get(t);
-					if (canAddToTripleSet(curr, set)) { // && ! containTriples(periodSim.get(t), set)
+					if (canAddToTripleSet(curr, update)) { // && ! containTriples(periodSim.get(t), set)
 						// POSTCONDITION: need to add this set, this set cannot simulate any set in curr
-						boolean[] modified = new boolean[1];
 						HashSet<TreeSet<IntBoolTriple>> subsetOfUpdate = new HashSet<>();
-						HashSet<TreeSet<IntBoolTriple>> result = addSetToPeriodAntichain(curr, set, subsetOfUpdate,
-								modified);
+						HashSet<TreeSet<IntBoolTriple>> result = addSetToPeriodAntichain(curr, update, subsetOfUpdate);
 						periodSim.put(t, result);
-						if (modified[0] && computeCounterexample) {
+						if (computeCounterexample) {
 							Word pref = A.getAlphabet().getLetterWord(a);
-							this.periodWordMap.put(new Pair<>(t, set), pref);
+							this.periodWordMap.put(new Pair<>(t, update), pref);
 							for (TreeSet<IntBoolTriple> key : subsetOfUpdate) {
 								removedPairs.add(new Pair<>(t, key));
 							}
 						}
-						if (modified[0] && t == accState) {
+						if (t == accState) {
 							// decide whether it ...
 							for (ISet pref : this.prefSim.get(accState)) {
-								if (!decideAcceptance(pref, set)) {
-									System.out.println("Early Early terminated " + pref + " " + set);
+								if (!decideAcceptance(pref, update)) {
+									options.log.println("Early-0 terminated for accepting state " + accState);
 									return;
 								}
 							}
-							if (debug)
-								System.out.println("Deciding Done... ");
 						}
-						if (debug)
-							System.out.println("AccTriple " + set);
 					}
-					if (set.isEmpty()) {
+					if (update.isEmpty()) {
 						cePrefix = A.getAlphabet().getEmptyWord();
 						aQState = t;
 						aLetter = a;
 						this.periodSim.get(accState).add(new TreeSet<>());
 						return;
 					}
-					if(debug) {
-						System.out.println("t = " + t + " set = " + set);
-						System.out.println("word = " + this.periodWordMap.get(new Pair<>(t,  set)));
+					if (debug) {
+						System.out.println("t = " + t + " set = " + update);
+						System.out.println("word = " + this.periodWordMap.get(new Pair<>(t, update)));
 					}
 				}
 			}
@@ -637,14 +624,14 @@ public class CongruenceSimulation implements IsIncluded {
 					}
 					for (TreeSet<IntBoolTriple> set : copy) {
 						// ignore removed sets
-						if(s == t && removedTreeSets.contains(set)) continue;
+						if (s == t && removedTreeSets.contains(set))
+							continue;
 						TreeSet<IntBoolTriple> update = new TreeSet<>();
 						// put sets
 						for (IntBoolTriple triple : set) {
 							int p = triple.getLeft();
 							int q = triple.getRight();
 							for (int qr : B.getSuccessors(q, a)) {
-//								if(!bReachSet.get(q)) continue;
 								boolean acc = B.isFinal(qr) || triple.getBool();
 								IntBoolTriple newTriple = new IntBoolTriple(p, qr, acc);
 								if (minimizePeriod) {
@@ -656,14 +643,11 @@ public class CongruenceSimulation implements IsIncluded {
 						}
 						// we have extended for set
 						if (canAddToTripleSet(periodSim.get(t), update)) {
-							// TODO: Antichain, only keep the set that are a subset of another
-							boolean changed = false;
+							// only keep the set that are a subset of another
 							HashSet<TreeSet<IntBoolTriple>> curr = periodSim.get(t);
-							boolean[] modified = new boolean[1];
 							HashSet<TreeSet<IntBoolTriple>> subsetOfUpdate = new HashSet<>();
 							HashSet<TreeSet<IntBoolTriple>> result = addSetToPeriodAntichain(curr, update,
-									subsetOfUpdate, modified);
-							changed = modified[0];
+									subsetOfUpdate);
 							periodSim.put(t, result);
 							if (computeCounterexample) {
 								Word pref = this.periodWordMap.get(new Pair<>(s, set));
@@ -671,7 +655,7 @@ public class CongruenceSimulation implements IsIncluded {
 								this.periodWordMap.put(new Pair<>(t, update), newPref);
 								for (TreeSet<IntBoolTriple> key : subsetOfUpdate) {
 									this.periodWordMap.remove(new Pair<>(t, key));
-									if(s == t) {
+									if (s == t) {
 										removedTreeSets.add(key);
 									}
 								}
@@ -680,23 +664,19 @@ public class CongruenceSimulation implements IsIncluded {
 								// decide whether it ...
 								for (ISet pref : this.prefSim.get(accState)) {
 									if (!decideAcceptance(pref, update)) {
-										System.out.println("Early terminated " + pref + " " + update);
+										options.log.println("Early-1 terminated for accepting state " + accState);
 										return;
 									}
 								}
 							}
-//								if(debug && t == accState) {
-//									System.out.println("Set = " + this.periodSim.get(t));
-//								}
-//								System.out.println("Loop AccTriple " + set + " state " + t + " from " + s + " modified = " + changed + " a = " + a + " Asize = " + A.getAlphabetSize());
-							if (changed && !inWorkList.get(t)) {
+							if (!inWorkList.get(t)) {
 								workList.add(t);
 								inWorkList.set(t);
-								if(debug) {
-									System.out.println("t = " + t + " set = " + update);
-									System.out.println("word = " + this.periodWordMap.get(new Pair<>(t, update)));
-								}
 							}
+						}
+						if (debug) {
+							System.out.println("t = " + t + " set = " + update);
+							System.out.println("word = " + this.periodWordMap.get(new Pair<>(t, update)));
 						}
 						// not possible
 						if (update.isEmpty()) {
@@ -713,7 +693,6 @@ public class CongruenceSimulation implements IsIncluded {
 		}
 		timer.stop();
 		this.timeForPeriodSim += timer.getTimeElapsed();
-//		System.out.println("Finished computing the congruence representation for accepting state " + accState + " ...");		
 	}
 
 	private void addMinimizedPeriodTriple(TreeSet<IntBoolTriple> set, IntBoolTriple triple) {
@@ -738,37 +717,6 @@ public class CongruenceSimulation implements IsIncluded {
 
 	public boolean isEquvalent() {
 		return false;
-	}
-
-	private boolean coveredBy(Pair<HashSet<ISet>, HashSet<TreeSet<IntBoolTriple>>> left,
-			Pair<HashSet<ISet>, HashSet<TreeSet<IntBoolTriple>>> right) {
-		// check whether left is coveredby right
-		// first, check prefix
-		for (ISet lSet : left.getLeft()) {
-			boolean covered = false;
-			for (ISet rSet : right.getLeft()) {
-				if (rSet.subsetOf(lSet)) {
-					covered = true;
-					break;
-				}
-			}
-			if (!covered) {
-				return false;
-			}
-		}
-		for (TreeSet<IntBoolTriple> lTriples : left.getRight()) {
-			boolean covered = false;
-			for (TreeSet<IntBoolTriple> rTriples : right.getRight()) {
-				if (lTriples.containsAll(rTriples)) {
-					covered = true;
-					break;
-				}
-			}
-			if (!covered) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	@Override
@@ -829,8 +777,6 @@ public class CongruenceSimulation implements IsIncluded {
 				System.out.println(
 						"Necessary states in A: " + necessaryStates + " #size = " + necessaryStates.cardinality());
 			computePrefixSimulation(accState, necessaryStates);
-			// outputPrefixSimulation();
-//			System.exit(-1);
 			// obtain the necessary part for accState
 			// we assume that prefSims is already computed under subsumption relation
 			HashSet<ISet> antichainPrefix = prefSim.get(accState);
@@ -858,27 +804,10 @@ public class CongruenceSimulation implements IsIncluded {
 				System.out.println("Prefix simulated sets: " + antichainPrefix);
 			if (debug)
 				System.out.println("Necessary states for B: " + simulatedStatesInB);
-			// now we compute the simulation for periods from accState
-			TarjanSCCsNonrecursive sccNonrecur = new TarjanSCCsNonrecursive(B, simulatedStatesInB);
-			// remove must states and test mayStates
-			ISet mayStates = UtilISet.newISet();
-			for(ISet scc : sccNonrecur.getSCCs()) {
-//				if(scc.overlap(bFinals))
-					mayStates.or(scc);
-			}
-			if (debug)
-				System.out.println("May states in B for accState in SCC: " + mayStates);
-//			mayStates.and(simulatedStates);
-			if (debug)
-				System.out.println("May states in B for accState: " + mayStates);
-//			System.out.println("pre scc: " + simulatedStatesInB);
-//			System.out.println("allow scc: " + allowSccs);
-			simulatedStatesInB.or(mayStates);
-			if(debug) System.out.println("simulated states in B: " + simulatedStatesInB);
-//			System.out.println("Final states: " + B.getFinalStates());
+			// // compute the fixedpoint of those states
 			computePeriodSimulation(accState, simulatedStatesInB);
 			// now decide whether there is one word accepted by A but not B
-			System.out.println("Deciding the language inclusion between L(A^i_f) (A^f_f)^w and L(B) ...");
+			options.log.println("Deciding the language inclusion between L(A^i_f) (A^f_f)^w and L(B) ...");
 			Timer timer = new Timer();
 			timer.start();
 			for (ISet pref : antichainPrefix) {
@@ -906,13 +835,83 @@ public class CongruenceSimulation implements IsIncluded {
 			}
 			timer.stop();
 			timeForAcceptance += timer.getTimeElapsed();
-//			System.out.println("Move on to next accepting state...");
-//			antichainFinals.add(new Pair(prefSim.get(accState), periodSim.get(accState)));
 		}
-		System.out.println("Time for deciding acceptance: " + timeForAcceptance);
-		System.out.println("Time for computing prefix simulation: " + this.timeForPrefixSim);
-		System.out.println("Time for computing period simulation: " + this.timeForPeriodSim);
+		options.log.println("Time for deciding acceptance: " + timeForAcceptance);
+		options.log.println("Time for computing prefix simulation: " + this.timeForPrefixSim);
+		options.log.println("Time for computing period simulation: " + this.timeForPeriodSim);
 		return true;
+	}
+	
+	// fixed point to compute all states that simulate accState reachable from simulatedStatesInB
+	private ISet computeNecessaryBStatesForPeriods(int accState, ISet reachSet, ISet simulatedStatesInB) {
+		if(debug) {
+				// now we compute the simulation for periods from accState
+				TarjanSCCsNonrecursive sccNonrecur = new TarjanSCCsNonrecursive(B, simulatedStatesInB);
+				// remove must states and test mayStates
+				ISet mayStates = UtilISet.newISet();
+				for(ISet scc : sccNonrecur.getSCCs()) {
+						mayStates.or(scc);
+				}
+				if (debug)
+					System.out.println("May states in B for accState in SCC: " + mayStates);
+				if (debug)
+					System.out.println("May states in B for accState: " + mayStates);
+//				System.out.println("pre scc: " + simulatedStatesInB);
+//				System.out.println("allow scc: " + allowSccs);
+				mayStates.or(simulatedStatesInB);
+				if(debug) System.out.println("simulated SCC states in B: " + mayStates);
+				options.log.println("Done for computing simulated SCC states in B...");
+				return mayStates;
+		}else {
+			// only keep those state that can go back to accState
+			TIntObjectMap<ISet> simulatedMap = new TIntObjectHashMap<>();
+			for (int s : reachSet) {
+				if (s == accState) {
+					simulatedMap.put(accState, simulatedStatesInB);
+				} else {
+					simulatedMap.put(s, UtilISet.newISet());
+				}
+			}
+			ISet inWorklist = UtilISet.newISet();
+			LinkedList<Integer> workList = new LinkedList<>();
+			workList.add(accState);
+			inWorklist.set(accState);
+			while (!workList.isEmpty()) {
+				int s = workList.remove();
+				inWorklist.clear(s);
+				// get current simulated sets
+				ISet preSet = simulatedMap.get(s).clone();
+				for (int a : A.getState(s).getEnabledLetters()) {
+					for (int t : A.getState(s).getSuccessors(a)) {
+						if (!reachSet.get(t))
+							continue;
+						// s - a -> t
+						ISet update = UtilISet.newISet();
+						ISet curr = simulatedMap.get(t);
+						for (int p : preSet) {
+							for (int q : B.getState(p).getSuccessors(a)) {
+								// ignore states that already in the set
+								if (curr.get(q))
+									continue;
+								update.set(q);
+							}
+						}
+						// now add possible new states
+						if (!update.isEmpty()) {
+							curr.or(update);
+							simulatedMap.put(t, curr);
+							if (!inWorklist.get(t)) {
+								workList.add(t);
+								inWorklist.set(t);
+							}
+						}
+					}
+				}
+			}
+			if(debug) System.out.println("Fixed point states: " + simulatedMap.get(accState));
+			options.log.println("Done for computing necessary simulated states in B for accepting state " + accState + "...");
+			return simulatedMap.get(accState);
+		}
 	}
 
 	// This function will be called if decideAcceptance returns false
@@ -1029,26 +1028,6 @@ public class CongruenceSimulation implements IsIncluded {
 		return result;
 	}
 
-	private TreeSet<IntBoolTriple> extend(TreeSet<IntBoolTriple> first, int letter) {
-		TreeSet<IntBoolTriple> result = new TreeSet<>();
-		for (IntBoolTriple triple : first) {
-			int state = triple.getRight();
-			for (int succ : B.getState(state).getSuccessors(letter)) {
-				addTriple(result, new IntBoolTriple(triple.getLeft(), succ, triple.getBool() || B.isFinal(succ)));
-			}
-		}
-		return result;
-	}
-
-	private TreeSet<IntBoolTriple> compose(ISet preds, TreeSet<IntBoolTriple> triples) {
-		TreeSet<IntBoolTriple> result = new TreeSet<>();
-		for (IntBoolTriple triple : triples) {
-			if (preds.get(triple.getLeft())) {
-				addTriple(result, triple);
-			}
-		}
-		return result;
-	}
 
 	// decide whether there exists an accepting run in B from states in sim
 	// all states on the left are from pref
@@ -1186,6 +1165,7 @@ public class CongruenceSimulation implements IsIncluded {
 		Options options = new Options();
 		options.verbose = 1;
 		options.minimization = false;
+		options.simulation = true;
 		PairParserBA pairParser = new PairParserBA(options, args[0], args[1]);
 		NBA A = pairParser.getA();
 		NBA B = pairParser.getB();
@@ -1198,7 +1178,6 @@ public class CongruenceSimulation implements IsIncluded {
 		timer.start();
 
 		CongruenceSimulation sim = new CongruenceSimulation(A, B, options);
-		sim.antichain = true;
 		sim.computeCounterexample = true;
 		sim.debug = false;
 		sim.useSimulation = true;
