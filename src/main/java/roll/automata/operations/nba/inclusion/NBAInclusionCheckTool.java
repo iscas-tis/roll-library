@@ -52,6 +52,64 @@ public class NBAInclusionCheckTool {
         boolean result = executeTool(command, true, "HOA", A, B);
         return result;
     }
+    
+    public static boolean isComplementCorrect(NBA A, NBA complement) {
+    	File fileA = new File("/tmp/A.hoa");
+    	File fileB = new File("/tmp/B.hoa");
+        File fileC = new File("/tmp/C.hoa");
+        try {
+            outputHOAStream(A, new PrintStream(new FileOutputStream(fileA)));
+            outputHOAStream(complement, new PrintStream(new FileOutputStream(fileC)));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        final Runtime rt = Runtime.getRuntime();
+        String command = "autfilt --complement " + fileA.getAbsolutePath() + " -B";
+        // add files
+        Process proc = null;
+        try {
+            proc = rt.exec(command);
+            proc.waitFor();
+        } catch (IOException | InterruptedException e1) {
+            e1.printStackTrace();
+        }
+        System.out.println(command);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+        String line = null;
+        
+        try {
+        	@SuppressWarnings("resource")
+			PrintStream printer = new PrintStream(fileB);
+            while ((line = reader.readLine()) != null) {
+                printer.println(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        command = "autfilt --equivalent-to=" + fileC.getAbsolutePath() + " " + fileB.getAbsolutePath();
+        try {
+            proc = rt.exec(command);
+            proc.waitFor();
+        } catch (IOException | InterruptedException e1) {
+            e1.printStackTrace();
+        }
+        System.out.println(command);
+        
+        reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+        line = null;
+        boolean result = false;
+        try {
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("HOA")) {
+                    result = true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 
     public static boolean isIncludedGoal(String goal, NBA A, NBA B) {
         String command = goal + " containment ";

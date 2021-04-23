@@ -39,6 +39,7 @@ import roll.learner.nba.lomega.UtilLOmega;
 import roll.learner.nba.lomega.translator.TranslatorFDFA;
 import roll.learner.nba.lomega.translator.TranslatorFDFAUnder;
 import roll.main.complement.TeacherNBAComplement;
+import roll.main.complement.algos.ComplementCongruence;
 import roll.main.inclusion.NBAInclusionCheck;
 import roll.main.ltl2dpa.TeacherLTL2LDBA;
 import roll.main.ltlf2dfa.TeacherLTLf2DFA;
@@ -286,7 +287,13 @@ public final class ROLL {
         // prepare the parser
         Parser parser = UtilParser.prepare(options, options.inputFile, options.format);
         NBA input = parser.parse();
-        NBA complement = complement(options, input, comp);
+        NBA complement = null;
+        if(options.congruence) {
+        	ComplementCongruence complementCongr = new ComplementCongruence(options, input);
+        	complement = complementCongr.getResult();
+        }else {
+        	complement = complement(options, input, comp);
+        }
         // output target automaton
         if(options.outputFile != null) {
             try {
@@ -302,6 +309,8 @@ public final class ROLL {
         }
         parser.close();
         // output statistics
+        options.stats.numOfLetters = input.getAlphabetSize();
+        options.stats.numOfStatesInTraget = input.getStateSize();
         options.stats.numOfStatesInHypothesis = complement.getStateSize();
         options.stats.numOfTransInTraget = NFAOperations.getNumberOfTransitions(input);
         options.stats.numOfTransInHypothesis = NFAOperations.getNumberOfTransitions(complement);
