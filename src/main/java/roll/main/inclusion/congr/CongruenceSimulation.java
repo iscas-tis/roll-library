@@ -672,11 +672,11 @@ public class CongruenceSimulation implements IsIncluded {
 							if (!inWorkList.get(t)) {
 								workList.add(t);
 								inWorkList.set(t);
-								if (debug) {
-									System.out.println("t = " + t + " set = " + update);
-									System.out.println("word = " + this.periodWordMap.get(new Pair<>(t, update)));
-								}
 							}
+						}
+						if (debug) {
+							System.out.println("t = " + t + " set = " + update);
+							System.out.println("word = " + this.periodWordMap.get(new Pair<>(t, update)));
 						}
 						// not possible
 						if (update.isEmpty()) {
@@ -1165,6 +1165,7 @@ public class CongruenceSimulation implements IsIncluded {
 		Options options = new Options();
 		options.verbose = 1;
 		options.minimization = false;
+		options.simulation = true;
 		PairParserBA pairParser = new PairParserBA(options, args[0], args[1]);
 		NBA A = pairParser.getA();
 		NBA B = pairParser.getB();

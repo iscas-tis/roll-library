@@ -69,25 +69,23 @@ public class CongruenceClass {
         }
     }
     
-    public boolean isAccepted() {
+    public boolean isAccepted(ISet leadingSet) {
     	if(this.isSet ) {
     		return guess.isEmpty();
     	}else {
     		if(this.level.isEmpty()) {
         		return false;
         	}else {
-        		ISet pre = UtilISet.newISet();
         		ISet post = UtilISet.newISet();
         		for(IntBoolTriple triple : this.level) {
-        			pre.set(triple.getLeft());
         			post.set(triple.getRight());
         		}
         		// first, pre needs to be the SAME
-        		if(!pre.contentEq(post)) {
+        		if(! leadingSet.contentEq(post)) {
         			return false;
         		}
         		// we need it to be accepted by complement language
-        		return ! UtilCongruence.decideAcceptance(pre, level);
+        		return ! UtilCongruence.decideAcceptance(leadingSet, level);
         	}
     	}
     }

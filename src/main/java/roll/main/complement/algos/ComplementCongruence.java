@@ -136,6 +136,7 @@ public class ComplementCongruence extends Complement {
 			walkList.add(walkListArr.get(i));
 		}
 		super.explore(walkList);
+		System.out.println(leadingDFA.toBA());
 		for (int i = 0; i < leadingDFA.getStateSize(); i++) {
 			DFACongruence proDFA = proDFAs.get(i);
 			proDFA.computeInitialState();
@@ -166,12 +167,17 @@ public class ComplementCongruence extends Complement {
 					}
 				}
 			}
+			
 			// check accepting states
 			if(proDFA.getFinalSize() <= 0 || !sccStates.get(i)) {
 				proDFAs.set(i, new DFACongruence(operand, walkListArr.get(i).congrClass));
 				proDFAs.get(i).computeInitialState();
 				for(int letter = 0; letter < this.getAlphabetSize(); letter ++) {
 					proDFAs.get(i).getState(0).addTransition(letter, 0);
+				}
+				if(walkListArr.get(i).congrClass.level.isEmpty()) {
+					// this state is empty
+					proDFAs.get(i).setFinal(0);
 				}
 			}
 			//proDFAs.get(i).setInitial(0);
@@ -192,7 +198,10 @@ public class ComplementCongruence extends Complement {
 		Automaton dkNBA = FDFAOperations.buildUnderNBA(fdfa);
 		this.result = NBAOperations.fromDkNBA(dkNBA, getAlphabet());
 		System.out.println(result.toBA());
-		ComplementNcsbOtf comp = new ComplementNcsbOtf(new Options(), operand);
+		Options ops = new Options();
+		ops.lazyB = true;
+		ops.lazyS = false;
+		ComplementNcsbOtf comp = new ComplementNcsbOtf(ops, operand);
 		comp.explore();
 		System.out.println(comp.toBA());
 		dkNBA = FDFAOperations.buildDOne(fdfa);
@@ -200,6 +209,7 @@ public class ComplementCongruence extends Complement {
 		dkNBA = UtilNBALDollar.dkDFAToBuchi(dkNBA);
 		NBA minimizedNBA = NBAOperations.fromDkNBA(dkNBA, getAlphabet());
 		System.out.println(minimizedNBA.toBA());
+		System.out.println(result.getStateSize() + ", " + comp.getStateSize() + ", " + minimizedNBA.getStateSize());
 	}
 
 	public static void main(String[] args) {
