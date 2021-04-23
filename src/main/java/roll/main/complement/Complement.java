@@ -17,5 +17,9 @@ public abstract class Complement extends NBA {
 	public NBA getOperand() {
 		return this.operand;
 	}
+	
+	public NBA getResult() {
+		return this;
+	}
 
 }

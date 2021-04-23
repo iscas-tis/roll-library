@@ -27,11 +27,14 @@ public class ParallelCongruenceSimulation implements IsIncluded {
 	
 	int numWorkers;
 	
+	Options options;
 	
-	public ParallelCongruenceSimulation(NBA A, NBA B, int numWorks) {
+	
+	public ParallelCongruenceSimulation(NBA A, NBA B, Options options) {
 		this.A = A;
 		this.B = B;
-		this.numWorkers = numWorks;
+		this.options = options;
+		this.numWorkers = options.numWorkers;
 	}
 	
 	@Override
@@ -63,7 +66,7 @@ public class ParallelCongruenceSimulation implements IsIncluded {
 		}
 		// run parallelly for checking inclusion
 		ArrayList<InclusionCheck> threads = new ArrayList<>();
-		System.out.println("There are " + nbas.length + " small NBAs");
+		options.log.println("There are " + nbas.length + " small NBAs after division.");
 		for(int j = 0; j < nbas.length; j ++) {
 			NBA nba = nbas[j];
 			InclusionCheck checker = new InclusionCheck(nba, B);
@@ -72,19 +75,16 @@ public class ParallelCongruenceSimulation implements IsIncluded {
 		ExecutorService executor = Executors.newFixedThreadPool(numWorkers);//Executors.newWorkStealingPool(numCores);
 		for(int j = 0; j < threads.size(); j ++) {
 			executor.execute(threads.get(j));
-			System.out.println("Create thread " + j);
+//			System.out.println("Create thread " + j);
 		}
 		executor.shutdown();
-		System.out.println("Entering while loop ......");
 		while (true) {
 			// create a thread to look up
 			if(executor.isTerminated()) {
-				System.out.println("executor terminate ?");
 				break;
 			}
 			if(terminate) {
 				executor.shutdownNow();
-				System.out.println("Terminate ?");
 				break;
 			}
 		}
@@ -113,7 +113,7 @@ public class ParallelCongruenceSimulation implements IsIncluded {
 						return;
 					}
 				}
-				CongruenceSimulation sim = new CongruenceSimulation(first, second);
+				CongruenceSimulation sim = new CongruenceSimulation(first, second, options);
 				// light processing 
 //				FiniteAutomaton faA = UtilInclusion.toRABITNBA(first);
 //				FiniteAutomaton faB = UtilInclusion.toRABITNBA(second);
@@ -146,7 +146,7 @@ public class ParallelCongruenceSimulation implements IsIncluded {
 //				CongruenceSimulation sim = new CongruenceSimulation(fst, snd);
 				sim.antichain = true;
 				sim.computeCounterexample = true;
-				sim.useSimulation = true;
+				sim.useSimulation = options.simulation;
 				boolean included = sim.isIncluded();
 //				System.out.println(included ? "Included" : "Not included");
 				if(!included) {
@@ -166,7 +166,6 @@ public class ParallelCongruenceSimulation implements IsIncluded {
 			counterexample = ce;
 			result = false;
 			terminate = true;
-			System.out.println("Visited" + " " + terminate);
 		}
 		
 	}
@@ -183,7 +182,7 @@ public class ParallelCongruenceSimulation implements IsIncluded {
 		timer.start();
 		int numCores = Runtime.getRuntime().availableProcessors();
 		System.out.println("NumCores = " + numCores);
-		ParallelCongruenceSimulation sim = new ParallelCongruenceSimulation(A, B, 4);
+		ParallelCongruenceSimulation sim = new ParallelCongruenceSimulation(A, B, options);
 		boolean included = sim.isIncluded();
 		System.out.println(included ? "Included" : "Not included");
 		if(!included) {

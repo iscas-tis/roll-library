@@ -64,6 +64,8 @@ public class Options {
     // only noninclusion
     public boolean nonIncusion = false;
     
+    public boolean onlyCongr = false;
+    
     // search method for counterexample
     public boolean binarySearch = false;
     
@@ -87,10 +89,13 @@ public class Options {
     public boolean parallel = false;
     
     public int numWorkers = 4;
-    
+    // use congruence simulation algorithm for inclusion checking
     public boolean congruence = false;
+    public boolean simulation = false;
+    // minimize graphs
+    public boolean minimization = false;
     
-    // options for NCSB complementation
+    // NCSB complementation
     public boolean lazyS = true;
     public boolean lazyB = true;
 
@@ -249,8 +254,9 @@ public class Options {
         builder.append("inputfile=" + inputFile + ",");
         builder.append("outputfile=" + outputFile + ",");
         builder.append("outputA=" + outputA + ",");
-        builder.append("outputB=" + outputB + "\n");
-        builder.append("congruence=" + congruence + "\n");
+        builder.append("outputB=" + outputB + ",");
+        builder.append("congruence=" + congruence + ",");
+        builder.append("simulation=" + simulation + "\n");
         return builder.toString();
     }
     

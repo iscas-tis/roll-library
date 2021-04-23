@@ -34,6 +34,8 @@ import roll.util.sets.UtilISet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
+ * 
+ * The state space of the input sndOp can be explored on-the-fly
  * */
 
 public class NBAIntersectCheck {
@@ -66,7 +68,7 @@ public class NBAIntersectCheck {
         
         @Override
         public int hashCode() {
-            return fstState * sndOp.getStateSize() + sndState;
+            return sndState * fstOp.getStateSize() + fstState;
         }
         
         @Override
@@ -110,7 +112,6 @@ public class NBAIntersectCheck {
 
     	    
     	public TarjanExplore() {
-    		int size = fstOp.getStateSize() * sndOp.getStateSize();
 //    		this.automaton = aut;
             this.hasLoop = UtilISet.newISet();
             this.prodArr = new ArrayList<ProductState>();
@@ -193,8 +194,8 @@ public class NBAIntersectCheck {
     				// did not visit succNode before
     				if (!tjDfsMap.containsKey(succNode)) {
     					// first, put node and tjSuccIter for return
-    					System.out.println("CallStackIndex = " + tjCallStackIndex);
-    					System.out.println("arr length = " + tjCallNodeStack.size());
+    					//System.out.println("CallStackIndex = " + tjCallStackIndex);
+    					//System.out.println("arr length = " + tjCallNodeStack.size());
     					tjCallNodeStack.push(tjNode);
     					tjCallSuccStack.push(tjSuccIter);
     					tjCallStackIndex++; // stack size
@@ -226,7 +227,7 @@ public class NBAIntersectCheck {
                         } while (tjNode != succNode);
             			if((scc.cardinality() > 1 || hasLoop.get(tjNode)) && fstAcc && sndAcc) {
             				empty = false;
-            				System.out.println("fstAcc = " + fstAcc + " sndAcc = " + sndAcc);
+            				//System.out.println("fstAcc = " + fstAcc + " sndAcc = " + sndAcc);
             				return;
             			}
                     }

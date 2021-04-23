@@ -39,9 +39,9 @@ public class CongrThread implements Callable<IsIncluded>, IsIncluded {
 		
 		IsIncluded congr = null;
 		if(options.parallel) {
-			congr = new ParallelCongruenceSimulation(A, B, options.numWorkers);
+			congr = new ParallelCongruenceSimulation(A, B, options);
 		}else {
-			congr = new CongruenceSimulation(A, B);
+			congr = new CongruenceSimulation(A, B, options);
 		}
 		result = congr.isIncluded();
 		if(! result) {

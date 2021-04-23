@@ -24,7 +24,6 @@ import java.util.TreeSet;
 
 import algorithms.Minimization;
 import algorithms.Options;
-import algorithms.Simulation;
 import automata.AutomatonPreprocessingResult;
 import automata.FAState;
 import automata.FiniteAutomaton;
@@ -34,6 +33,7 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import roll.automata.NBA;
 import roll.automata.StateNFA;
+import roll.main.inclusion.congr.RabitSimulation;
 import roll.util.Pair;
 import roll.util.sets.ISet;
 import roll.words.Alphabet;
@@ -242,7 +242,7 @@ public class UtilInclusion {
         Options.jumpsim_quotienting=true;
         Options.verbose=false; // set verbose to true to report counterexample
         Minimization minimizer = new Minimization();
-        Simulation simulation = new Simulation();
+        RabitSimulation simulation = new RabitSimulation();
         Set<datastructure.Pair<FAState, FAState>> frel, drel;
         frel = simulation.ForwardSimRelNBW(system, spec);
         if(frel.contains(new datastructure.Pair<FAState, FAState>(system.getInitialState(), spec.getInitialState())))

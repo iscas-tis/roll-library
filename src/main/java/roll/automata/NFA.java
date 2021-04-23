@@ -83,6 +83,10 @@ public class NFA implements Acceptor {
         return finalStates.clone();
     }
     
+    public int getFinalSize() {
+    	return finalStates.cardinality();
+    }
+    
     public ISet getSuccessors(ISet states, Word word) {
         ISet currentStates = states;
         int index = 0;
@@ -125,6 +129,11 @@ public class NFA implements Acceptor {
     public void setFinal(int state) {
         assert checkValidState(state);
         finalStates.set(state);
+    }
+    
+    public void clearFinal(int state) {
+    	assert checkValidState(state);
+        finalStates.clear(state);
     }
     
     // -------------------------------------------
