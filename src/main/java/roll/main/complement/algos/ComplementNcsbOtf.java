@@ -26,15 +26,9 @@ import roll.util.sets.UtilISet;
 public class ComplementNcsbOtf extends Complement {
 
     protected TObjectIntMap<StateNcsbOtf> stateIndices;
-    protected Options options;
     
     public ComplementNcsbOtf(Options options, NBA nba) {
-        super(nba);
-        this.options = options;
-    }
-    
-    protected Options getOptions() {
-    	return this.options;
+        super(options, nba);
     }
 
     @Override

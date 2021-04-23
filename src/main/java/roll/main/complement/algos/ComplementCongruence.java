@@ -5,12 +5,9 @@ import java.util.LinkedList;
 import java.util.TreeSet;
 
 import dk.brics.automaton.Automaton;
-import dk.brics.automaton.State;
 import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import roll.automata.AcceptNBA;
 import roll.automata.DFA;
@@ -20,11 +17,13 @@ import roll.automata.StateNFA;
 import roll.automata.operations.DFAOperations;
 import roll.automata.operations.FDFAOperations;
 import roll.automata.operations.NBAOperations;
+import roll.automata.operations.StateContainer;
 import roll.automata.operations.TarjanSCCsNonrecursive;
 import roll.learner.nba.ldollar.UtilNBALDollar;
 import roll.main.Options;
 import roll.main.complement.Complement;
 import roll.main.inclusion.congr.IntBoolTriple;
+import roll.main.inclusion.congr.Simulation;
 import roll.parser.ba.ParserBA;
 import roll.util.Timer;
 import roll.util.sets.ISet;
@@ -35,19 +34,49 @@ public class ComplementCongruence extends Complement {
 	protected TObjectIntMap<StateCongruence> stateIndices;
 	
 	protected NBA result;
-	protected Options options;
-
+	protected boolean[][] fsim;
+	
 	public ComplementCongruence(Options options, NBA operand) {
-		super(operand);
-		this.options = options;
+		super(options, operand);
 	}
 
 	@Override
 	protected void computeInitialState() {
+		if(options.simulation) {
+			StateContainer[] states = new StateContainer[operand.getStateSize()];
+//			// compute the predecessors and successors
+			for(int i = 0; i < operand.getStateSize(); i ++) {
+				states[i] = new StateContainer(i, operand);
+			}
+			// initialize the information for B
+			for (int i = 0; i < operand.getStateSize(); i++) {
+				StateNFA st = states[i].getState();
+				for (int letter = 0; letter < operand.getAlphabetSize(); letter++) {
+					for (int succ : st.getSuccessors(letter)) {
+						//aStates[i].addSuccessors(letter, succ);
+						states[succ].addPredecessors(letter, i);
+					}
+				}
+			}
+			fsim = Simulation.computeForwardSimilation(operand, states);
+		}else {
+			System.out.println("State size = " + operand.getStateSize());
+			fsim = new boolean[operand.getStateSize()][operand.getStateSize()];
+			for(int p = 0; p < operand.getStateSize(); p ++) {
+				for(int q = 0; q < operand.getStateSize(); q ++) {
+					if(p == q) {
+						fsim[p][q] = true;
+					}else {
+						fsim[p][q] = false;
+					}
+				}
+			}
+		}
+	
 		stateIndices = new TObjectIntHashMap<>();
 		ISet init = UtilISet.newISet();
 		init.set(operand.getInitialState());
-		CongruenceClass congrCls = new CongruenceClass(init);
+		CongruenceClass congrCls = new CongruenceClass(init, fsim);
 		StateCongruence state = this.getOrAddState(congrCls);
 		this.setInitial(state.getId());
 	}
@@ -61,7 +90,12 @@ public class ComplementCongruence extends Complement {
 	}
 
 	protected StateCongruence getOrAddState(CongruenceClass congrCls) {
-
+		
+		if(options.simulation) {
+			System.out.println("Before " + congrCls);
+			congrCls.minimize();
+			System.out.println("After " + congrCls);
+		}
 		StateCongruence state = new StateCongruence(this, 0, congrCls);
 
 		if (stateIndices.containsKey(state)) {
@@ -108,7 +142,7 @@ public class ComplementCongruence extends Complement {
 			for(int s : iStateCongr.congrClass.guess) {
 				UtilCongruence.addTriple(level, new IntBoolTriple(s, s, false));
 			}
-			CongruenceClass congrCls = new CongruenceClass(level);
+			CongruenceClass congrCls = new CongruenceClass(level, fsim);
 			proDFAs.add(new DFACongruence(operand, congrCls));
 			// add this state to complement 
 			StateCongruence levelState = this.getOrAddState(congrCls);
@@ -220,7 +254,7 @@ public class ComplementCongruence extends Complement {
 //		Options ops = new Options();
 //		ops.lazyB = true;
 //		ops.lazyS = false;
-//		ComplementNcsbOtf comp = new ComplementNcsbOtf(ops, operand);
+//		ComplementNcsbOtf comp = new ComplementNcsbOtf(options, operand);
 //		comp.explore();
 //		System.out.println(comp.toBA());
 		Automaton dkNBA = FDFAOperations.buildDOne(fdfa);

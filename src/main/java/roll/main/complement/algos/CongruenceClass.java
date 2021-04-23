@@ -11,17 +11,53 @@ public class CongruenceClass {
 	protected ISet guess;
 	protected TreeSet<IntBoolTriple> level;
 	protected boolean isSet;
+	protected boolean[][] fsim;
 	
-	public CongruenceClass(ISet set) {
+	public CongruenceClass(ISet set, boolean[][] fsim) {
 		this.guess = set;
 		this.level = new TreeSet<>();
 		this.isSet = true;
+		this.fsim = fsim;
 	}
 	
-	public CongruenceClass(TreeSet<IntBoolTriple> level) {
+	public CongruenceClass(TreeSet<IntBoolTriple> level, boolean[][] fsim) {
 		this.level = level;
 		this.guess = UtilISet.newISet();
 		this.isSet = false;
+		this.fsim = fsim;
+	}
+	
+	public void minimize() {
+		if(this.isSet) {
+			// only keep the maximal one, if they are equivalent, then keep the larger one
+			ISet result = UtilISet.newISet();
+			for(int p : this.guess) {
+				int maxP = p;
+				for(int q : this.guess) {
+					if(fsim[maxP][q]) {
+						maxP = q;
+					}
+				}
+				result.set(maxP);
+			}
+			this.guess = result;
+		}else {
+			// minimize the equivalence class in level
+			TreeSet<IntBoolTriple> result = new TreeSet<>();
+			for(IntBoolTriple left : this.level) {
+				// find maximal for left
+				IntBoolTriple maxTriple = left;
+				for(IntBoolTriple right : this.level) {
+					if(maxTriple.getLeft() == right.getLeft()
+					&& fsim[maxTriple.getRight()][right.getRight()]
+					&& (!maxTriple.getBool() || right.getBool())) {
+						maxTriple = right;
+					}
+				}
+				result.add(maxTriple);
+			}
+			this.level = result;
+		}
 	}
 	
 	@Override
@@ -34,6 +70,66 @@ public class CongruenceClass {
 		return  contentEqual(other);
 	}
 	
+	private boolean isGuessEqual(ISet left, ISet right) {
+		for(int p : left) {
+			boolean contained = false;
+			for(int q : right) {
+				if(fsim[p][q] && fsim[q][p]) {
+					contained = true;
+					break;
+				}
+			}
+			if(! contained) {
+				return false;
+			}
+		}
+		for(int p : right) {
+			boolean contained = false;
+			for(int q : left) {
+				if(fsim[p][q] && fsim[q][p]) {
+					contained = true;
+					break;
+				}
+			}
+			if(! contained) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private boolean isLevelEqual(TreeSet<IntBoolTriple> left, TreeSet<IntBoolTriple> right) {
+		for(IntBoolTriple fst : left) {
+			boolean contained = false;
+			for(IntBoolTriple snd : right) {
+				if(fst.getLeft() == snd.getLeft()
+				&& fst.getBool() == snd.getBool()
+				&& fsim[fst.getRight()][snd.getRight()] && fsim[snd.getRight()][fst.getRight()]) {
+					contained = true;
+					break;
+				}
+			}
+			if(! contained) {
+				return false;
+			}
+		}
+		for(IntBoolTriple fst : right) {
+			boolean contained = false;
+			for(IntBoolTriple snd : left) {
+				if(fst.getLeft() == snd.getLeft()
+				&& fst.getBool() == snd.getBool()
+				&& fsim[fst.getRight()][snd.getRight()] && fsim[snd.getRight()][fst.getRight()]) {
+					contained = true;
+					break;
+				}
+			}
+			if(! contained) {
+				return false;
+			}
+		}
+		return true;
+	}
+		
 	protected boolean contentEqual(CongruenceClass other) {
 		if( this.isSet != other.isSet
 		|| ! guess.contentEq(other.guess)

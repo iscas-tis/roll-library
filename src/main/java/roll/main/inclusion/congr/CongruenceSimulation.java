@@ -331,9 +331,8 @@ public class CongruenceSimulation implements IsIncluded {
 								Word pref = this.prefWordMap.get(pair);
 								Word newPref = pref.append(a);
 								this.prefWordMap.put(new Pair<>(t, update), newPref);
-								for (ISet subset : subsetsOfUpdate) {
-									prefWordMap.remove(new Pair<>(t, subset));
-									if (s == t) {
+								if (s == t) {
+									for (ISet subset : subsetsOfUpdate) {
 										removedSets.add(subset);
 									}
 								}
@@ -354,10 +353,15 @@ public class CongruenceSimulation implements IsIncluded {
 							aLetter = a;
 							cePrefix = this.prefWordMap.get(new Pair<>(s, set));
 							prefSim.get(accState).add(UtilISet.newISet());
+							System.out.println("Hello " + cePrefix + ", " + new Pair<>(s, set));
+							System.out.println("Hello " + ", " + s + ", " + t + ", " + removedSets);
 							return;
 						}
 					}
 				}
+			}
+			for(ISet set: removedSets) {
+				this.prefWordMap.remove(new Pair<>(s, set));
 			}
 		}
 		timer.stop();
@@ -653,9 +657,8 @@ public class CongruenceSimulation implements IsIncluded {
 								Word pref = this.periodWordMap.get(new Pair<>(s, set));
 								Word newPref = pref.append(a);
 								this.periodWordMap.put(new Pair<>(t, update), newPref);
-								for (TreeSet<IntBoolTriple> key : subsetOfUpdate) {
-									this.periodWordMap.remove(new Pair<>(t, key));
-									if (s == t) {
+								if (s == t) {
+									for (TreeSet<IntBoolTriple> key : subsetOfUpdate) {
 										removedTreeSets.add(key);
 									}
 								}
@@ -689,6 +692,9 @@ public class CongruenceSimulation implements IsIncluded {
 						}
 					}
 				}
+			}
+			for(TreeSet<IntBoolTriple> key : removedTreeSets) {
+				this.periodWordMap.remove(new Pair<>(s, key));
 			}
 		}
 		timer.stop();

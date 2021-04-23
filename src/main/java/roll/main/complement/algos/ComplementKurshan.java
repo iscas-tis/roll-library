@@ -3,6 +3,7 @@ package roll.main.complement.algos;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import roll.automata.NBA;
+import roll.main.Options;
 import roll.main.complement.Complement;
 
 /**
@@ -15,8 +16,8 @@ public class ComplementKurshan extends Complement {
     private TObjectIntMap<StateKurshan> stateIndices;
 
 
-	public ComplementKurshan(NBA operand) {
-		super(operand);
+	public ComplementKurshan(Options options, NBA operand) {
+		super(options, operand);
 	}
 
     @Override

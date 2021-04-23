@@ -44,7 +44,7 @@ public class StateCongruence extends StateNFA {
 					nextGuess.set(succ);
 				}
 			}
-			CongruenceClass nextCongrCls = new CongruenceClass(nextGuess);
+			CongruenceClass nextCongrCls = new CongruenceClass(nextGuess, complement.fsim);
 			// add one state
 			StateCongruence nextState = complement.getOrAddState(nextCongrCls);
 			super.addTransition(letter, nextState.getId());
@@ -54,7 +54,7 @@ public class StateCongruence extends StateNFA {
 			// now move onto level
 			preLevel = congrClass.level;
 			TreeSet<IntBoolTriple> nextLevel = computeNextLevel(preLevel, letter);
-			CongruenceClass nextCongrCls = new CongruenceClass(nextLevel);
+			CongruenceClass nextCongrCls = new CongruenceClass(nextLevel, complement.fsim);
 			// add one state
 			StateCongruence nextState = complement.getOrAddState(nextCongrCls);
 			super.addTransition(letter, nextState.getId());
@@ -68,7 +68,7 @@ public class StateCongruence extends StateNFA {
 		TreeSet<IntBoolTriple> nextLevel = new TreeSet<>();
 		for(IntBoolTriple currTriple : preLevel) {
 			for(int succ : operand.getState(currTriple.getRight()).getSuccessors(letter)) {
-				UtilCongruence.addTriple(nextLevel, new IntBoolTriple(currTriple.getLeft(), succ, currTriple.getBool() || operand.isFinal(succ)));
+				UtilCongruence.addTriple(nextLevel, new IntBoolTriple(currTriple.getLeft(), succ, operand.isFinal(currTriple.getLeft()) || currTriple.getBool() || operand.isFinal(succ)));
 			}
 		}
 		return nextLevel;
