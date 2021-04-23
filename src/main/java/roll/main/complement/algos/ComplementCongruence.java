@@ -5,15 +5,19 @@ import java.util.LinkedList;
 import java.util.TreeSet;
 
 import dk.brics.automaton.Automaton;
+import dk.brics.automaton.State;
 import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import roll.automata.AcceptNBA;
 import roll.automata.DFA;
 import roll.automata.FDFA;
 import roll.automata.NBA;
 import roll.automata.StateNFA;
+import roll.automata.operations.DFAOperations;
 import roll.automata.operations.FDFAOperations;
 import roll.automata.operations.NBAOperations;
 import roll.automata.operations.TarjanSCCsNonrecursive;
@@ -138,10 +142,12 @@ public class ComplementCongruence extends Complement {
 			if(! sccStates.get(i)) continue;
 			walkList.add(walkListArr.get(i));
 		}
+		options.log.println("There are " + numLeadingStates + " states in the leading DFA...");
 		options.stats.numOfStatesInLeading = numLeadingStates;
 		options.log.println("Exploring state space for period classes...");
 		super.explore(walkList);
 //		System.out.println(leadingDFA.toBA());
+		ArrayList<DFA> castDFAs = new ArrayList<>();
 		for (int i = 0; i < leadingDFA.getStateSize(); i++) {
 			DFACongruence proDFA = proDFAs.get(i);
 			proDFA.computeInitialState();
@@ -185,14 +191,21 @@ public class ComplementCongruence extends Complement {
 					proDFAs.get(i).setFinal(0);
 				}
 			}
+			// we can minimize the automaton
+			DFA castDFA = null;
+			if(options.minimization) {
+				Automaton dkDFA = DFAOperations.toDkDFA(proDFAs.get(i));
+				options.log.println("Minimizing the corresponding progress DFAs...");
+				dkDFA.minimize();
+				castDFA = DFAOperations.fromDkDFA(getAlphabet(), dkDFA);
+			}else {
+				castDFA = proDFAs.get(i);
+			}
+			castDFAs.add(i, castDFA);
+			options.stats.numOfStatesInProgress.add(castDFA.getStateSize());
+			options.log.println("There are " + castDFA.getStateSize() + " states in the progress DFA " + i + " ...");
 			//proDFAs.get(i).setInitial(0);
 //			System.out.println("proDRFA: " + i + "\n" + proDFAs.get(i).toBA());
-		}
-		// now we have an FDFA
-		ArrayList<DFA> castDFAs = new ArrayList<>();
-		for(int i = 0; i < leadingDFA.getStateSize(); i ++) {
-			castDFAs.add(proDFAs.get(i));
-			options.stats.numOfStatesInProgress.add(proDFAs.get(i).getStateSize());
 		}
 //		System.out.println("leading DFA size: " + leadingDFA.getStateSize() + " progress Size " + castDFAs.size() );
 		FDFA fdfa = new FDFA(leadingDFA, castDFAs);

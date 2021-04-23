@@ -31,6 +31,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import roll.automata.DFA;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
+import roll.words.Alphabet;
 import roll.words.Word;
 
 /**
@@ -117,10 +118,31 @@ public class DFAOperations {
         return dkAut;
     }
     
-    public static DFA fromDkDFA(Automaton dkAut) {
-        State init = dkAut.getInitialState();
+    public static DFA fromDkDFA(Alphabet alphabet, Automaton dkAut) {
+
         TObjectIntMap<State> map = new TObjectIntHashMap<>();
-        return null;
+        int num = 0;
+        DFA dfa = new DFA(alphabet);
+        // numbering every state
+        for(State s : dkAut.getStates()) {
+            map.put(s, num);
+            num ++;
+            dfa.createState();
+        }
+        for (State s: dkAut.getStates()) {
+        	if(s == dkAut.getInitialState()) {
+        		dfa.setInitial(map.get(s));
+        	}
+        	if(s.isAccept()) {
+        		dfa.setFinal(map.get(s));
+        	}
+            for (Transition tr: s.getTransitions()){
+            	for(char letter = tr.getMin(); letter <= tr.getMax(); letter ++) {
+            		dfa.getState(map.get(s)).addTransition(alphabet.indexOf(letter), map.get(tr.getDest()));
+                }
+            }
+        }
+        return dfa;
     }
     
     //add specific(not general) epsilon transition in an NFA.
