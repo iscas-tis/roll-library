@@ -302,8 +302,8 @@ public final class ROLL {
                 e.printStackTrace();
             }
         }else {
-            options.log.println("\ntarget automaton:");
-            parser.print(input, options.log.getOutputStream());
+            //options.log.println("\ntarget automaton:");
+            //parser.print(input, options.log.getOutputStream());
             options.log.println("\nhypothesis automaton:");
             parser.print(complement, options.log.getOutputStream());
         }
