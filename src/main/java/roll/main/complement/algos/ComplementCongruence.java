@@ -35,6 +35,7 @@ public class ComplementCongruence extends Complement {
 	
 	protected NBA result;
 	protected boolean[][] fsim;
+	boolean debug = false;
 	
 	public ComplementCongruence(Options options, NBA operand) {
 		super(options, operand);
@@ -60,7 +61,7 @@ public class ComplementCongruence extends Complement {
 			}
 			fsim = Simulation.computeForwardSimilation(operand, states);
 		}else {
-			System.out.println("State size = " + operand.getStateSize());
+			if(debug) System.out.println("State size = " + operand.getStateSize());
 			fsim = new boolean[operand.getStateSize()][operand.getStateSize()];
 			for(int p = 0; p < operand.getStateSize(); p ++) {
 				for(int q = 0; q < operand.getStateSize(); q ++) {
@@ -68,6 +69,15 @@ public class ComplementCongruence extends Complement {
 						fsim[p][q] = true;
 					}else {
 						fsim[p][q] = false;
+					}
+				}
+			}
+		}
+		if(debug) {
+			for(int p = 0; p < operand.getStateSize(); p ++) {
+				for(int q = 0; q < operand.getStateSize(); q ++) {
+					if(fsim[p][q]) {
+						System.out.println(p + " simulated by " + q);
 					}
 				}
 			}
@@ -92,9 +102,9 @@ public class ComplementCongruence extends Complement {
 	protected StateCongruence getOrAddState(CongruenceClass congrCls) {
 		
 		if(options.simulation) {
-			System.out.println("Before " + congrCls);
+			if(debug) System.out.println("Before " + congrCls);
 			congrCls.minimize();
-			System.out.println("After " + congrCls);
+			if(debug) System.out.println("After " + congrCls);
 		}
 		StateCongruence state = new StateCongruence(this, 0, congrCls);
 
@@ -122,6 +132,7 @@ public class ComplementCongruence extends Complement {
 	
 	@Override
 	public void explore() {
+		if(debug) System.out.println("input \n" + operand.toBA());
 		options.log.println("Perform subset construction for prefix classes...");
 		super.explore();
 		ISet inits = UtilISet.newISet();
@@ -166,7 +177,7 @@ public class ComplementCongruence extends Complement {
 		TarjanSCCsNonrecursive tarjan = new TarjanSCCsNonrecursive(this, inits);
 		ISet sccStates = UtilISet.newISet();
 		for(ISet scc : tarjan.getSCCs()) {
-//			System.out.println(" scc " + scc );
+			if(debug) System.out.println(" scc " + scc );
 			sccStates.or(scc);
 		}
 		// create DFAs for each state in leading DFA
@@ -180,7 +191,10 @@ public class ComplementCongruence extends Complement {
 		options.stats.numOfStatesInLeading = numLeadingStates;
 		options.log.println("Exploring state space for period classes...");
 		super.explore(walkList);
-//		System.out.println(leadingDFA.toBA());
+		if(debug) {
+			System.out.println("Leading DFA: ");
+			System.out.println(leadingDFA.toBA());
+		}
 		ArrayList<DFA> castDFAs = new ArrayList<>();
 		for (int i = 0; i < leadingDFA.getStateSize(); i++) {
 			DFACongruence proDFA = proDFAs.get(i);
@@ -236,6 +250,10 @@ public class ComplementCongruence extends Complement {
 				castDFA = proDFAs.get(i);
 			}
 			castDFAs.add(i, castDFA);
+			if(debug) {
+				System.out.println("proDFA " + i);
+				System.out.println(castDFA.toBA());
+			}
 			options.stats.numOfStatesInProgress.add(castDFA.getStateSize());
 			options.log.println("There are " + castDFA.getStateSize() + " states in the progress DFA " + i + " ...");
 			//proDFAs.get(i).setInitial(0);
@@ -243,11 +261,14 @@ public class ComplementCongruence extends Complement {
 		}
 //		System.out.println("leading DFA size: " + leadingDFA.getStateSize() + " progress Size " + castDFAs.size() );
 		FDFA fdfa = new FDFA(leadingDFA, castDFAs);
-//		ArrayList<String> apList = new ArrayList<>();
-//		for(int c = 0; c < this.getAlphabetSize(); c ++) {
-//			apList.add("a" + c);
-//		}
-		//System.out.println(fdfa.toString(apList));
+		if(debug) {
+			ArrayList<String> apList = new ArrayList<>();
+			for(int c = 0; c < this.getAlphabetSize(); c ++) {
+				apList.add("a" + c);
+			}
+			System.out.println(fdfa.toString(apList));
+		}
+
 //		Automaton dkNBA = FDFAOperations.buildUnderNBA(fdfa);
 //		this.result = NBAOperations.fromDkNBA(dkNBA, getAlphabet());
 //		System.out.println(result.toBA());
@@ -260,9 +281,10 @@ public class ComplementCongruence extends Complement {
 		Automaton dkNBA = FDFAOperations.buildDOne(fdfa);
 		options.log.println("Minimizing the corresponding family of DFAs...");
 		dkNBA.minimize();
+		if(debug) System.out.println("acc state size " + dkNBA.getAcceptStates().size());
 		dkNBA = UtilNBALDollar.dkDFAToBuchi(dkNBA);
 		this.result = NBAOperations.fromDkNBA(dkNBA, getAlphabet());
-//		System.out.println(minimizedNBA.toBA());
+		if(debug) System.out.println(result.toBA());
 //		System.out.println(result.getStateSize() + ", " + comp.getStateSize() + ", " + minimizedNBA.getStateSize());
 	}
 

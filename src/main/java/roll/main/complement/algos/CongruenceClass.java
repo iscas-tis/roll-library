@@ -27,20 +27,24 @@ public class CongruenceClass {
 		this.fsim = fsim;
 	}
 	
+	private ISet minimizeGuess(ISet set) {
+		ISet result = UtilISet.newISet();
+		for(int p : set) {
+			int maxP = p;
+			for(int q : set) {
+				if(fsim[maxP][q]) {
+					maxP = q;
+				}
+			}
+			result.set(maxP);
+		}
+		return result;
+	}
+	
 	public void minimize() {
 		if(this.isSet) {
 			// only keep the maximal one, if they are equivalent, then keep the larger one
-			ISet result = UtilISet.newISet();
-			for(int p : this.guess) {
-				int maxP = p;
-				for(int q : this.guess) {
-					if(fsim[maxP][q]) {
-						maxP = q;
-					}
-				}
-				result.set(maxP);
-			}
-			this.guess = result;
+//			this.guess = minimizeGuess(this.guess);
 		}else {
 			// minimize the equivalence class in level
 			TreeSet<IntBoolTriple> result = new TreeSet<>();
@@ -176,8 +180,10 @@ public class CongruenceClass {
         		for(IntBoolTriple triple : this.level) {
         			post.set(triple.getRight());
         		}
-        		// first, pre needs to be the SAME
-        		if(! leadingSet.contentEq(post)) {
+        		// first, pre needs to be the SAME/simulated same
+        		ISet simulatedPost = this.minimizeGuess(post);
+        		ISet simulatedInit = this.minimizeGuess(leadingSet);
+        		if(! simulatedInit.contentEq(simulatedPost)) {
         			return false;
         		}
         		// we need it to be accepted by complement language

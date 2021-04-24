@@ -65,6 +65,7 @@ public class DFACongruence extends DFA {
 			if (! congrCls.isSet && congrCls.isAccepted(this.inits)) {
 				// now decide if it is subsumed by initCongr 
 				setFinal(localIndex);
+//				System.out.println("Acc state = " + congrCls + ", init = " + this.inits);
 			}
 			return newState;
 		}
