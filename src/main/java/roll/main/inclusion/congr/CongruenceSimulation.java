@@ -353,8 +353,8 @@ public class CongruenceSimulation implements IsIncluded {
 							aLetter = a;
 							cePrefix = this.prefWordMap.get(new Pair<>(s, set));
 							prefSim.get(accState).add(UtilISet.newISet());
-							System.out.println("Hello " + cePrefix + ", " + new Pair<>(s, set));
-							System.out.println("Hello " + ", " + s + ", " + t + ", " + removedSets);
+							if(debug) System.out.println("Hello " + cePrefix + ", " + new Pair<>(s, set));
+							if(debug) System.out.println("Hello " + ", " + s + ", " + t + ", " + removedSets);
 							return;
 						}
 					}
