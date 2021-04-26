@@ -203,6 +203,7 @@ public class ComplementCongruence extends Complement {
 		options.stats.numOfStatesInLeading = numLeadingStates;
 		options.log.println("Exploring state space for period classes...");
 		super.explore(walkList);
+		options.log.println("Explored " + this.getStateSize() + " states for constructing FDFAs...");
 		if(debug) {
 			System.out.println("Leading DFA: ");
 			System.out.println(leadingDFA.toBA());

@@ -55,7 +55,7 @@ public class CongruenceClass {
 				// find maximal for left
 				IntBoolTriple maxTriple = left;
 				for(IntBoolTriple right : this.level) {
-					if(maxTriple.getLeft() == right.getLeft()
+					if(bsim[maxTriple.getLeft()][right.getLeft()]
 					&& fsim[maxTriple.getRight()][right.getRight()]
 					&& (!maxTriple.getBool() || right.getBool())) {
 						maxTriple = right;
