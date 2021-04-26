@@ -110,6 +110,7 @@ public class CongruenceSimulation implements IsIncluded {
 	boolean useSimulationAB = false;
 	boolean useSimulation = false;
 	boolean fwSimB[][]; // forward simulation on B
+	boolean bwSimB[][]; // backward simulation on B
 	boolean fwSimA[][]; // forward simulation on A, didn't use this one
 	boolean fwSimAB[][]; // simulation between A and B
 	
@@ -454,7 +455,7 @@ public class CongruenceSimulation implements IsIncluded {
 		for (IntBoolTriple fstTriple : left) {
 			boolean simulated = false;
 			for (IntBoolTriple sndTriple : right) {
-				if (fstTriple.getLeft() == sndTriple.getLeft() 
+				if (bwSimB[fstTriple.getLeft()][sndTriple.getLeft()] 
 						&& fwSimB[fstTriple.getRight()][sndTriple.getRight()]
 						&& (!fstTriple.getBool() || sndTriple.getBool())) {
 					simulated = true;
@@ -746,12 +747,15 @@ public class CongruenceSimulation implements IsIncluded {
 		}
 		if(useSimulation) {
 			fwSimB = Simulation.computeForwardSimilation(B, bStates);
+			bwSimB = Simulation.computeBackwardSimilation(B, bStates);
 		}else {
 //			System.out.println("Hello");
 			fwSimB = new boolean[B.getStateSize()][B.getStateSize()];
+			bwSimB = new boolean[B.getStateSize()][B.getStateSize()];
 			for (int s = 0; s < B.getStateSize(); s++) {
 				for (int t = 0; t < B.getStateSize(); t++) {
 					fwSimB[s][t] = (s == t);
+					bwSimB[s][t] = (s == t);
 				}
 			}
 		}
