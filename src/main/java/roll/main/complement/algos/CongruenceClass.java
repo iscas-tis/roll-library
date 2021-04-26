@@ -35,7 +35,7 @@ public class CongruenceClass {
 		for(int p : set) {
 			int maxP = p;
 			for(int q : set) {
-				if(fsim[maxP][q] && bsim[maxP][q]) {
+				if(fsim[maxP][q]) {
 					maxP = q;
 				}
 			}
@@ -47,7 +47,19 @@ public class CongruenceClass {
 	public void minimize() {
 		if(this.isSet) {
 			// only keep the maximal one, if they are equivalent, then keep the larger one
-			this.guess = minimizeGuess(this.guess);
+//			this.guess = minimizeGuess(this.guess);
+			ISet result = UtilISet.newISet();
+			for(int p : this.guess) {
+				int maxP = p;
+				for(int q : this.guess) {
+					// more strict computation
+					if(fsim[maxP][q] && bsim[maxP][q]) {
+						maxP = q;
+					}
+				}
+				result.set(maxP);
+			}
+			this.guess = result;
 		}else {
 			// minimize the equivalence class in level
 			TreeSet<IntBoolTriple> result = new TreeSet<>();
@@ -186,6 +198,8 @@ public class CongruenceClass {
         		// first, pre needs to be the SAME/simulated same
         		ISet simulatedPost = this.minimizeGuess(post);
         		ISet simulatedInit = this.minimizeGuess(leadingSet);
+//        		System.out.println("post = " + post + " sim = " + simulatedPost);
+//        		System.out.println("lset = " + leadingSet + " sim = " + simulatedInit);
         		if(! simulatedInit.contentEq(simulatedPost)) {
         			return false;
         		}

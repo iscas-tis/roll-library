@@ -239,18 +239,18 @@ public class ComplementCongruence extends Complement {
 					}
 				}
 			}
-			
-			// check accepting states
-			if(proDFA.getFinalSize() <= 0 || !sccStates.get(i)) {
-				proDFAs.set(i, new DFACongruence(operand, walkListArr.get(i).congrClass));
-				proDFAs.get(i).computeInitialState();
-				for(int letter = 0; letter < this.getAlphabetSize(); letter ++) {
-					proDFAs.get(i).getState(0).addTransition(letter, 0);
-				}
+			if(!sccStates.get(i)) {
+				DFACongruence dfa = constructEmptyDFA(new DFACongruence(operand, walkListArr.get(i).congrClass));
+				proDFAs.set(i, dfa);
+			}else if(proDFAs.get(i).getFinalSize() <= 0) {
+				// check whether there is empty states
+				DFACongruence dfa = constructEmptyDFA(new DFACongruence(operand, walkListArr.get(i).congrClass));
 				if(walkListArr.get(i).congrClass.level.isEmpty()) {
 					// this state is empty
-					proDFAs.get(i).setFinal(0);
+					dfa.setFinal(0);
+//					System.out.println("CongrClass " + walkListArr.get(i).congrClass.level);
 				}
+				proDFAs.set(i, dfa);
 			}
 			// we can minimize the automaton
 			DFA castDFA = null;
@@ -299,6 +299,16 @@ public class ComplementCongruence extends Complement {
 		this.result = NBAOperations.fromDkNBA(dkNBA, getAlphabet());
 		if(debug) System.out.println(result.toBA());
 //		System.out.println(result.getStateSize() + ", " + comp.getStateSize() + ", " + minimizedNBA.getStateSize());
+	}
+
+	private DFACongruence constructEmptyDFA(DFACongruence dfa) {
+		// TODO Auto-generated method stub
+		dfa.computeInitialState();
+		for(int letter = 0; letter < this.getAlphabetSize(); letter ++) {
+			dfa.getState(0).addTransition(letter, 0);
+		}
+		dfa.clearFinal(0);
+		return dfa;
 	}
 
 	public static void main(String[] args) {
