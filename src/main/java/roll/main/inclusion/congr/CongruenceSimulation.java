@@ -34,6 +34,7 @@ import roll.automata.operations.StateContainer;
 import roll.automata.operations.TarjanSCCsNonrecursive;
 import roll.main.Options;
 import roll.main.complement.IsIncluded;
+import roll.main.complement.algos.UtilCongruence;
 import roll.main.inclusion.run.SuccessorInfo;
 import roll.parser.ba.PairParserBA;
 import roll.util.Pair;
@@ -1038,73 +1039,74 @@ public class CongruenceSimulation implements IsIncluded {
 		return result;
 	}
 
-
+	
 	// decide whether there exists an accepting run in B from states in sim
 	// all states on the left are from pref
 	private boolean decideAcceptance(ISet pref, TreeSet<IntBoolTriple> period) {
+		return UtilCongruence.decideAcceptanceSim(pref, period, fwSimB);
 //		System.out.println("pref: " + pref);
 //		System.out.println("period: " + period);
 //		System.out.println("Start deciding acceptance ...");
-		boolean foundLoop = false;
-		ISet reachStates = pref.clone();
-//		for(int state: pref) {
-		// iteratively check whether there exists a triple (q, q: true) reachable from
-		// state
-		ISet reachableStates = pref.clone();
-		TreeSet<IntBoolTriple> reachSet = new TreeSet<>();
-		while (true) {
-			ISet newReach = UtilISet.newISet();
-			for (IntBoolTriple triple : period) {
-				if (minimizePeriod || useSimulation) {
-					// check whether there exists a triple whose left state is simulated by some
-					// state in reach
-					for (int q : reachStates) {
-						if (fwSimB[triple.getLeft()][q]) {
-							reachSet.add(new IntBoolTriple(q, triple.getRight(), triple.getBool()));
-							newReach.set(triple.getRight());
-						}
-					}
-				}
-				if (!(minimizePeriod || useSimulation) && reachStates.get(triple.getLeft())) {
-					reachSet.add(triple);
-					// add states that can be reached
-					newReach.set(triple.getRight());
-				}
-			}
-//			System.out.println("ReachSet = " + reachSet);
-			// first add reachable triples
-			// compute update
-			int origSize = reachSet.size();
-			TreeSet<IntBoolTriple> update = compose(reachSet, period);
-			// reachable states from pref can also be first states
-			reachSet.addAll(update);
-//			System.out.println("ReachSet = " + reachSet);
-			// a triple (q, q: true) means that we have found an accepting run
-			for (IntBoolTriple triple : reachSet) {
-				if (triple.getLeft() == triple.getRight() && triple.getBool()) {
-					foundLoop = true;
-					break;
-				}
-			}
-			for (IntBoolTriple triple : update) {
-				// more reachable states
-				newReach.set(triple.getRight());
-			}
-			// new reachable states
-//			System.out.println("New reach = " + newReach);
-			int statesSize = reachableStates.cardinality();
-			newReach.andNot(reachableStates);
-			reachableStates.or(newReach);
-			// reach a fixed point
-			if (foundLoop || (origSize == reachSet.size() && statesSize == reachableStates.cardinality())) {
-				break;
-			}
-			reachStates = newReach;
-		}
+//		boolean foundLoop = false;
+//		ISet reachStates = pref.clone();
+////		for(int state: pref) {
+//		// iteratively check whether there exists a triple (q, q: true) reachable from
+//		// state
+//		ISet reachableStates = pref.clone();
+//		TreeSet<IntBoolTriple> reachSet = new TreeSet<>();
+//		while (true) {
+//			ISet newReach = UtilISet.newISet();
+//			for (IntBoolTriple triple : period) {
+//				if (minimizePeriod || useSimulation) {
+//					// check whether there exists a triple whose left state is simulated by some
+//					// state in reach
+//					for (int q : reachStates) {
+//						if (fwSimB[triple.getLeft()][q]) {
+//							reachSet.add(new IntBoolTriple(q, triple.getRight(), triple.getBool()));
+//							newReach.set(triple.getRight());
+//						}
+//					}
+//				}
+//				if (!(minimizePeriod || useSimulation) && reachStates.get(triple.getLeft())) {
+//					reachSet.add(triple);
+//					// add states that can be reached
+//					newReach.set(triple.getRight());
+//				}
+//			}
+////			System.out.println("ReachSet = " + reachSet);
+//			// first add reachable triples
+//			// compute update
+//			int origSize = reachSet.size();
+//			TreeSet<IntBoolTriple> update = compose(reachSet, period);
+//			// reachable states from pref can also be first states
+//			reachSet.addAll(update);
+////			System.out.println("ReachSet = " + reachSet);
+//			// a triple (q, q: true) means that we have found an accepting run
+//			for (IntBoolTriple triple : reachSet) {
+//				if (triple.getLeft() == triple.getRight() && triple.getBool()) {
+//					foundLoop = true;
+//					break;
+//				}
+//			}
+//			for (IntBoolTriple triple : update) {
+//				// more reachable states
+//				newReach.set(triple.getRight());
+//			}
+//			// new reachable states
+////			System.out.println("New reach = " + newReach);
+//			int statesSize = reachableStates.cardinality();
+//			newReach.andNot(reachableStates);
+//			reachableStates.or(newReach);
+//			// reach a fixed point
+//			if (foundLoop || (origSize == reachSet.size() && statesSize == reachableStates.cardinality())) {
+//				break;
+//			}
+//			reachStates = newReach;
 //		}
-//		System.out.println("Finished deciding acceptance ...");
-
-		return foundLoop;
+////		}
+////		System.out.println("Finished deciding acceptance ...");
+//
+//		return foundLoop;
 	}
 
 	public static void main(String[] args) {

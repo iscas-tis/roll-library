@@ -1,10 +1,17 @@
 package roll.main.complement.algos;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeSet;
 
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import roll.automata.NBA;
+import roll.automata.operations.TarjanSCCsNonrecursive;
 import roll.main.inclusion.congr.IntBoolTriple;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
+import roll.words.Alphabet;
 
 public class UtilCongruence {
 	
@@ -111,6 +118,56 @@ public class UtilCongruence {
 		} else {
 			set.add(triple);
 		}
+	}
+	
+	public static boolean decideAcceptanceSim(ISet pref, TreeSet<IntBoolTriple> period, boolean[][]fwSim) {
+		Alphabet alphabet = new Alphabet();
+		alphabet.addLetter('0');
+//		alphabet.addLetter('1');
+		TObjectIntMap<IntBoolTriple> fromMap = new TObjectIntHashMap<>();
+//		ArrayList<IntBoolTriple> toMap = new ArrayList<>();
+		NBA nba = new NBA(alphabet);
+		ISet inits = UtilISet.newISet();
+		int num = 0;
+		for(IntBoolTriple tpl : period) {
+			fromMap.put(tpl, num);
+//			toMap.add(tpl);
+			if(pref.get(tpl.getLeft())) {
+				inits.set(num);
+			}
+			nba.createState();
+			num ++;
+//			assert toMap.size() == num;
+			assert nba.getStateSize() == num;
+		}
+		// now add transition
+		for(IntBoolTriple from: period) {
+			int s = fromMap.get(from);
+			for(IntBoolTriple to : period) {
+				int t = fromMap.get(to);
+				// can be simulated
+				if(fwSim[to.getLeft()][from.getRight()]) {
+					nba.getState(s).addTransition(0 , t);
+				}
+			}
+			if(from.getBool()) {
+				nba.setFinal(s);
+			}
+		}
+		// now we compute the SCCs
+		TarjanSCCsNonrecursive tarjan = new TarjanSCCsNonrecursive(nba, inits);
+		ISet finals = nba.getFinalStates();
+		boolean accepting = false;
+		for(ISet scc : tarjan.getSCCs()) {
+			if(finals.overlap(scc)) {
+				accepting = true;
+				break;
+			}
+		}
+//		System.out.println("pref: " + pref);
+//		System.out.println("period: " + period);
+//		System.out.println("acc = " + accepting);
+		return accepting;
 	}
 
 }

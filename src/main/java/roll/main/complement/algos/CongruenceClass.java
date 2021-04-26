@@ -44,6 +44,20 @@ public class CongruenceClass {
 		return result;
 	}
 	
+	private ISet strongMinimizeGuess(ISet set) {
+		ISet result = UtilISet.newISet();
+		for(int p : set) {
+			int maxP = p;
+			for(int q : set) {
+				if(fsim[maxP][q] && bsim[maxP][q]) {
+					maxP = q;
+				}
+			}
+			result.set(maxP);
+		}
+		return result;
+	}
+	
 	public void minimize() {
 		if(this.isSet) {
 			// only keep the maximal one, if they are equivalent, then keep the larger one
@@ -66,13 +80,13 @@ public class CongruenceClass {
 			for(IntBoolTriple left : this.level) {
 				// find maximal for left
 				IntBoolTriple maxTriple = left;
-				System.out.println("Curr = " + maxTriple);
+//				System.out.println("Curr = " + maxTriple);
 				for(IntBoolTriple right : this.level) {
 					if(bsim[maxTriple.getLeft()][right.getLeft()]
 					&& fsim[maxTriple.getRight()][right.getRight()]
 					&& (!maxTriple.getBool() || right.getBool())) {
 						maxTriple = right;
-						System.out.println("updated to " + right);
+//						System.out.println("updated to " + right);
 					}
 				}
 				result.add(maxTriple);
@@ -200,15 +214,23 @@ public class CongruenceClass {
         		// first, pre needs to be the SAME/simulated same
         		ISet simulatedPost = this.minimizeGuess(post);
         		ISet simulatedInit = this.minimizeGuess(leadingSet);
-//        		System.out.println("post = " + post + " sim = " + simulatedPost);
-//        		System.out.println("lset = " + leadingSet + " sim = " + simulatedInit);
-        		if(! simulatedInit.contentEq(simulatedPost)) {
+        		System.out.println("post = " + post + " sim = " + simulatedPost);
+        		System.out.println("lset = " + leadingSet + " sim = " + simulatedInit);
+        		if(! (simulatedInit.contentEq(simulatedPost)
+        		|| bisimulated(simulatedPost, simulatedInit))) {
         			return false;
         		}
         		// we need it to be accepted by complement language
-        		return ! UtilCongruence.decideAcceptance(leadingSet, level, fsim);
+        		return ! UtilCongruence.decideAcceptanceSim(leadingSet, level, fsim);
         	}
     	}
     }
+
+	private boolean bisimulated(ISet left, ISet right) {
+		boolean result = false;
+		ISet minLeft = this.strongMinimizeGuess(left);
+		ISet minRight = this.strongMinimizeGuess(right);
+		return false;
+	}
 
 }

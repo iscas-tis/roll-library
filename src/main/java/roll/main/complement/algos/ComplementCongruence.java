@@ -139,8 +139,9 @@ public class ComplementCongruence extends Complement {
 	
 	@Override
 	public void explore() {
+		System.out.println("Acc = " + operand.getFinalStates());
 		if(debug) System.out.println("input \n" + operand.toBA());
-		if(debug) {
+		if(true) {
 			for(int p = 0; p < operand.getStateSize(); p ++) {
 				for(int q = 0; q < operand.getStateSize(); q ++) {
 					if(p == q) continue;
