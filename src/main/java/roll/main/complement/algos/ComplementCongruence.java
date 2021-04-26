@@ -36,7 +36,7 @@ public class ComplementCongruence extends Complement {
 	protected NBA result;
 	protected boolean[][] fsim;
 	protected boolean[][] bsim;
-	boolean debug = false;
+	boolean debug = true;
 	
 	public ComplementCongruence(Options options, NBA operand) {
 		super(options, operand);
@@ -78,22 +78,17 @@ public class ComplementCongruence extends Complement {
 				}
 			}
 		}
-		if(debug) {
-			for(int p = 0; p < operand.getStateSize(); p ++) {
-				for(int q = 0; q < operand.getStateSize(); q ++) {
-					if(p == q) continue;
-					if(fsim[p][q]) {
-						System.out.println(p + " fw-simulated by " + q);
-					}
-					if(bsim[p][q]) {
-						System.out.println(p + " bw-simulated by " + q);
-					}
-					if(bsim[p][q] && fsim[p][q]) {
-						System.out.println(p + " fbw-simulated by " + q);
-					}
-				}
-			}
-		}
+//		for(int p = 0; p < operand.getStateSize(); p ++) {
+//			for(int q = 0; q < operand.getStateSize(); q ++) {
+//				if(p == q) {
+////					fsim[p][q] = true;
+//					bsim[p][q] = true;
+//				}else {
+////					fsim[p][q] = false;
+//					bsim[p][q] = false;
+//				}
+//			}
+//		}
 	
 		stateIndices = new TObjectIntHashMap<>();
 		ISet init = UtilISet.newISet();
@@ -145,6 +140,22 @@ public class ComplementCongruence extends Complement {
 	@Override
 	public void explore() {
 		if(debug) System.out.println("input \n" + operand.toBA());
+		if(debug) {
+			for(int p = 0; p < operand.getStateSize(); p ++) {
+				for(int q = 0; q < operand.getStateSize(); q ++) {
+					if(p == q) continue;
+					if(fsim[p][q]) {
+						System.out.println(p + " fw-simulated by " + q);
+					}
+					if(bsim[p][q]) {
+						System.out.println(p + " bw-simulated by " + q);
+					}
+					if(bsim[p][q] && fsim[p][q]) {
+						System.out.println(p + " fbw-simulated by " + q);
+					}
+				}
+			}
+		}
 		options.log.println("Perform subset construction for prefix classes...");
 		super.explore();
 		ISet inits = UtilISet.newISet();

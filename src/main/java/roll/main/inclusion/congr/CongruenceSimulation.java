@@ -1055,7 +1055,7 @@ public class CongruenceSimulation implements IsIncluded {
 		while (true) {
 			ISet newReach = UtilISet.newISet();
 			for (IntBoolTriple triple : period) {
-				if (minimizePeriod) {
+				if (minimizePeriod || useSimulation) {
 					// check whether there exists a triple whose left state is simulated by some
 					// state in reach
 					for (int q : reachStates) {
@@ -1065,7 +1065,7 @@ public class CongruenceSimulation implements IsIncluded {
 						}
 					}
 				}
-				if (!minimizePeriod && reachStates.get(triple.getLeft())) {
+				if (!(minimizePeriod || useSimulation) && reachStates.get(triple.getLeft())) {
 					reachSet.add(triple);
 					// add states that can be reached
 					newReach.set(triple.getRight());

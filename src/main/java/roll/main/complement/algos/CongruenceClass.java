@@ -66,11 +66,13 @@ public class CongruenceClass {
 			for(IntBoolTriple left : this.level) {
 				// find maximal for left
 				IntBoolTriple maxTriple = left;
+				System.out.println("Curr = " + maxTriple);
 				for(IntBoolTriple right : this.level) {
 					if(bsim[maxTriple.getLeft()][right.getLeft()]
 					&& fsim[maxTriple.getRight()][right.getRight()]
 					&& (!maxTriple.getBool() || right.getBool())) {
 						maxTriple = right;
+						System.out.println("updated to " + right);
 					}
 				}
 				result.add(maxTriple);
@@ -204,7 +206,7 @@ public class CongruenceClass {
         			return false;
         		}
         		// we need it to be accepted by complement language
-        		return ! UtilCongruence.decideAcceptance(leadingSet, level);
+        		return ! UtilCongruence.decideAcceptance(leadingSet, level, fsim);
         	}
     	}
     }

@@ -14,7 +14,7 @@ public class UtilCongruence {
 	
 	// decide whether there exists an accepting run in B from states in sim
 	// all states on the left are from pref
-	public static boolean decideAcceptance(ISet pref, TreeSet<IntBoolTriple> period) {
+	public static boolean decideAcceptance(ISet pref, TreeSet<IntBoolTriple> period, boolean[][]fwSim) {
 //		System.out.println("pref: " + pref);
 //		System.out.println("period: " + period);
 //		System.out.println("Start deciding acceptance ...");
@@ -28,11 +28,21 @@ public class UtilCongruence {
 		while (true) {
 			ISet newReach = UtilISet.newISet();
 			for (IntBoolTriple triple : period) {
-				if ( reachStates.get(triple.getLeft())) {
-					reachSet.add(triple);
-					// add states that can be reached
-					newReach.set(triple.getRight());
+//				if (bwSim) {
+					// check whether there exists a triple whose left state is simulated by some
+					// state in reach
+				for (int q : reachStates) {
+					if (fwSim[triple.getLeft()][q]) {
+						reachSet.add(new IntBoolTriple(q, triple.getRight(), triple.getBool()));
+						newReach.set(triple.getRight());
+					}
 				}
+//				}
+//				if (!bwSim && reachStates.get(triple.getLeft())) {
+//					reachSet.add(triple);
+//					// add states that can be reached
+//					newReach.set(triple.getRight());
+//				}
 			}
 //			System.out.println("ReachSet = " + reachSet);
 			// first add reachable triples
