@@ -1,10 +1,17 @@
 package roll.main.inclusion.congr;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
+import automata.FAState;
+import automata.FiniteAutomaton;
+import comparator.StatePairComparator;
+import datastructure.HashSet;
 import datastructure.Pair;
 import roll.automata.NBA;
 import roll.automata.StateNFA;
@@ -540,6 +547,169 @@ public class Simulation {
 //					System.out.println(q + " B-simulates " + p);
 		return fsim;
 	}
+	
+	public static boolean[][] computeBackwardSimilation(NBA aut, StateContainer[] autPres) {
+		final int size = aut.getStateSize();
+		boolean[] isFinal = new boolean[size];
+		boolean[] isInit = new boolean[size];
+		// forward simulation
+		boolean[][] bsim = new boolean[size][size];
+		for (int i = 0; i < size; i++) {
+			isFinal[i] = aut.isFinal(i);
+			isInit[i] = (i == aut.getInitialState());
+		}
+		for (int i = 0; i < size; i++) {
+			StateNFA iState = aut.getState(i);
+			for (int j = i; j < size; j++) {
+				StateNFA jState = aut.getState(j);
+				bsim[i][j] = (!isInit[i] || isInit[j]) && (!isFinal[i] || isFinal[j]) && jState.backwardCovers(iState, autPres[j], autPres[i]);
+				bsim[j][i] = (isInit[i] || !isInit[j]) && (isFinal[i] || !isFinal[j]) && iState.backwardCovers(jState, autPres[i], autPres[j]);
+			}
+		}
+		return computeFastHHKBwSimilation(aut, bsim, autPres);
+	}
+	// copy of RABIT code
+	private static boolean[][] computeFastHHKBwSimilation(NBA A, boolean[][] bsim, StateContainer[] autPres) 
+	{	
+
+		//implement the HHK algorithm
+		int numStates = A.getStateSize();
+		int numsSymbols = A.getAlphabetSize();
+//		FAState[] states = all_states.toArray(new FAState[0]);
+//		ArrayList<String> symbols=new ArrayList<String>(alphabet);
+		
+
+		// fsim[u][v]=true iff v in fsim(u) iff v forward-simulates u
+		
+		int[][][] pre = new int[numsSymbols][numStates][];
+		int[][][] post = new int[numsSymbols][numStates][];
+		int[][] preLen = new int[numsSymbols][numStates];
+		int[][] postLen = new int[numsSymbols][numStates];
+		
+		    // Initialize memory of pre/post. Pre/Post reversed because of bw-sim.
+			for (int a = 0; a < numsSymbols; a++) {
+				for (int p = 0; p < numStates; p++) {
+					postLen[a][p] = 0;
+					preLen[a][p] = 0;
+					ISet next = A.getState(p).getSuccessors(a);
+					if (!next.isEmpty())
+						pre[a][p] = new int[next.cardinality()];
+					Set<StateNFA> prev = autPres[p].getPredecessors(a);
+					if (!prev.isEmpty())
+						post[a][p] = new int[prev.size()];
+				}
+			}
+
+		//state[post[s][q][r]] is in post_s(q) for 0<=r<adj_len[s][q]
+		//state[pre[s][q][r]] is in pre_s(q) for 0<=r<adj_len[s][q]
+		for(int a=0;a<numsSymbols;a++)
+		{
+			for(int p=0; p<numStates; p++)
+				for(int q=0; q<numStates; q++)		
+				{
+					Set<StateNFA> prev = autPres[p].getPredecessors(a);
+					boolean contained = false;
+					for(StateNFA stateNFA : prev) {
+						if(stateNFA.getId() == q) {
+							contained = true;
+							break;
+						}
+					}
+					if(! prev.isEmpty() && contained)
+					{
+						//if p --a--> q, then p is in pre_a(q), q is in post_a(p) (note: it is backward)
+						pre[a][q][preLen[a][q]++] = p;
+						post[a][p][postLen[a][p]++] = q;
+					}
+				}
+		}
+		int[] todo = new int[numStates*numsSymbols];
+		int todoLen = 0;
+		
+		int[][][] remove = new int[numsSymbols][numStates][numStates];
+		int[][] remove_len = new int[numsSymbols][numStates];
+		for(int a=0; a<numsSymbols; a++)
+		{
+			for(int p=0; p<numStates; p++)
+				if(preLen[a][p]>0) // p is in a_S
+				{	
+					Sharpen_S_a:
+					for(int q=0; q<numStates; q++)	// {all q} --> S_a 
+					{
+							if(postLen[a][q]>0)	/// q is in S_a 
+							{	
+								for(int r=0; r<postLen[a][q]; r++) 
+									if(bsim[p][post[a][q][r]]) 	// q is in pre_a(sim(p))
+										continue Sharpen_S_a;	// skip q						
+								remove[a][p][remove_len[a][p]++] = q;
+							}
+					}
+					if(remove_len[a][p]>0)
+						todo[todoLen++] = a*numStates + p;
+				}
+		}
+		int[] swap = new int[numStates];
+		int swap_len = 0;
+		boolean using_swap = false;
+		
+		while(todoLen>0)
+		{
+			todoLen--;
+			int v = todo[todoLen] % numStates;
+			int a = todo[todoLen] / numStates;
+			int len = (using_swap? swap_len : remove_len[a][v]);
+			remove_len[a][v] = 0;
+			
+			for(int j=0; j<preLen[a][v]; j++)
+			{
+				int u = pre[a][v][j];
+				
+				for(int i=0; i<len; i++)			
+				{
+					int w = (using_swap? swap[i] : remove[a][v][i]);
+					if(bsim[u][w]) 
+					{
+						bsim[u][w] = false;					
+						for(int b=0; b<numsSymbols; b++)
+							if(preLen[b][u]>0)
+							{
+								Sharpen_pre_b_w:
+								for(int k=0; k<preLen[b][w]; k++)
+								{	
+									int ww = pre[b][w][k];
+									for(int r=0; r<postLen[b][ww]; r++) 
+										if(bsim[u][post[b][ww][r]]) 	// ww is in pre_b(sim(u))
+											continue Sharpen_pre_b_w;	// skip ww
+									
+									if(b==a && u==v && !using_swap)
+										swap[swap_len++] = ww;
+									else{										
+										if(remove_len[b][u]==0)
+											todo[todoLen++] = b*numStates + u;
+										remove[b][u][remove_len[b][u]++] = ww;
+									}
+									
+								}
+							}
+					}//End of if(fsim[u][w])
+				}				
+			}			
+			if(swap_len>0)
+			{	
+				if(!using_swap)
+				{	
+					todo[todoLen++] = a*numStates + v;	
+					using_swap = true; 
+				}else{
+					swap_len = 0;
+					using_swap = false;
+				}
+			}
+			
+		}
+
+		return bsim;
+	}	
 	
 	
 	

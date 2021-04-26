@@ -17,12 +17,16 @@
 package roll.automata;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import automata.FAState;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TIntProcedure;
+import roll.automata.operations.StateContainer;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
 
@@ -165,6 +169,17 @@ public class StateNFA {
 			if (!successors.containsKey(letter)) {
 				return false;
 			}
+		}
+		return true;
+	}
+	
+	public boolean backwardCovers(StateNFA other, StateContainer sc, StateContainer scOther)
+	{
+		for(int letter = 0; letter < nfa.getAlphabetSize(); letter ++) {
+			int prevSize = sc.getPredSize(letter);
+			int otherPrevSize = scOther.getPredSize(letter);
+			if(otherPrevSize > 0 && prevSize <= 0)
+				return false;
 		}
 		return true;
 	}

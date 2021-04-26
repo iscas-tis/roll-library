@@ -12,19 +12,22 @@ public class CongruenceClass {
 	protected TreeSet<IntBoolTriple> level;
 	protected boolean isSet;
 	protected boolean[][] fsim;
+	protected boolean[][] bsim;
 	
-	public CongruenceClass(ISet set, boolean[][] fsim) {
+	public CongruenceClass(ISet set, boolean[][] fsim, boolean[][] bsim) {
 		this.guess = set;
 		this.level = new TreeSet<>();
 		this.isSet = true;
 		this.fsim = fsim;
+		this.bsim = bsim;
 	}
 	
-	public CongruenceClass(TreeSet<IntBoolTriple> level, boolean[][] fsim) {
+	public CongruenceClass(TreeSet<IntBoolTriple> level, boolean[][] fsim, boolean[][] bsim) {
 		this.level = level;
 		this.guess = UtilISet.newISet();
 		this.isSet = false;
 		this.fsim = fsim;
+		this.bsim = bsim;
 	}
 	
 	private ISet minimizeGuess(ISet set) {
@@ -32,7 +35,7 @@ public class CongruenceClass {
 		for(int p : set) {
 			int maxP = p;
 			for(int q : set) {
-				if(fsim[maxP][q]) {
+				if(fsim[maxP][q] && bsim[maxP][q]) {
 					maxP = q;
 				}
 			}
@@ -44,7 +47,7 @@ public class CongruenceClass {
 	public void minimize() {
 		if(this.isSet) {
 			// only keep the maximal one, if they are equivalent, then keep the larger one
-//			this.guess = minimizeGuess(this.guess);
+			this.guess = minimizeGuess(this.guess);
 		}else {
 			// minimize the equivalence class in level
 			TreeSet<IntBoolTriple> result = new TreeSet<>();

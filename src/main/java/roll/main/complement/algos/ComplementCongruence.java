@@ -35,6 +35,7 @@ public class ComplementCongruence extends Complement {
 	
 	protected NBA result;
 	protected boolean[][] fsim;
+	protected boolean[][] bsim;
 	boolean debug = false;
 	
 	public ComplementCongruence(Options options, NBA operand) {
@@ -60,15 +61,19 @@ public class ComplementCongruence extends Complement {
 				}
 			}
 			fsim = Simulation.computeForwardSimilation(operand, states);
+			bsim = Simulation.computeBackwardSimilation(operand, states);
 		}else {
 			if(debug) System.out.println("State size = " + operand.getStateSize());
 			fsim = new boolean[operand.getStateSize()][operand.getStateSize()];
+			bsim = new boolean[operand.getStateSize()][operand.getStateSize()];
 			for(int p = 0; p < operand.getStateSize(); p ++) {
 				for(int q = 0; q < operand.getStateSize(); q ++) {
 					if(p == q) {
 						fsim[p][q] = true;
+						bsim[p][q] = true;
 					}else {
 						fsim[p][q] = false;
+						bsim[p][q] = false;
 					}
 				}
 			}
@@ -76,8 +81,15 @@ public class ComplementCongruence extends Complement {
 		if(debug) {
 			for(int p = 0; p < operand.getStateSize(); p ++) {
 				for(int q = 0; q < operand.getStateSize(); q ++) {
+					if(p == q) continue;
 					if(fsim[p][q]) {
-						System.out.println(p + " simulated by " + q);
+						System.out.println(p + " fw-simulated by " + q);
+					}
+					if(bsim[p][q]) {
+						System.out.println(p + " bw-simulated by " + q);
+					}
+					if(bsim[p][q] && fsim[p][q]) {
+						System.out.println(p + " fbw-simulated by " + q);
 					}
 				}
 			}
@@ -86,7 +98,7 @@ public class ComplementCongruence extends Complement {
 		stateIndices = new TObjectIntHashMap<>();
 		ISet init = UtilISet.newISet();
 		init.set(operand.getInitialState());
-		CongruenceClass congrCls = new CongruenceClass(init, fsim);
+		CongruenceClass congrCls = new CongruenceClass(init, fsim, bsim);
 		StateCongruence state = this.getOrAddState(congrCls);
 		this.setInitial(state.getId());
 	}
@@ -153,7 +165,7 @@ public class ComplementCongruence extends Complement {
 			for(int s : iStateCongr.congrClass.guess) {
 				UtilCongruence.addTriple(level, new IntBoolTriple(s, s, false));
 			}
-			CongruenceClass congrCls = new CongruenceClass(level, fsim);
+			CongruenceClass congrCls = new CongruenceClass(level, fsim, bsim);
 			proDFAs.add(new DFACongruence(operand, congrCls));
 			// add this state to complement 
 			StateCongruence levelState = this.getOrAddState(congrCls);
@@ -300,7 +312,9 @@ public class ComplementCongruence extends Complement {
 		System.out.println("#AF = " + A.getFinalSize());
 		Timer timer = new Timer();
 		timer.start();
-		ComplementCongruence complement = new ComplementCongruence(new Options(), A);
+		options.simulation = false;
+		ComplementCongruence complement = new ComplementCongruence(options, A);
+		complement.debug = false;
 		complement.explore();
 		timer.stop();
 		System.out.println("Time elapsed: " + timer.getTimeElapsed());
