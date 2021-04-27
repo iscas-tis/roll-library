@@ -36,7 +36,7 @@ public class ComplementCongruence extends Complement {
 	protected NBA result;
 	protected boolean[][] fsim;
 	protected boolean[][] bsim;
-	boolean debug = true;
+	boolean debug = false;
 	
 	public ComplementCongruence(Options options, NBA operand) {
 		super(options, operand);
@@ -44,8 +44,9 @@ public class ComplementCongruence extends Complement {
 
 	@Override
 	protected void computeInitialState() {
-		if(options.simulation) {
-			StateContainer[] states = new StateContainer[operand.getStateSize()];
+		StateContainer[] states = null;
+		if(options.fwSimulation || options.bwSimulation) {
+			states = new StateContainer[operand.getStateSize()];
 //			// compute the predecessors and successors
 			for(int i = 0; i < operand.getStateSize(); i ++) {
 				states[i] = new StateContainer(i, operand);
@@ -60,20 +61,32 @@ public class ComplementCongruence extends Complement {
 					}
 				}
 			}
+		}
+		if(debug) System.out.println("State size = " + operand.getStateSize());
+		if(options.fwSimulation) {
 			fsim = Simulation.computeForwardSimilation(operand, states);
-			bsim = Simulation.computeBackwardSimilation(operand, states);
 		}else {
-			if(debug) System.out.println("State size = " + operand.getStateSize());
 			fsim = new boolean[operand.getStateSize()][operand.getStateSize()];
-			bsim = new boolean[operand.getStateSize()][operand.getStateSize()];
 			for(int p = 0; p < operand.getStateSize(); p ++) {
 				for(int q = 0; q < operand.getStateSize(); q ++) {
 					if(p == q) {
 						fsim[p][q] = true;
+					}else {
+						fsim[p][q] = false;
+					}
+				}
+			}
+		}
+		if(options.bwSimulation) {
+			bsim = Simulation.computeBackwardSimilation(operand, states);
+		}else {
+			bsim = new boolean[operand.getStateSize()][operand.getStateSize()];
+			for(int p = 0; p < operand.getStateSize(); p ++) {
+				for(int q = 0; q < operand.getStateSize(); q ++) {
+					if(p == q) {
 						bsim[p][q] = true;
 					}else {
 						fsim[p][q] = false;
-						bsim[p][q] = false;
 					}
 				}
 			}
@@ -139,9 +152,9 @@ public class ComplementCongruence extends Complement {
 	
 	@Override
 	public void explore() {
-		System.out.println("Acc = " + operand.getFinalStates());
+//		System.out.println("Acc = " + operand.getFinalStates());
 		if(debug) System.out.println("input \n" + operand.toBA());
-		if(true) {
+		if(debug) {
 			for(int p = 0; p < operand.getStateSize(); p ++) {
 				for(int q = 0; q < operand.getStateSize(); q ++) {
 					if(p == q) continue;

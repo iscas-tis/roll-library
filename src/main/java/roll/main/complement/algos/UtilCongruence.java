@@ -120,7 +120,7 @@ public class UtilCongruence {
 		}
 	}
 	
-	public static boolean decideAcceptanceSim(ISet pref, TreeSet<IntBoolTriple> period, boolean[][]fwSim) {
+	public static boolean decideAcceptanceSim(ISet pref, TreeSet<IntBoolTriple> period, boolean[][]fwSim, boolean[][] bwSim) {
 		Alphabet alphabet = new Alphabet();
 		alphabet.addLetter('0');
 //		alphabet.addLetter('1');
@@ -146,7 +146,7 @@ public class UtilCongruence {
 			for(IntBoolTriple to : period) {
 				int t = fromMap.get(to);
 				// can be simulated
-				if(fwSim[to.getLeft()][from.getRight()]) {
+				if(bwSim[from.getRight()][to.getLeft()]) {
 					nba.getState(s).addTransition(0 , t);
 				}
 			}

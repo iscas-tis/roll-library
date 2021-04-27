@@ -92,6 +92,8 @@ public class Options {
     // use congruence simulation algorithm for inclusion checking
     public boolean congruence = false;
     public boolean simulation = false;
+    public boolean fwSimulation = false;
+    public boolean bwSimulation = false;
     // minimize graphs
     public boolean minimization = false;
     
@@ -256,7 +258,8 @@ public class Options {
         builder.append("outputA=" + outputA + ",");
         builder.append("outputB=" + outputB + ",");
         builder.append("congruence=" + congruence + ",");
-        builder.append("simulation=" + simulation + "\n");
+        builder.append("fwSimulation=" + fwSimulation + ",");
+        builder.append("bwSimulation=" + bwSimulation + "\n");
         return builder.toString();
     }
     

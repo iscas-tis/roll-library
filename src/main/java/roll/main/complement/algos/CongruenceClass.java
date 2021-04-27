@@ -60,6 +60,7 @@ public class CongruenceClass {
 	
 	public void minimize() {
 		if(this.isSet) {
+			// if a state p <=_b q, then, p is in a set, then q must also be in there
 			// only keep the maximal one, if they are equivalent, then keep the larger one
 //			this.guess = minimizeGuess(this.guess);
 			ISet result = UtilISet.newISet();
@@ -212,25 +213,33 @@ public class CongruenceClass {
         			post.set(triple.getRight());
         		}
         		// first, pre needs to be the SAME/simulated same
-        		ISet simulatedPost = this.minimizeGuess(post);
-        		ISet simulatedInit = this.minimizeGuess(leadingSet);
-        		System.out.println("post = " + post + " sim = " + simulatedPost);
-        		System.out.println("lset = " + leadingSet + " sim = " + simulatedInit);
-        		if(! (simulatedInit.contentEq(simulatedPost)
-        		|| bisimulated(simulatedPost, simulatedInit))) {
+        		//ISet simulatedPost = this.minimizeGuess(post);
+        		//ISet simulatedInit = this.minimizeGuess(leadingSet);
+//        		System.out.println("post = " + post );
+//        		System.out.println("lset = " + leadingSet);
+        		if(! isBwSimulated(post, leadingSet)) {
         			return false;
         		}
         		// we need it to be accepted by complement language
-        		return ! UtilCongruence.decideAcceptanceSim(leadingSet, level, fsim);
+        		return ! UtilCongruence.decideAcceptanceSim(leadingSet, level, fsim, bsim);
         	}
     	}
     }
 
-	private boolean bisimulated(ISet left, ISet right) {
-		boolean result = false;
-		ISet minLeft = this.strongMinimizeGuess(left);
-		ISet minRight = this.strongMinimizeGuess(right);
-		return false;
+	private boolean isBwSimulated(ISet left, ISet right) {
+		for(int p : left) {
+			boolean simulated = false;
+			for(int q : right) {
+				if(bsim[p][q]) {
+					simulated = true;
+					break;
+				}
+			}
+			if(!simulated) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

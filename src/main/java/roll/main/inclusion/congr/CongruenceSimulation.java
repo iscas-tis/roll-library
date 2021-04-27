@@ -1043,7 +1043,7 @@ public class CongruenceSimulation implements IsIncluded {
 	// decide whether there exists an accepting run in B from states in sim
 	// all states on the left are from pref
 	private boolean decideAcceptance(ISet pref, TreeSet<IntBoolTriple> period) {
-		return UtilCongruence.decideAcceptanceSim(pref, period, fwSimB);
+		return UtilCongruence.decideAcceptanceSim(pref, period, fwSimB, bwSimB);
 //		System.out.println("pref: " + pref);
 //		System.out.println("period: " + period);
 //		System.out.println("Start deciding acceptance ...");

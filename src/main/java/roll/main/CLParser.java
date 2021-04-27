@@ -330,6 +330,16 @@ public class CLParser {
             }
             if(args[i].compareTo("-sim") == 0) {
             	options.simulation = true;
+            	options.fwSimulation = true;
+            	options.bwSimulation = true;
+            	continue;
+            }
+            if(args[i].compareTo("-bsim") == 0) {
+            	options.bwSimulation = true;
+            	continue;
+            }
+            if(args[i].compareTo("-fsim") == 0) {
+            	options.fwSimulation = true;
             	continue;
             }
             if(args[i].compareTo("-min") == 0) {
@@ -434,7 +444,9 @@ public class CLParser {
         	, new Pair<>("-fin", "Interpret the input LTL formula over finite words")
         	, new Pair<>("-p <prob>", "Probability to terminate during sampling")
         	, new Pair<>("-congr", "Use congruence-based algorithm for inclusion checking")
-        	, new Pair<>("-sim", "Use simulation in congruence-based algorithm")
+        	, new Pair<>("-sim", "Use forward/backward simulation in congruence-based algorithm")
+        	, new Pair<>("-bsim", "Use backward simulation in congruence-based algorithm")
+        	, new Pair<>("-fsim", "Use forward simulation in congruence-based algorithm")
 //        	, new Pair<>("-f <ltl>", "Convert LTL to limit deterministic BA")
 //        	, new Pair<>("-fdfa", "FDFA as the learning target")
 //        	, new Pair<>("-nba", "NBA as the learning target")
