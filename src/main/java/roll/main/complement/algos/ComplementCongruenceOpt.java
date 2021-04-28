@@ -30,7 +30,7 @@ public class ComplementCongruenceOpt extends Complement {
 	protected TObjectIntMap<StateCongruenceOpt> stateIndices;
 	
 	protected NBA result;
-	boolean debug = true;
+	boolean debug = false;
 	
 	public ComplementCongruenceOpt(Options options, NBA operand) {
 		super(options, operand);
@@ -199,7 +199,7 @@ public class ComplementCongruenceOpt extends Complement {
 				castDFA = proDFAs.get(i);
 			}
 			castDFAs.add(i, castDFA);
-			if(false) {
+			if(debug) {
 				System.out.println("proDFA " + i);
 				System.out.println(castDFA.toBA());
 			}
@@ -210,7 +210,7 @@ public class ComplementCongruenceOpt extends Complement {
 		}
 //		System.out.println("leading DFA size: " + leadingDFA.getStateSize() + " progress Size " + castDFAs.size() );
 		FDFA fdfa = new FDFA(leadingDFA, castDFAs);
-		if(false) {
+		if(debug) {
 			ArrayList<String> apList = new ArrayList<>();
 			for(int c = 0; c < this.getAlphabetSize(); c ++) {
 				apList.add("a" + c);

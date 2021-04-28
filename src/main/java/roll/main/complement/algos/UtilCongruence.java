@@ -228,9 +228,9 @@ public class UtilCongruence {
 				break;
 			}
 		}
-		System.out.println("pref: " + pref);
-		System.out.println("period: " + period);
-		System.out.println("acc = " + accepting);
+//		System.out.println("pref: " + pref);
+//		System.out.println("period: " + period);
+//		System.out.println("acc = " + accepting);
 		return accepting;
 	}
 
