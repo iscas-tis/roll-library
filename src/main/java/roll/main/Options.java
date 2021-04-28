@@ -94,6 +94,7 @@ public class Options {
     public boolean simulation = false;
     public boolean fwSimulation = false;
     public boolean bwSimulation = false;
+    public boolean congrOpt = false;
     // minimize graphs
     public boolean minimization = false;
     
