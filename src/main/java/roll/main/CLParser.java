@@ -328,6 +328,10 @@ public class CLParser {
             	options.congruence = true;
             	continue;
             }
+            if(args[i].compareTo("-congro") == 0) {
+            	options.congrOpt = true;
+            	continue;
+            }
             if(args[i].compareTo("-sim") == 0) {
             	options.simulation = true;
             	options.fwSimulation = true;
@@ -444,6 +448,7 @@ public class CLParser {
         	, new Pair<>("-fin", "Interpret the input LTL formula over finite words")
         	, new Pair<>("-p <prob>", "Probability to terminate during sampling")
         	, new Pair<>("-congr", "Use congruence-based algorithm for inclusion checking")
+        	, new Pair<>("-congro", "Use asympotically optimal congruence-based algorithm for inclusion checking")
         	, new Pair<>("-sim", "Use forward/backward simulation in congruence-based algorithm")
         	, new Pair<>("-bsim", "Use backward simulation in congruence-based algorithm")
         	, new Pair<>("-fsim", "Use forward simulation in congruence-based algorithm")

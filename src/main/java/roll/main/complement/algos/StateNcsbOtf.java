@@ -103,6 +103,9 @@ public class StateNcsbOtf extends StateNFA {
 			StateNcsbOtf succ = complement.getOrAddState(ncsb);
 			super.addTransition(letter, succ.getId());
 			succs.set(succ.getId());
+			if(complement.debug) {
+				System.out.println(this.getId() + ": " + this + " - " + letter + " -> " + succ.getId() + ": " + succ);
+			}
 		}
 
 		return succs;

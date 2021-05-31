@@ -169,5 +169,69 @@ public class UtilCongruence {
 //		System.out.println("acc = " + accepting);
 		return accepting;
 	}
+	
+	public static boolean decideAcceptanceOpt(ArrayList<ISet> pref, CongruenceClassOpt period, ISet finals) {
+		Alphabet alphabet = new Alphabet();
+		alphabet.addLetter('0');
+		alphabet.addLetter('1');
+		TObjectIntMap<ISet> fromMap = new TObjectIntHashMap<>();
+//		ArrayList<IntBoolTriple> toMap = new ArrayList<>();
+		NBA nba = new NBA(alphabet);
+		ISet inits = UtilISet.newISet();
+		int num = 0;
+		for(int i = 0; i < pref.size(); i ++) {
+			fromMap.put(pref.get(i), num);
+//			toMap.add(tpl);
+			inits.set(i);
+			nba.createState();
+			num ++;
+//			assert toMap.size() == num;
+			assert nba.getStateSize() == num;
+		}
+		// now add transition
+		for(int i = 0; i < pref.size(); i ++) {
+			ISet from = pref.get(i);
+			int s = fromMap.get(from);
+			for(int j = 0; j < pref.size(); j ++) {
+				ISet to = period.getSet(j);
+				int t = fromMap.get(to);
+				// can be simulated
+				if(period.getMaxPres(j).getLeft() == i) {
+					if(period.getMaxPres(j).getRight()) {
+						nba.getState(s).addTransition(0 , t);
+					}else {
+						nba.getState(s).addTransition(1 , t);
+					}
+				}
+			}
+		}
+		// now we compute the SCCs
+		ISet localFinals = nba.getFinalStates();
+		TarjanSCCsNonrecursive tarjan = new TarjanSCCsNonrecursive(nba, inits);
+		boolean accepting = false;
+		for(ISet scc : tarjan.getSCCs()) {
+			if(localFinals.overlap(scc)) {
+				accepting = true;
+				break;
+			}else {
+				// check the transitions
+				for(int p : scc) {
+					for(int q : nba.getState(p).getSuccessors(0)) {
+						if (!scc.get(q)) continue;
+						accepting = true;
+						break;
+					}
+					if(accepting) break;
+				}
+			}
+			if(accepting) {
+				break;
+			}
+		}
+//		System.out.println("pref: " + pref);
+//		System.out.println("period: " + period);
+//		System.out.println("acc = " + accepting);
+		return accepting;
+	}
 
 }

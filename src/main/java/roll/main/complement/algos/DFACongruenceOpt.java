@@ -10,23 +10,17 @@ import roll.main.inclusion.congr.IntBoolTriple;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
 
-public class DFACongruence extends DFA {
+public class DFACongruenceOpt extends DFA {
 	
 	protected NBA operand;
-	protected CongruenceClass initCongrCls;
-	protected TObjectIntMap<StateDFA> localIndices;
-	protected ISet inits;
+	protected CongruenceClassOpt initCongrCls;
+	protected TObjectIntMap<StateDFAOpt> localIndices;
 	
-	public DFACongruence(NBA operand, CongruenceClass initCongCls) {
+	public DFACongruenceOpt(NBA operand, CongruenceClassOpt initCongCls) {
 		super(operand.getAlphabet());
 		this.operand = operand;
 		this.initCongrCls = initCongCls;
 		this.localIndices = new TObjectIntHashMap<>();
-		if(! initCongrCls.isSet) {
-			this.inits = this.getReachSet(initCongrCls.level);
-		}else {
-			this.inits = UtilISet.newISet();
-		}
 	}
 	
 	protected NBA getOperand() {
@@ -35,7 +29,7 @@ public class DFACongruence extends DFA {
 	
 	protected void computeInitialState() {
 		// map from global index to local index
-		StateDFA state = this.getOrAddState(initCongrCls);
+		StateDFAOpt state = this.getOrAddState(initCongrCls);
 		this.setInitial(state.getId());
 	}
 	
@@ -48,21 +42,21 @@ public class DFACongruence extends DFA {
 	}
 
 	
-	protected StateDFA getOrAddState(CongruenceClass congrCls) {
-		StateDFA state = new StateDFA(this, 0, congrCls);
+	protected StateDFAOpt getOrAddState(CongruenceClassOpt congrCls) {
+		StateDFAOpt state = new StateDFAOpt(this, 0, congrCls);
 		if (localIndices.containsKey(state)) {
 			// this StateDFA already computed
 			int localIndex = localIndices.get(state);
-			return getStateDFA(localIndex);
+			return getStateDFAOpt(localIndex);
 		} else {
 			int localIndex = getStateSize();
-			StateDFA newState = new StateDFA(this, localIndex, congrCls);
+			StateDFAOpt newState = new StateDFAOpt(this, localIndex, congrCls);
 			int id = this.addState(newState);
 			if (id != localIndex) {
 				throw new RuntimeException("ComplementCongruence state index error");
 			}
 			localIndices.put(newState, localIndex);
-			if (! congrCls.isSet && congrCls.isAccepted(this.inits)) {
+			if (congrCls.isProgress() && congrCls.isAccepted(initCongrCls, operand.getFinalStates())) {
 				// now decide if it is subsumed by initCongr 
 				setFinal(localIndex);
 //				System.out.println("Acc state = " + congrCls + ", init = " + this.inits);
@@ -71,8 +65,8 @@ public class DFACongruence extends DFA {
 		}
 	}
 	
-	public StateDFA getStateDFA(int id) {
-		return (StateDFA) getState(id);
+	public StateDFAOpt getStateDFAOpt(int id) {
+		return (StateDFAOpt) getState(id);
 	}
 
 }

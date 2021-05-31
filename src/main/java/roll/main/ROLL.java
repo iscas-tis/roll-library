@@ -40,6 +40,7 @@ import roll.learner.nba.lomega.translator.TranslatorFDFA;
 import roll.learner.nba.lomega.translator.TranslatorFDFAUnder;
 import roll.main.complement.TeacherNBAComplement;
 import roll.main.complement.algos.ComplementCongruence;
+import roll.main.complement.algos.ComplementCongruenceOpt;
 import roll.main.inclusion.NBAInclusionCheck;
 import roll.main.ltl2dpa.TeacherLTL2LDBA;
 import roll.main.ltlf2dfa.TeacherLTLf2DFA;
@@ -290,6 +291,9 @@ public final class ROLL {
         NBA complement = null;
         if(options.congruence) {
         	ComplementCongruence complementCongr = new ComplementCongruence(options, input);
+        	complement = complementCongr.getResult();
+        }else if(options.congrOpt){
+        	ComplementCongruenceOpt complementCongr = new ComplementCongruenceOpt(options, input);
         	complement = complementCongr.getResult();
         }else {
         	complement = complement(options, input, comp);
