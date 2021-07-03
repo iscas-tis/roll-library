@@ -30,6 +30,11 @@ public class StateNcsbOtf extends StateNFA {
 			return super.getSuccessors(letter);
 		}
 		visitedLetters.set(letter);
+		// S， first compute S, may terminate early
+		succResult = UtilNcsb.collectSuccessors(operand, ncsb.getSSet(), letter, false);
+		if(!succResult.hasSuccessor) return UtilISet.newISet();
+		ISet SSuccs = succResult.succs;
+		
 		// B
 		SuccessorResult succResult = UtilNcsb.collectSuccessors(operand, ncsb.getBSet(), letter, true);
 		if(!succResult.hasSuccessor) return UtilISet.newISet();
@@ -52,11 +57,6 @@ public class StateNcsbOtf extends StateNFA {
 		succResult = UtilNcsb.collectSuccessors(operand, ncsb.getNSet(), letter, false);
 		if(!succResult.hasSuccessor) return UtilISet.newISet();
 		ISet NSuccs = succResult.succs;
-
-		// S
-		succResult = UtilNcsb.collectSuccessors(operand, ncsb.getSSet(), letter, false);
-		if(!succResult.hasSuccessor) return UtilISet.newISet();
-		ISet SSuccs = succResult.succs;
 		
 		return computeSuccessors(new NCSB(NSuccs, CSuccs, SSuccs, BSuccs), minusFSuccs, interFSuccs, letter);
 	}
