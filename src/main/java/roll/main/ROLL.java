@@ -41,6 +41,7 @@ import roll.learner.nba.lomega.translator.TranslatorFDFAUnder;
 import roll.main.complement.TeacherNBAComplement;
 import roll.main.complement.algos.ComplementCongruence;
 import roll.main.complement.algos.ComplementCongruenceOpt;
+import roll.main.complement.algos.ComplementNcsbOtf;
 import roll.main.inclusion.NBAInclusionCheck;
 import roll.main.ltl2dpa.TeacherLTL2LDBA;
 import roll.main.ltlf2dfa.TeacherLTLf2DFA;
@@ -289,7 +290,11 @@ public final class ROLL {
         Parser parser = UtilParser.prepare(options, options.inputFile, options.format);
         NBA input = parser.parse();
         NBA complement = null;
-        if(options.congruence) {
+        if(options.ncsb) {
+        	ComplementNcsbOtf complementNcsb = new ComplementNcsbOtf(options, input);
+        	options.lazyS = options.lazyB = true;
+        	complement = complementNcsb.getResult();
+        }else if(options.congruence) {
         	ComplementCongruence complementCongr = new ComplementCongruence(options, input);
         	complement = complementCongr.getResult();
         }else if(options.congrOpt){

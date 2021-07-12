@@ -332,6 +332,10 @@ public class CLParser {
             	options.congrOpt = true;
             	continue;
             }
+            if(args[i].compareTo("-ncsb") == 0) {
+            	options.ncsb = true;
+            	continue;
+            }
             if(args[i].compareTo("-sim") == 0) {
             	options.simulation = true;
             	options.fwSimulation = true;
@@ -447,6 +451,7 @@ public class CLParser {
         	, new Pair<>("-par", "RABIT and Spot work in parallel in the complement teacher")
         	, new Pair<>("-fin", "Interpret the input LTL formula over finite words")
         	, new Pair<>("-p <prob>", "Probability to terminate during sampling")
+        	, new Pair<>("-ncsb", "Use NCSB algorithm for complementation")
         	, new Pair<>("-congr", "Use congruence-based algorithm for inclusion checking")
 //        	, new Pair<>("-congr", "Use congruence-based algorithm for inclusion checking")
         	, new Pair<>("-sim", "Use forward/backward simulation in congruence-based algorithm")

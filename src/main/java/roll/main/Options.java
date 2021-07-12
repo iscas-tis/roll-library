@@ -99,6 +99,7 @@ public class Options {
     public boolean minimization = false;
     
     // NCSB complementation
+    public boolean ncsb = false;
     public boolean lazyS = false;
     public boolean lazyB = true;
 
@@ -259,6 +260,7 @@ public class Options {
         builder.append("outputA=" + outputA + ",");
         builder.append("outputB=" + outputB + ",");
         builder.append("congruence=" + congruence + ",");
+        builder.append("ncsb=" + ncsb + ",");
         builder.append("fwSimulation=" + fwSimulation + ",");
         builder.append("bwSimulation=" + bwSimulation + "\n");
         return builder.toString();
