@@ -291,6 +291,9 @@ public final class ROLL {
         NBA input = parser.parse();
         NBA complement = null;
         if(options.ncsb) {
+        	if(!input.isLimitdeterministic()) {
+        		options.log.println("Input is not limit-deterministic; the output may not be correct!");
+        	}
         	ComplementNcsbOtf complementNcsb = new ComplementNcsbOtf(options, input);
         	options.lazyS = options.lazyB = true;
         	complement = complementNcsb.getResult();
