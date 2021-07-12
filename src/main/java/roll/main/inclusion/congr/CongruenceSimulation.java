@@ -44,7 +44,7 @@ import roll.util.sets.UtilISet;
 import roll.words.Word;
 
 // This algorithm is inspired by simulation relation and the work 
-//	Congruence Relations for B\"uchi Automata submitted to ICALP'21
+//	Congruence Relations for B\"uchi Automata 
 // We actually can define congruence relations for language inclusion checking
 
 public class CongruenceSimulation implements IsIncluded {

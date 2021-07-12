@@ -30,8 +30,14 @@ public class StateNcsbOtf extends StateNFA {
 			return super.getSuccessors(letter);
 		}
 		visitedLetters.set(letter);
+		// S, can terminate when S has final successors
+		SuccessorResult succResult = UtilNcsb.collectSuccessors(operand, ncsb.getSSet(), letter, false);
+		ISet SSuccs = succResult.succs;
+		if(!succResult.hasSuccessor || SSuccs.overlap(operand.getFinalStates())) {
+			return UtilISet.newISet(); 
+		}
 		// B
-		SuccessorResult succResult = UtilNcsb.collectSuccessors(operand, ncsb.getBSet(), letter, true);
+		succResult = UtilNcsb.collectSuccessors(operand, ncsb.getBSet(), letter, true);
 		if(!succResult.hasSuccessor) return UtilISet.newISet();
 		ISet BSuccs = succResult.succs;
 		ISet minusFSuccs = succResult.minusFSuccs;
@@ -47,16 +53,14 @@ public class StateNcsbOtf extends StateNFA {
 		CSuccs.or(BSuccs);
 		minusFSuccs.or(succResult.minusFSuccs);
 		interFSuccs.or(succResult.interFSuccs);
+		if(minusFSuccs.overlap(SSuccs)) {
+			return UtilISet.newISet();
+		}
 		
 		// N
 		succResult = UtilNcsb.collectSuccessors(operand, ncsb.getNSet(), letter, false);
 		if(!succResult.hasSuccessor) return UtilISet.newISet();
 		ISet NSuccs = succResult.succs;
-
-		// S
-		succResult = UtilNcsb.collectSuccessors(operand, ncsb.getSSet(), letter, false);
-		if(!succResult.hasSuccessor) return UtilISet.newISet();
-		ISet SSuccs = succResult.succs;
 		
 		return computeSuccessors(new NCSB(NSuccs, CSuccs, SSuccs, BSuccs), minusFSuccs, interFSuccs, letter);
 	}
@@ -86,10 +90,10 @@ public class StateNcsbOtf extends StateNFA {
 	private ISet computeSuccessors(NCSB succNCSB, ISet minusFSuccs
 			, ISet interFSuccs, int letter) {
 		// check d(S) and d(C)
-		if(succNCSB.getSSet().overlap(operand.getFinalStates())
-		|| minusFSuccs.overlap(succNCSB.getSSet())) {
-			return UtilISet.newISet();
-		}
+//		if(succNCSB.getSSet().overlap(operand.getFinalStates())
+//		|| minusFSuccs.overlap(succNCSB.getSSet())) {
+//			return UtilISet.newISet();
+//		}
 		SuccessorGenerator generator = new SuccessorGenerator(complement.getOptions()
 				                                            , ncsb.getBSet().isEmpty()
 															, succNCSB

@@ -453,7 +453,7 @@ public class CLParser {
         	, new Pair<>("-p <prob>", "Probability to terminate during sampling")
         	, new Pair<>("-ncsb", "Use NCSB algorithm for complementation")
         	, new Pair<>("-congr", "Use congruence-based algorithm for inclusion checking")
-//        	, new Pair<>("-congr", "Use congruence-based algorithm for inclusion checking")
+        	, new Pair<>("-congro", "Use asympotically optimal congruence-based algorithm for inclusion checking")
         	, new Pair<>("-sim", "Use forward/backward simulation in congruence-based algorithm")
         	, new Pair<>("-bsim", "Use backward simulation in congruence-based algorithm")
         	, new Pair<>("-fsim", "Use forward simulation in congruence-based algorithm")
