@@ -22,9 +22,11 @@ import roll.automata.NBA;
 import roll.automata.operations.FDFAOperations;
 import roll.automata.operations.NBAOperations;
 import roll.learner.fdfa.LearnerFDFA;
+import roll.learner.fdfa.table.LearnerFDFATableLimit;
 import roll.learner.fdfa.table.LearnerFDFATablePeriodic;
 import roll.learner.fdfa.table.LearnerFDFATableRecurrent;
 import roll.learner.fdfa.table.LearnerFDFATableSyntactic;
+import roll.learner.fdfa.tree.LearnerFDFATreeLimit;
 import roll.learner.fdfa.tree.LearnerFDFATreePeriodic;
 import roll.learner.fdfa.tree.LearnerFDFATreeRecurrent;
 import roll.learner.fdfa.tree.LearnerFDFATreeSyntactic;
@@ -56,6 +58,9 @@ public class UtilLOmega {
             case RECURRENT:
                 fdfaLearner = new LearnerFDFATableRecurrent(options, alphabet, membershipOracle);
                 break;
+            case LIMIT:
+            	fdfaLearner = new LearnerFDFATableLimit(options, alphabet, membershipOracle);
+            	break;
             default:
                 throw new UnsupportedOperationException("Unknown FDFA learner");
             }
@@ -70,6 +75,9 @@ public class UtilLOmega {
             case RECURRENT:
                 fdfaLearner = new LearnerFDFATreeRecurrent(options, alphabet, membershipOracle);
                 break;
+            case LIMIT:
+            	fdfaLearner = new LearnerFDFATreeLimit(options, alphabet, membershipOracle);
+            	break;
             default:
                 throw new UnsupportedOperationException("Unknown FDFA learner");
             }

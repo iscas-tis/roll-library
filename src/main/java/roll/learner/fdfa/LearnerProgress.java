@@ -19,6 +19,7 @@ package roll.learner.fdfa;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
 import roll.table.HashableValueBooleanPair;
+import roll.table.HashableValueImplBoolPair;
 import roll.table.HashableValueIntEnum;
 import roll.words.Word;
 
@@ -36,6 +37,11 @@ public interface LearnerProgress extends LearnerGeneral {
     // only for recurrent FDFA
     default HashableValue getHashableValueBoolPair(boolean recur, boolean mq) {
         return new HashableValueBooleanPair(recur, mq);
+    }
+    
+    // only for limit FDFA
+    default HashableValue getHashableValueImplBoolPair(boolean recur, boolean mq) {
+        return new HashableValueImplBoolPair(recur, mq);
     }
     
 //    default HashableValue getHashableValueBoolExactPair(boolean recur, boolean mq) {

@@ -171,7 +171,8 @@ public class Options {
         NBA_LDOLLAR,
         PERIODIC,
         SYNTACTIC,
-        RECURRENT;
+        RECURRENT,
+        LIMIT;
         
         boolean isTargetDFA() {
             return this == DFA_LSTAR || this == DFA_COLUMN|| this == DFA_KV;

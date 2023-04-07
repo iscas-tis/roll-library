@@ -113,7 +113,8 @@ public class Executor {
             learner = new LearnerNBALDollar(options, alphabet, teacher);
         }else if(options.algorithm == Options.Algorithm.PERIODIC
              || options.algorithm == Options.Algorithm.SYNTACTIC
-             || options.algorithm == Options.Algorithm.RECURRENT) {
+             || options.algorithm == Options.Algorithm.RECURRENT
+             || options.algorithm == Options.Algorithm.LIMIT) {
             learner = new LearnerNBALOmega(options, alphabet, teacher);
         }else {
             throw new UnsupportedOperationException("Unsupported BA Learner");

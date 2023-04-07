@@ -14,42 +14,38 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner;
+
+package roll.learner.fdfa.table;
+
+import roll.learner.fdfa.LearnerFDFA;
+import roll.learner.fdfa.LearnerLeading;
+import roll.learner.fdfa.LearnerProgress;
+import roll.main.Options;
+import roll.oracle.MembershipOracle;
+import roll.table.HashableValue;
+import roll.words.Alphabet;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public enum LearnerType {
-	
-	DFA_LSTAR,
-	DFA_COLUMN_TREE,
-	DFA_COLUMN_TABLE,
-	DFA_KV,
-	NFA_NLSTAR,
-	NFA_RDSTAR,
-	NFA_RDFA,
-	WEIGHT,
-	NBA_FDFA,
-	DPA_FDFA,
-	NBA_LDOLLAR,
-	NBA_MP,
-	
-	// FDFA
-	
-	FDFA,
-	FNFA,
-	
-	FDFA_LEADING_TABLE,
-	FDFA_LEADING_TREE,
-	
-	FDFA_PERIODIC_TABLE,
-	FDFA_SYNTACTIC_TABLE,
-	FDFA_RECURRENT_TABLE,
-	FDFA_LIMIT_TABLE,
-	
-	FDFA_PERIODIC_TREE,
-	FDFA_SYNTACTIC_TREE,
-	FDFA_RECURRENT_TREE,
-	FDFA_LIMIT_TREE
-	
+
+public class LearnerFDFATableLimit extends LearnerFDFA {
+
+	public LearnerFDFATableLimit(Options options, Alphabet alphabet,
+            MembershipOracle<HashableValue> membershipOracle) {
+        super(options, alphabet, membershipOracle);
+    }
+
+    @Override
+    protected LearnerLeading getLearnerLeading() {
+        return new LearnerLeadingTable(options, alphabet, membershipOracle);
+    }
+
+    @Override
+    protected LearnerProgress getLearnerProgress(int state) {
+        assert learnerLeading != null;
+        return new LearnerProgressTableLimit(options, alphabet, membershipOracle, learnerLeading, state);
+    }
+
 }
+

@@ -14,42 +14,30 @@
 /* You should have received a copy of the GNU General Public License      */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-package roll.learner;
+package roll.table;
+
+import roll.util.Pair;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public enum LearnerType {
+public class HashableValueImplBoolPair extends HashableValueBooleanPair{
+		
+	public HashableValueImplBoolPair(boolean left, boolean right) {
+		super(left, right);
+	}
 	
-	DFA_LSTAR,
-	DFA_COLUMN_TREE,
-	DFA_COLUMN_TABLE,
-	DFA_KV,
-	NFA_NLSTAR,
-	NFA_RDSTAR,
-	NFA_RDFA,
-	WEIGHT,
-	NBA_FDFA,
-	DPA_FDFA,
-	NBA_LDOLLAR,
-	NBA_MP,
+	// specialized for limit FDFAs
+	@Override
+	public boolean isAccepting() {
+		return !valueLeft || valueRight ;
+	}
 	
-	// FDFA
-	
-	FDFA,
-	FNFA,
-	
-	FDFA_LEADING_TABLE,
-	FDFA_LEADING_TREE,
-	
-	FDFA_PERIODIC_TABLE,
-	FDFA_SYNTACTIC_TABLE,
-	FDFA_RECURRENT_TABLE,
-	FDFA_LIMIT_TABLE,
-	
-	FDFA_PERIODIC_TREE,
-	FDFA_SYNTACTIC_TREE,
-	FDFA_RECURRENT_TREE,
-	FDFA_LIMIT_TREE
-	
+	@Override
+	public boolean valueEqual(HashableValue rvalue) {
+	    boolean left = !valueLeft || valueRight;
+	    boolean right = !(Boolean)rvalue.getLeft() || (Boolean)rvalue.getRight();
+		return left == right;
+	}
+
 }

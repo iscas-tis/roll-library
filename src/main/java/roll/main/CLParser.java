@@ -266,6 +266,10 @@ public class CLParser {
                 options.algorithm = Options.Algorithm.SYNTACTIC;
                 continue;
             }
+            if(args[i].compareTo("-limit") == 0) {
+                options.algorithm = Options.Algorithm.LIMIT;
+                continue;
+            }
             if(args[i].compareTo("-recurrent") == 0) {
                 options.algorithm = Options.Algorithm.RECURRENT;
                 continue;
@@ -440,6 +444,7 @@ public class CLParser {
         	, new Pair<>("-ldollar", "L$ automata for learning w-regular language")
         	, new Pair<>("-periodic", "Peridoc FDFA for learning w-regular language")
         	, new Pair<>("-recurrent", "Recurrent FDFA for learning w-regular languages")
+        	, new Pair<>("-limit", "Limit FDFA for learning w-regular languages")
         	, new Pair<>("-syntactic", "Syntactic FDFA for learning w-regular languages (Default)")
         	, new Pair<>("-over", "Over-approximation in BA construction for FDFA")
         	, new Pair<>("-under", "Under-approximation in BA construction for FDFA (Default)")

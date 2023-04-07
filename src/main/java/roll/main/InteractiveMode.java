@@ -77,7 +77,8 @@ public class InteractiveMode {
         if(options.algorithm == Options.Algorithm.NBA_LDOLLAR
              || options.algorithm == Options.Algorithm.PERIODIC
              || options.algorithm == Options.Algorithm.SYNTACTIC
-             || options.algorithm == Options.Algorithm.RECURRENT) {
+             || options.algorithm == Options.Algorithm.RECURRENT
+             || options.algorithm == Options.Algorithm.LIMIT) {
             return new MQNBAInteractive(kb);
         }else if(options.algorithm == Options.Algorithm.DFA_COLUMN
              || options.algorithm == Options.Algorithm.DFA_LSTAR
@@ -93,7 +94,8 @@ public class InteractiveMode {
         if(options.algorithm == Options.Algorithm.NBA_LDOLLAR
                 || options.algorithm == Options.Algorithm.PERIODIC
                 || options.algorithm == Options.Algorithm.SYNTACTIC
-                || options.algorithm == Options.Algorithm.RECURRENT) {
+                || options.algorithm == Options.Algorithm.RECURRENT
+                || options.algorithm == Options.Algorithm.LIMIT) {
                return getOmegaCeWord(alphabet);
            }else if(options.algorithm == Options.Algorithm.DFA_COLUMN
                 || options.algorithm == Options.Algorithm.DFA_LSTAR
@@ -112,7 +114,8 @@ public class InteractiveMode {
             learner = (LearnerBase<? extends NFA>)new LearnerNBALDollar(options, alphabet, teacher);
         }else if(options.algorithm == Options.Algorithm.PERIODIC
              || options.algorithm == Options.Algorithm.SYNTACTIC
-             || options.algorithm == Options.Algorithm.RECURRENT) {
+             || options.algorithm == Options.Algorithm.RECURRENT
+             || options.algorithm == Options.Algorithm.LIMIT) {
             learner = new LearnerNBALOmega(options, alphabet, teacher);
         }else if(options.algorithm == Options.Algorithm.DFA_COLUMN) {
             if(options.structure == Options.Structure.TABLE) {

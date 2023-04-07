@@ -23,7 +23,7 @@ import roll.util.Pair;
  * */
 public class HashableValueBooleanPair implements HashableValue {
 	
-	private boolean valueLeft, valueRight ;
+	protected boolean valueLeft, valueRight ;
 	
 	public HashableValueBooleanPair(boolean left, boolean right) {
 		this.valueLeft  = left;
