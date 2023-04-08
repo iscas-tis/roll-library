@@ -33,6 +33,8 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import roll.automata.NBA;
 import roll.automata.StateNFA;
+import roll.automata.TDBA;
+import roll.util.Pair;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
@@ -281,5 +283,60 @@ public class NBAOperations {
         result.setInitial(0);
         return result;
     }
+    
+    private static int getState(NBA nba, Pair<Integer, Integer> p
+    		, TObjectIntMap<Pair<Integer, Integer>> map) {
+        if(map.containsKey(p)) {
+            return map.get(p);
+        }
+        StateNFA nbaState = nba.createState();
+        map.put(p, nbaState.getId());
+        return nbaState.getId();
+    }
+    
+    // translate transition-based DBA to state-based NBA
+    public static NBA fromTDBA(TDBA tdba) {
+    	NBA res = new NBA(tdba.getAlphabet());
+    	// now traverse the tDBA
+//    	Pair<Integer, Boolean> mm;
+    	TObjectIntMap<Pair<Integer, Integer>> map = new TObjectIntHashMap<>();
+    	int init = getState(res, new Pair<>(tdba.getInitialState(), -1), map);
+    	ISet visited = UtilISet.newISet();
+    	LinkedList<Pair<Integer, Integer>> queue = new LinkedList<>();
+        queue.add(new Pair<>(tdba.getInitialState(), -1));
+//        visited.set(init);
+        // setting the initial state
+        res.setInitial(init);
+//        System.out.println("Init: " + init);
 
+    	while(! queue.isEmpty()) {
+            Pair<Integer, Integer> lState = queue.remove();
+            int rState = getState(res, lState, map);
+//            System.out.println("State: " + lState.getLeft() + " Letter: " + lState.getRight());
+            // ignore visited states
+            if(visited.get(rState)) continue;
+            visited.set(rState);
+            for(int c = 0; c < tdba.getAlphabetSize(); c ++) {
+                for(int lSucc : tdba.getSuccessors(lState.getLeft(), c)) {
+                	boolean acSucc = tdba.isFinal(lState.getLeft(), c); 
+                	Pair<Integer, Integer> rpSucc = new Pair<>(lSucc
+                			, acSucc ? c : -1);
+                    int rSucc = getState(res, rpSucc, map);
+                    // record outgoing transitions
+                    res.getState(rState).addTransition(c, rSucc);
+//                    System.out.println(rState + " -> " + rSucc + " : " + c);
+                    if(! visited.get(rSucc)) {
+                        queue.add(rpSucc);
+//                        visited.set(lSucc);
+                    }
+                    if (acSucc) {
+                    	res.setFinal(rSucc);
+//                    	System.out.println("Acc: " + rSucc);
+                    }
+                }
+            }
+    	}
+    	
+    	return res;
+    }
 }

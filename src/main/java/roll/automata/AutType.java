@@ -26,6 +26,7 @@ public enum AutType {
 	FDFA,
 	FNFA,
 	NBA,
+	TDBA,
 	RABIN,
 	STREET,
 	PARITY;
@@ -62,6 +63,10 @@ public enum AutType {
 		return this == PARITY;
 	}
 	
+	public boolean isTDBA() {
+		return this == TDBA;
+	}
+	
 	
 	public String toString() {
 		if(this == DFA) {
@@ -77,7 +82,9 @@ public enum AutType {
 		}else if(this == RABIN) {
 			return "RABIN";
 		}else if(this == STREET) {
-				return "STREET";
+			return "STREET";
+		}else if (this == TDBA){
+			return "TDBA";
 		}else {
 			return "PARITY";
 		}
