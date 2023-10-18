@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.TreeSet;
 
+import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import roll.automata.AcceptNBA;
@@ -118,6 +119,12 @@ public class CongruenceSimulation implements IsIncluded {
 	Options options;
 	boolean minimizePrefix = false;
 	boolean minimizePeriod = false;
+	
+	// state to SCC index map
+	TIntIntMap sccInfoB;
+	
+	TIntIntMap sccInfoA;
+	
 
 	public CongruenceSimulation(NBA A, NBA B, Options options) {
 		this.A = A;
@@ -158,6 +165,26 @@ public class CongruenceSimulation implements IsIncluded {
 			}
 		}
 		periodSim = new TIntObjectHashMap<>();
+		ISet inits = UtilISet.newISet();
+		inits.set(B.getInitialState());
+		TarjanSCCsNonrecursive tarjan = new TarjanSCCsNonrecursive(B, inits);
+		int num = 0;
+		for(ISet scc : tarjan.getSCCs()) {
+			for (int s : scc) {
+				sccInfoB.put(s, num);
+			}
+			num ++;
+		}
+		inits.clear();
+		inits.set(A.getInitialState());
+		tarjan = new TarjanSCCsNonrecursive(A, inits);
+		num = 0;
+		for(ISet scc : tarjan.getSCCs()) {
+			for (int s : scc) {
+				sccInfoA.put(s, num);
+			}
+			num ++;
+		}
 		this.useSimulation = options.simulation || options.minimization;
 		this.useSimulationAB = options.simulation || options.minimization;
 		this.minimizePrefix = options.simulation || options.minimization;

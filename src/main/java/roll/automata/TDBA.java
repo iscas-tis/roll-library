@@ -4,19 +4,24 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import roll.automata.operations.NBAOperations;
 import roll.util.Pair;
 import roll.util.sets.ISet;
+import roll.util.Triplet;
 import roll.words.Alphabet;
 
 public class TDBA extends DFA {
 	
 	HashSet<Pair<Integer, Integer>> trans;
+	TIntObjectMap<Triplet<Integer, Integer, Integer>> stateMap;
     
 	public TDBA(final Alphabet alphabet) {
         super(alphabet);
         this.accept = new AcceptTDBA(this);
         this.trans = new HashSet<>();
+        this.stateMap = new TIntObjectHashMap<>();
     }
 
     @Override
@@ -41,10 +46,19 @@ public class TDBA extends DFA {
     	return trans.contains(new Pair<>(state, letter));
     }
     
+    // these two methods are designed for CE analysis
+    public void setTriplet(int state, Triplet<Integer, Integer, Integer> tpl) {
+    	stateMap.put(state
+    			, new Triplet<>(tpl.getLeft(), tpl.getMiddle(), tpl.getRight()));
+    }
+    
+    public Triplet<Integer, Integer, Integer> getTriplet(int state) {
+    	return stateMap.get(state);
+    }
+    
     @Override
     public boolean isFinal(int state) {
-    	throw new UnsupportedOperationException("TDBA does not support isFinal(int)");
-
+    	return false;
     }
     
     @Override
@@ -64,7 +78,12 @@ public class TDBA extends DFA {
         builder.append("  rankdir=LR;\n");
         int startNode = this.getStateSize();
         for (int node = 0; node < this.getStateSize(); node++) {
-            builder.append("  " + node + " [label=\"" + node + "\"");
+        	if (stateMap.size() <= 0) {
+        		builder.append("  " + node + " [label=\"" + node + "\"");
+        	}else {
+            	Triplet<Integer, Integer, Integer> tpl = this.getTriplet(node);
+                builder.append("  " + node + " [label=\"" + node + ", " + tpl.toString() + "\"");
+        	}
             builder.append(", shape = circle");
             builder.append("];\n");
             for (int letter = 0; letter < this.getAlphabetSize(); letter ++) {
@@ -87,6 +106,7 @@ public class TDBA extends DFA {
         return builder.toString();
     }
     
+    @Override
     public String toDot() {
         List<String> apList = new ArrayList<>();
         for(int i = 0; i < alphabet.getLetterSize(); i ++) {

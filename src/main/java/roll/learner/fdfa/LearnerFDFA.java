@@ -53,6 +53,32 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
         this.learnerProgress = new ArrayList<>();
     }
     
+    public Word getLeadingStateLabel(int state) {
+    	return learnerLeading.getStateLabel(state);
+    }
+    
+    public Word getProgressStateLabel(int lead, int state) {
+    	assert (lead >= 0 && lead < learnerProgress.size());
+    	return learnerProgress.get(lead).getStateLabel(state);
+    }
+    
+    public Word getProgressNegativeExperiment(int lead, int proState) {
+    	DFA proDFA = this.hypothesis.getProgressFA(lead);
+    	assert (lead >= 0 && lead < learnerProgress.size());
+    	int letter = 0;
+		for (; letter < this.alphabet.getLetterSize(); letter ++) {
+			if (proState != proDFA.getSuccessor(proState, letter)) {
+				break;
+			}
+		}
+		if (letter == this.alphabet.getLetterSize()) {
+			// trapped in sink non-final state
+			return null;
+		}
+		System.out.println("LeadState: " + lead + " proState: " + proState + " letter = " + letter);
+		return learnerProgress.get(lead).getExperimentWordLimit(proState, letter);
+    }
+    
     @Override
     protected void initialize() {
         learnerLeading = getLearnerLeading();
@@ -97,6 +123,40 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
     protected boolean isPeriodic() {
         return false;
     }
+    
+    // the function only for limit FDFA
+    public void refineLeadingDFA(Query<HashableValue> query) {
+    	refineLeadingDFA(query, true);
+    }
+    
+    protected void refineLeadingDFA(Query<HashableValue> query, boolean constructHypo) {
+    	DFA leadDFA = learnerLeading.getHypothesis();
+    	Timer timer = new Timer();
+        timer.start();
+        learnerLeading.refineHypothesis(query);
+        timer.stop();
+        options.stats.timeOfLearnerLeading += timer.getTimeElapsed();
+        
+        timer.start();
+        if(! isPeriodic()) {
+            // Syntactic and Recurrent FDFA should restart progress learning
+            for(LearnerProgress learner : learnerProgress) {
+                learner.startLearning();
+            }
+        }
+        DFA leadDFAPrime = learnerLeading.getHypothesis();
+        // new states, not just one (for table-based leading automaton)
+        for(int state = leadDFA.getStateSize(); state < leadDFAPrime.getStateSize(); state ++) {
+            LearnerProgress learner = getLearnerProgress(state);
+            learner.startLearning();
+            learnerProgress.add(learner);
+        }
+        timer.stop();
+        options.stats.timeOfLearnerProgress += timer.getTimeElapsed();
+        if (constructHypo) {
+        	constructHypothesis();
+        }
+    }
 
     // refine FDFA by counterexample
     @Override
@@ -118,28 +178,7 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
         }
         queryLeading.answerQuery(resultCE);
         if(! resultLabel.equals(resultCE)) { // refine leading automaton
-            Timer timer = new Timer();
-            timer.start();
-            learnerLeading.refineHypothesis(queryLeading);
-            timer.stop();
-            options.stats.timeOfLearnerLeading += timer.getTimeElapsed();
-            
-            timer.start();
-            if(! isPeriodic()) {
-                // Syntactic and Recurrent FDFA should restart progress learning
-                for(LearnerProgress learner : learnerProgress) {
-                    learner.startLearning();
-                }
-            }
-            DFA leadDFAPrime = learnerLeading.getHypothesis();
-            // new states, not just one (for table-based leading automaton)
-            for(int state = leadDFA.getStateSize(); state < leadDFAPrime.getStateSize(); state ++) {
-                LearnerProgress learner = getLearnerProgress(state);
-                learner.startLearning();
-                learnerProgress.add(learner);
-            }
-            timer.stop();
-            options.stats.timeOfLearnerProgress += timer.getTimeElapsed();
+        	refineLeadingDFA(queryLeading, false);
         }else { // refine progress automaton
             Timer timer = new Timer();
             timer.start();

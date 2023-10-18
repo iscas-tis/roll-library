@@ -86,6 +86,12 @@ public class DFAOperations {
     // Transfers a DFA into a dk.brics.automaton
     // with specific initial and final state.
     public static Automaton toDkDFA(DFA dfa, int init, int fin){
+        ISet fins = UtilISet.newISet();
+        fins.set(fin);
+        return toDkDFA(dfa, init, fins);
+    }
+    
+    public static Automaton toDkDFA(DFA dfa, int init, ISet fins){
         Automaton dkAut = new Automaton();
         TIntObjectMap<State> map = new TIntObjectHashMap<>();
         Queue<Integer> queue = new LinkedList<>();
@@ -111,7 +117,10 @@ public class DFAOperations {
             }
         }
         
-        getState(map, fin).setAccept(true);
+        for (int fin : fins) {
+        	getState(map, fin).setAccept(true);
+        }
+        
         dkAut.setDeterministic(true);
         dkAut.restoreInvariant();
         dkAut.minimize();

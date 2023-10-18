@@ -78,6 +78,54 @@ public class NBAGenerator {
 
         return result;
     }
+    
+    public static NBA getRandomDBA(
+            final int numState,
+            final int numLetter) {
+
+        if (numLetter > 5) {
+            throw new UnsupportedOperationException("only allow a,b,c,d,e letters in generated LDBA");
+        }
+        
+        Alphabet alphabet = new Alphabet();
+        char[] letters = { 'a', 'b', 'c', 'd', 'e' };
+
+        for (int i = 0; i < numLetter && i < letters.length; i++) {
+            alphabet.addLetter(letters[i]);
+        }
+
+        NBA result = new NBA(alphabet);
+        Random r = new Random(System.currentTimeMillis());
+
+        for (int i = 0; i < numState; i++) {
+            result.createState();
+        }
+
+        result.setInitial(0);
+        
+        final int numFinals = r.nextInt(numState);
+        
+        // the deterministic states are all in the range 
+        // [ numNondetState, numState)
+        // so the accepting states should be all in this range 
+        for (int i = 0; i < numFinals; i++) {
+            result.setFinal(r.nextInt(numState));
+        }
+        
+        for (int source = 0; source < numState; source++) {
+        	final StateNFA s = result.getState(source);
+        	for (int letter = 0; letter < numLetter; letter ++) {
+        		final int destination = r.nextInt(numState);
+                // the deterministic states are all in the range 
+                        // [ numNondetState, numState)
+                        // so the target state should be all in this range 
+                s.addTransition(letter, destination);
+        	}    
+        }
+    
+        return result;
+    }
+
         
     public static NBA getRandomLDBA(
             final int numState,

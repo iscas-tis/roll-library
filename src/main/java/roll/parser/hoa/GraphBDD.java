@@ -25,6 +25,7 @@ import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
 import net.sf.javabdd.BDD;
 
+// Explicit graph with BDD labels on the edge
 public class GraphBDD {
 	
 	int initialState;

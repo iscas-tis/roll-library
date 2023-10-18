@@ -16,6 +16,7 @@
 
 package roll.learner.fdfa.table;
 
+
 import roll.learner.LearnerType;
 import roll.learner.fdfa.LearnerLeading;
 import roll.learner.fdfa.LearnerProgressLimit;

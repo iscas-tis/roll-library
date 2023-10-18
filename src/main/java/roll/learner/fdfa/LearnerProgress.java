@@ -60,4 +60,7 @@ public interface LearnerProgress extends LearnerGeneral {
     }
     
     int getLeadingState();
+    
+    // return the experiment that distinguish two state and state . letter
+    Word getExperimentWordLimit(int state, int letter);
 }

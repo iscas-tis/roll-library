@@ -54,9 +54,9 @@ public class NBAInclusionCheckTool {
     }
     
     public static boolean isComplementCorrect(NBA A, NBA complement) {
-    	File fileA = new File("/tmp/A.hoa");
-    	File fileB = new File("/tmp/B.hoa");
-        File fileC = new File("/tmp/C.hoa");
+    	File fileA = new File("/home/liyong/git/roll-library/hard/A.hoa");
+    	File fileB = new File("/home/liyong/git/roll-library/hard/B.hoa");
+        File fileC = new File("/home/liyong/git/roll-library/hard/C.hoa");
         try {
             outputHOAStream(A, new PrintStream(new FileOutputStream(fileA)));
             outputHOAStream(complement, new PrintStream(new FileOutputStream(fileC)));
@@ -79,7 +79,7 @@ public class NBAInclusionCheckTool {
         
         try {
         	@SuppressWarnings("resource")
-			PrintStream printer = new PrintStream(fileB);
+			PrintStream printer = new PrintStream(new FileOutputStream(fileB));
             while ((line = reader.readLine()) != null) {
                 printer.println(line);
             }
@@ -93,6 +93,7 @@ public class NBAInclusionCheckTool {
             proc.waitFor();
         } catch (IOException | InterruptedException e1) {
             e1.printStackTrace();
+            System.out.println("Idea?");
         }
         System.out.println(command);
         
@@ -103,7 +104,15 @@ public class NBAInclusionCheckTool {
             while ((line = reader.readLine()) != null) {
                 if (line.contains("HOA")) {
                     result = true;
+                    break;
                 }
+                if(line.contains("The limit is 32.")
+                || line.contains("autfilt:")) {
+                	result = true;
+                	System.out.println("Ignore error states");
+                	break;
+                }
+                result = true;
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -16,6 +16,9 @@
 
 package roll.learner.fdfa.tree;
 
+import java.util.List;
+
+import roll.learner.dfa.tree.ValueNode;
 import roll.learner.fdfa.LearnerLeading;
 import roll.learner.fdfa.LearnerProgress;
 import roll.main.Options;
@@ -24,8 +27,10 @@ import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.ExprValue;
 import roll.table.HashableValue;
+import roll.tree.Node;
 import roll.words.Alphabet;
 import roll.words.Word;
+import roll.tree.LCA;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -96,6 +101,31 @@ abstract class LearnerProgressTree extends LearnerOmegaTree implements LearnerPr
     @Override
     protected CeAnalyzerTree getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
         return new CeAnalyzerProgressTree(exprValue, result);
+    }
+    
+    // we may only have one root in the tree
+    @Override
+    public Word getExperimentWordLimit(int state, int letter) {
+    	Word wordRep = this.getStateLabel(state);
+    	Word wordExt = wordRep.append(letter);
+    	
+    	Node<ValueNode> repNode = sift(wordRep);
+    	Node<ValueNode> extNode = sift(wordExt);
+    	LCA<ValueNode> lca = this.tree.getLCA(repNode, extNode);
+    	Word lcaLabel = lca.commonAncestor.getLabel().get();
+    	boolean repMqResult = processMembershipQuery(wordRep, lcaLabel).get();
+    	HashableValue repVal = prepareRowHashableValue(repMqResult, wordRep, lcaLabel);
+    	boolean extMqResult = processMembershipQuery(wordExt, lcaLabel).get();
+    	HashableValue extVal = prepareRowHashableValue(extMqResult, wordExt, lcaLabel);    	
+    	
+    	assert (repVal != extVal);
+    	if (repVal.isAccepting() && !extVal.isAccepting()) {
+    		return lcaLabel.preappend(letter);
+    	}else if (!repVal.isAccepting() && extVal.isAccepting()) {
+    		return lcaLabel;
+    	}
+    	
+    	throw new RuntimeException("Experiment not found in getExperimentWordLimit(int, int)");
     }
 
 }

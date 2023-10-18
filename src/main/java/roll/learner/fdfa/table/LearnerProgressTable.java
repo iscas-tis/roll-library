@@ -16,6 +16,8 @@
 
 package roll.learner.fdfa.table;
 
+import java.util.List;
+
 import roll.learner.fdfa.LearnerLeading;
 import roll.learner.fdfa.LearnerProgress;
 import roll.main.Options;
@@ -97,6 +99,28 @@ abstract class LearnerProgressTable extends LearnerOmegaTable implements Learner
     @Override
     protected CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
         return new CeAnalyzerProgressTable(exprValue, result);
+    }
+    
+    @Override
+    public Word getExperimentWordLimit(int state, int letter) {
+    	Word wordRep = this.getStateLabel(state);
+//    	System.out.println("StateLead = " + state + ", word = " + wordRep.toStringWithAlphabet());
+    	List<HashableValue> repRow = this.observationTable.getUpperTableRow(wordRep).getValues();
+    	Word wordExt = wordRep.append(letter);
+    	List<HashableValue> extRow = this.observationTable.getTableRow(wordExt).getValues();
+    	for (int colNr = 0; colNr < this.observationTable.getColumns().size(); colNr ++) {
+    		boolean isRepAcc = repRow.get(colNr).isAccepting();
+    		boolean isExtAcc = extRow.get(colNr).isAccepting();
+//    		System.out.println("repRow: " + repRow.get(colNr) + " = " + isRepAcc);
+//    		System.out.println("extRow: " + extRow.get(colNr) + " = " + isExtAcc);
+    		Word expr = this.observationTable.getColumns().get(colNr).get();
+    		if (isRepAcc && !isExtAcc) {
+    			return expr.preappend(letter); 
+    		}else if (!isRepAcc && isExtAcc) {
+    			return expr;
+    		}
+    	}
+    	throw new RuntimeException("Experiment not found in getExperimentWordLimit(int, int)");
     }
 
 }

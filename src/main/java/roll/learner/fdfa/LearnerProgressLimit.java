@@ -35,4 +35,5 @@ public interface LearnerProgressLimit extends LearnerProgressRecurrent {
         return getHashableValueImplBoolPair(recur, mqResult);
     }    
 
+
 }

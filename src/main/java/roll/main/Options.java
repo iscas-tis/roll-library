@@ -183,7 +183,11 @@ public class Options {
         }
         
         boolean isTargetFDFA() {
-            return this == PERIODIC || this == SYNTACTIC|| this == RECURRENT;
+            return this == PERIODIC || this == SYNTACTIC|| this == RECURRENT
+            		|| this == LIMIT;
+        }
+        boolean isTargetTDBA() {
+        	return this == LIMIT; 
         }
     }
     
@@ -204,6 +208,7 @@ public class Options {
         NFA,
         FDFA,
         NBA,
+        TDBA,
         LDBA;
         
         boolean isBA() {
@@ -225,6 +230,9 @@ public class Options {
         
         boolean isLDBA() {
             return this == LDBA;
+        }
+        boolean isTDBA() {
+        	return this == TDBA;
         }
     }
     
@@ -271,7 +279,8 @@ public class Options {
         
         if((algorithm.isTargetDFA() && ! automaton.isDFA())
           || (algorithm.isTargetNFA() && ! automaton.isNFA())
-          || (!algorithm.isTargetDFA() && automaton.isDFA())) {
+          || (!algorithm.isTargetDFA() && automaton.isDFA())
+          || (!algorithm.isTargetTDBA() && automaton.isTDBA())) {
             throw new UnsupportedOperationException("algorithm and target automaton are not consistent");
         }
         if(runningMode.isTestMode() 

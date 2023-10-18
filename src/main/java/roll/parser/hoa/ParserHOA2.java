@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 
 import dk.brics.automaton.Automaton;
@@ -86,7 +85,7 @@ public class ParserHOA2 implements Parser, HOAConsumer{
     protected Map<String, BDD> aliasBddMap = new HashMap<>();
     
     // if there are more than VAR_NUM_BOUND_TO_USE_BDD atomic propositions, then use bdd
-    protected final int VAR_NUM_BOUND_TO_USE_BDD = 7;
+//    protected final int VAR_NUM_BOUND_TO_USE_BDD = 7;
     protected NBA nba;
     protected final Options options;
     protected final Alphabet alphabet;
@@ -94,6 +93,8 @@ public class ParserHOA2 implements Parser, HOAConsumer{
     protected LinkedList<BDD> letters;
     
     protected boolean initialAdded = false;
+    
+    protected boolean pairParsing = false;
     
     public ParserHOA2(Options options, String file) {
         this.options = options;
@@ -269,7 +270,6 @@ public class ParserHOA2 implements Parser, HOAConsumer{
         options.log.verbose("alphabet: " + apset + " size: 2^" + apset.size());
     }
 
-
     @Override
     public void notifyBodyStart() throws HOAConsumerException {
         options.log.verbose("Start parsing body...");
@@ -292,6 +292,9 @@ public class ParserHOA2 implements Parser, HOAConsumer{
             List<Integer> accSignature) throws HOAConsumerException {
         if(conjSuccessors.size() != 1) {
             throw new UnsupportedOperationException("Successor conjunction is not allowed");
+        }
+        if (accSignature != null && accSignature.size() > 0) {
+        	throw new UnsupportedOperationException("Transition-based acceptance is not allowed");
         }
         
         assert labelExpr != null;
@@ -401,7 +404,7 @@ public class ParserHOA2 implements Parser, HOAConsumer{
     }
     @Override
     public void notifyEnd() throws HOAConsumerException {
-    	
+  
     	// now we have all the letters
     	partitionLetters();
     	computeDkNBA();
@@ -486,20 +489,20 @@ public class ParserHOA2 implements Parser, HOAConsumer{
         
     }
     
-//    public static void main(String[] args)
-//    {
-//    	String fileName = "/home/liyong/vscode/CAV/COLA/ltlFormulas/bugs/formula_0_s.hoa";
-//    	Options options = new Options();
-//    	ParserHOA2 parser = new ParserHOA2(options, fileName);
-//    	NBA input = parser.parse();
-//    	try {
-//			parser.print(input, new FileOutputStream("/home/liyong/vscode/CAV/COLA/ltlFormulas/bugs/formula_0-copy.hoa"));
-//		} catch (FileNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//    	System.out.println("Size: " + parser.getNumLetters());
-//    	
-//    }
+    public static void main(String[] args)
+    {
+    	String fileName = "/home/liyong/vscode/CAV/COLA/split-automata-le/A.hoa";
+    	Options options = new Options();
+    	ParserHOA2 parser = new ParserHOA2(options, fileName);
+    	NBA input = parser.parse();
+    	try {
+			parser.print(input, new FileOutputStream("/home/liyong/vscode/CAV/COLA/split-automata-le/A-copy.hoa"));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	System.out.println("Size: " + parser.getNumLetters());
+    	
+    }
 
 }

@@ -53,6 +53,7 @@ public class LearnerProgressTreeLimit extends LearnerProgressTree implements Lea
         int stateUX = leadDFA.getSuccessor(getLeadingState(), x);
         int stateUXE = leadDFA.getSuccessor(stateUX, e);
         boolean recur = stateUXE == getLeadingState();
+        System.out.println("recur = " + recur + ", mq = " + mqResult);
         return getHashableValueBool(!recur || mqResult);
     }
 

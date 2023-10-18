@@ -17,19 +17,28 @@
 package roll.automata.operations;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.State;
 import dk.brics.automaton.Transition;
 import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import roll.automata.DFA;
 import roll.automata.FDFA;
+import roll.automata.NBA;
+import roll.automata.StateNFA;
+import roll.automata.TDBA;
 import roll.util.Pair;
+import roll.util.Triplet;
 import roll.util.sets.ISet;
+import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
 import roll.words.Word;
+
 
 /**
  * FDFA Operations
@@ -139,6 +148,20 @@ public class FDFAOperations {
                 u.addTransition(new Transition(Alphabet.DOLLAR, product.getInitialState()));
             }
         }
+        dkAutL.setDeterministic(true);
+        return dkAutL;
+    }
+    
+    public static Automaton buildDFAFromTDBA(TDBA tdba) {
+        TIntObjectMap<State> map = new TIntObjectHashMap<>(); 
+        Automaton dkAutL = DFAOperations.toDkDFA(map, tdba);
+        for(int stateNr = 0; stateNr < tdba.getStateSize(); stateNr ++) {
+        	// M^a_a
+            Automaton dkAutLOther = DFAOperations.toDkDFA(tdba, stateNr, stateNr);
+            State u = map.get(stateNr); // make dollar transitions
+            u.addTransition(new Transition(Alphabet.DOLLAR, dkAutLOther.getInitialState()));
+        }
+        
         dkAutL.setDeterministic(true);
         return dkAutL;
     }
@@ -317,6 +340,89 @@ public class FDFAOperations {
         }
 //      dkAutL.removeDeadTransitions();
         return dkAutL;
+    }
+    
+    private static int getState(TDBA nba, Triplet<Integer, Integer, Integer> p
+    		, TObjectIntMap<Triplet<Integer, Integer, Integer>> map) {
+        if(map.containsKey(p)) {
+            return map.get(p);
+        }
+        StateNFA nbaState = nba.createState();
+        map.put(p, nbaState.getId());
+        return nbaState.getId();
+    }
+    
+    
+    
+    public static TDBA buildTDBA(FDFA fdfa) {
+    	int alphabetSize = fdfa.getAlphabet().getLetterSize();
+    	TDBA res = new TDBA(fdfa.getAlphabet());
+    	DFA M = fdfa.getLeadingFA();
+    	DFA B0 = fdfa.getProgressFA(M.getInitialState());
+    	Triplet<Integer, Integer, Integer> tpl = new Triplet<>(M.getInitialState()
+    			, M.getInitialState(), B0.getInitialState());
+    	TObjectIntMap<Triplet<Integer, Integer, Integer>> map = new TObjectIntHashMap<>();
+    	int init = getState(res, tpl, map);
+    	ISet visited = UtilISet.newISet();
+    	LinkedList<Triplet<Integer, Integer, Integer>> queue = new LinkedList<>();
+        queue.add(tpl);
+//        visited.set(init);
+        // setting the initial state
+        res.setInitial(init);
+        res.setTriplet(init, tpl);
+        System.out.println("Init: " + tpl);
+
+    	while(! queue.isEmpty()) {
+    		Triplet<Integer, Integer, Integer> lState = queue.remove();
+            int rState = getState(res, lState, map);
+//            System.out.println("State: " + lState.getLeft() + " Letter: " + lState.getRight());
+            // ignore visited states
+            if(visited.get(rState)) continue;
+            visited.set(rState);
+            for(int c = 0; c < alphabetSize; c ++) {
+            	int leadSucc = M.getSuccessor(lState.getLeft(), c);
+            	DFA proDFA = fdfa.getProgressFA(lState.getMiddle());
+                for(int lSucc : proDFA.getSuccessors(lState.getRight(), c)) {
+                	boolean acSucc = proDFA.isFinal(lSucc); 
+                	if (acSucc) {
+                		for (int a = 0; a < alphabetSize; a ++) {
+                			int succ = proDFA.getSuccessor(lSucc, a);
+                			if (succ == lSucc) {
+                				continue;
+                			}else {
+                				acSucc = false;
+                				break;
+                			}
+                		}
+                	}
+                	System.out.println("sinkState " + lSucc + " ?: " + acSucc);
+                	int proId = acSucc ? leadSucc : lState.getMiddle();
+                	int proSucc = acSucc ? fdfa.getProgressFA(proId).getInitialState()
+                			: lSucc;
+                	Triplet<Integer, Integer, Integer> rpSucc = 
+                			new Triplet<>(leadSucc, proId, proSucc);
+                    int rSucc = getState(res, rpSucc, map);
+                    res.setTriplet(rSucc, rpSucc);
+                    // record outgoing transitions
+                    res.getState(rState).addTransition(c, rSucc);
+                    System.out.println(rState + " -> " + rSucc + " : " + c);
+                  System.out.println("State: " + lState + " Letter: " + c + " Succ: " + rpSucc);
+
+                    if(! visited.get(rSucc)) {
+                        queue.add(rpSucc);
+//                        visited.set(lSucc);
+                    }
+                    // have changed?
+                    if (acSucc ) {
+                    	res.setFinal(rState, c);
+                    	System.out.println("Acc: " + rState + ", c " + c);
+                    }
+                }
+            }
+    	}
+    	
+    	return res;
+
     }
     
     

@@ -42,7 +42,7 @@ public class LearnerFDFATreeLimit extends LearnerFDFA {
 
     @Override
     protected LearnerProgress getLearnerProgress(int state) {
-        return new LearnerProgressTreeRecurrent(options, alphabet, membershipOracle, learnerLeading, state);
+        return new LearnerProgressTreeLimit(options, alphabet, membershipOracle, learnerLeading, state);
     }
 
 }

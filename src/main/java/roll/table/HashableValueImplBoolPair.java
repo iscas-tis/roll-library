@@ -21,7 +21,7 @@ import roll.util.Pair;
 /**
  * @author Yong Li (liyong@ios.ac.cn)
  * */
-public class HashableValueImplBoolPair extends HashableValueBooleanPair{
+public class HashableValueImplBoolPair extends HashableValueBooleanPair implements HashableValue {
 		
 	public HashableValueImplBoolPair(boolean left, boolean right) {
 		super(left, right);
@@ -35,9 +35,16 @@ public class HashableValueImplBoolPair extends HashableValueBooleanPair{
 	
 	@Override
 	public boolean valueEqual(HashableValue rvalue) {
-	    boolean left = !valueLeft || valueRight;
-	    boolean right = !(Boolean)rvalue.getLeft() || (Boolean)rvalue.getRight();
-		return left == right;
+		return this.isAccepting() == rvalue.isAccepting();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof HashableValueImplBoolPair) {
+			HashableValueImplBoolPair pair = (HashableValueImplBoolPair)obj;
+			return valueEqual(pair);
+		}
+		return false;
 	}
 
 }
