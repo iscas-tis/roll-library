@@ -32,8 +32,6 @@ import roll.words.Word;
 public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 	protected final TDBA tdba;
 	protected MembershipOracle<HashableValue> membershipOracle; 
-//	protected Word prefix;
-//	protected Word suffix;
 	
 	public TranslatorFDFATDBA(LearnerFDFA learner, TDBA tdba
 			, MembershipOracle<HashableValue> membershipOracle) {
@@ -48,11 +46,11 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 		Automaton autInter = autUVOmega.intersection(dollarTDBA);
 		assert autInter != null;
 		String ceStr = autInter.getShortestExample(true);
-		options.log.println("CeStr = " + ceStr);
+		options.log.verbose("CeStr = " + ceStr);
 		assert(ceStr != null && ceStr != "");
 		Query<HashableValue> query = getQuery(ceStr, ceQuery.getQueryAnswer());
 		// verify whether it is correct
-		options.log.println("Word CeStr = " + query.toString());
+		options.log.verbose("Word CeStr = " + query.toString());
 		Word prefix = query.getPrefix();
 		Word suffix = query.getSuffix();
 		int repeatDBAState = tdba.getSuccessor(prefix);
@@ -71,10 +69,10 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 		int position = 0;
 		int recordPos = 0;
 		int prevState = tdba.getInitialState();
-		options.log.println("Look for triple = " + sinkleadState + ", " + sinkleadState + ", " + proInit);
+		options.log.verbose("Look for triple = " + sinkleadState + ", " + sinkleadState + ", " + proInit);
 		while (position < prefix.length()) {
 			tpl = tdba.getTriplet(prevState);
-			options.log.println("Current triple = " + tpl);
+			options.log.verbose("Current triple = " + tpl);
 			if (tpl.getLeft() == sinkleadState && tpl.getMiddle() == sinkleadState
 					&& tpl.getRight() == proInit) {
 				recordPos = position;
@@ -82,12 +80,12 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 			prevState = tdba.getSuccessor(prevState, prefix.getLetter(position));
 			position ++;
 		}
-		options.log.println("The last position for (l, 0) = " + recordPos);
+		options.log.verbose("The last position for (l, 0) = " + recordPos);
 		Word wordU = prefix.getPrefix(recordPos); // length?
 		Word wordV1 = prefix.getSuffix(recordPos); // index
-		options.log.println("U: " + wordU.toStringWithAlphabet());
-		options.log.println("V1: " + wordV1.toStringWithAlphabet());
-		options.log.println("V2: " + suffix.toStringWithAlphabet());
+		options.log.verbose("U: " + wordU.toStringWithAlphabet());
+		options.log.verbose("V1: " + wordV1.toStringWithAlphabet());
+		options.log.verbose("V2: " + suffix.toStringWithAlphabet());
 		return new Triplet<>(wordU, wordV1, suffix);
 	}
 	
@@ -115,8 +113,8 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 			// we can first check this
 			Query<HashableValue> query = new QuerySimple<>(wordM, repeatK);
 			HashableValue mqResult = membershipOracle.answerMembershipQuery(query);
-			options.log.println("MQ(m.(v1.v2^" + k + ". y) = " + query);
-			options.log.println("MQ(m.(v1.v2^" + k + ". y) = " + mqResult);
+			options.log.verbose("MQ(m.(v1.v2^" + k + ". y) = " + query);
+			options.log.verbose("MQ(m.(v1.v2^" + k + ". y) = " + mqResult);
 
 			if (mqResult.isAccepting()) {
 				query = new QuerySimple<>(wordU, repeatK);
@@ -132,9 +130,9 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 				// M(m, (v1.v2^k.y)^k) = m, must based on current leading DFA
 				int mprime = fdfa.getLeadingFA().getSuccessor(repeatLeadState, wordInfix);
 				if (sink && repeatLeadState != mprime) {
-					options.log.println("m = " + wordM.toStringWithAlphabet());
-					options.log.println("(v1.v^k_2.y)^i= " + wordInfix.toStringWithAlphabet());
-					options.log.println("repeatLeadState = " + repeatLeadState + " mprime = " + mprime);
+					options.log.verbose("m = " + wordM.toStringWithAlphabet());
+					options.log.verbose("(v1.v^k_2.y)^i= " + wordInfix.toStringWithAlphabet());
+					options.log.verbose("repeatLeadState = " + repeatLeadState + " mprime = " + mprime);
 					// usually this happens when progress state [v1] is sink non-final
 					// then [v1] and (v1.v2^k.y)^k can be distinguished by empty word
 					query = new QuerySimple<>(wordU, wordInfix);
@@ -148,16 +146,16 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 				// if not, then m and m.(v1.v2^k.y)^i can be distinguished by v1.(v2) 
 				Word prefix = wordM.concat(wordInfix);
 				// when M(m.v1) = m' but not m 
-				options.log.println("(v1.v2^k.y)^i = " + wordInfix.toStringWithAlphabet());
-				options.log.println("m.(v1.v2^k.y)^i = " + prefix.toStringWithAlphabet());
-				options.log.println("M(m.(v1.v2^k.y)^i) = " + mprime);
+				options.log.verbose("(v1.v2^k.y)^i = " + wordInfix.toStringWithAlphabet());
+				options.log.verbose("m.(v1.v2^k.y)^i = " + prefix.toStringWithAlphabet());
+				options.log.verbose("M(m.(v1.v2^k.y)^i) = " + mprime);
 				prefix = prefix.concat(wordV1);
-				options.log.println("m.(v1.v2^k.y)^i.v1 = " + prefix.toStringWithAlphabet());
-				options.log.println("m = " + repeatLeadState);
+				options.log.verbose("m.(v1.v2^k.y)^i.v1 = " + prefix.toStringWithAlphabet());
+				options.log.verbose("m = " + repeatLeadState);
 				query = new QuerySimple<>(prefix, wordV2);
 				mqResult = membershipOracle.answerMembershipQuery(query);
-				options.log.println("MQ(m.(v1.v2^" + k + ". y)^i .v1.(v2) = " + query.toString());
-				options.log.println("MQ(m.(v1.v2^" + k + ". y)^i .v1.(v2) = " + mqResult);
+				options.log.verbose("MQ(m.(v1.v2^" + k + ". y)^i .v1.(v2) = " + query.toString());
+				options.log.verbose("MQ(m.(v1.v2^" + k + ". y)^i .v1.(v2) = " + mqResult);
 
 				if (!mqResult.isAccepting()) {
 					// must refine the leading DFA
@@ -167,7 +165,6 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 			}
 			k ++;
 		}
-
 		
 	}
 	
@@ -182,10 +179,10 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 			// negative counterexample
 			counterexample = translateLower();
 		}else {
-		    options.log.println("Positive counterexample = " + ceQuery.toString());
+		    options.log.verbose("Positive counterexample = " + ceQuery.toString());
 			// positive counterexample
 			counterexample = getPositiveCounterExample(autUVOmega);
-		    options.log.println("Counterexample = " + counterexample);
+		    options.log.verbose("Counterexample = " + counterexample);
 			if (counterexample != null && counterexample != "") {
 				counterexample = translateLower();
 			}else {
@@ -203,19 +200,19 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 				// INVARIANT:
 				// 1. M(wordU . wordV1) = M(wordU . wordV1 . wordV2)
 				// 2. A^{repeatLeadState}(wordV1) = A^{repeatLeadState}(wordV1 . wordV2)
-				options.log.println("M( u) = " + repeatLeadState);
-				options.log.println("[u] = " + leadRepState.toStringWithAlphabet());
+				options.log.verbose("M( u) = " + repeatLeadState);
+				options.log.verbose("[u] = " + leadRepState.toStringWithAlphabet());
 
-				options.log.println("M( u . v1) = " + fdfa.getLeadingFA().getSuccessor(repeatLeadState, wordV1));
-				options.log.println("M( u. v1. v2) = " + fdfa.getLeadingFA().getSuccessor(repeatLeadState, wordV1.concat(wordV2)));
-				options.log.println("A^u(v1) = " + proDFA.getSuccessor(wordV1));
-				options.log.println("A^u(v1.v2) = " + proDFA.getSuccessor(wordV1.concat(wordV2)));
-				options.log.println("[v1] = [v1.v2] = " + proRepState.toStringWithAlphabet());
+				options.log.verbose("M( u . v1) = " + fdfa.getLeadingFA().getSuccessor(repeatLeadState, wordV1));
+				options.log.verbose("M( u. v1. v2) = " + fdfa.getLeadingFA().getSuccessor(repeatLeadState, wordV1.concat(wordV2)));
+				options.log.verbose("A^u(v1) = " + proDFA.getSuccessor(wordV1));
+				options.log.verbose("A^u(v1.v2) = " + proDFA.getSuccessor(wordV1.concat(wordV2)));
+				options.log.verbose("[v1] = [v1.v2] = " + proRepState.toStringWithAlphabet());
 				
 				//1. check MQ(m.v1.(v2)) = +?
 				// if not, u and m can be distinguished with v1.(v2)
 				HashableValue mqResult = membershipOracle.answerMembershipQuery(new QuerySimple<>(leadRepState.concat(wordV1), wordV2));
-				options.log.println("MQ(m.v1.(v2) = " + mqResult);
+				options.log.verbose("MQ(m.v1.(v2) = " + mqResult);
 				if (! mqResult.isAccepting()) {
 					Query<HashableValue> query = new QuerySimple<>(wordU.concat(wordV1), wordV2);
 					query.answerQuery(new HashableValueBoolean(true));
@@ -240,16 +237,16 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 					// 2.2 m.(v1.v2^k) in L?
 					//     if in L, then emptyword can distinguish [v1] and v1.v2^k					
 					// 3. there must be some k 
-					options.log.println("Sink non-final states");
+					options.log.verbose("Sink non-final states");
 					wordY = alphabet.getEmptyWord();
 //					return analyseRepeatProgressState(wordU, leadRepState, wordV1, wordV2, wordY, true);
 				}
-				options.log.println("Y = " + wordY.toStringWithAlphabet());
-				options.log.println("M( m. v1. Y) = m: " + fdfa.getLeadingFA().getSuccessor(repeatLeadState, wordV1.concat(wordY)));
+				options.log.verbose("Y = " + wordY.toStringWithAlphabet());
+				options.log.verbose("M( m. v1. Y) = m: " + fdfa.getLeadingFA().getSuccessor(repeatLeadState, wordV1.concat(wordY)));
 				
 				int leadStateVY = fdfa.getLeadingFA().getSuccessor(repeatLeadState, wordV1.concat(wordY));
 				if (repeatLeadState != leadStateVY) {
-					options.log.println("M(m.v1.(Y) /= m");
+					options.log.verbose("M(m.v1.(Y) /= m");
 					Query<HashableValue> query = new QuerySimple<>(wordU, wordV1.concat(wordY));
 					mqResult = membershipOracle.answerMembershipQuery(query);
 					query.answerQuery(new HashableValueBoolean(false));
@@ -260,12 +257,12 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 				Query<HashableValue> query = new QuerySimple<>(leadRepState, wordV1.concat(wordY));
 				Query<HashableValue> query2 = new QuerySimple<>(wordU, wordV1.concat(wordY));
 				mqResult = membershipOracle.answerMembershipQuery(query);
-				options.log.println("MQ(m.(v1.y) = " + query.toString());
-				options.log.println("MQ(m.(v1.y) = " + mqResult);
+				options.log.verbose("MQ(m.(v1.y) = " + query.toString());
+				options.log.verbose("MQ(m.(v1.y) = " + mqResult);
 				HashableValue mqResult2 = membershipOracle.answerMembershipQuery(query2);
 				if (mqResult.isAccepting()) {
 					query2.answerQuery(new HashableValueBoolean(false));
-					options.log.println("MQ(u.(v1.y) = " + mqResult2);
+					options.log.verbose("MQ(u.(v1.y) = " + mqResult2);
 					return query2;
 				}
 				// now we have M(m.v1.y) = m , m. (v1.y) not in L

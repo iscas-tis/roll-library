@@ -298,6 +298,11 @@ public class CLParser {
                 options.automaton = Options.TargetAutomaton.NBA;
                 continue;
             }
+            if(args[i].compareTo("-dba") == 0) {
+                options.automaton = Options.TargetAutomaton.TDBA;
+                options.algorithm = Options.Algorithm.LIMIT;
+                continue;
+            }
             if(args[i].compareTo("-fdfa") == 0) {
                 options.automaton = Options.TargetAutomaton.FDFA;
                 continue;
@@ -464,7 +469,7 @@ public class CLParser {
         	, new Pair<>("-fsim", "Use forward simulation in congruence-based algorithm")
 //        	, new Pair<>("-f <ltl>", "Convert LTL to limit deterministic BA")
 //        	, new Pair<>("-fdfa", "FDFA as the learning target")
-//        	, new Pair<>("-nba", "NBA as the learning target")
+        	, new Pair<>("-dba", "Transition-based DBA as the learning target")
         );
         Comparator<Pair<String, String>> comparator = new Comparator<Pair<String, String>>() {
 			@Override

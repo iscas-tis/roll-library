@@ -75,7 +75,6 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
 			// trapped in sink non-final state
 			return null;
 		}
-		System.out.println("LeadState: " + lead + " proState: " + proState + " letter = " + letter);
 		return learnerProgress.get(lead).getExperimentWordLimit(proState, letter);
     }
     

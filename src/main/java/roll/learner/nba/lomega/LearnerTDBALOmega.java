@@ -73,7 +73,7 @@ public class LearnerTDBALOmega extends LearnerBase<TDBA> {
         timer.start();
         
         ceQuery = translator.translate();
-        System.out.println("Counterexample for FDFA: " + ceQuery);
+        options.log.verbose("Counterexample for FDFA: " + ceQuery);
 
         // now we anaylse the counterexample to see which DFA to be refined
         timer.stop();

@@ -370,7 +370,7 @@ public class FDFAOperations {
         // setting the initial state
         res.setInitial(init);
         res.setTriplet(init, tpl);
-        System.out.println("Init: " + tpl);
+//        System.out.println("Init: " + tpl);
 
     	while(! queue.isEmpty()) {
     		Triplet<Integer, Integer, Integer> lState = queue.remove();
@@ -395,7 +395,7 @@ public class FDFAOperations {
                 			}
                 		}
                 	}
-                	System.out.println("sinkState " + lSucc + " ?: " + acSucc);
+//                	System.out.println("sinkState " + lSucc + " ?: " + acSucc);
                 	int proId = acSucc ? leadSucc : lState.getMiddle();
                 	int proSucc = acSucc ? fdfa.getProgressFA(proId).getInitialState()
                 			: lSucc;
@@ -405,8 +405,8 @@ public class FDFAOperations {
                     res.setTriplet(rSucc, rpSucc);
                     // record outgoing transitions
                     res.getState(rState).addTransition(c, rSucc);
-                    System.out.println(rState + " -> " + rSucc + " : " + c);
-                  System.out.println("State: " + lState + " Letter: " + c + " Succ: " + rpSucc);
+//                    System.out.println(rState + " -> " + rSucc + " : " + c);
+//                  System.out.println("State: " + lState + " Letter: " + c + " Succ: " + rpSucc);
 
                     if(! visited.get(rSucc)) {
                         queue.add(rpSucc);
@@ -415,7 +415,7 @@ public class FDFAOperations {
                     // have changed?
                     if (acSucc ) {
                     	res.setFinal(rState, c);
-                    	System.out.println("Acc: " + rState + ", c " + c);
+//                    	System.out.println("Acc: " + rState + ", c " + c);
                     }
                 }
             }
