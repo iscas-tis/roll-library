@@ -26,16 +26,14 @@ import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
-import roll.util.Pair;
 import roll.util.Triplet;
-import roll.words.Alphabet;
 import roll.words.Word;
 
 public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 	protected final TDBA tdba;
 	protected MembershipOracle<HashableValue> membershipOracle; 
-	protected Word prefix;
-	protected Word suffix;
+//	protected Word prefix;
+//	protected Word suffix;
 	
 	public TranslatorFDFATDBA(LearnerFDFA learner, TDBA tdba
 			, MembershipOracle<HashableValue> membershipOracle) {
@@ -50,11 +48,11 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 		Automaton autInter = autUVOmega.intersection(dollarTDBA);
 		assert autInter != null;
 		String ceStr = autInter.getShortestExample(true);
-		System.out.println("CeStr = " + ceStr);
+		options.log.println("CeStr = " + ceStr);
 		assert(ceStr != null && ceStr != "");
 		Query<HashableValue> query = getQuery(ceStr, ceQuery.getQueryAnswer());
 		// verify whether it is correct
-		System.out.println("Word CeStr = " + query.toString());
+		options.log.println("Word CeStr = " + query.toString());
 		Word prefix = query.getPrefix();
 		Word suffix = query.getSuffix();
 		int repeatDBAState = tdba.getSuccessor(prefix);
@@ -67,17 +65,16 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 		// the leading state of s should be fixed
 		Triplet<Integer, Integer, Integer> tpl = tdba.getTriplet(repeatDBAState);
 		int sinkleadState = tpl.getMiddle();
-		int proState = tpl.getRight();
 		int proInit = fdfa.getProgressFA(sinkleadState).getInitialState();
 		// now we need to find out the last position where we see the initial state
 		// (leadState, proInit)
 		int position = 0;
 		int recordPos = 0;
 		int prevState = tdba.getInitialState();
-		System.out.println("Look for triple = " + sinkleadState + ", " + sinkleadState + ", " + proInit);
+		options.log.println("Look for triple = " + sinkleadState + ", " + sinkleadState + ", " + proInit);
 		while (position < prefix.length()) {
 			tpl = tdba.getTriplet(prevState);
-			System.out.println("Current triple = " + tpl);
+			options.log.println("Current triple = " + tpl);
 			if (tpl.getLeft() == sinkleadState && tpl.getMiddle() == sinkleadState
 					&& tpl.getRight() == proInit) {
 				recordPos = position;
@@ -85,18 +82,24 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 			prevState = tdba.getSuccessor(prevState, prefix.getLetter(position));
 			position ++;
 		}
-		System.out.println("The last position for (l, 0) = " + recordPos);
+		options.log.println("The last position for (l, 0) = " + recordPos);
 		Word wordU = prefix.getPrefix(recordPos); // length?
 		Word wordV1 = prefix.getSuffix(recordPos); // index
-		System.out.println("U: " + wordU.toStringWithAlphabet());
-		System.out.println("V1: " + wordV1.toStringWithAlphabet());
-		System.out.println("V2: " + suffix.toStringWithAlphabet());
+		options.log.println("U: " + wordU.toStringWithAlphabet());
+		options.log.println("V1: " + wordV1.toStringWithAlphabet());
+		options.log.println("V2: " + suffix.toStringWithAlphabet());
 		return new Triplet<>(wordU, wordV1, suffix);
 	}
 	
 	protected Query<HashableValue> analyseRepeatProgressState(
-			Word wordU, Word wordM, Word wordV1, Word wordV2, Word wordY) {
-		int repeatLeadState = fdfa.getLeadingFA().getSuccessor(wordM);
+			Word wordU, Word wordM, Word wordV1, Word wordV2, Word wordY, boolean sink) {
+//		int repeatLeadState = fdfa.getLeadingFA().getSuccessor(wordU);
+		// previously, above line is used, but for tree-based algorithm
+		// M(wordU) is not necessarily equal to M(wordM) and hence state m
+		// hence, we still need to get to the state over U, i.e., M(wordU) 
+		// since wordM is its label
+		int repeatLeadState = fdfa.getLeadingFA().getSuccessor(wordU);
+		// INVARIANT: wordM is the label string of repeatLeadState
 		int k = 1;
 		while(true) {
 			// create v1. v^k_2
@@ -104,49 +107,63 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 			for (int i = 0; i < k; i ++) {
 				v1PlusV2 = v1PlusV2.concat(wordV2);
 			}
-			// check whether m.(v1. v^k_2 . y)^k . v1. (v2)
+			// for a fixed k, we check all 1 <= i < k
+			// check whether m.(v1. v^k_2 . y)^i . v1. (v2)
 			Word repeatK = v1PlusV2.concat(wordY);
-			Word wordInfix = alphabet.getEmptyWord();
-			for (int i = 0; i < k; i ++) {
-				wordInfix = wordInfix.concat(repeatK);
-			}
-			Word prefix = wordM.concat(wordInfix);
-			// M(m.(v1.v2^k.y)^k) = m
-			int mprime = fdfa.getLeadingFA().getSuccessor(prefix);
-			if (repeatLeadState != mprime) {
-				System.out.println("m = " + wordM.toStringWithAlphabet());
-				System.out.println("m.(v1.v^k_2.y)^k= " + prefix.toStringWithAlphabet());
-				System.out.println("repeatLeadState = " + repeatLeadState + " mprime = " + mprime);
-				// usually this happens when progress state [v1] is sink non-final
-				// then [v1] and (v1.v2^k.y)^k can be distinguished by empty word
-				Query<HashableValue> query = new QuerySimple<>(wordU, wordInfix);
-				query.answerQuery(new HashableValueBoolean(false));
-				return query;
-				// when [v1] is not sink, then repeatLeadState must be equal to
-				// mprime always.
-			}
-			prefix = prefix.concat(wordV1);
-			Query<HashableValue> query = new QuerySimple<>(prefix, wordV2);
+			//3. check whether MQ(m, (v1.v2^k.y)^i) = +
+			// if yes, then [v1] and v1.v2^k can be distinguished by y
+			// we can first check this
+			Query<HashableValue> query = new QuerySimple<>(wordM, repeatK);
 			HashableValue mqResult = membershipOracle.answerMembershipQuery(query);
-			System.out.println("MQ(m.(v1.v2^" + k + ". y)^k .v1.(v2) = " + query.toString());
-			System.out.println("MQ(m.(v1.v2^" + k + ". y)^k .v1.(v2) = " + mqResult);
-
-			if (!mqResult.isAccepting()) {
-				// must refine the leading DFA
-				query.answerQuery(new HashableValueBoolean(true));
-				return query;
-			}
-			// now check another query
-			query = new QuerySimple<>(wordM, repeatK);
-			mqResult = membershipOracle.answerMembershipQuery(query);
-			System.out.println("MQ(m.(v1.v2^" + k + ". y) = " + query);
-			System.out.println("MQ(m.(v1.v2^" + k + ". y) = " + mqResult);
+			options.log.println("MQ(m.(v1.v2^" + k + ". y) = " + query);
+			options.log.println("MQ(m.(v1.v2^" + k + ". y) = " + mqResult);
 
 			if (mqResult.isAccepting()) {
 				query = new QuerySimple<>(wordU, repeatK);
 //				mqResult2 = membershipOracle.answerMembershipQuery(query2);
 				query.answerQuery(new HashableValueBoolean(false));
 				return query;
+			}
+			Word wordInfix = alphabet.getEmptyWord();
+			for (int i = 0; i < k; i ++) {
+				wordInfix = wordInfix.concat(repeatK);
+				// (v1.v^k_2.y)^(i+1)
+				//1. check whether m = M(m, (v1.v2^k.y)^i)
+				// M(m, (v1.v2^k.y)^k) = m, must based on current leading DFA
+				int mprime = fdfa.getLeadingFA().getSuccessor(repeatLeadState, wordInfix);
+				if (sink && repeatLeadState != mprime) {
+					options.log.println("m = " + wordM.toStringWithAlphabet());
+					options.log.println("(v1.v^k_2.y)^i= " + wordInfix.toStringWithAlphabet());
+					options.log.println("repeatLeadState = " + repeatLeadState + " mprime = " + mprime);
+					// usually this happens when progress state [v1] is sink non-final
+					// then [v1] and (v1.v2^k.y)^k can be distinguished by empty word
+					query = new QuerySimple<>(wordU, wordInfix);
+					query.answerQuery(new HashableValueBoolean(false));
+					return query;
+					// when [v1] is not sink, then repeatLeadState must be equal to
+					// mprime always.
+				}
+				assert (sink || (repeatLeadState == mprime)) : "nonsink has no loop for v1.v2^k.y";
+				//2. check whether MQ(m.(v1.v2^k.y)^i.v1.(v2)) = +?
+				// if not, then m and m.(v1.v2^k.y)^i can be distinguished by v1.(v2) 
+				Word prefix = wordM.concat(wordInfix);
+				// when M(m.v1) = m' but not m 
+				options.log.println("(v1.v2^k.y)^i = " + wordInfix.toStringWithAlphabet());
+				options.log.println("m.(v1.v2^k.y)^i = " + prefix.toStringWithAlphabet());
+				options.log.println("M(m.(v1.v2^k.y)^i) = " + mprime);
+				prefix = prefix.concat(wordV1);
+				options.log.println("m.(v1.v2^k.y)^i.v1 = " + prefix.toStringWithAlphabet());
+				options.log.println("m = " + repeatLeadState);
+				query = new QuerySimple<>(prefix, wordV2);
+				mqResult = membershipOracle.answerMembershipQuery(query);
+				options.log.println("MQ(m.(v1.v2^" + k + ". y)^i .v1.(v2) = " + query.toString());
+				options.log.println("MQ(m.(v1.v2^" + k + ". y)^i .v1.(v2) = " + mqResult);
+
+				if (!mqResult.isAccepting()) {
+					// must refine the leading DFA
+					query.answerQuery(new HashableValueBoolean(true));
+					return query;
+				}
 			}
 			k ++;
 		}
@@ -160,15 +177,15 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 	    fdfa = fdfaLearner.getHypothesis();
 	    String counterexample = "";
 	    boolean isInTarget = ceQuery.getQueryAnswer().get();
-	    System.out.println("Analysing counterexamples for TDBA...");
+	    options.log.println("Analysing counterexamples for TDBA...");
 		if (! isInTarget ) {
 			// negative counterexample
 			counterexample = translateLower();
 		}else {
-		    System.out.println("Positive counterexample = " + ceQuery.toString());
+		    options.log.println("Positive counterexample = " + ceQuery.toString());
 			// positive counterexample
 			counterexample = getPositiveCounterExample(autUVOmega);
-		    System.out.println("Counterexample = " + counterexample);
+		    options.log.println("Counterexample = " + counterexample);
 			if (counterexample != null && counterexample != "") {
 				counterexample = translateLower();
 			}else {
@@ -182,17 +199,32 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 				int repeatProState = proDFA.getSuccessor(wordV1);
 				Word leadRepState = fdfaLearner.getLeadingStateLabel(repeatLeadState);
 				Word proRepState = fdfaLearner.getProgressStateLabel(repeatLeadState, repeatProState);
+				
 				// INVARIANT:
 				// 1. M(wordU . wordV1) = M(wordU . wordV1 . wordV2)
 				// 2. A^{repeatLeadState}(wordV1) = A^{repeatLeadState}(wordV1 . wordV2)
-				System.out.println("M( u) = " + repeatLeadState);
-				System.out.println("[u] = " + leadRepState.toStringWithAlphabet());
+				options.log.println("M( u) = " + repeatLeadState);
+				options.log.println("[u] = " + leadRepState.toStringWithAlphabet());
 
-				System.out.println("M( u . v1) = " + fdfa.getLeadingFA().getSuccessor(repeatLeadState, wordV1));
-				System.out.println("M( u. v1. v2) = " + fdfa.getLeadingFA().getSuccessor(repeatLeadState, wordV1.concat(wordV2)));
-				System.out.println("A^u(v1) = " + proDFA.getSuccessor(wordV1));
-				System.out.println("A^u(v1.v2) = " + proDFA.getSuccessor(wordV1.concat(wordV2)));
-				System.out.println("[v1] = [v1.v2] = " + proRepState.toStringWithAlphabet());
+				options.log.println("M( u . v1) = " + fdfa.getLeadingFA().getSuccessor(repeatLeadState, wordV1));
+				options.log.println("M( u. v1. v2) = " + fdfa.getLeadingFA().getSuccessor(repeatLeadState, wordV1.concat(wordV2)));
+				options.log.println("A^u(v1) = " + proDFA.getSuccessor(wordV1));
+				options.log.println("A^u(v1.v2) = " + proDFA.getSuccessor(wordV1.concat(wordV2)));
+				options.log.println("[v1] = [v1.v2] = " + proRepState.toStringWithAlphabet());
+				
+				//1. check MQ(m.v1.(v2)) = +?
+				// if not, u and m can be distinguished with v1.(v2)
+				HashableValue mqResult = membershipOracle.answerMembershipQuery(new QuerySimple<>(leadRepState.concat(wordV1), wordV2));
+				options.log.println("MQ(m.v1.(v2) = " + mqResult);
+				if (! mqResult.isAccepting()) {
+					Query<HashableValue> query = new QuerySimple<>(wordU.concat(wordV1), wordV2);
+					query.answerQuery(new HashableValueBoolean(true));
+					return query;
+				}
+				
+				//2. obtain some experiment y such that M(m.[v1].y) = m but m.([v1].y) not in L
+				// [v1] might be a sink non-final state, then y will be empty word
+				// wordY == null if [v1] is sink and non-final state
 				Word wordY = fdfaLearner.getProgressNegativeExperiment(repeatLeadState, repeatProState);
 				if (wordY == null) {
 					// repeatProState must be sink but non-final state
@@ -208,92 +240,41 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 					// 2.2 m.(v1.v2^k) in L?
 					//     if in L, then emptyword can distinguish [v1] and v1.v2^k					
 					// 3. there must be some k 
-					System.out.println("Sink non-final states");
+					options.log.println("Sink non-final states");
 					wordY = alphabet.getEmptyWord();
-					return analyseRepeatProgressState(wordU, leadRepState, wordV1, wordV2, wordY);
+//					return analyseRepeatProgressState(wordU, leadRepState, wordV1, wordV2, wordY, true);
 				}
-				System.out.println("Y = " + wordY.toStringWithAlphabet());
-				System.out.println("M( m. v1. Y) = m: " + fdfa.getLeadingFA().getSuccessor(repeatLeadState, wordV1.concat(wordY)));
-				// now check m . v1 . (v2)
-				HashableValue mqResult = membershipOracle.answerMembershipQuery(new QuerySimple<>(leadRepState.concat(wordV1), wordV2));
-				System.out.println("MQ(m.v1.(v2) = " + mqResult);
-				if (! mqResult.isAccepting()) {
-					Query<HashableValue> query = new QuerySimple<>(wordU.concat(wordV1), wordV2);
-					query.answerQuery(new HashableValueBoolean(true));
-					return query;
-				}
+				options.log.println("Y = " + wordY.toStringWithAlphabet());
+				options.log.println("M( m. v1. Y) = m: " + fdfa.getLeadingFA().getSuccessor(repeatLeadState, wordV1.concat(wordY)));
 				
 				int leadStateVY = fdfa.getLeadingFA().getSuccessor(repeatLeadState, wordV1.concat(wordY));
 				if (repeatLeadState != leadStateVY) {
-					System.out.println("M(m.v1.(Y) /= m");
+					options.log.println("M(m.v1.(Y) /= m");
 					Query<HashableValue> query = new QuerySimple<>(wordU, wordV1.concat(wordY));
 					mqResult = membershipOracle.answerMembershipQuery(query);
 					query.answerQuery(new HashableValueBoolean(false));
-//					System.exit(-1);
 					return query;
-				}else {
-					// check MQ(m. (v1.y))
-					Query<HashableValue> query = new QuerySimple<>(leadRepState, wordV1.concat(wordY));
-					Query<HashableValue> query2 = new QuerySimple<>(wordU, wordV1.concat(wordY));
-					mqResult = membershipOracle.answerMembershipQuery(query);
-					System.out.println("MQ(m.(v1.y) = " + query.toString());
-					System.out.println("MQ(m.(v1.y) = " + mqResult);
-					HashableValue mqResult2 = membershipOracle.answerMembershipQuery(query2);
-					if (mqResult.isAccepting()) {
-						query2.answerQuery(new HashableValueBoolean(false));
-						System.out.println("MQ(u.(v1.y) = " + mqResult2);
-//						System.exit(-1);
-						return query2;
-					}
-					// now we have M(m.v1.y) = m , m. (v1.y) not in L
-					
-					int k = 1;
-					while(true) {
-						// create v1. v^k_2
-						Word v1PlusV2 = wordV1;
-						for (int i = 0; i < k; i ++) {
-							v1PlusV2 = v1PlusV2.concat(wordV2);
-						}
-						// check whether m.(v1. v^k_2 . y)^k . v1. (v2)
-						Word repeatK = v1PlusV2.concat(wordY);
-						Word wordInfix = alphabet.getEmptyWord();
-						for (int i = 0; i < k; i ++) {
-							wordInfix = wordInfix.concat(repeatK);
-						}
-						Word prefix = leadRepState.concat(wordInfix);
-						prefix = prefix.concat(wordV1);
-						query = new QuerySimple<>(prefix, wordV2);
-						mqResult = membershipOracle.answerMembershipQuery(query);
-						System.out.println("MQ(m.(v1.v2^" + k + ". y)^k .v1.(v2) = " + query.toString());
-						System.out.println("MQ(m.(v1.v2^" + k + ". y)^k .v1.(v2) = " + mqResult);
-
-						if (!mqResult.isAccepting()) {
-							query.answerQuery(new HashableValueBoolean(true));
-							return query;
-						}
-						// now check another query
-						query = new QuerySimple<>(leadRepState, repeatK);
-						mqResult = membershipOracle.answerMembershipQuery(query);
-						System.out.println("MQ(m.(v1.v2^" + k + ". y) = " + query);
-						System.out.println("MQ(m.(v1.v2^" + k + ". y) = " + mqResult);
-
-						if (mqResult.isAccepting()) {
-							query2 = new QuerySimple<>(wordU, repeatK);
-//							mqResult2 = membershipOracle.answerMembershipQuery(query2);
-							query2.answerQuery(new HashableValueBoolean(false));
-							return query2;
-						}
-						k ++;
-					}
 				}
+				
+				// check MQ(m. (v1.y))
+				Query<HashableValue> query = new QuerySimple<>(leadRepState, wordV1.concat(wordY));
+				Query<HashableValue> query2 = new QuerySimple<>(wordU, wordV1.concat(wordY));
+				mqResult = membershipOracle.answerMembershipQuery(query);
+				options.log.println("MQ(m.(v1.y) = " + query.toString());
+				options.log.println("MQ(m.(v1.y) = " + mqResult);
+				HashableValue mqResult2 = membershipOracle.answerMembershipQuery(query2);
+				if (mqResult.isAccepting()) {
+					query2.answerQuery(new HashableValueBoolean(false));
+					options.log.println("MQ(u.(v1.y) = " + mqResult2);
+					return query2;
+				}
+				// now we have M(m.v1.y) = m , m. (v1.y) not in L
+				return analyseRepeatProgressState(wordU, leadRepState, wordV1, wordV2, wordY, true);
+
 			}
 		}
 		// refine either leading or progress DFA
 		return getQuery(counterexample, new HashableValueBoolean(false));
 	}
-	
-	
-	
-	
 
 }
