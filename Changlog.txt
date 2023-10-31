@@ -1,4 +1,8 @@
-
+New in ROLL v1.2 (2023-10-19)
+	* Add new learning algorithm for transition-based deterministic B\"uchi automata based on learning limit FDFAs
+	* Add new learning algorithm for B\"uchi automata based on learning limit FDFAs
+	* Add learning algorithm for limit FDFAs with supprt of both observation tables and classification trees
+	
 New in ROLL v1.1 (2021-03-25)
 	* Add new inclusion checking algorithm for B\"uchi automata based on novel congruence relations and simulation relations
 	* Add Kushan's complementation algorithm for determinisitic B\"uchi automata and NCSB complementation algorithm for limit deterministic B\"uchi automata
