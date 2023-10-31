@@ -159,8 +159,11 @@ public class TranslatorFDFATDBA extends TranslatorFDFAUnder {
 
 				if (!mqResult.isAccepting()) {
 					// must refine the leading DFA
-					query.answerQuery(new HashableValueBoolean(true));
-					return query;
+					Word p = wordU.concat(wordInfix);
+					p = p.concat(wordV1);
+					Query<HashableValue> query2 = new QuerySimple<>(p, wordV2);
+					query2.answerQuery(new HashableValueBoolean(true));
+					return query2;
 				}
 			}
 			k ++;
