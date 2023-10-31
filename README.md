@@ -18,9 +18,9 @@ Since 2023, it also added the support for the limit FDFAs proposed in [11] and t
 
 
 The ROLL library is implemented in JAVA. Its DFA operations are delegated to the [dk.brics.automaton](http://www.brics.dk/automaton/) package. We use [RABIT](http://www.languageinclusion.org/doku.php?id=tools) tool to check the equivalence of
-two Büchi automata. 
+two Büchi automata.
 
-----
+## References
 
 [1] Dana Angluin. "Learning regular sets from queries and counterexamples." Information and computation 75.2 (1987): 87-106.
 
@@ -39,7 +39,7 @@ two Büchi automata.
 
 [8] Radu Grosu, Scott A. Smolka. "Monte carlo model checking." In TACAS. Springer-Verlag Berlin, Heidelberg, 2005:271-286.
 
-[9] Yong Li, Andrea Turrini, Xuechao Sun and Lijun Zhang. "Proving Non-inclusion of Büchi Automata Based on Monte Carlo Sampling." In ATVA. Springer, 2020: 467-483.
+[9] Yong Li, Andrea Turrini, Xuechao Sun and Lijun Zhang. "Proving Non-inclusion of Büchi Automata Based on Monte Carlo Sampling." In ATVA. Springer, 2020: 467-483. [paper](https://arxiv.org/abs/2007.02282)
 
 
 [10] Yong Li, Yu-Fang Chen, Lijun Zhang, and Depeng Liu. "A Novel Learning Algorithm for Büchi Automata based on Family of DFAs and Classification Trees." In I&C. (Added an algorithm to transform an FDFA to a limit-deterministic Büchi automaton) [paper](https://tis.ios.ac.cn/roll/lib/exe/fetch.php?media=iandc.pdf)
