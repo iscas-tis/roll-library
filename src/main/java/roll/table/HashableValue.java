@@ -38,5 +38,9 @@ public interface HashableValue {
     <T> T getRight();
     
     boolean isAccepting();
+    
+    default boolean isRejecting() {
+    	return !isAccepting();
+    }
 
 }

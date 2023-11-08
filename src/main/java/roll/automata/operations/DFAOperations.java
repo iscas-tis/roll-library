@@ -29,6 +29,7 @@ import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import roll.automata.DFA;
+import roll.util.Pair;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
@@ -223,6 +224,42 @@ public class DFAOperations {
                 int letter = period.getLetter(i);
                 last = dfa.getSuccessor(last, letter);
                 inf.set(last);
+            }
+            if(last == first) {
+                break;
+            }
+        }
+        return inf;
+    }
+    
+    public static Set<Pair<Integer, Integer>> getInfTrans(DFA dfa, Word prefix, Word period) {
+    	Set<Pair<Integer, Integer>> inf = new HashSet<>();
+        int size = dfa.getStateSize();
+        int first = dfa.getSuccessor(prefix), last;
+        for(int i = 0; i < size / 2; i ++) {
+            last = first;
+            if(i > 0) {
+                first = dfa.getSuccessor(last, period);
+            }
+            int second = first;
+            for(int j = i + 1; j < size + 1 - i; j ++) {
+                for(int k = 1; k <= j; k ++) {
+                    second = dfa.getSuccessor(second, period);
+                }
+            }
+            // check whether u.v^i = u.v^{i + j}
+            if(first == second) {
+                break;
+            }
+        }
+        // collect all states in the loop
+//        inf.set();
+        while(true) {
+            last = first;
+            for(int i = 0; i < period.length(); i ++) {
+                int letter = period.getLetter(i);
+                last = dfa.getSuccessor(last, letter);
+                inf.add(new Pair<>(last, letter));
             }
             if(last == first) {
                 break;

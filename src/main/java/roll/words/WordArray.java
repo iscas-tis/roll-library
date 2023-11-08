@@ -100,7 +100,7 @@ class WordArray extends WordAbstract {
 	@Override
 	public Word getSuffix(int startIndex) {
 		assert startIndex >= 0;
-		assert startIndex <= length;
+		assert startIndex <= length: "start = " + startIndex + " length = " + length;
 		if(startIndex >= length) return alphabet.getEmptyWord();
 		if(startIndex == length - 1) return alphabet.getLetterWord(getLetter(startIndex));
 		return new WordArray(alphabet, elementData, startIndex + offset, length - startIndex);

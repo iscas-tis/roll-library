@@ -114,12 +114,21 @@ public class StateNFA {
         return toString(apList);
     }
     
+    protected String toStringLabel() {
+    	return "" + getId();
+    }
+    
+    protected String toStringShape() {
+    	StringBuilder builder = new StringBuilder();
+        if(nfa.isFinal(getId())) builder.append(", shape = doublecircle");
+        else builder.append(", shape = circle");
+        return builder.toString();
+    }
     
     public String toString(List<String> apList) {
         StringBuilder builder = new StringBuilder();
-        builder.append("  " + getId() + " [label=\"" + getId() + "\"");
-        if(nfa.isFinal(getId())) builder.append(", shape = doublecircle");
-        else builder.append(", shape = circle");
+        builder.append("  " + getId() + " [label=\"" + toStringLabel() + "\"");
+        builder.append(toStringShape());
         builder.append("];\n");
         // transitions
         TIntObjectProcedure<ISet> procedure = new TIntObjectProcedure<ISet> () {

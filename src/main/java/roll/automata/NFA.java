@@ -136,6 +136,19 @@ public class NFA implements Acceptor {
         finalStates.clear(state);
     }
     
+    public void clearReject(int state) {
+    	assert checkValidState(state);
+    }
+    
+    public void setReject(int state) {
+    	assert checkValidState(state);
+    }
+    
+    public boolean isReject(int state) {
+    	assert checkValidState(state);
+    	return !finalStates.get(state);
+    }
+    
     // -------------------------------------------
     public StateNFA createState() {
         StateNFA state = makeState(states.size());

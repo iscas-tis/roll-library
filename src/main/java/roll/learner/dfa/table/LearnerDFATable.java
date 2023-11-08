@@ -89,12 +89,15 @@ public abstract class LearnerDFATable extends LearnerDFA {
         makeTableClosed();
     }
     
+    protected void createConjecture() {
+    	hypothesis = new DFA(alphabet);
+    }
     
     // Default learner for DFA
     @Override
     protected void constructHypothesis() {
         
-        hypothesis = new DFA(alphabet);
+    	createConjecture();
         
         List<ObservationRow> upperTable = observationTable.getUpperTable();
         
@@ -114,15 +117,29 @@ public abstract class LearnerDFATable extends LearnerDFA {
             if(isAccepting(rowNr)) {
                 hypothesis.setFinal(rowNr);
             }
+            if (isRejecting(rowNr)) {
+            	hypothesis.setReject(rowNr);
+            }
         }
         
+    }
+    
+    protected int getEmptyWordColumnIndex(int state) {
+        int emptyNr = observationTable.getColumnIndex(getExprValueWord(alphabet.getEmptyWord()));
+        assert emptyNr != -1 : "index -> " + emptyNr;
+        return emptyNr;
+    }
+    
+    protected boolean isRejecting(int state) {
+    	ObservationRow stateRow = observationTable.getUpperTable().get(state);
+    	int emptyNr = getEmptyWordColumnIndex(state);
+        return stateRow.getValues().get(emptyNr).isRejecting();
     }
     
     // a state is accepting iff it accepts empty language
     protected boolean isAccepting(int state) {
         ObservationRow stateRow = observationTable.getUpperTable().get(state);
-        int emptyNr = observationTable.getColumnIndex(getExprValueWord(alphabet.getEmptyWord()));
-        assert emptyNr != -1 : "index -> " + emptyNr;
+        int emptyNr = getEmptyWordColumnIndex(state);
         return stateRow.getValues().get(emptyNr).isAccepting();
     }
 

@@ -22,7 +22,7 @@ import roll.tree.Node;
 import roll.tree.NodeAbstract;
 import roll.words.Word;
 
-class NodeImpl extends NodeAbstract<ValueNode> {
+public class NodeImpl extends NodeAbstract<ValueNode> {
 
 	public NodeImpl(Node<ValueNode> parent, HashableValue branch, ExprValue exprValue) {
 		super(parent, branch, exprValue);
@@ -49,7 +49,12 @@ class NodeImpl extends NodeAbstract<ValueNode> {
 	}
 	
 	public String toString() {
-		Word label = getLabel().get();  
-		return label.toStringWithAlphabet() + ":" + isLeaf() + ":" + getDepth();
+		if (getLabel().get() instanceof Word) {
+			Word label = getLabel().get();  
+			return label.toStringWithAlphabet() + ":" + isLeaf() + ":" + getDepth();
+		}else {
+			return getLabel().get().toString();
+		}
+		
 	}
 }

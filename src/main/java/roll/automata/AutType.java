@@ -23,6 +23,7 @@ public enum AutType {
 
 	DFA,
 	NFA,
+	SDFA,
 	FDFA,
 	FNFA,
 	NBA,
@@ -67,12 +68,18 @@ public enum AutType {
 		return this == TDBA;
 	}
 	
+	public boolean isSDFA() {
+		return this == SDFA;
+	}
+	
 	
 	public String toString() {
 		if(this == DFA) {
 			return "DFA";
 		}else if(this == NFA) {
 			return "NFA";
+		}else if (this == SDFA) {
+			return "SDFA";
 		}else if(this == FDFA) {
 			return "FDFA";
 		}else if(this == FNFA) {
