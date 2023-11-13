@@ -79,6 +79,10 @@ public abstract class LearnerDFATree extends LearnerDFA{
 		nodeToSplit = null;
 		constructHypothesis();
 	}
+    
+    protected DFA createConjecture() {
+    	return new DFA(alphabet);
+    }
 	
 
 	protected Node<ValueNode> nodeToSplit;
@@ -89,7 +93,7 @@ public abstract class LearnerDFATree extends LearnerDFA{
 			updatePredecessors();
 		}
 		
-		DFA dfa = new DFA(alphabet);
+		DFA dfa = createConjecture();
 		for(int i = 0; i < states.size(); i ++) {
 		    dfa.createState();
 		}
@@ -106,11 +110,18 @@ public abstract class LearnerDFATree extends LearnerDFA{
 			if(isAccepting(state)) {
 			    dfa.setFinal(state.id);;
 			}
+			
+			setRejecting(state);
+			
 			if(state.label.isEmpty()) {
 			    dfa.setInitial(state.id);
 			}
 		}
 		this.hypothesis = dfa;
+	}
+	
+	protected void setRejecting(ValueNode state) {
+		
 	}
 	
 	protected boolean isAccepting(ValueNode state) {

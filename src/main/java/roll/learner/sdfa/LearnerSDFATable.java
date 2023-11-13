@@ -18,14 +18,9 @@ public class LearnerSDFATable extends LearnerDFATable {
 
 	@Override
 	public LearnerType getLearnerType() {
-		return LearnerType.SDFA;
+		return LearnerType.SDFA_TABLE;
 	}
 
-	@Override
-	public String toHTML() {
-		return "<pre>" + toString() + "</pre>";
-	}
-	
 	@Override
 	protected void createConjecture() {
     	hypothesis = new SDFA(alphabet);

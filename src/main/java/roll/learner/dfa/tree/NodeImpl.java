@@ -29,6 +29,7 @@ public class NodeImpl extends NodeAbstract<ValueNode> {
 	}
 
 	private boolean isAccepting = false;
+	private boolean isRejecting = false;
 
 	@Override
 	public void setAcceting() {
@@ -56,5 +57,15 @@ public class NodeImpl extends NodeAbstract<ValueNode> {
 			return getLabel().get().toString();
 		}
 		
+	}
+
+	@Override
+	public void setRejecting() {
+		this.isRejecting = true;
+	}
+
+	@Override
+	public boolean isRejecting() {
+		return isRejecting;
 	}
 }

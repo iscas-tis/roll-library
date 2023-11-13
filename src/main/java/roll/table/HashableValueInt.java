@@ -39,6 +39,8 @@ public class HashableValueInt implements HashableValue {
 	
 	@Override
 	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (this == obj) return true;
 		if(obj instanceof HashableValueInt) {
 			HashableValueInt val = (HashableValueInt)obj;
 			return val.value == value;

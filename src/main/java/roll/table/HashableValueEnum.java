@@ -30,6 +30,17 @@ public class HashableValueEnum implements HashableValue {
 	    }
 		return false;
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(o == null) return false;
+		if (this == o) return true;
+		if (o instanceof HashableValueEnum) {
+			HashableValueEnum other = (HashableValueEnum)o;
+			return this.valueEqual(other);
+		}
+		return false;
+	}
 
 	@Override
 	public <T> T get() {

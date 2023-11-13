@@ -53,6 +53,7 @@ public interface Node<V> {
 	void setValue(V v);
 	void addChild(HashableValue v, Node<V> n);
 	void setAcceting();
+	void setRejecting();
 	//public void setLabel(ExprValue v); should be final once it has been instantiated
 	
 	//tests
@@ -65,5 +66,6 @@ public interface Node<V> {
 	}
 	//boolean equals(Object obj);
 	boolean isAccepting();
+	boolean isRejecting();
 
 }

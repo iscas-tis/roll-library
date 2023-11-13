@@ -13,7 +13,6 @@ import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.ExprValue;
 import roll.table.ExprValueInt;
-import roll.table.ExprValueWord;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
 import roll.table.HashableValueEnum;
@@ -29,14 +28,17 @@ public class TeacherSDFA extends TeacherAbstract<SDFA> {
     private Alphabet alphabet;
     LinkedList<Word> positives;
     LinkedList<Word> negatives;
+    LinkedList<Word> dontcares;
     
 	public TeacherSDFA(Options options, Alphabet alphabet, 
-		LinkedList<Word> positives, LinkedList<Word> negatives) {
+		LinkedList<Word> positives, LinkedList<Word> negatives,
+		LinkedList<Word> dontcares) {
 		super(options);
 		states = new LinkedList<>();
 		this.alphabet = alphabet;
 		this.positives = positives;
 		this.negatives = negatives;
+		this.dontcares = dontcares;
 		Node<ValueNode> root = new NodeImpl(null, null, getExprValue(0));
 		tree = new TreeImpl(root);
 		
@@ -47,14 +49,14 @@ public class TeacherSDFA extends TeacherAbstract<SDFA> {
 		if (word.isEmpty()) {
 			return tree.getRoot();
 		}
-		System.out.println("Search node: " + word.toString());
+//		System.out.println("Search node: " + word.toString());
 		Node<ValueNode> nodeCurr = tree.getRoot();
 		int val = 0;
 		
 		int currIndex = 0;
 		while(true) {
 			HashableValueInt branch = new HashableValueInt(word.getLetter(currIndex));
-			System.out.println("Current branch: " + branch);
+//			System.out.println("Current branch: " + branch);
 			Node<ValueNode> child = nodeCurr.getChild(branch);
 			if (currIndex + 1 == word.length()) {
 				val = mqResult;
@@ -109,11 +111,11 @@ public class TeacherSDFA extends TeacherAbstract<SDFA> {
 	@Override
 	protected HashableValue checkMembership(Query<HashableValue> query) {
 		Word word = query.getQueriedWord();
-		System.out.println("Query word: " + word.toString());
+//		System.out.println("Query word: " + word.toString());
 		Node<ValueNode> node = searchNode(word, 0, true);
-		System.out.println("node = " + (node == null? "null" : node.getLabel().toString()));
+//		System.out.println("node = " + (node == null? "null" : node.getLabel().toString()));
 		if (node == null) return new HashableValueEnum(0);
-		System.out.println("node label: " + node.getLabel().get());
+//		System.out.println("node label: " + node.getLabel().get());
 		return new HashableValueEnum(node.getLabel().get());
 	}
 
@@ -137,9 +139,18 @@ public class TeacherSDFA extends TeacherAbstract<SDFA> {
     	        return ceQuery;
     		}
     	}
+    	for (Word word : dontcares) {
+    		int state = hypothesis.getSuccessor(word);
+    		if (hypothesis.isReject(state)
+    			|| hypothesis.isFinal(state)) {
+    			ceQuery = new QuerySimple<>(word);
+    	        ceQuery.answerQuery(new HashableValueBoolean(false));
+    	        return ceQuery;
+    		}
+    	}
     	ceQuery = new QuerySimple<>(cex);
         ceQuery.answerQuery(new HashableValueBoolean(true));
         return ceQuery;
-	}
+	} 
 
 }
