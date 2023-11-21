@@ -8,6 +8,7 @@ import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.table.ExprValue;
 import roll.table.HashableValue;
+import roll.table.ObservationRow;
 import roll.words.Alphabet;
 
 public class LearnerSDFATable extends LearnerDFATable {
@@ -30,5 +31,12 @@ public class LearnerSDFATable extends LearnerDFATable {
 	protected CeAnalyzer getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
         return new CeAnalyzerTable(exprValue, result);
 	}
+	
+	@Override
+    protected boolean isRejecting(int state) {
+    	ObservationRow stateRow = observationTable.getUpperTable().get(state);
+    	int emptyNr = getEmptyWordColumnIndex(state);
+        return stateRow.getValues().get(emptyNr).isRejecting();
+    }
 
 }

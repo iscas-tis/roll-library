@@ -2,6 +2,8 @@ package roll.automata;
 
 import java.util.LinkedList;
 
+import roll.table.HashableValue;
+import roll.table.HashableValueEnum;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
@@ -86,6 +88,36 @@ public class SDFA extends DFA {
     	}
     	res.setInitial(getInitialState());
     	return res;
+    }
+    
+    public HashableValue run(Word word) {
+    	int state = this.getSuccessor(word);
+    	if (this.isFinal(state)) {
+    		return new HashableValueEnum(1);
+    	}else if (this.isReject(state)) {
+    		return new HashableValueEnum(-1);
+    	}else {
+    		return new HashableValueEnum(0);
+    	}
+    }
+    
+    public DFA getDFA(boolean accept) {
+    	DFA dfa = new DFA(this.alphabet);
+    	for (int s = 0; s < this.getStateSize(); s ++) {
+    		dfa.createState();
+    		if (accept && this.isFinal(s)) {
+    			dfa.setFinal(s);
+    		}else if (!accept && this.isReject(s)) {
+    			dfa.setFinal(s);
+    		}
+    	}
+    	for (int s = 0; s < this.getStateSize(); s ++) {
+    		for (int a = 0; a < this.getAlphabetSize(); a ++) {
+    			dfa.getState(s).addTransition(a, this.getSuccessor(s, a));
+    		}
+    	}
+    	dfa.setInitial(this.getInitialState());
+    	return dfa;
     }
 
 }

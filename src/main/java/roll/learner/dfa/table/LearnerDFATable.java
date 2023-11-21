@@ -131,9 +131,7 @@ public abstract class LearnerDFATable extends LearnerDFA {
     }
     
     protected boolean isRejecting(int state) {
-    	ObservationRow stateRow = observationTable.getUpperTable().get(state);
-    	int emptyNr = getEmptyWordColumnIndex(state);
-        return stateRow.getValues().get(emptyNr).isRejecting();
+    	return false;
     }
     
     // a state is accepting iff it accepts empty language

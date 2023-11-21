@@ -1,8 +1,11 @@
 package roll.learner.sdfa;
 
+import java.util.LinkedList;
+
 import gnu.trove.iterator.TIntObjectIterator;
 import roll.automata.DFA;
 import roll.automata.SDFA;
+import roll.automata.StateNFA;
 import roll.learner.LearnerType;
 import roll.learner.dfa.tree.LearnerDFATree;
 import roll.learner.dfa.tree.ValueNode;
@@ -17,11 +20,11 @@ import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
 import roll.words.Word;
 
-public class LearnerSDFATree extends LearnerDFATree {
+public class LearnerSDFATree2 extends LearnerDFATree {
 
 	private SDFA sdfa;
 
-	public LearnerSDFATree(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
+	public LearnerSDFATree2(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
 		super(options, alphabet, membershipOracle);
 	}
 
@@ -40,6 +43,40 @@ public class LearnerSDFATree extends LearnerDFATree {
 		if (state.node.isRejecting()) {
 			sdfa.setReject(state.id);
 		}
+	}
+	
+	@Override
+	protected void constructHypothesis() {
+		// make sure the tree is closed and consistent
+		updatePredecessors();
+		
+		DFA dfa = createConjecture();
+		for(int i = 0; i < states.size(); i ++) {
+		    dfa.createState();
+		}
+		
+		for(ValueNode state : states) {
+			for(int letter = 0; letter < alphabet.getLetterSize(); letter ++) {
+				StateNFA s = dfa.getState(state.id);
+				Word wa = state.label.append(letter);
+				Partition partition = findNodePartition(wa, tree.getRoot());
+                if(partition.found) {
+                	s.addTransition(letter, partition.node.getValue().id);
+                }else {
+                	throw new RuntimeException("Succeccor not found: " + wa.toString());
+                }
+			}
+			if(isAccepting(state)) {
+			    dfa.setFinal(state.id);;
+			}
+			
+			setRejecting(state);
+			
+			if(state.label.isEmpty()) {
+			    dfa.setInitial(state.id);
+			}
+		}
+		this.hypothesis = dfa;
 	}
 
 	// sift the word to one equivalence class
@@ -92,7 +129,7 @@ public class LearnerSDFATree extends LearnerDFATree {
 		else if (result.isRejecting())
 			nodeLeaf.setRejecting();
         
-        updatePredecessors(stateLeaf.id, 0, alphabet.getLetterSize() - 1);
+//        updatePredecessors(stateLeaf.id, 0, alphabet.getLetterSize() - 1);
         return nodeLeaf;
     }
     
@@ -109,10 +146,10 @@ public class LearnerSDFATree extends LearnerDFATree {
             Word wordSucc = label.append(letter);
             Partition nodeSucc = findNodePartition(wordSucc);
             if(nodeSucc.found) {
-                updateTransition(stateNr, letter, nodeSucc.node.getValue().id);
+//                updateTransition(stateNr, letter, nodeSucc.node.getValue().id);
             }else {
-                Node<ValueNode> node = addNode(nodeSucc.node, nodeSucc.branch, getExprValueWord(wordSucc));
-                updateTransition(stateNr, letter, node.getValue().id);
+                addNode(nodeSucc.node, nodeSucc.branch, getExprValueWord(wordSucc));
+//                updateTransition(stateNr, letter, node.getValue().id);
             }
         }
     }
@@ -120,45 +157,36 @@ public class LearnerSDFATree extends LearnerDFATree {
     @Override
     protected void updatePredecessors() {
         
-        TIntObjectIterator<ISet> iterator = nodeToSplit.getValue().predecessors.iterator();
-        Node<ValueNode> parent = nodeToSplit.getParent();
-        ISet letterDeleted = UtilISet.newISet();
-        while(iterator.hasNext()) {
-            iterator.advance();
-            int letter = iterator.key();
-            ISet statePrevs = iterator.value().clone(); 
-            ISet stateRemoved = UtilISet.newISet();
+        LinkedList<ValueNode> queue = new LinkedList<>();
+        ISet visited = UtilISet.newISet();
+        for (ValueNode node : states) {
+        	queue.add(node);
+        	visited.set(node.id);
+        }
+        
+        while(! queue.isEmpty()) {
+            ValueNode currState = queue.poll();
+            visited.set(currState.id);
             // when addNode is called, statePrevs will not add states, 
             // but iterator.value() may add new states
             // since we do not care new added states, they are correct
-            for(final int stateNr : statePrevs) {
-                ValueNode statePrev = states.get(stateNr);
-                Word wa = statePrev.label.append(letter);
-                Partition partition = findNodePartition(wa, parent);
-                if(partition.found) {
-                    if (partition.node != nodeToSplit) {
-                        updateTransition(stateNr, letter, partition.node.getValue().id);
-                        stateRemoved.set(stateNr); // remove this predecessor
-                    } // change to other leaf node
-                }else {
+            for (int letter = 0; letter < alphabet.getLetterSize(); letter ++) {
+            	Word wa = currState.label.append(letter);
+                Partition partition = findNodePartition(wa, tree.getRoot());
+                if(! partition.found) {
                     Node<ValueNode> node = addNode(partition.node, partition.branch
                             , getExprValueWord(wa));
-                    updateTransition(stateNr, letter, node.getValue().id);
-                    stateRemoved.set(stateNr);  // remove this predecessor
+                    if (!visited.get(node.getValue().id)) {
+                    	queue.add(node.getValue());
+                    	visited.set(node.getValue().id);
+                    }
                 }
-            }
-            ISet temp = iterator.value().clone(); 
-            temp.andNot(stateRemoved);
-            if(temp.isEmpty()) {
-                letterDeleted.set(letter);
-            }else {
-                iterator.setValue(temp);
             }
         }
         
-        for(final int letter : letterDeleted) {
-            nodeToSplit.getValue().predecessors.remove(letter);
-        }
+//        for(final int letter : letterDeleted) {
+//            nodeToSplit.getValue().predecessors.remove(letter);
+//        }
         
     }
 
