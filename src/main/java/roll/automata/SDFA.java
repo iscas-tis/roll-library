@@ -40,6 +40,10 @@ public class SDFA extends DFA {
     	return this.rejectStates.cardinality();
     }
     
+    public ISet getRejectStates() {
+    	return this.rejectStates.clone();
+    }
+    
     @Override
     public boolean isReject(int state) {
     	assert checkValidState(state);

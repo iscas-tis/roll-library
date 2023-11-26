@@ -189,6 +189,24 @@ public class LearnerSDFATree2 extends LearnerDFATree {
 //        }
         
     }
+    
+    @Override
+	protected void setAcceptingNodes(Node<ValueNode> nodePrev, Node<ValueNode> nodePrevNew
+	        , Node<ValueNode> nodeLeaf, boolean rootChanged) {
+    	HashableValue mqLeaf = processMembershipQuery(nodeLeaf.getLabel().get()
+    			, alphabet.getEmptyWord());
+//    	System.out.println("Acc: " + nodeLeaf.getLabel().get() + ": " + mqLeaf);
+    	if (mqLeaf.isAccepting()) {
+    		nodeLeaf.setAcceting();
+    	}else if (mqLeaf.isRejecting()) {
+    		nodeLeaf.setRejecting();
+    	}
+    	if(nodePrev.isAccepting()) {
+            nodePrevNew.setAcceting();
+        }else if (nodePrev.isRejecting()) {
+        	nodePrevNew.setRejecting();
+        }
+	}
 
 	@Override
 	protected CeAnalyzerTree getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
@@ -223,6 +241,11 @@ public class LearnerSDFATree2 extends LearnerDFATree {
             super.update(result);
             this.nodePrevBranch = processMembershipQuery(getStateLabel(result.currState), wordExpr);
         }
+	}
+	
+	@Override
+	public String toString() {
+		return TreePrinterBoolean.toString(tree);
 	}
 
 }

@@ -11,6 +11,7 @@ import roll.oracle.MembershipOracle;
 import roll.table.ExprValue;
 import roll.table.HashableValue;
 import roll.tree.Node;
+import roll.tree.TreeBinaryExpoterDOT;
 import roll.tree.TreePrinterBoolean;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
@@ -86,12 +87,11 @@ public class LearnerSDFATree extends LearnerDFATree {
         // test whether this node is accepting
         Word period = nodeLabel.get();
         HashableValue result = processMembershipQuery(period, tree.getRoot().getLabel());
-        
         if (result.isAccepting())
 			nodeLeaf.setAcceting();
 		else if (result.isRejecting())
 			nodeLeaf.setRejecting();
-        
+
         updatePredecessors(stateLeaf.id, 0, alphabet.getLetterSize() - 1);
         return nodeLeaf;
     }
@@ -161,6 +161,27 @@ public class LearnerSDFATree extends LearnerDFATree {
         }
         
     }
+    
+    // we need to change the accepting/rejecting of nodes
+    // if we change the previous leaf node to internal node,
+    // we need to set the acceptance correctly
+    @Override
+	protected void setAcceptingNodes(Node<ValueNode> nodePrev, Node<ValueNode> nodePrevNew
+	        , Node<ValueNode> nodeLeaf, boolean rootChanged) {
+    	HashableValue mqLeaf = processMembershipQuery(nodeLeaf.getLabel().get()
+    			, alphabet.getEmptyWord());
+//    	System.out.println("Acc: " + nodeLeaf.getLabel().get() + ": " + mqLeaf);
+    	if (mqLeaf.isAccepting()) {
+    		nodeLeaf.setAcceting();
+    	}else if (mqLeaf.isRejecting()) {
+    		nodeLeaf.setRejecting();
+    	}
+    	if(nodePrev.isAccepting()) {
+            nodePrevNew.setAcceting();
+        }else if (nodePrev.isRejecting()) {
+        	nodePrevNew.setRejecting();
+        }
+	}
 
 	@Override
 	protected CeAnalyzerTree getCeAnalyzerInstance(ExprValue exprValue, HashableValue result) {
@@ -195,6 +216,11 @@ public class LearnerSDFATree extends LearnerDFATree {
             super.update(result);
             this.nodePrevBranch = processMembershipQuery(getStateLabel(result.currState), wordExpr);
         }
+	}
+	
+	@Override
+	public String toString() {
+		return TreePrinterBoolean.toString(tree);
 	}
 
 }

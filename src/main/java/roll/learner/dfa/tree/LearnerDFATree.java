@@ -108,7 +108,7 @@ public abstract class LearnerDFATree extends LearnerDFA{
 				}
 			}
 			if(isAccepting(state)) {
-			    dfa.setFinal(state.id);;
+			    dfa.setFinal(state.id);
 			}
 			
 			setRejecting(state);
