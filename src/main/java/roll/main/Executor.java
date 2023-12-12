@@ -71,6 +71,7 @@ public class Executor {
         	}else if (learner instanceof LearnerTDBALOmega) {
         		LearnerTDBALOmega learnerLOmega = (LearnerTDBALOmega)learner;
         		learnerFDFA = learnerLOmega.getLearnerFDFA();
+        		options.stats.numOfStatesInHypothesis = learnerLOmega.getHypothesis().getStateSize();
         	}
             
             FDFA fdfa = learnerFDFA.getHypothesis();
@@ -80,6 +81,7 @@ public class Executor {
             }
             if(options.automaton.isLDBA()) {
                 hypothesis = UtilLOmega.constructLDBA(options, fdfa);
+              options.stats.numOfStatesInHypothesis = hypothesis.getStateSize();
             }
         }else if(learner instanceof LearnerNBALDollar) {
             LearnerNBALDollar learnerLDollar = (LearnerNBALDollar)learner;
@@ -89,7 +91,6 @@ public class Executor {
             throw new UnsupportedOperationException("Unsupported BA Learner");
         }
         options.stats.hypothesis = hypothesis;
-        options.stats.numOfStatesInHypothesis = hypothesis.getStateSize();
     }
     
     private static void execute(Options options, NBA target,
