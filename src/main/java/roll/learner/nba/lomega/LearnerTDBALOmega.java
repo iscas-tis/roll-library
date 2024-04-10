@@ -52,6 +52,12 @@ public class LearnerTDBALOmega extends LearnerBase<TDBA> {
         // construct BA from FDFA
         FDFA fdfa = fdfaLearner.getHypothesis();
         hypothesis = FDFAOperations.buildTDBA(fdfa);
+        options.log.println("Num of states in the leading DFA: " + fdfa.getLeadingFA().getStateSize());
+        int max = 0;
+        for (int i = 0; i < fdfa.getLeadingFA().getStateSize(); i ++) {
+        	max = Math.max(max, fdfa.getProgressFA(i).getStateSize());
+        }
+        options.log.println("Max num of states in progress DFAs: " + max);
     }
     
     @Override

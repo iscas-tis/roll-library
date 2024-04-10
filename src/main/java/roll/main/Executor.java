@@ -16,6 +16,9 @@
 
 package roll.main;
 
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import roll.automata.DFA;
 import roll.automata.FDFA;
 import roll.automata.NBA;
@@ -48,7 +51,8 @@ public class Executor {
     
     public static void executeRABIT(Options options, NBA target) {
     	TeacherNBA teacher = null;
-    	if (target.isDeterministic() && options.automaton == Options.TargetAutomaton.TDBA) {
+    	if (target.isDeterministic() && options.automaton == Options.TargetAutomaton.TDBA
+    			&& !options.spot) {
     		teacher = new TeacherTDBAImpl(options, target);
     	}else {
     		teacher = new TeacherNBAImpl(options, target);
@@ -59,6 +63,25 @@ public class Executor {
     public static void executeSampler(Options options, NBA target) {
         TeacherNBASampler teacher = new TeacherNBASampler(options, target);
         Executor.execute(options, target, teacher);
+    }
+    
+    private static void computeMaxProStates(Options options, LearnerBase<?> learner) {
+    	if(learner instanceof LearnerNBALOmega || learner instanceof LearnerTDBALOmega) {
+        	LearnerFDFA learnerFDFA = null;
+        	if (learner instanceof LearnerNBALOmega) {
+        		LearnerNBALOmega learnerLOmega = (LearnerNBALOmega)learner;
+        		learnerFDFA = learnerLOmega.getLearnerFDFA();
+        	}else if (learner instanceof LearnerTDBALOmega) {
+        		LearnerTDBALOmega learnerLOmega = (LearnerTDBALOmega)learner;
+        		learnerFDFA = learnerLOmega.getLearnerFDFA();
+        	}
+            
+            FDFA fdfa = learnerFDFA.getHypothesis();
+            for(int state = 0; state < fdfa.getLeadingFA().getStateSize(); state ++) {
+                options.stats.numOfMaxStatesInProgress = 
+                		Math.max(options.stats.numOfMaxStatesInProgress, fdfa.getProgressFA(state).getStateSize());
+            }
+    	}
     }
     
     private static void prepareStats(Options options, LearnerBase<?> learner, NBA hypothesis) {
@@ -103,10 +126,13 @@ public class Executor {
         timer.stop();
         options.stats.timeOfLearner += timer.getTimeElapsed();
         NBA hypothesis = null;
+//        options.log.println(target.toString());
         while(true) {
             options.log.verbose("Table/Tree is both closed and consistent\n" + learner.toString());
             NFA model = (NFA)learner.getHypothesis();
             hypothesis = getNBA(model);
+            // record the maximal number of states in progress DFAs
+            computeMaxProStates(options, learner);
             // along with ce
             options.log.println("Resolving equivalence query for hypothesis (#Q=" + hypothesis.getStateSize() + ")...  ");
             Query<HashableValue> ceQuery = teacher.answerEquivalenceQuery(hypothesis);
@@ -125,6 +151,14 @@ public class Executor {
             options.stats.timeOfLearner += timer.getTimeElapsed();
         }
         options.log.println("Learning completed...");
+        if (options.automaton.isTDBA()) {
+        	options.log.println("Learned TDBA:");
+        	LearnerTDBALOmega learnerDBA = (LearnerTDBALOmega)learner;
+        	TDBA model = learnerDBA.getHypothesis();
+        	options.log.println(model.toString(IntStream.range(0, target.getAlphabetSize())
+                    .mapToObj(String::valueOf)
+                    .collect(Collectors.toList())));
+        }
     }
 
     public static LearnerBase<?> getLearner(Options options, Alphabet alphabet,

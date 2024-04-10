@@ -105,6 +105,8 @@ public class SpotThread3 implements Callable<IsIncluded>, IsIncluded {
 		}
 		return word;
 	}
+	
+	
 
 	@Override
 	public IsIncluded call() throws Exception {

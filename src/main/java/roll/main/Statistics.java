@@ -39,7 +39,7 @@ public class Statistics {
     
     public int numOfStatesInLeading; // number of states in leading automaton
     public List<Integer> numOfStatesInProgress; // number of states in progress automata
-    
+    public int numOfMaxStatesInProgress = 0;// peak number of states in learning procedure
     
     public long timeOfMembershipQuery ; // milliseconds used in membership query 
     public long timeOfEquivalenceQuery ;// milliseconds used in equivalence query
@@ -93,6 +93,7 @@ public class Statistics {
             numTotal += numStates;
         }
         builder.append("]");
+        log.println("#Pmax.S = " + numOfMaxStatesInProgress , indent , "    // max #states of progress DFAs in learning");
         log.println(builder.toString(),  indent ,"    // #states of each progress automaton");
         // total number of the states in final FDFA
         log.println("#F.S = " + numTotal , indent , "    // #L.S + #P.S");

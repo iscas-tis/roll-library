@@ -32,12 +32,15 @@ import roll.learner.dfa.tree.LearnerDFATreeColumn;
 import roll.learner.dfa.tree.LearnerDFATreeKV;
 import roll.learner.nba.ldollar.LearnerNBALDollar;
 import roll.learner.nba.lomega.LearnerNBALOmega;
+import roll.learner.nba.lomega.LearnerTDBALOmega;
 import roll.learner.nfa.nlstar.LearnerNFANLStar;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
+import roll.util.sets.ISet;
+import roll.util.sets.UtilISet;
 import roll.words.Alphabet;
 import roll.words.Word;
 
@@ -51,7 +54,7 @@ public class InteractiveMode {
         // prepare the alphabet
         Alphabet alphabet = prepareAlphabet(options);
         KnowledgeBase kb = new KnowledgeBase();
-        MembershipOracle<HashableValue> teacher = getMembershipOracle(options, kb);
+        MembershipOracle<HashableValue> teacher = new MQNBAInteractive2(alphabet); //getMembershipOracle(options, kb);
         LearnerBase<? extends NFA> learner = getLearner(options, alphabet, teacher);
         
         options.log.println("Initializing learning...");
@@ -62,6 +65,9 @@ public class InteractiveMode {
             NFA hypothesis = learner.getHypothesis();
             // along with ce
             System.out.println("Resolving equivalence query for hypothesis (#Q=" + hypothesis.getStateSize() + ")...  ");
+            System.out.println("Learner: " + learner.toString());
+            LearnerTDBALOmega ll = (LearnerTDBALOmega)learner;
+            System.out.println("FDFA: " + ll.getLearnerFDFA().getHypothesis().toString());
             Query<HashableValue> ceQuery = answerEquivalenceQuery(hypothesis);
             boolean isEq = ceQuery.getQueryAnswer().get();
             if(isEq == true) break;
@@ -112,6 +118,9 @@ public class InteractiveMode {
         LearnerBase<? extends NFA> learner = null;
         if(options.algorithm == Options.Algorithm.NBA_LDOLLAR) {
             learner = (LearnerBase<? extends NFA>)new LearnerNBALDollar(options, alphabet, teacher);
+        }else if (options.automaton == Options.TargetAutomaton.TDBA) {
+        	learner = new LearnerTDBALOmega(options, alphabet, teacher);
+        	System.out.println("I am here");
         }else if(options.algorithm == Options.Algorithm.PERIODIC
              || options.algorithm == Options.Algorithm.SYNTACTIC
              || options.algorithm == Options.Algorithm.RECURRENT
@@ -300,6 +309,33 @@ public class InteractiveMode {
         }
         
         return new QuerySimple<HashableValue>(prefix, suffix);
+    }
+    
+    private static class MQNBAInteractive2 implements MembershipOracle<HashableValue> {
+    	
+    	Alphabet alphabet;
+    	
+    	public MQNBAInteractive2(Alphabet alphabet) {
+    		this.alphabet = alphabet;
+    	}
+
+        @Override
+        public HashableValue answerMembershipQuery(Query<HashableValue> query) {
+            Word prefix = query.getPrefix();
+            Word suffix = query.getSuffix();
+            if(suffix.isEmpty()) {
+                return new HashableValueBoolean(false);
+            }
+            
+            ISet set = UtilISet.newISet();
+            for (int index = 0; index < suffix.length(); index ++) {
+            	set.set(suffix.getLetter(index));
+            }
+            boolean answer = set.cardinality() == alphabet.getLetterSize(); 
+            HashableValue result = new HashableValueBoolean(answer);
+            query.answerQuery(result);
+            return result;
+        }
     }
     
     private static class MQNBAInteractive implements MembershipOracle<HashableValue> {

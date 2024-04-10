@@ -215,7 +215,7 @@ public final class ROLL {
             options.log.println("\ntarget automaton:");
             parser.print(target, options.log.getOutputStream());
             options.log.println("\nhypothesis automaton:");
-            if (options.stats.numOfTransInHypothesis != options.stats.hypothesis.getStateSize()) {
+            if (options.stats.numOfStatesInHypothesis != options.stats.hypothesis.getStateSize()) {
             	options.log.println("(note: output has been converted to state-based automaton)");
             }
             parser.print(options.stats.hypothesis, options.log.getOutputStream());
