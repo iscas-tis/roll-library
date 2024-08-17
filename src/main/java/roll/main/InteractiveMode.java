@@ -393,7 +393,7 @@ public class InteractiveMode {
         }
     }
     
-    private static Query<HashableValue> answerEquivalenceQuery(NFA hypothesis) {
+    public static Query<HashableValue> answerEquivalenceQuery(NFA hypothesis) {
         if(hypothesis != null) {
             List<String> apList = new ArrayList<>();
             for(int i = 0; i < hypothesis.getAlphabetSize(); i ++) {

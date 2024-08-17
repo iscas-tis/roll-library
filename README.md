@@ -14,7 +14,7 @@ ROLL is a library of learning algorithms for ω-regular languages. It consists o
 Since 2023, it also added the support for the limit FDFAs proposed in [11] and the following:
   - the learning algorithms for limit FDFAs using observation tables or classification trees;
   - the learning algorithms for Büchi automata via learning limit FDFAs;
-  - and the learning algorithms for transition-based deterministic Büchi automata for an unknown DBA language based on learning limit FDFAs;
+  - and the learning algorithms for transition-based deterministic Büchi automata for an unknown DBA language based on learning limit FDFAs [12];
 
 
 The ROLL library is implemented in JAVA. Its DFA operations are delegated to the [dk.brics.automaton](http://www.brics.dk/automaton/) package. We use [RABIT](http://www.languageinclusion.org/doku.php?id=tools) tool to check the equivalence of
@@ -45,5 +45,7 @@ two Büchi automata.
 [10] Yong Li, Yu-Fang Chen, Lijun Zhang, and Depeng Liu. "A Novel Learning Algorithm for Büchi Automata based on Family of DFAs and Classification Trees." In I&C. (Added an algorithm to transform an FDFA to a limit-deterministic Büchi automaton) [paper](https://tis.ios.ac.cn/roll/lib/exe/fetch.php?media=iandc.pdf)
 
 [11] Yong Li, Sven Schewe, and Qiyi Tang. "A Novel Family of Finite Automata for Recognizing and Learning ω-Regular Languages." In ATVA 2023. [paper](https://arxiv.org/abs/2307.07490)
+
+[12] Yong Li, Sven Schewe, and Qiyi Tang. "Angluin-Style Learning of Deterministic Büchi and Co-Büchi Automata." In IJCAI 2024. [paper](https://liyong31.github.io/pdf/IJCAI24.pdf)
 
 For more information, please visit our website http://iscasmc.ios.ac.cn/roll/.
