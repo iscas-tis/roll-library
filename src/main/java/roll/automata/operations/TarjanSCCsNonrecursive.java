@@ -25,6 +25,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import roll.automata.NBA;
+import roll.automata.NFA;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
 
@@ -50,7 +51,7 @@ public class TarjanSCCsNonrecursive {
 	private final LinkedList<ISet> maxSCCs;
 
 	    
-	public TarjanSCCsNonrecursive(NBA aut, ISet initials) {
+	public TarjanSCCsNonrecursive(NFA aut, ISet initials) {
 //		this.automaton = aut;
 		this.initials = initials;
 		this.maxSCCs = new LinkedList<>();

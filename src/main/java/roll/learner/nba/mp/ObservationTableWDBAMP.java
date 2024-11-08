@@ -22,8 +22,8 @@ import roll.table.ObservationTableBase;
  * @author Yong Li (liyong@ios.ac.cn)
  * */
 
-public class ObservationTableNBAMP extends ObservationTableBase {
-    public ObservationTableNBAMP() {
+public class ObservationTableWDBAMP extends ObservationTableBase {
+    public ObservationTableWDBAMP() {
         super();
     }
 }
