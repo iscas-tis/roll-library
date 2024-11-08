@@ -28,6 +28,7 @@ import roll.automata.operations.NBAOperations;
 import roll.learner.LearnerBase;
 import roll.learner.fdfa.LearnerFDFA;
 import roll.learner.nba.ldollar.LearnerNBALDollar;
+import roll.learner.nba.mp.LearnerWDBAMP;
 import roll.learner.nba.lomega.LearnerNBALOmega;
 import roll.learner.nba.lomega.LearnerTDBALOmega;
 import roll.learner.nba.lomega.UtilLOmega;
@@ -110,6 +111,10 @@ public class Executor {
             LearnerNBALDollar learnerLDollar = (LearnerNBALDollar)learner;
             DFA dfa = learnerLDollar.getLearnerDFA().getHypothesis();
             options.stats.numOfStatesInLeading = dfa.getStateSize();
+        }else if (learner instanceof LearnerWDBAMP){
+        	LearnerWDBAMP learnerMP = (LearnerWDBAMP)learner;
+            NBA nba = learnerMP.getHypothesis();
+            options.stats.numOfStatesInLeading = nba.getStateSize();
         }else {
             throw new UnsupportedOperationException("Unsupported BA Learner");
         }
@@ -166,6 +171,8 @@ public class Executor {
         LearnerBase<?> learner = null;
         if(options.algorithm == Options.Algorithm.NBA_LDOLLAR) {
             learner = new LearnerNBALDollar(options, alphabet, teacher);
+        }else if (options.algorithm == Options.Algorithm.WDBA_MP) {
+        	learner = new LearnerWDBAMP(options, alphabet, teacher);
         }else if (options.automaton == Options.TargetAutomaton.TDBA) {
         	learner = new LearnerTDBALOmega(options, alphabet, teacher);
         }else if(options.algorithm == Options.Algorithm.PERIODIC

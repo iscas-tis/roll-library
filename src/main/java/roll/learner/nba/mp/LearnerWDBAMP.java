@@ -125,7 +125,7 @@ public class LearnerWDBAMP extends LearnerBase<NBA> {
             processMembershipQueries(newLowerRows, 0, observationTable.getColumns().size());
             lowerRow = observationTable.getUnclosedLowerRow();
         }
-    	System.out.println(observationTable.toString());
+//    	System.out.println(observationTable.toString());
     	// construct the transition graph and resolve conflict
         constructHypothesis();
     }
@@ -212,7 +212,7 @@ public class LearnerWDBAMP extends LearnerBase<NBA> {
         inits.set(dfa.getInitialState());
         TarjanSCCsNonrecursive tarjan = new TarjanSCCsNonrecursive(dfa, inits);
         for (ISet mscc : tarjan.getSCCs()) {
-        	System.out.println("SCC: " + mscc);
+//        	System.out.println("SCC: " + mscc);
         	// whether there are two states with different acceptance
         	int posState = -1;
         	int negState = -1;
@@ -271,13 +271,12 @@ public class LearnerWDBAMP extends LearnerBase<NBA> {
     
     private void addColumn(Word prefix, Word loop) {
     	int colSize = observationTable.getColumns().size();
-    	System.out.println("colsize: " + colSize);
+//    	System.out.println("colsize: " + colSize);
     	ExprValue col = new ExprValueWordPair(prefix, loop);
     	// we cannot add repeated column to table
     	if (observationTable.getColumns().indexOf(col) >= 0) {
     		return ;
     	}
-    	System.out.println("add column: " + col);
         observationTable.addColumn(col);
 //    	System.out.println("colsize: " + observationTable.getColumns().size());
 
@@ -474,7 +473,7 @@ public class LearnerWDBAMP extends LearnerBase<NBA> {
     	// add including the word (emptyword, loop)
     	for (int i = 0; i < prefix.length(); i ++) {
         	addColumn(prefix.getSuffix(i), loop);
-        	System.out.println("suffix: " + prefix.getSuffix(i));
+//        	System.out.println("suffix: " + prefix.getSuffix(i));
     	}
     	// we need to add all rotation of the word
     	Word head = alphabet.getEmptyWord();
@@ -487,7 +486,7 @@ public class LearnerWDBAMP extends LearnerBase<NBA> {
         	tail = loop.getSuffix(i + 1);
         	Word rotation = tail.concat(head);
         	addColumn(wordEmpty, rotation);
-        	System.out.println("rotation: " + rotation);
+//        	System.out.println("rotation: " + rotation);
         }
     }
     

@@ -169,6 +169,7 @@ public class Options {
         NFA_RDSTAR,
         NFA_NLSTAR,
         NBA_LDOLLAR,
+        WDBA_MP,
         PERIODIC,
         SYNTACTIC,
         RECURRENT,

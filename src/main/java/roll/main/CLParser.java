@@ -262,6 +262,10 @@ public class CLParser {
                 options.algorithm = Options.Algorithm.NBA_LDOLLAR;
                 continue;
             }
+            if(args[i].compareTo("-mp") == 0) {
+                options.algorithm = Options.Algorithm.WDBA_MP;
+                continue;
+            }
             if(args[i].compareTo("-syntactic") == 0) {
                 options.algorithm = Options.Algorithm.SYNTACTIC;
                 continue;
@@ -447,6 +451,7 @@ public class CLParser {
 //        	, new Pair<>("-nlstar", "Use NL* learning algorithm")
         	, new Pair<>("-table", "Table-based data structures for learning (Default)")
         	, new Pair<>("-ldollar", "L$ automata for learning w-regular language")
+        	, new Pair<>("-mp", "Maler-Pnueli algorithm for learning weak DBA language")
         	, new Pair<>("-periodic", "Peridoc FDFA for learning w-regular language")
         	, new Pair<>("-recurrent", "Recurrent FDFA for learning w-regular languages")
         	, new Pair<>("-limit", "Limit FDFA for learning w-regular languages")
