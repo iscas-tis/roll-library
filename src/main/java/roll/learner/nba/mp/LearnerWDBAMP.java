@@ -133,7 +133,8 @@ public class LearnerWDBAMP extends LearnerBase<NBA> {
     @Override
     protected void constructHypothesis() {
         transGraph = constructTransitionGraph();
-        markOrDetect(transGraph);
+        if(markOrDetect(transGraph))
+        	makeTableClosed();
     }
     
     private boolean findConflict(DFA dfa, ISet inf, int mark) {
@@ -181,7 +182,7 @@ public class LearnerWDBAMP extends LearnerBase<NBA> {
 		return false;
     }
 
-    protected void markOrDetect(DFA dfa) {
+    protected boolean markOrDetect(DFA dfa) {
     	// mark every state whether they are rejecting or accepting
         marks = new int[dfa.getStateSize()];
         // associate each state with a positive or negative sample
@@ -203,7 +204,7 @@ public class LearnerWDBAMP extends LearnerBase<NBA> {
                 ISet inf = getInfSetAndRecordWords(dfa, prefix, period, mq.isAccepting());
                 // now try to find conflict
                 boolean foundConflict = findConflict(dfa, inf, mq.isAccepting()? ACC : REJ);
-                if (foundConflict) return;
+                if (foundConflict) return true;
             }
         }
         
@@ -248,7 +249,7 @@ public class LearnerWDBAMP extends LearnerBase<NBA> {
         		}
         		// if both of them not feasible
         		// now we have a problem
-        		System.err.println("Serious problem");
+//        		System.err.println("Serious problem");
         		// this means sz /= t, as wz can distinguish them
         		// sz.(wz) is accepting, while t.(wz) is rejecting
         		if (options.minimization) {
@@ -256,6 +257,7 @@ public class LearnerWDBAMP extends LearnerBase<NBA> {
         		}else {
         			refineWithCounterexample(s.concat(z), wz);
         		}
+        		return true;
         		// now we check 
         	}else if (posState >= 0){
         		mark = ACC;
@@ -266,6 +268,7 @@ public class LearnerWDBAMP extends LearnerBase<NBA> {
         		marks[s] = mark;
         	}
         }
+        return false;
         
     }
     
@@ -449,7 +452,7 @@ public class LearnerWDBAMP extends LearnerBase<NBA> {
     
     protected void refineWithCounterexample(Word prefix, Word loop) {
     	addColumns(prefix, loop);
-    	makeTableClosed();
+//    	System.out.println("cex: " + prefix + " loop:" + loop);	
     }
 
     @Override
@@ -458,9 +461,12 @@ public class LearnerWDBAMP extends LearnerBase<NBA> {
 //    	if (options.minimization) {
 //        	HashableValue mq = membershipOracle.answerMembershipQuery(query);
 //            ISet inf = getInfSetAndRecordWords(transGraph, query.getPrefix(), query.getSuffix(), mq.isAccepting());
-//            findConflict(transGraph, inf, mq.isAccepting()? ACC : REJ);    		
+//            findConflict(transGraph, inf, mq.isAccepting()? ACC : REJ);  
+        	// adding all suffix of (u, v) is equivalent to test (uv, v) 
+//            analyzeFinitePrefix(transGraph, query.getPrefix().concat(query.getSuffix()), query.getSuffix(), mq.isAccepting());
 //    	}else 
     		refineWithCounterexample(query.getPrefix(), query.getSuffix());
+    		makeTableClosed();
     }
 
     @Override

@@ -52,7 +52,8 @@ public class Executor {
     
     public static void executeRABIT(Options options, NBA target) {
     	TeacherNBA teacher = null;
-    	if (target.isDeterministic() && options.automaton == Options.TargetAutomaton.TDBA
+    	if (target.isDeterministic() && (options.automaton == Options.TargetAutomaton.TDBA 
+    			|| options.algorithm == Options.Algorithm.WDBA_MP)
     			&& !options.spot) {
     		teacher = new TeacherTDBAImpl(options, target);
     	}else {
@@ -125,6 +126,7 @@ public class Executor {
             TeacherNBA teacher) {
         LearnerBase<?> learner = getLearner(options, target.getAlphabet(), teacher);
         Timer timer = new Timer();
+//        NBAOperations.outputCode(target);
         options.log.println("Initializing learner...");
         timer.start();
         learner.startLearning();

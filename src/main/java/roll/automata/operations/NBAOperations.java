@@ -339,4 +339,31 @@ public class NBAOperations {
     	
     	return res;
     }
+    
+    public static void outputCode(NBA nba) {
+    	System.out.println("Alphabet alphabet = new Alphabet();");
+    	System.out.println("for (int c = 0; c < " + nba.getAlphabetSize() + "; c++) {");
+    	System.out.println("    alphabet.addLetter((char) (\'0\' + c));");//(char) ('0' + c)
+    	System.out.println("}");
+    	System.out.println("NBA nba = new NBA(alphabet);");
+    	System.out.println("for (int s = 0; s < " + nba.getStateSize() + "; s++) {");
+    	System.out.println("    nba.createState();");
+    	System.out.println("}");
+    	for (int s = 0; s < nba.getStateSize(); s ++) {
+    		if (nba.isFinal(s)) {
+    			System.out.println("nba.setFinal(" + s + ");");
+    		}
+    	}
+    	System.out.println("nba.setInitial(" + nba.getInitialState() + ");");
+    	// transitions
+    	for (int s = 0; s < nba.getStateSize(); s ++) {
+    		for (int c = 0; c < nba.getAlphabetSize(); c ++) {
+    			for (int t : nba.getSuccessors(s, c)) {
+        			System.out.println("nba.getState(" + s + ").addTransition(" + c + "," + t + ");");
+        		}
+    		}
+    	}
+    	
+    	System.out.println("return nba;");
+    }
 }
