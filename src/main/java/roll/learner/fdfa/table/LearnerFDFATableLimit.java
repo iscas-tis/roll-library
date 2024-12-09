@@ -37,12 +37,12 @@ public class LearnerFDFATableLimit extends LearnerFDFA {
     }
 
     @Override
-    protected LearnerLeading getLearnerLeading() {
+    protected LearnerLeading createLearnerLeading() {
         return new LearnerLeadingTable(options, alphabet, membershipOracle);
     }
 
     @Override
-    protected LearnerProgress getLearnerProgress(int state) {
+    protected LearnerProgress createLearnerProgress(int state) {
         assert learnerLeading != null;
         return new LearnerProgressTableLimit(options, alphabet, membershipOracle, learnerLeading, state);
     }

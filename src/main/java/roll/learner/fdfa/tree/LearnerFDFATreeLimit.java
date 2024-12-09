@@ -16,13 +16,18 @@
 
 package roll.learner.fdfa.tree;
 
+import roll.automata.DFA;
 import roll.learner.fdfa.LearnerFDFA;
 import roll.learner.fdfa.LearnerLeading;
 import roll.learner.fdfa.LearnerProgress;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
+import roll.query.Query;
+import roll.query.QuerySimple;
+import roll.table.ExprValue;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
+import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -36,13 +41,35 @@ public class LearnerFDFATreeLimit extends LearnerFDFA {
     }
 
     @Override
-    protected LearnerLeading getLearnerLeading() {
+    protected LearnerLeading createLearnerLeading() {
         return new LearnerLeadingTree(options, alphabet, membershipOracle);
     }
 
     @Override
-    protected LearnerProgress getLearnerProgress(int state) {
+    protected LearnerProgress createLearnerProgress(int state) {
         return new LearnerProgressTreeLimit(options, alphabet, membershipOracle, learnerLeading, state);
+    }
+    
+    @Override
+    public boolean checkLeadingConsistency() {
+    	LearnerLeadingTree learnerLeading = (LearnerLeadingTree) this.learnerLeading;
+    	DFA dfa = learnerLeading.getHypothesis();
+    	for (int state = 0; state < dfa.getStateSize(); state ++) {
+    		if (state == dfa.getInitialState()) continue;
+    		Word repr = this.getLeadingStateLabel(state);
+    		int reachState = dfa.getSuccessor(repr);
+    		if (reachState != state) {
+    			// we can obtain the experiments of this two
+    			ExprValue expr = learnerLeading.getExperiment(state, reachState);
+    			// now we input the word for refinement
+    			Word prefix = expr.getLeft();
+    			Word loop = expr.getRight();
+    			Query<HashableValue> query = new QuerySimple<>(repr.concat(prefix), loop);
+    			this.refineLeadingDFA(query);
+    			return true;
+    		}
+    	}
+		return false;
     }
 
 }

@@ -264,6 +264,12 @@ public class CLParser {
             }
             if(args[i].compareTo("-mp") == 0) {
                 options.algorithm = Options.Algorithm.WDBA_MP;
+                options.automaton = Options.TargetAutomaton.WDBA;
+                continue;
+            }
+            if(args[i].compareTo("-wdba") == 0) {
+                options.algorithm = Options.Algorithm.WDBA_FDFA;
+                options.automaton = Options.TargetAutomaton.WDBA;
                 continue;
             }
             if(args[i].compareTo("-syntactic") == 0) {
@@ -475,6 +481,7 @@ public class CLParser {
 //        	, new Pair<>("-f <ltl>", "Convert LTL to limit deterministic BA")
 //        	, new Pair<>("-fdfa", "FDFA as the learning target")
         	, new Pair<>("-dba", "Transition-based DBA as the learning target")
+        	, new Pair<>("-wdba", "Weak DBA as the learning target via Limit FDFA")
         );
         Comparator<Pair<String, String>> comparator = new Comparator<Pair<String, String>>() {
 			@Override

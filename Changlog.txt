@@ -1,3 +1,7 @@
+New in ROLL v1.4 (2024-12-9)
+	* Add new learning algorithm for weak deterministic B\"uchi automata based on learning limit FDFAs
+	* Add new learning algorithm for weak deterministic B\"uchi automata by Maler and Pnueli
+
 New in ROLL v1.2 (2023-10-19)
 	* Add new learning algorithm for transition-based deterministic B\"uchi automata based on learning limit FDFAs
 	* Add new learning algorithm for B\"uchi automata based on learning limit FDFAs

@@ -40,7 +40,7 @@ import roll.words.Alphabet;
 
 public class LearnerNBALOmega extends LearnerBase<NBA>{
 
-    private final LearnerFDFA fdfaLearner;
+    protected final LearnerFDFA fdfaLearner;
     
     public LearnerNBALOmega(Options options, Alphabet alphabet, MembershipOracle<HashableValue> membershipOracle) {
         super(options, alphabet, membershipOracle);

@@ -170,6 +170,7 @@ public class Options {
         NFA_NLSTAR,
         NBA_LDOLLAR,
         WDBA_MP,
+        WDBA_FDFA,
         PERIODIC,
         SYNTACTIC,
         RECURRENT,
@@ -189,6 +190,9 @@ public class Options {
         }
         boolean isTargetTDBA() {
         	return this == LIMIT; 
+        }
+        boolean isTargetWDBA() {
+        	return this == WDBA_MP || this == WDBA_FDFA;
         }
     }
     
@@ -210,6 +214,7 @@ public class Options {
         FDFA,
         NBA,
         TDBA,
+        WDBA,
         LDBA;
         
         boolean isBA() {
@@ -234,6 +239,9 @@ public class Options {
         }
         boolean isTDBA() {
         	return this == TDBA;
+        }
+        boolean isWDBA() {
+        	return this == WDBA;
         }
     }
     
@@ -281,7 +289,8 @@ public class Options {
         if((algorithm.isTargetDFA() && ! automaton.isDFA())
           || (algorithm.isTargetNFA() && ! automaton.isNFA())
           || (!algorithm.isTargetDFA() && automaton.isDFA())
-          || (!algorithm.isTargetTDBA() && automaton.isTDBA())) {
+          || (!algorithm.isTargetTDBA() && automaton.isTDBA())
+          || (!algorithm.isTargetWDBA() && automaton.isWDBA())) {
             throw new UnsupportedOperationException("algorithm and target automaton are not consistent");
         }
         if(runningMode.isTestMode() 

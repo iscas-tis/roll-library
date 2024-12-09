@@ -30,6 +30,7 @@ import roll.learner.fdfa.LearnerFDFA;
 import roll.learner.nba.ldollar.LearnerNBALDollar;
 import roll.learner.nba.mp.LearnerWDBAMP;
 import roll.learner.nba.lomega.LearnerNBALOmega;
+import roll.learner.nba.lomega.LearnerWDBALOmega;
 import roll.learner.nba.lomega.LearnerTDBALOmega;
 import roll.learner.nba.lomega.UtilLOmega;
 import roll.oracle.Teacher;
@@ -175,6 +176,8 @@ public class Executor {
             learner = new LearnerNBALDollar(options, alphabet, teacher);
         }else if (options.algorithm == Options.Algorithm.WDBA_MP) {
         	learner = new LearnerWDBAMP(options, alphabet, teacher);
+        }else if (options.algorithm == Options.Algorithm.WDBA_FDFA) {
+        	learner = new LearnerWDBALOmega(options, alphabet, teacher);
         }else if (options.automaton == Options.TargetAutomaton.TDBA) {
         	learner = new LearnerTDBALOmega(options, alphabet, teacher);
         }else if(options.algorithm == Options.Algorithm.PERIODIC

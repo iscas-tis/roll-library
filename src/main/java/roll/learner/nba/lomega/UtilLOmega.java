@@ -59,6 +59,7 @@ public class UtilLOmega {
                 fdfaLearner = new LearnerFDFATableRecurrent(options, alphabet, membershipOracle);
                 break;
             case LIMIT:
+            case WDBA_FDFA:
             	fdfaLearner = new LearnerFDFATableLimit(options, alphabet, membershipOracle);
             	break;
             default:
@@ -76,6 +77,7 @@ public class UtilLOmega {
                 fdfaLearner = new LearnerFDFATreeRecurrent(options, alphabet, membershipOracle);
                 break;
             case LIMIT:
+            case WDBA_FDFA:
             	fdfaLearner = new LearnerFDFATreeLimit(options, alphabet, membershipOracle);
             	break;
             default:

@@ -17,6 +17,7 @@
 package roll.learner.fdfa.tree;
 
 import roll.learner.dfa.tree.LearnerDFATree;
+import roll.learner.dfa.tree.ValueNode;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
 import roll.query.Query;
@@ -24,6 +25,8 @@ import roll.query.QuerySimple;
 import roll.table.ExprValue;
 import roll.table.ExprValueWordPair;
 import roll.table.HashableValue;
+import roll.tree.LCA;
+import roll.tree.Node;
 import roll.words.Alphabet;
 import roll.words.Word;
 
@@ -50,5 +53,13 @@ public abstract class LearnerOmegaTree extends LearnerDFATree {
         assert left != null && right != null;
         return new ExprValueWordPair(left, right);
     }
+    
+	public ExprValue getExperiment(int fst, int snd) {
+		ValueNode fstNode = states.get(fst);
+		ValueNode sndNode = states.get(snd);
+		LCA<ValueNode> lca = tree.getLCA(fstNode.node, sndNode.node);
+		Node<ValueNode> ancestor = lca.commonAncestor;
+		return ancestor.getLabel();
+	}
 
 }

@@ -16,7 +16,11 @@
 
 package roll.learner.fdfa;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import roll.automata.DFA;
+import roll.query.Query;
 import roll.table.HashableValue;
 import roll.words.Word;
 
@@ -34,6 +38,12 @@ public interface LearnerProgressLimit extends LearnerProgressRecurrent {
         boolean recur = stateUXE == getLeadingState();
         return getHashableValueImplBoolPair(recur, mqResult);
     }    
+	
+	// we need to find two states x and y in the progress DFA
+	// such that u = M(uxv1) and u(xv1) in L
+	//           u = M(uyv2) and u(yv2) not in L
+	// Note that xv1 and yv2 cannot be empty words
+	List<Query<HashableValue>> computeMark();
 
 
 }

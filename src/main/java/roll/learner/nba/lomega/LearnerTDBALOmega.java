@@ -1,18 +1,11 @@
 package roll.learner.nba.lomega;
 
-import dk.brics.automaton.Automaton;
-import dk.brics.automaton.State;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import roll.automata.DFA;
 import roll.automata.FDFA;
 import roll.automata.TDBA;
-import roll.automata.operations.DFAOperations;
 import roll.automata.operations.FDFAOperations;
 import roll.learner.LearnerBase;
 import roll.learner.LearnerType;
 import roll.learner.fdfa.LearnerFDFA;
-import roll.learner.fdfa.LearnerProgress;
 import roll.learner.nba.lomega.translator.TranslatorFDFA;
 import roll.learner.nba.lomega.translator.TranslatorFDFATDBA;
 import roll.main.Options;

@@ -36,12 +36,12 @@ public class LearnerFDFATreePeriodic extends LearnerFDFA {
     }
 
     @Override
-    protected LearnerLeading getLearnerLeading() {
+    protected LearnerLeading createLearnerLeading() {
         return new LearnerLeadingTree(options, alphabet, membershipOracle);
     }
 
     @Override
-    protected LearnerProgress getLearnerProgress(int state) {
+    protected LearnerProgress createLearnerProgress(int state) {
         return new LearnerProgressTreePeriodic(options, alphabet, membershipOracle, learnerLeading, state);
     }
     

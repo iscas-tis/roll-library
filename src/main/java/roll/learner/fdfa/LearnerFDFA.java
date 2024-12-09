@@ -78,9 +78,14 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
 		return learnerProgress.get(lead).getExperimentWordLimit(proState, letter);
     }
     
+    public List<Query<HashableValue>> getProgressMark(int state) {
+    	LearnerProgressLimit learnerProLimit = (LearnerProgressLimit) learnerProgress.get(state);
+    	return learnerProLimit.computeMark();
+    }
+    
     @Override
     protected void initialize() {
-        learnerLeading = getLearnerLeading();
+        learnerLeading = createLearnerLeading();
         Timer timer = new Timer();
         timer.start();
         learnerLeading.startLearning();
@@ -89,7 +94,7 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
         
         DFA dfa = learnerLeading.getHypothesis();
         for(int state = 0; state < dfa.getStateSize(); state ++ ) {
-            LearnerProgress learner = getLearnerProgress(state);
+            LearnerProgress learner = createLearnerProgress(state);
             learnerProgress.add(learner);
             timer.start();
             learner.startLearning();
@@ -115,17 +120,44 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
         return LearnerType.FDFA;
     }
     
-    protected abstract LearnerLeading getLearnerLeading();
+    protected abstract LearnerLeading createLearnerLeading();
     
-    protected abstract LearnerProgress getLearnerProgress(int state);
+    protected abstract LearnerProgress createLearnerProgress(int state);
     
     protected boolean isPeriodic() {
         return false;
     }
     
+    // only for tree-based approach
+    public boolean checkLeadingConsistency() {
+    	return false;
+    }
+    
     // the function only for limit FDFA
     public void refineLeadingDFA(Query<HashableValue> query) {
     	refineLeadingDFA(query, true);
+    }
+    
+    public void refineProgressDFA(int state, Query<HashableValue> query) {
+    	refineProgressDFA(state, query, true);
+    }
+    
+    protected void refineProgressDFA(int state, Query<HashableValue> query, boolean constructHypo) {
+    	// we need to obtain the corresponding progress learner, not creating
+    	LearnerProgress learnerPro = null;
+    	for(LearnerProgress learner : learnerProgress) {
+    		if (learner.getLeadingState() == state) {
+    			learnerPro = learner;
+    			break;
+    		}
+        }
+    	HashableValue result = learnerPro.getCeAnalyzerHashableValue(query.getQueryAnswer().get()
+    			, alphabet.getEmptyWord(), query.getSuffix());
+        query.answerQuery(result);
+        learnerPro.refineHypothesis(query);
+        if (constructHypo) {
+        	constructHypothesis();
+        }
     }
     
     protected void refineLeadingDFA(Query<HashableValue> query, boolean constructHypo) {
@@ -146,7 +178,7 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
         DFA leadDFAPrime = learnerLeading.getHypothesis();
         // new states, not just one (for table-based leading automaton)
         for(int state = leadDFA.getStateSize(); state < leadDFAPrime.getStateSize(); state ++) {
-            LearnerProgress learner = getLearnerProgress(state);
+            LearnerProgress learner = createLearnerProgress(state);
             learner.startLearning();
             learnerProgress.add(learner);
         }
@@ -181,16 +213,11 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
         }else { // refine progress automaton
             Timer timer = new Timer();
             timer.start();
-            LearnerProgress learnerPro = null;
-            for(LearnerProgress learner : learnerProgress) {
-                if(learner.getLeadingState() == s) {
-                    learnerPro = learner;
-                    break;
-                }
-            }
-            HashableValue result = learnerPro.getCeAnalyzerHashableValue(resultCE.get(), alphabet.getEmptyWord(), queryLeading.getSuffix());
-            queryLeading.answerQuery(result);
-            learnerPro.refineHypothesis(queryLeading);
+            refineProgressDFA(s, queryLeading, false);
+//            LearnerProgress learnerPro = getLearnerProgress(s);
+//            HashableValue result = learnerPro.getCeAnalyzerHashableValue(resultCE.get(), alphabet.getEmptyWord(), queryLeading.getSuffix());
+//            queryLeading.answerQuery(result);
+//            learnerPro.refineHypothesis(queryLeading);
             timer.stop();
             options.stats.timeOfLearnerProgress += timer.getTimeElapsed();
         }
