@@ -39,6 +39,7 @@ public class LearnerWDBALOmega extends LearnerNBALOmega implements LearnerWDBA {
 //		if (options.algorithm != Options.Algorithm.LIMIT) {
 //			throw new UnsupportedOperationException("Only support limit FDFA for TDBA learner");
 //		}
+		kb = new KnowledgeBase(options.kbSize);
 	}
 	
 	@Override
@@ -202,28 +203,20 @@ public class LearnerWDBALOmega extends LearnerNBALOmega implements LearnerWDBA {
     	}
         hypothesis = nba;
 	}
-
-	@Override
-	public void refineHypothesis(Query<HashableValue> query) {
-
-		options.log.verbose("Current WDBA-FDFA:\n" + fdfaLearner.getHypothesis().toString());
-		options.log.println("Analyzing counterexample for WDBA learner...");
-
-		Timer timer = new Timer();
-		timer.start();
+	
+	protected void refineHypothesisOnce(Query<HashableValue> query, HashableValue mqResult) {
 		// lazy equivalence check is implemented here
-		HashableValue mqResult = new HashableValueBoolean(!hypothesis.getAcc().accept(query.getPrefix(), query.getSuffix()));
 		query.answerQuery(mqResult);
-		
+
 		DFA leadingDFA = this.fdfaLearner.getHypothesis().getLeadingFA();
-		ISet infSet = this.getInfSetAndRecordWords(leadingDFA, query.getPrefix()
-				, query.getSuffix(), mqResult.isAccepting());
-		
+		ISet infSet = this.getInfSetAndRecordWords(leadingDFA, query.getPrefix(), query.getSuffix(),
+				mqResult.isAccepting());
+
 		if (refined) {
 			// we already updated the leading DFA
 			// means that u' = u for some u with different samples
 			constructHypothesis();
-			return ;
+			return;
 		}
 		// now we know that all the states in the loop does not
 		// have a conflict, so there must one in the SCC
@@ -233,9 +226,10 @@ public class LearnerWDBALOmega extends LearnerNBALOmega implements LearnerWDBA {
 		ISet scc = maxSCCs[uprime];
 		int u = -1;
 		for (int s : scc) {
-			// we have within the same SCC, two states correspond to words of different memberships 
+			// we have within the same SCC, two states correspond to words of different
+			// memberships
 			if (mqResult.isAccepting() && negativeSamples[s] != null
-			|| mqResult.isRejecting() && positiveSamples[s] != null) {
+					|| mqResult.isRejecting() && positiveSamples[s] != null) {
 				u = s;
 				break;
 			}
@@ -244,20 +238,18 @@ public class LearnerWDBALOmega extends LearnerNBALOmega implements LearnerWDBA {
 			// this is a positive counterexample trapped in rejecting SCC
 			// there must be a u such that u = M(u) and u(v) notin L
 			if (u != -1)
-				resolveConflict(membershipOracle
-					, options, fdfaLearner.getHypothesis().getLeadingFA(), uprime, u);
+				resolveConflict(membershipOracle, options, fdfaLearner.getHypothesis().getLeadingFA(), uprime, u);
 			else {
 				// this applies to case whether there is one epsilon state,
 				// with empty word as experiment or no experiments (tree-structure)
 				refineProgressDFA(positiveSamples, uprime, mqResult);
 			}
-		}else {
+		} else {
 			if (u != -1) {
 				// there is a u such that u = M(u) and u(v) in L
 				// in contrast to u'(y') in L and u' = M(u')
-				resolveConflict(membershipOracle
-						, options, fdfaLearner.getHypothesis().getLeadingFA(), u, uprime);
-			}else {
+				resolveConflict(membershipOracle, options, fdfaLearner.getHypothesis().getLeadingFA(), u, uprime);
+			} else {
 				// in the worst case, we just refine the progress DFA of uprime
 				// right now, we have u' = M(x') and y', we input (x', y')
 				refineProgressDFA(negativeSamples, uprime, mqResult);
@@ -265,6 +257,27 @@ public class LearnerWDBALOmega extends LearnerNBALOmega implements LearnerWDBA {
 		}
 
 		constructHypothesis();
+
+	}
+	
+	KnowledgeBase kb;
+
+	@Override
+	public void refineHypothesis(Query<HashableValue> query) {
+
+		options.log.verbose("Current WDBA-FDFA:\n" + fdfaLearner.getHypothesis().toString());
+		options.log.println("Analyzing counterexample for WDBA learner...");
+		Timer timer = new Timer();
+		timer.start();
+		HashableValue mqResult = new HashableValueBoolean(
+				!hypothesis.getAcc().accept(query.getPrefix(), query.getSuffix()));
+		kb.addQuery(query, mqResult.isAccepting());
+		refineHypothesisOnce(query, mqResult);
+		while (options.kbSize > 0) {
+			Query<HashableValue> ceQuery = kb.testCorrectness(hypothesis);
+			if (ceQuery == null) break;
+			refineHypothesisOnce(ceQuery, ceQuery.getQueryAnswer());
+		}
 		timer.stop();
 	}
 	
@@ -272,6 +285,7 @@ public class LearnerWDBALOmega extends LearnerNBALOmega implements LearnerWDBA {
 		Query<HashableValue> queryProgress = new QuerySimple<>(samples[uprime].getLeft(),
 				samples[uprime].getRight());
 			queryProgress.answerQuery(mqResult);
+			kb.addQuery(queryProgress, mqResult.isAccepting());
 			fdfaLearner.refineProgressDFA(uprime, queryProgress);
 	}
 
@@ -291,9 +305,11 @@ public class LearnerWDBALOmega extends LearnerNBALOmega implements LearnerWDBA {
 	}
 
 	@Override
-	public void refineWithCounterexample(Word prefix, Word loop) {
+	public void refineWithCounterexample(Word prefix, Word loop, boolean acc) {
 		Query<HashableValue> ceQuery = new QuerySimple<>(prefix, loop);
-		// we will construct new hypothesis FDFA afterwards		
+		// we will construct new hypothesis FDFA afterwards	
+		ceQuery.answerQuery(new HashableValueBoolean(acc));
+		kb.addQuery(ceQuery, acc);
 		fdfaLearner.refineLeadingDFA(ceQuery);
 	}
 	
@@ -316,7 +332,7 @@ public class LearnerWDBALOmega extends LearnerNBALOmega implements LearnerWDBA {
 		HashableValue mq = membershipOracle.answerMembershipQuery(new QuerySimple<>(uprime, yprime));
 		if (mq.isAccepting() && !acc || mq.isRejecting() && acc) {
 			// this means that prefix x' and u' can be distinguished by (y')
-			refineWithCounterexample(xprime, yprime);
+			refineWithCounterexample(xprime, yprime, acc);
 			refined = true;
 			return true;
 		}

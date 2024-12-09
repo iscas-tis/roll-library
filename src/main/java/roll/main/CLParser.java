@@ -213,6 +213,13 @@ public class CLParser {
             	}
                 continue;
             }
+            if(args[i].compareTo("-kb")==0){
+            	if(args.length > i + 1) {
+            		options.kbSize = parseInt(args[i+1], "-kb");
+            		i += 1;
+            	}
+                continue;
+            }
             
             if(args[i].compareTo("-bs")==0) {
                 options.binarySearch = true;
@@ -482,6 +489,7 @@ public class CLParser {
 //        	, new Pair<>("-fdfa", "FDFA as the learning target")
         	, new Pair<>("-dba", "Transition-based DBA as the learning target")
         	, new Pair<>("-wdba", "Weak DBA as the learning target via Limit FDFA")
+        	, new Pair<>("-kb i", "Size of the knowledge base")
         );
         Comparator<Pair<String, String>> comparator = new Comparator<Pair<String, String>>() {
 			@Override

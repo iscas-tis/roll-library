@@ -65,10 +65,10 @@ public interface LearnerWDBA {
 		// now we have a problem
 		// this means sz /= t, as wz can distinguish them
 		// sz.(wz) is accepting, while t.(wz) is rejecting
-		refineWithCounterexample(s.concat(z), wz);
+		refineWithCounterexample(s.concat(z), wz, true);
 	}
 	
-	void refineWithCounterexample(Word prefix, Word loop);
+	void refineWithCounterexample(Word prefix, Word loop, boolean acc);
 
 	default void resolveConflict(MembershipOracle<HashableValue> membershipOracle
 			, Options options, DFA dfa, Word u, Word x, Word y) {
@@ -91,7 +91,7 @@ public interface LearnerWDBA {
 				if (mq.isRejecting()) {
 					// (x) can be used to to distinguish m and u
 					// u has a loop over x and m
-					refineWithCounterexample(m, x);
+					refineWithCounterexample(m, x, false);
 					return ;
 				}
 				m = m.concat(xpower);
@@ -99,7 +99,7 @@ public interface LearnerWDBA {
 				if (mq.isAccepting()) {
 					// (y) can be used to to distinguish m and u
 					// u has a loop over y
-					refineWithCounterexample(m, y);
+					refineWithCounterexample(m, y, true);
 					return ;
 				}
 				h ++;
