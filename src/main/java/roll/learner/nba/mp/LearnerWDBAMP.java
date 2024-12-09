@@ -155,13 +155,13 @@ public class LearnerWDBAMP extends LearnerBase<NBA> implements LearnerWDBA {
 			HashableValue res = membershipOracle.answerMembershipQuery(new QuerySimple<>(repr, pos.getRight()));
 			if (!res.isAccepting()) {
 				// loop can distinguish s and prefix
-				refineWithCounterexample(pos.getLeft(), pos.getRight());
+				refineWithCounterexample(pos.getLeft(), pos.getRight(), true);
 				return true;
 			} else {
 				res = membershipOracle.answerMembershipQuery(new QuerySimple<>(repr, neg.getRight()));
 				if (!res.isRejecting()) {
 					// loop can distinguish s and prefix
-					refineWithCounterexample(neg.getLeft(), neg.getRight());
+					refineWithCounterexample(neg.getLeft(), neg.getRight(), false);
 					return true;
 				}
 			}
@@ -344,14 +344,14 @@ public class LearnerWDBAMP extends LearnerBase<NBA> implements LearnerWDBA {
     }
     
     @Override
-    public void refineWithCounterexample(Word prefix, Word loop) {
+    public void refineWithCounterexample(Word prefix, Word loop, boolean acc) {
     	addColumns(prefix, loop);
     }
 
 	@Override
 	public void refineHypothesis(Query<HashableValue> query) {
-		// now we get a counterexample
-		refineWithCounterexample(query.getPrefix(), query.getSuffix());
+		// now we get a counterexample, third argument is don't care
+		refineWithCounterexample(query.getPrefix(), query.getSuffix(), false);
 		makeTableClosed();
 	}
 
