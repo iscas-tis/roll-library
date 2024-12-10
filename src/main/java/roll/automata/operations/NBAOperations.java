@@ -88,7 +88,9 @@ public class NBAOperations {
     
     public static boolean accepts(NBA nba, Word stem, Word loop) {
         assert nba != null && stem != null && loop != null;
-        NBALasso lasso = new NBALasso(stem, loop);
+        Pair<Word, Word> normForm = Alphabet.getNormalForm(stem, loop);
+        // reduce the number of states in NBALasso
+        NBALasso lasso = new NBALasso(normForm.getLeft(), normForm.getRight());
         if(loop.isEmpty()) return false;
         NBAIntersectionCheck checker = new NBAIntersectionCheck(nba, lasso.getNBA());
         return !checker.isEmpty();

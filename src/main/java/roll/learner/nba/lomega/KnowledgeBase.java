@@ -9,6 +9,9 @@ import roll.query.Query;
 import roll.query.QuerySimple;
 import roll.table.HashableValue;
 import roll.table.HashableValueBoolean;
+import roll.util.Pair;
+import roll.words.Alphabet;
+import roll.words.Word;
 
 // currently we only support very limited knowledge base
 // only support NBA, since equivalence query is expensive
@@ -91,7 +94,8 @@ public class KnowledgeBase {
 		int count;
 		
 		public Data(Query<HashableValue> query, boolean inTarget) {
-			this.data = new QuerySimple<>(query.getPrefix(), query.getSuffix());
+			Pair<Word, Word> normForm = Alphabet.getNormalForm(query.getPrefix(), query.getSuffix());
+			this.data = new QuerySimple<>(normForm.getLeft(), normForm.getRight());
 			this.data.answerQuery(new HashableValueBoolean(inTarget));
 			this.count = 0;
 		}
