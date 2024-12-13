@@ -55,7 +55,7 @@ public class Options {
     public int numOfTests;
     public int numOfStatesForTest;
     
-    public int kbSize = 11;
+    public int kbSize = 0;
     
     // output mode
     public int verbose = 0; // 0 for silent, 1 for normal and 2 for verbose

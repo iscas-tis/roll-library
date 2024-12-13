@@ -59,6 +59,11 @@ public class Statistics {
     // sampling as the teacher
     public long numOfSamplingOmegaWords;
     
+    // number of counterexamples to refine progress DFAs
+    public int numOfProgressCex = 0;
+    public int numOfLeadingCex = 0;
+
+    
     private final Log log;
     private final Options options;
     
@@ -97,7 +102,8 @@ public class Statistics {
         log.println(builder.toString(),  indent ,"    // #states of each progress automaton");
         // total number of the states in final FDFA
         log.println("#F.S = " + numTotal , indent , "    // #L.S + #P.S");
-        
+        log.println("#LED = " + numOfLeadingCex , indent , "    // #leading DFA CEX ");
+        log.println("#PRO = " + numOfProgressCex , indent , "    // #progress DFA CEX ");
         log.println("#MQ = " + numOfMembershipQuery , indent , "    // #membership query");
         log.println("#EQ = " + numOfEquivalenceQuery , indent , "    // #equivalence query");
         

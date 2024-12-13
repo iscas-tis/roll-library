@@ -28,6 +28,9 @@ public class KnowledgeBase {
 	}
 	
 	public void addQuery(Query<HashableValue> query, boolean inTarget) {
+		if (sizeLimit <= 0) {
+			return ;
+		}
 		Data d = new Data(query, inTarget);
 		Data e = contains(d);
 		if (e == null) {
