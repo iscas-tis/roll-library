@@ -144,6 +144,7 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
     
     protected void refineProgressDFA(int state, Query<HashableValue> query, boolean constructHypo) {
     	// we need to obtain the corresponding progress learner, not creating
+        options.stats.numOfProgressCex ++;
     	LearnerProgress learnerPro = null;
     	for(LearnerProgress learner : learnerProgress) {
     		if (learner.getLeadingState() == state) {
@@ -161,6 +162,7 @@ public abstract class LearnerFDFA extends LearnerBase<FDFA> {
     }
     
     protected void refineLeadingDFA(Query<HashableValue> query, boolean constructHypo) {
+    	options.stats.numOfLeadingCex ++;
     	DFA leadDFA = learnerLeading.getHypothesis();
     	Timer timer = new Timer();
         timer.start();
