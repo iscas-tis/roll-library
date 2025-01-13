@@ -173,6 +173,7 @@ public class Options {
         NBA_LDOLLAR,
         WDBA_MP,
         WDBA_FDFA,
+        WDBA_DFA,
         PERIODIC,
         SYNTACTIC,
         RECURRENT,
@@ -194,7 +195,7 @@ public class Options {
         	return this == LIMIT; 
         }
         boolean isTargetWDBA() {
-        	return this == WDBA_MP || this == WDBA_FDFA;
+        	return this == WDBA_MP || this == WDBA_FDFA || this == WDBA_DFA;
         }
     }
     

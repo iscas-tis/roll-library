@@ -17,11 +17,13 @@
 package roll.learner.nba.lomega;
 
 import dk.brics.automaton.Automaton;
+import roll.automata.DFA;
 import roll.automata.FDFA;
 import roll.automata.NBA;
 import roll.automata.operations.FDFAOperations;
 import roll.automata.operations.NBAOperations;
 import roll.learner.fdfa.LearnerFDFA;
+import roll.learner.fdfa.LearnerLeading;
 import roll.learner.fdfa.table.LearnerFDFATableLimit;
 import roll.learner.fdfa.table.LearnerFDFATablePeriodic;
 import roll.learner.fdfa.table.LearnerFDFATableRecurrent;
@@ -30,13 +32,18 @@ import roll.learner.fdfa.tree.LearnerFDFATreeLimit;
 import roll.learner.fdfa.tree.LearnerFDFATreePeriodic;
 import roll.learner.fdfa.tree.LearnerFDFATreeRecurrent;
 import roll.learner.fdfa.tree.LearnerFDFATreeSyntactic;
+import roll.learner.fdfa.tree.LearnerLeadingTree;
 import roll.learner.nba.lomega.translator.TranslatorFDFA;
 import roll.learner.nba.lomega.translator.TranslatorFDFAOver;
 import roll.learner.nba.lomega.translator.TranslatorFDFAUnder;
 import roll.main.Options;
 import roll.oracle.MembershipOracle;
+import roll.query.Query;
+import roll.query.QuerySimple;
+import roll.table.ExprValue;
 import roll.table.HashableValue;
 import roll.words.Alphabet;
+import roll.words.Word;
 
 /**
  * @author Yong Li (liyong@ios.ac.cn)
@@ -127,5 +134,30 @@ public class UtilLOmega {
         }
         return translator;
     }
+    
+    public static boolean makeTreeConsistency(Options options, LearnerLeading learner) {
+    	if (options.structure.isTable()) {
+    		return false;
+    	}
+    	LearnerLeadingTree learnerLeading = (LearnerLeadingTree)learner;
+    	DFA dfa = learnerLeading.getHypothesis();
+    	for (int state = 0; state < dfa.getStateSize(); state ++) {
+    		if (state == dfa.getInitialState()) continue;
+    		Word repr = learnerLeading.getStateLabel(state);
+    		int reachState = dfa.getSuccessor(repr);
+    		if (reachState != state) {
+    			// we can obtain the experiments of this two
+    			ExprValue expr = learnerLeading.getExperiment(state, reachState);
+    			// now we input the word for refinement
+    			Word prefix = expr.getLeft();
+    			Word loop = expr.getRight();
+    			Query<HashableValue> query = new QuerySimple<>(repr.concat(prefix), loop);
+    			learnerLeading.refineHypothesis(query);
+    			return true;
+    		}
+    	}
+		return false;
+    }
+   
 
 }

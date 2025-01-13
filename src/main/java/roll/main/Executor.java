@@ -31,6 +31,7 @@ import roll.learner.nba.ldollar.LearnerNBALDollar;
 import roll.learner.nba.mp.LearnerWDBAMP;
 import roll.learner.nba.lomega.LearnerNBALOmega;
 import roll.learner.nba.lomega.LearnerWDBALOmega;
+import roll.learner.nba.lomega.LearnerWDBALOmega2;
 import roll.learner.nba.lomega.LearnerTDBALOmega;
 import roll.learner.nba.lomega.UtilLOmega;
 import roll.oracle.Teacher;
@@ -53,7 +54,8 @@ public class Executor {
     
     public static void executeRABIT(Options options, NBA target) {
     	TeacherNBA teacher = null;
-    	if (target.isDeterministic() && (options.automaton == Options.TargetAutomaton.TDBA 
+    	if (target.isDeterministic() && (options.automaton == Options.TargetAutomaton.TDBA
+    			|| options.automaton == Options.TargetAutomaton.WDBA
     			|| options.algorithm == Options.Algorithm.WDBA_MP)
     			&& !options.spot) {
     		teacher = new TeacherTDBAImpl(options, target);
@@ -117,6 +119,9 @@ public class Executor {
         	LearnerWDBAMP learnerMP = (LearnerWDBAMP)learner;
             NBA nba = learnerMP.getHypothesis();
             options.stats.numOfStatesInLeading = nba.getStateSize();
+        }else  if (learner instanceof LearnerWDBALOmega2){
+        	NBA nba = (NBA)learner.getHypothesis();
+            options.stats.numOfStatesInLeading = nba.getStateSize();
         }else {
             throw new UnsupportedOperationException("Unsupported BA Learner");
         }
@@ -178,6 +183,8 @@ public class Executor {
         	learner = new LearnerWDBAMP(options, alphabet, teacher);
         }else if (options.algorithm == Options.Algorithm.WDBA_FDFA) {
         	learner = new LearnerWDBALOmega(options, alphabet, teacher);
+        }else if (options.algorithm == Options.Algorithm.WDBA_DFA) {
+        	learner = new LearnerWDBALOmega2(options, alphabet, teacher);
         }else if (options.automaton == Options.TargetAutomaton.TDBA) {
         	learner = new LearnerTDBALOmega(options, alphabet, teacher);
         }else if(options.algorithm == Options.Algorithm.PERIODIC

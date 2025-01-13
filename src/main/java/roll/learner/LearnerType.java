@@ -35,6 +35,7 @@ public enum LearnerType {
 	NBA_MP,
 	TDBA_FDFA,
 	WDBA_FDFA,
+	WDBA_DFA,
 	
 	SDFA_TABLE,
 	SDFA_TREE,

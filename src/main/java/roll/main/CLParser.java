@@ -279,6 +279,11 @@ public class CLParser {
                 options.automaton = Options.TargetAutomaton.WDBA;
                 continue;
             }
+            if(args[i].compareTo("-wdba2") == 0) {
+                options.algorithm = Options.Algorithm.WDBA_DFA;
+                options.automaton = Options.TargetAutomaton.WDBA;
+                continue;
+            }
             if(args[i].compareTo("-syntactic") == 0) {
                 options.algorithm = Options.Algorithm.SYNTACTIC;
                 continue;
@@ -489,6 +494,7 @@ public class CLParser {
 //        	, new Pair<>("-fdfa", "FDFA as the learning target")
         	, new Pair<>("-dba", "Transition-based DBA as the learning target")
         	, new Pair<>("-wdba", "Weak DBA as the learning target via Limit FDFA")
+        	, new Pair<>("-wdba2", "Weak DBA as the learning target via learning leading DFA")
         	, new Pair<>("-kb i", "Size of the knowledge base")
         );
         Comparator<Pair<String, String>> comparator = new Comparator<Pair<String, String>>() {
