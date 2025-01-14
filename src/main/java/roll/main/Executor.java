@@ -130,6 +130,12 @@ public class Executor {
     
     private static void execute(Options options, NBA target,
             TeacherNBA teacher) {
+    	if (options.automaton == Options.TargetAutomaton.WDBA && (!target.isDeterministic() || !target.isWeak())) {
+    		throw new RuntimeException("Called weak DBA learner but input is not weak DBA");
+    	}
+    	if (options.automaton == Options.TargetAutomaton.TDBA && (!target.isDeterministic())) {
+    		throw new RuntimeException("Called DBA learner but input is not deterministic");
+    	}
         LearnerBase<?> learner = getLearner(options, target.getAlphabet(), teacher);
         Timer timer = new Timer();
 //        NBAOperations.outputCode(target);

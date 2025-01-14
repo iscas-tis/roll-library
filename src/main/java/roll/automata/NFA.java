@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import roll.automata.operations.TarjanSCCsNonrecursive;
 import roll.jupyter.NativeTool;
 import roll.util.sets.ISet;
 import roll.util.sets.UtilISet;
@@ -263,6 +264,23 @@ public class NFA implements Acceptor {
     public boolean isDeterministic() {
         int init = this.getInitialState();
         return isDeterministic(init);
+    }
+    
+    public boolean isWeak() {
+    	ISet inits = UtilISet.newISet();
+    	inits.set(getInitialState());
+    	TarjanSCCsNonrecursive tarjan = new TarjanSCCsNonrecursive(this, inits);
+    	for (ISet scc : tarjan.getSCCs()) {
+    		Iterator<Integer> iter = scc.iterator();
+    		int repr = iter.next();
+    		boolean isAcc = this.isFinal(repr);
+    		while (iter.hasNext()) {
+    			if (isAcc != this.isFinal(iter.next())) {
+    				return false;
+    			}
+    		}
+    	}
+		return true;
     }
 
     

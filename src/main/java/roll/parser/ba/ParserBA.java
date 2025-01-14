@@ -187,6 +187,7 @@ public class ParserBA implements Parser {
 	}
 	
 	protected State getState(String str) {
+		//TODO: trim white space, not sure whether it will affect other code
 	    State state = strStateMap.get(str);
 		if(state == null) {
 			state = new State();
