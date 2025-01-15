@@ -66,8 +66,8 @@ public class InteractiveMode {
             // along with ce
             System.out.println("Resolving equivalence query for hypothesis (#Q=" + hypothesis.getStateSize() + ")...  ");
             System.out.println("Learner: " + learner.toString());
-            LearnerTDBALOmega ll = (LearnerTDBALOmega)learner;
-            System.out.println("FDFA: " + ll.getLearnerFDFA().getHypothesis().toString());
+//            LearnerNBALOmega ll = (LearnerNBALOmega)learner;
+//            System.out.println("FDFA: " + ll.getLearnerFDFA().getHypothesis().toString());
             Query<HashableValue> ceQuery = answerEquivalenceQuery(hypothesis);
             boolean isEq = ceQuery.getQueryAnswer().get();
             if(isEq == true) break;
@@ -120,7 +120,6 @@ public class InteractiveMode {
             learner = (LearnerBase<? extends NFA>)new LearnerNBALDollar(options, alphabet, teacher);
         }else if (options.automaton == Options.TargetAutomaton.TDBA) {
         	learner = new LearnerTDBALOmega(options, alphabet, teacher);
-        	System.out.println("I am here");
         }else if(options.algorithm == Options.Algorithm.PERIODIC
              || options.algorithm == Options.Algorithm.SYNTACTIC
              || options.algorithm == Options.Algorithm.RECURRENT
