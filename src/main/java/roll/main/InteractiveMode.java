@@ -54,7 +54,7 @@ public class InteractiveMode {
         // prepare the alphabet
         Alphabet alphabet = prepareAlphabet(options);
         KnowledgeBase kb = new KnowledgeBase();
-        MembershipOracle<HashableValue> teacher = new MQNBAInteractive2(alphabet); //getMembershipOracle(options, kb);
+        MembershipOracle<HashableValue> teacher = getMembershipOracle(options, kb);//new MQNBAInteractive2(alphabet); //
         LearnerBase<? extends NFA> learner = getLearner(options, alphabet, teacher);
         
         options.log.println("Initializing learning...");
