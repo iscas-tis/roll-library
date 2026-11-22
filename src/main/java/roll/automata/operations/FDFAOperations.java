@@ -32,6 +32,10 @@ import roll.automata.FDFA;
 import roll.automata.NBA;
 import roll.automata.StateNFA;
 import roll.automata.TDBA;
+import roll.oracle.MembershipOracle;
+import roll.query.Query;
+import roll.query.QuerySimple;
+import roll.table.HashableValue;
 import roll.util.Pair;
 import roll.util.Triplet;
 import roll.util.sets.ISet;
@@ -49,6 +53,53 @@ import roll.words.Word;
 public class FDFAOperations {
         
     private FDFAOperations() {
+    }
+
+    /**
+     * Returns two normalized representations of the same UP-word with opposite
+     * acceptance, or null iff the FDFA is saturated (normalized semantics).
+     * Implements the loopshift-then-power test of Bohn, Li, Löding and Schewe,
+     * ICALP 2025, Section 3.1. The input must have total deterministic transitions.
+     * The input automata are not modified.
+     */
+    public static SaturationWitness checkSaturation(FDFA fdfa) {
+        return FDFASaturation.check(fdfa);
+    }
+
+    /**
+     * Returns an answered counterexample suitable for LearnerFDFA.refineHypothesis,
+     * or null iff saturated. A target membership query is necessary: saturation
+     * alone cannot tell which of the two conflicting representations is wrong.
+     * The result satisfies Definition 3 of Li et al., TACAS 2017: a nonempty
+     * period, M(uv)=M(u), and acceptance opposite to the target answer.
+     */
+    public static Query<HashableValue> findSaturationCounterexample(
+            FDFA fdfa, MembershipOracle<HashableValue> oracle) {
+        SaturationWitness witness = checkSaturation(fdfa);
+        if (witness == null) return null;
+        Pair<Word, Word> accepted = witness.getAccepted();
+        Query<HashableValue> query = new QuerySimple<>(accepted.getLeft(), accepted.getRight());
+        HashableValue answer = oracle.answerMembershipQuery(query);
+        boolean inTarget = answer.get();
+        Pair<Word, Word> counterexample = inTarget ? witness.getRejected() : accepted;
+        query = new QuerySimple<>(counterexample.getLeft(), counterexample.getRight());
+        query.answerQuery(answer);
+        return query;
+    }
+
+    /** A target-independent certificate; both periods are nonempty. */
+    public static final class SaturationWitness {
+        private final Pair<Word, Word> accepted;
+        private final Pair<Word, Word> rejected;
+
+        SaturationWitness(FDFA fdfa, Pair<Word, Word> first, Pair<Word, Word> second) {
+            boolean acceptsFirst = fdfa.getAcc().accept(first.getLeft(), first.getRight());
+            accepted = acceptsFirst ? first : second;
+            rejected = acceptsFirst ? second : first;
+        }
+
+        public Pair<Word, Word> getAccepted() { return accepted; }
+        public Pair<Word, Word> getRejected() { return rejected; }
     }
     
     public static Automaton buildRepeatAutomaton(Word suffix) {
